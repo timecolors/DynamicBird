@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="LingDongBird.Features.SystemStatus.SystemStatusView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+        <!-- 时间 -->
+        <TextBlock x:Name="TimeText" 
+                   Text="12:34:56" 
+                   FontSize="13" 
+                   Foreground="#AAAAAA"
+                   Margin="0,0,15,0"
+                   FontWeight="SemiBold"/>
+
+        <!-- CPU -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+            <TextBlock x:Name="CpuIcon" Text="CPU" FontSize="13" Foreground="#AAAAAA"/>
+            <TextBlock x:Name="CpuText" Text="45%" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
+        </StackPanel>
+
+        <!-- 内存 -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+            <TextBlock x:Name="MemoryIcon" Text="Memory" FontSize="13" Foreground="#AAAAAA"/>
+            <TextBlock x:Name="MemoryText" Text="62%" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
+        </StackPanel>
+
+        <!-- 帧率 -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+            <TextBlock x:Name="FpsIcon" Text="🔄" FontSize="13" Foreground="#AAAAAA"/>
+            <TextBlock x:Name="FpsText" Text="60fps" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
+        </StackPanel>
+
+        <!-- 音量（支持滚轮调节） -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,15,0"
+                    PreviewMouseWheel="VolumePanel_PreviewMouseWheel">
+            <TextBlock x:Name="VolumeIcon" Text="🔊" FontSize="13" Foreground="#AAAAAA"/>
+            <TextBlock x:Name="VolumeText" Text="75%" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
+        </StackPanel>
+
+        <!-- 网络 -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+            <TextBlock x:Name="NetworkIcon" Text="📶" FontSize="13" Foreground="#AAAAAA"/>
+            <TextBlock x:Name="NetworkText" Text="已连接" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
+        </StackPanel>
+
+        <!-- 电池 -->
+        <StackPanel Orientation="Horizontal">
+            <TextBlock x:Name="BatteryIcon" Text="🔋" FontSize="13" Foreground="#AAAAAA"/>
+            <TextBlock x:Name="BatteryText" Text="85%" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
+        </StackPanel>
+
+    </StackPanel>
+</UserControl>
