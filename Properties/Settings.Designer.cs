@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LingDongBird.Properties {
+namespace DynamicBird.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

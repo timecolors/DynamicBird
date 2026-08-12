@@ -1,0 +1,54 @@
+<UserControl x:Class="DynamicBird.UI.Widgets.ClipboardHistory.ClipboardHistoryWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="160">
+            <ItemsControl x:Name="HistoryList" Background="Transparent">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="Transparent" 
+                                Padding="4,2" 
+                                Cursor="Hand"
+                                MouseLeftButtonUp="Item_Click">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Column="0" 
+                                          x:Name="ItemCheckBox" 
+                                          Margin="0,0,8,0"
+                                          VerticalAlignment="Center"
+                                          Checked="Item_Checked"
+                                          Unchecked="Item_Unchecked"/>
+
+                                <TextBlock Grid.Column="1" 
+                                           Text="{Binding DisplayText}" 
+                                           FontSize="12" 
+                                           Foreground="#EEEEEE"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center"/>
+
+                                <!-- ★★★ 保留 ✕ 按钮（单条删除） ★★★ -->
+                                <Button Grid.Column="2" 
+                                        Content="✕" 
+                                        Width="18" Height="18"
+                                        FontSize="10"
+                                        Foreground="#888888"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Click="DeleteItem_Click"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <!-- ★★★ 移除了原有的底部工具栏（已由 GetFooterControl 提供） ★★★ -->
+    </Grid>
+</UserControl>

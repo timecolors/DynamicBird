@@ -1,0 +1,911 @@
+<Window x:Class="DynamicBird.UI.Settings.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:DynamicBird.UI.Settings"
+        Title="🐦 灵动鸟 设置"
+        Height="600" Width="750"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        Background="#F5F5F5"
+        Foreground="#1E1E1E"
+        MinHeight="500" MinWidth="650">
+
+    <Window.Resources>
+        <Style x:Key="InfoTipStyle" TargetType="TextBlock">
+            <Setter Property="Text" Value="ⓘ"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="Cursor" Value="Help"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="InfoTipButtonStyle" TargetType="Button">
+            <Setter Property="Content" Value="ⓘ"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="Cursor" Value="Help"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="3,0,0,0"/>
+            <Setter Property="Padding" Value="2,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="🐦 灵动鸟 设置"
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Margin="0,0,0,12"/>
+
+        <TabControl Grid.Row="1"
+                    Background="Transparent"
+                    BorderBrush="#DDDDDD"
+                    FontSize="12.5">
+
+            <!-- ====== 选项卡1：任务栏设置 ====== -->
+            <TabItem Header="⚙️ 任务栏">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                    <StackPanel>
+
+                        <!-- ========== 分组1：布局与显示 ========== -->
+                        <Border Background="#E8E8E8"
+                                CornerRadius="4"
+                                Padding="10,6"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="📐 布局与显示"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Margin="0,0,0,6"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="32"/>
+                                        <RowDefinition Height="32"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="图标大小" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <Slider Grid.Row="0" Grid.Column="1" x:Name="sldIconSize"
+                                            Minimum="16" Maximum="48" Value="28"
+                                            TickFrequency="2" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" x:Name="txtIconSize"
+                                               Text="28px" TextAlignment="Center" Width="40" FontSize="12"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="快捷方式图标的显示大小。范围 16-48px，调整后需要重新触发面板才会生效。"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="标签宽度" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <Slider Grid.Row="1" Grid.Column="1" x:Name="sldTagWidth"
+                                            Minimum="40" Maximum="300" Value="120"
+                                            TickFrequency="5" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" x:Name="txtTagWidth"
+                                               Text="120px" TextAlignment="Center" Width="40" FontSize="12"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="任务标签文字的最大宽度，超宽部分自动截断显示省略号。"/>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="4" Text="圆角" VerticalAlignment="Center" FontSize="12" Width="40" Margin="8,0,0,0"/>
+                                    <Slider Grid.Row="0" Grid.Column="5" x:Name="sldCornerRadius"
+                                            Minimum="0" Maximum="30" Value="16"
+                                            TickFrequency="1" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="txtCornerRadiusValue"
+                                               Text="16" TextAlignment="Center" Width="30" FontSize="12"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="4" Text="透明度" VerticalAlignment="Center" FontSize="12" Width="40" Margin="8,0,0,0"/>
+                                    <Slider Grid.Row="1" Grid.Column="5" x:Name="sldOpacity"
+                                            Minimum="0" Maximum="1" Value="0.85"
+                                            TickFrequency="0.01" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="6" x:Name="txtOpacityValue"
+                                               Text="0.85" TextAlignment="Center" Width="30" FontSize="12"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ========== 分组2：触发与位置 ========== -->
+                        <Border Background="#E8E8E8"
+                                CornerRadius="4"
+                                Padding="10,6"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🎯 触发与位置"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Margin="0,0,0,6"/>
+
+                                <WrapPanel Margin="0,0,0,6">
+                                    <CheckBox x:Name="chkTop" Content="上边" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkBottom" Content="下边" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkLeft" Content="左边" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkRight" Content="右边" Margin="0,0,12,3"/>
+                                    <TextBlock Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="勾选后，鼠标移动到对应屏幕边缘时会弹出面板。"/>
+                                </WrapPanel>
+                                <WrapPanel Margin="0,0,0,8">
+                                    <CheckBox x:Name="chkTopLeft" Content="左上角" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkTopRight" Content="右上角" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkBottomLeft" Content="左下角" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkBottomRight" Content="右下角" Margin="0,0,12,3"/>
+                                    <TextBlock Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="勾选后，鼠标移动到屏幕角落时会弹出面板（角落触发优先级高于边缘）。"/>
+                                </WrapPanel>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="28"/>
+                                        <RowDefinition Height="28"/>
+                                        <RowDefinition Height="28"/>
+                                        <RowDefinition Height="28"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="边" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="行为模式" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="形状" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Margin="8,0,0,0"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="上" VerticalAlignment="Center" FontSize="12"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cmbTopMode" Width="100" FontSize="12">
+                                        <ComboBoxItem Content="跟随鼠标"/>
+                                        <ComboBoxItem Content="固定位置"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="形状" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="3" x:Name="cmbFixedShapeTop" Width="90" FontSize="12">
+                                        <ComboBoxItem Content="方形"/>
+                                        <ComboBoxItem Content="横条"/>
+                                        <ComboBoxItem Content="竖条"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="1" Grid.Column="4" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="跟随鼠标：面板跟随鼠标在边缘的位置移动。固定位置：面板固定在边缘的特定位置。"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="下" VerticalAlignment="Center" FontSize="12"/>
+                                    <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cmbBottomMode" Width="100" FontSize="12">
+                                        <ComboBoxItem Content="跟随鼠标"/>
+                                        <ComboBoxItem Content="固定位置"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="形状" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <ComboBox Grid.Row="2" Grid.Column="3" x:Name="cmbFixedShapeBottom" Width="90" FontSize="12">
+                                        <ComboBoxItem Content="方形"/>
+                                        <ComboBoxItem Content="横条"/>
+                                        <ComboBoxItem Content="竖条"/>
+                                    </ComboBox>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="左" VerticalAlignment="Center" FontSize="12"/>
+                                    <ComboBox Grid.Row="3" Grid.Column="1" x:Name="cmbLeftMode" Width="100" FontSize="12">
+                                        <ComboBoxItem Content="跟随鼠标"/>
+                                        <ComboBoxItem Content="固定位置"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="形状" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <ComboBox Grid.Row="3" Grid.Column="3" x:Name="cmbFixedShapeLeft" Width="90" FontSize="12">
+                                        <ComboBoxItem Content="方形"/>
+                                        <ComboBoxItem Content="横条"/>
+                                        <ComboBoxItem Content="竖条"/>
+                                    </ComboBox>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="右" VerticalAlignment="Center" FontSize="12"/>
+                                    <ComboBox Grid.Row="4" Grid.Column="1" x:Name="cmbRightMode" Width="100" FontSize="12">
+                                        <ComboBoxItem Content="跟随鼠标"/>
+                                        <ComboBoxItem Content="固定位置"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="4" Grid.Column="2" Text="形状" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <ComboBox Grid.Row="4" Grid.Column="3" x:Name="cmbFixedShapeRight" Width="90" FontSize="12">
+                                        <ComboBoxItem Content="方形"/>
+                                        <ComboBoxItem Content="横条"/>
+                                        <ComboBoxItem Content="竖条"/>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ========== 分组3：外观 ========== -->
+                        <Border Background="#E8E8E8"
+                                CornerRadius="4"
+                                Padding="10,6"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🎨 外观"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Margin="0,0,0,6"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="60"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="32"/>
+                                        <RowDefinition Height="32"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="背景色" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtBgColor" Text="#2D2D2D" VerticalAlignment="Center" FontSize="12"/>
+                                    <Button Grid.Row="0" Grid.Column="2" x:Name="btnBgColorPicker" Content="选择" Width="50" Height="22" Click="BtnBgColorPicker_Click" FontSize="11" Margin="4,0,0,0"/>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="文字色" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <TextBox Grid.Row="0" Grid.Column="4" x:Name="txtTextColor" Text="#FFFFFF" VerticalAlignment="Center" FontSize="12"/>
+                                    <Button Grid.Row="0" Grid.Column="5" x:Name="btnTextColorPicker" Content="选择" Width="50" Height="22" Click="BtnTextColorPicker_Click" FontSize="11" Margin="4,0,0,0"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="自定义图标" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtCustomIcon" Text="" IsReadOnly="True" VerticalAlignment="Center" FontSize="12" Background="#EEEEEE" Grid.ColumnSpan="2"/>
+                                    <Button Grid.Row="1" Grid.Column="3" x:Name="btnSelectIcon" Content="选择图片" Width="70" Height="22" Click="BtnSelectIcon_Click" FontSize="11" Margin="8,0,0,0" Grid.ColumnSpan="2"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="5" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="选择一张图片替换灵动鸟图标（支持 PNG、JPG、ICO 等格式）。"/>
+                                </Grid>
+                                <CheckBox x:Name="chkShowSystemStatus" Content="显示系统状态" Margin="0,4,0,0" FontSize="12"/>
+                                <TextBlock Style="{StaticResource InfoTipStyle}" Margin="0,-22,0,0" HorizontalAlignment="Right"
+                                           ToolTip="在面板顶部显示时间、CPU、内存、音量、网络、电池、FPS 等信息。"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ========== 分组4：高级设置 ========== -->
+                        <Border Background="#E8E8E8"
+                                CornerRadius="4"
+                                Padding="10,6"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="⚡ 高级设置"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Margin="0,0,0,6"/>
+
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="动画时长" VerticalAlignment="Center" FontSize="12"/>
+                                    <Slider Grid.Row="0" Grid.Column="1" x:Name="sldAnimDuration"
+                                            Minimum="10" Maximum="800" Value="120"
+                                            TickFrequency="5" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" x:Name="txtAnimDuration"
+                                               Text="120" TextAlignment="Center" FontSize="12"/>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="触发阈值" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <Slider Grid.Row="0" Grid.Column="4" x:Name="sldHorizontalThreshold"
+                                            Minimum="0.1" Maximum="0.9" Value="0.43"
+                                            TickFrequency="0.01" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="txtHorizontalThreshold"
+                                               Text="43%" TextAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="6" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="控制面板在横向/纵向布局之间切换的宽高比阈值。值越大，需要越宽的面板才会切换到横向布局。"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="分辨率" VerticalAlignment="Center" FontSize="12"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cmbResolutionPreset" Width="100" FontSize="12" HorizontalAlignment="Left">
+                                        <ComboBoxItem Content="1080p"/>
+                                        <ComboBoxItem Content="2K"/>
+                                        <ComboBoxItem Content="4K"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="选择显示器分辨率预设，影响鼠标离开面板的判定距离。"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Text="缩放比例" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="4" x:Name="cmbDpiScale" Width="70" FontSize="12" HorizontalAlignment="Left">
+                                        <ComboBoxItem Content="100%"/>
+                                        <ComboBoxItem Content="125%"/>
+                                        <ComboBoxItem Content="150%"/>
+                                        <ComboBoxItem Content="200%"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="1" Grid.Column="5" Foreground="#888888" Text="实际阈值" VerticalAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="6" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="分辨率预设 × 缩放比例 = 最终判定阈值。示例：1080p(20px) × 150% = 30px。"/>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Column="0" x:Name="chkAutoFitOnTrigger"
+                                              Content="每次触发自适应"
+                                              Margin="0,2,0,2" FontSize="12"/>
+                                    <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="开启：每次触发边缘时自动适配内容大小。关闭：保持手动拖拽调整的尺寸。"/>
+
+                                    <CheckBox Grid.Column="2" x:Name="chkRememberDndMode"
+                                              Content="记住勿扰状态"
+                                              Margin="12,2,0,2" FontSize="12"/>
+                                    <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="开启后，勿扰模式状态会保存到配置中，下次启动时自动恢复。"/>
+                                </Grid>
+
+                                <!-- ★★★ 小鸟依人模式 ★★★ -->
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Column="0" x:Name="chkClingMode"
+                                              Content="🐦 小鸟依人模式"
+                                              Margin="0,2,0,2" FontSize="12"/>
+                                    <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="开启后，面板会软绵绵地追着鼠标跑，追上后粘在鼠标上。关闭则移出边缘后面板停在原位。"/>
+                                    <TextBlock Grid.Column="2" Text="推荐开启" FontSize="10" Foreground="#888888" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <!-- ★★★ 区域防抖 ★★★ -->
+                                <Grid Margin="0,6,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="区域防抖" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <Slider Grid.Column="1" x:Name="sldRegionDebounce"
+                                            Minimum="30" Maximum="300" Value="80"
+                                            TickFrequency="10" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Column="2" x:Name="txtRegionDebounce"
+                                               Text="80ms" TextAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="鼠标在区域边界抖动时，防抖延迟。值越小响应越快，但可能误触发；值越大越稳定，但响应稍慢。推荐 80ms。"/>
+                                </Grid>
+
+                                <Expander Header="📍 区域形状（高级）"
+                                          Margin="0,6,0,0"
+                                          FontSize="12">
+                                    <StackPanel Margin="0,6,0,0">
+                                        <TextBlock Text="提示：选择'默认'则使用全局逻辑" FontSize="11" Foreground="#888888" Margin="0,0,0,6"/>
+                                        <TextBlock Style="{StaticResource InfoTipStyle}" Margin="0,-22,0,0" HorizontalAlignment="Right"
+                                                   ToolTip="为不同屏幕区域独立设置面板形状：方形/横条/竖条。"/>
+
+                                        <TextBlock Text="上边" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="左/中/右" VerticalAlignment="Center" FontSize="10"/>
+                                            <ComboBox Grid.Column="1" x:Name="cmbTopLeft" Width="80" FontSize="11">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="2" x:Name="cmbTopCenter" Width="80" FontSize="11" Margin="6,0,6,0">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="3" x:Name="cmbTopRight" Width="80" FontSize="11">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                        </Grid>
+
+                                        <TextBlock Text="下边" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="左/中/右" VerticalAlignment="Center" FontSize="10"/>
+                                            <ComboBox Grid.Column="1" x:Name="cmbBottomLeft" Width="80" FontSize="11">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="2" x:Name="cmbBottomCenter" Width="80" FontSize="11" Margin="6,0,6,0">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="3" x:Name="cmbBottomRight" Width="80" FontSize="11">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                        </Grid>
+
+                                        <TextBlock Text="左边" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="上/中/下" VerticalAlignment="Center" FontSize="10"/>
+                                            <ComboBox Grid.Column="1" x:Name="cmbLeftTop" Width="80" FontSize="11">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="2" x:Name="cmbLeftCenter" Width="80" FontSize="11" Margin="6,0,6,0">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="3" x:Name="cmbLeftBottom" Width="80" FontSize="11">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                        </Grid>
+
+                                        <TextBlock Text="右边" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
+                                        <Grid Margin="0,0,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="上/中/下" VerticalAlignment="Center" FontSize="10"/>
+                                            <ComboBox Grid.Column="1" x:Name="cmbRightTop" Width="80" FontSize="11">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="2" x:Name="cmbRightCenter" Width="80" FontSize="11" Margin="6,0,6,0">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="3" x:Name="cmbRightBottom" Width="80" FontSize="11">
+                                                <ComboBoxItem Content="默认"/>
+                                                <ComboBoxItem Content="方形"/>
+                                                <ComboBoxItem Content="横条"/>
+                                                <ComboBoxItem Content="竖条"/>
+                                            </ComboBox>
+                                        </Grid>
+                                    </StackPanel>
+                                </Expander>
+
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ====== 选项卡2：小工具设置 ====== -->
+            <TabItem Header="🧰 小工具">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                    <StackPanel>
+
+                        <Border Background="#E8E8E8"
+                                CornerRadius="4"
+                                Padding="10,8"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="📋 剪贴板历史"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Margin="0,0,0,6"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="32"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="最大条数" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <Slider Grid.Row="0" Grid.Column="1" x:Name="sldClipboardMax"
+                                            Minimum="1" Maximum="50" Value="10"
+                                            TickFrequency="1" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" x:Name="txtClipboardMax"
+                                               Text="10" TextAlignment="Center" FontSize="12"/>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="预览字符" VerticalAlignment="Center" FontSize="12" Width="60" Margin="12,0,0,0"/>
+                                    <Slider Grid.Row="0" Grid.Column="4" x:Name="sldClipboardDisplay"
+                                            Minimum="10" Maximum="500" Value="100"
+                                            TickFrequency="10" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="txtClipboardDisplay"
+                                               Text="100" TextAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="6" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="剪贴板历史记录的最大保存条数，以及列表中预览显示的字符数量。"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#E8E8E8"
+                                CornerRadius="4"
+                                Padding="10,8"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="📝 便签"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Margin="0,0,0,6"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="32"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="默认颜色" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtDefaultNoteColor" Text="#FFFF99" VerticalAlignment="Center" FontSize="12"/>
+                                    <Button Grid.Row="0" Grid.Column="2" x:Name="btnNoteColorPicker" Content="选择" Width="50" Height="22" Click="BtnNoteColorPicker_Click" FontSize="11" Margin="6,0,0,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="新建便签时的默认背景颜色。可在便签编辑器中单独修改每个便签的颜色。"/>
+                                </Grid>
+                                <CheckBox x:Name="chkNoteShowTitle" Content="新建便签默认显示标题" Margin="0,4,0,0" FontSize="12"/>
+                                <TextBlock Style="{StaticResource InfoTipStyle}" Margin="0,-22,0,0" HorizontalAlignment="Right"
+                                           ToolTip="开启后，新建便签时会显示标题栏，否则只显示内容。"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock FontSize="11" Foreground="#888888" Text="💡 便签保存在 Data/notes.json，剪贴板历史在 Data/clipboard_history.json" TextWrapping="Wrap"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ====== 选项卡3：快捷方式管理 ====== -->
+            <TabItem Header="📌 快捷方式">
+                <Grid Margin="0,8,0,0">
+                    <Frame x:Name="ShortcutManagementFrame"
+                           NavigationUIVisibility="Hidden"
+                           Source="Pages/ShortcutManagementPage.xaml"/>
+                </Grid>
+            </TabItem>
+
+            <!-- ====== ★★★ 选项卡4：动画设置 ★★★ ====== -->
+            <TabItem Header="🎬 动画">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                    <StackPanel>
+
+                        <Border Background="#E8E8E8"
+                                CornerRadius="4"
+                                Padding="10,8"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🎬 动画设置"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Margin="0,0,0,6"/>
+
+                                <CheckBox x:Name="chkAnimationsEnabled"
+                                          Content="启用动画"
+                                          Margin="0,0,0,12"
+                                          FontSize="12"/>
+
+                                <!-- ====== 呼出/隐藏 ====== -->
+                                <Border Background="#F0F0F0"
+                                        CornerRadius="4"
+                                        Padding="8,6"
+                                        Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="📌 呼出/隐藏"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Style="{StaticResource InfoTipStyle}"
+                                                       HorizontalAlignment="Right"
+                                                       ToolTip="面板从边缘滑入/滑出时的动画效果"/>
+                                        </Grid>
+
+                                        <Grid Margin="0,6,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="32"/>
+                                                <RowDefinition Height="32"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                                       Text="缓动类型"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="12"/>
+                                            <ComboBox Grid.Row="0" Grid.Column="1"
+                                                      x:Name="cmbShowHideEasing"
+                                                      Width="120"
+                                                      FontSize="12"
+                                                      HorizontalAlignment="Left"
+                                                      VerticalAlignment="Center">
+                                                <ComboBoxItem Content="线性"/>
+                                                <ComboBoxItem Content="立方缓动"/>
+                                                <ComboBoxItem Content="平方缓动"/>
+                                                <ComboBoxItem Content="四次方缓动"/>
+                                                <ComboBoxItem Content="五次方缓动"/>
+                                                <ComboBoxItem Content="弹性缓动"/>
+                                                <ComboBoxItem Content="回退缓动"/>
+                                                <ComboBoxItem Content="弹跳缓动"/>
+                                            </ComboBox>
+
+                                            <TextBlock Grid.Row="1" Grid.Column="0"
+                                                       Text="动画时长"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="12"/>
+                                            <Slider Grid.Row="1" Grid.Column="1"
+                                                    x:Name="sldShowHideDuration"
+                                                    Minimum="50" Maximum="800" Value="150"
+                                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="2"
+                                                       x:Name="txtShowHideDuration"
+                                                       Text="150ms"
+                                                       TextAlignment="Center"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="3"
+                                                       Style="{StaticResource InfoTipStyle}"
+                                                       Margin="8,0,0,0"
+                                                       ToolTip="线性：匀速运动，无缓动效果&#x0a;立方缓动：先快后慢，平滑自然（推荐）&#x0a;平方缓动：比立方更柔和，变化更平缓&#x0a;四次方缓动：非常平滑，适合长距离动画&#x0a;五次方缓动：极其平滑，几乎察觉不到加速&#x0a;弹性缓动：带有弹性振荡效果，生动活泼&#x0a;回退缓动：略微过冲再回正，有弹跳感&#x0a;弹跳缓动：落地弹跳效果，适合结束动作"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- ====== 形变/切换 ====== -->
+                                <Border Background="#F0F0F0"
+                                        CornerRadius="4"
+                                        Padding="8,6"
+                                        Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="🔄 形变/切换"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Style="{StaticResource InfoTipStyle}"
+                                                       HorizontalAlignment="Right"
+                                                       ToolTip="面板尺寸变化/区域切换/跨边飞行时的动画效果"/>
+                                        </Grid>
+
+                                        <Grid Margin="0,6,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="32"/>
+                                                <RowDefinition Height="32"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                                       Text="缓动类型"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="12"/>
+                                            <ComboBox Grid.Row="0" Grid.Column="1"
+                                                      x:Name="cmbTransformEasing"
+                                                      Width="120"
+                                                      FontSize="12"
+                                                      HorizontalAlignment="Left"
+                                                      VerticalAlignment="Center">
+                                                <ComboBoxItem Content="线性"/>
+                                                <ComboBoxItem Content="立方缓动"/>
+                                                <ComboBoxItem Content="平方缓动"/>
+                                                <ComboBoxItem Content="四次方缓动"/>
+                                                <ComboBoxItem Content="五次方缓动"/>
+                                                <ComboBoxItem Content="弹性缓动"/>
+                                                <ComboBoxItem Content="回退缓动"/>
+                                                <ComboBoxItem Content="弹跳缓动"/>
+                                            </ComboBox>
+
+                                            <TextBlock Grid.Row="1" Grid.Column="0"
+                                                       Text="动画时长"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="12"/>
+                                            <Slider Grid.Row="1" Grid.Column="1"
+                                                    x:Name="sldTransformDuration"
+                                                    Minimum="50" Maximum="600" Value="250"
+                                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="2"
+                                                       x:Name="txtTransformDuration"
+                                                       Text="250ms"
+                                                       TextAlignment="Center"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="3"
+                                                       Style="{StaticResource InfoTipStyle}"
+                                                       Margin="8,0,0,0"
+                                                       ToolTip="线性：匀速运动，无缓动效果&#x0a;立方缓动：先快后慢，平滑自然（推荐）&#x0a;平方缓动：比立方更柔和，变化更平缓&#x0a;四次方缓动：非常平滑，适合长距离动画&#x0a;五次方缓动：极其平滑，几乎察觉不到加速&#x0a;弹性缓动：带有弹性振荡效果，生动活泼&#x0a;回退缓动：略微过冲再回正，有弹跳感&#x0a;弹跳缓动：落地弹跳效果，适合结束动作"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- ====== 飞行时长 ====== -->
+                                <Border Background="#F0F0F0"
+                                        CornerRadius="4"
+                                        Padding="8,6"
+                                        Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="🚀 飞行时长"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Style="{StaticResource InfoTipStyle}"
+                                                       HorizontalAlignment="Right"
+                                                       ToolTip="跨边飞行时的移动速度。数值越小飞行越快，数值越大飞行越慢。"/>
+                                        </Grid>
+
+                                        <Grid Margin="0,6,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="60"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="32"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                                       Text="100ms"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="11"
+                                                       Foreground="#888888"/>
+                                            <Slider Grid.Row="0" Grid.Column="1"
+                                                    x:Name="sldFlyDuration"
+                                                    Minimum="100" Maximum="2000" Value="500"
+                                                    TickFrequency="50" IsSnapToTickEnabled="True"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="2"
+                                                       x:Name="txtFlyDuration"
+                                                       Text="500ms"
+                                                       TextAlignment="Center"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- ====== 延时隐藏 ====== -->
+                                <Border Background="#F0F0F0"
+                                        CornerRadius="4"
+                                        Padding="8,6">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="⏱️ 延时隐藏"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Style="{StaticResource InfoTipStyle}"
+                                                       HorizontalAlignment="Right"
+                                                       ToolTip="鼠标移出面板后，延迟多久开始隐藏动画"/>
+                                        </Grid>
+
+                                        <Grid Margin="0,6,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="60"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="32"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                                       Text="等待时间"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="12"/>
+                                            <Slider Grid.Row="0" Grid.Column="1"
+                                                    x:Name="sldHideDelay"
+                                                    Minimum="50" Maximum="1000" Value="200"
+                                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="2"
+                                                       x:Name="txtHideDelay"
+                                                       Text="200ms"
+                                                       TextAlignment="Center"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock FontSize="11" Foreground="#888888"
+                                   Text="💡 关闭动画后，呼出/隐藏/切换均为瞬间完成。延时隐藏仍会生效（面板会在延迟后瞬间消失）。飞行特性在关闭动画时仍保留（面板不消失，但形变瞬间完成）。"
+                                   TextWrapping="Wrap"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- 底部按钮 -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button x:Name="btnSave" Content="保存" Width="72" Height="28" Margin="0,0,8,0" Click="BtnSave_Click" FontSize="12"/>
+            <Button x:Name="btnClose" Content="关闭" Width="72" Height="28" Click="BtnClose_Click" FontSize="12"/>
+            <TextBlock Style="{StaticResource InfoTipStyle}" ToolTip="保存当前设置到 config.json，关闭后设置生效。"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,127 @@
+<Page x:Class="DynamicBird.UI.Settings.Pages.ShortcutManagementPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="快捷方式管理"
+      Background="Transparent"
+      Foreground="#1E1E1E">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 顶部工具栏 -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button x:Name="BtnAddShortcut" 
+                    Content="➕ 添加快捷方式" 
+                    Width="140" Height="30"
+                    FontSize="12"
+                    Background="#404040"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Click="BtnAddShortcut_Click"/>
+            <Button x:Name="BtnClearAll" 
+                    Content="🗑️ 清空全部" 
+                    Width="100" Height="30"
+                    FontSize="12"
+                    Background="#553333"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Margin="10,0,0,0"
+                    Click="BtnClearAll_Click"/>
+            <TextBlock x:Name="TxtStatus" 
+                       Text="就绪" 
+                       FontSize="11" 
+                       Foreground="#888888"
+                       VerticalAlignment="Center"
+                       Margin="15,0,0,0"/>
+        </StackPanel>
+
+        <!-- ★★★ 移除了图标大小控制区域（已移到主设置页面） ★★★ -->
+
+        <!-- 快捷方式列表 -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="ShortcutList" Background="Transparent">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#2D2D2D" 
+                                CornerRadius="4"
+                                Padding="8,6"
+                                Margin="0,0,0,4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Image Grid.Column="0" 
+                                       Source="{Binding Icon}" 
+                                       Width="24" Height="24"
+                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                       VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Column="1" 
+                                           Text="{Binding Name}" 
+                                           FontSize="13" 
+                                           Foreground="#EEEEEE"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0"
+                                           TextTrimming="CharacterEllipsis"/>
+
+                                <Button Grid.Column="2" 
+                                        Content="↑" 
+                                        Width="28" Height="28"
+                                        FontSize="14"
+                                        Background="Transparent"
+                                        Foreground="#888888"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Click="BtnMoveUp_Click"
+                                        Margin="4,0,0,0"
+                                        VerticalAlignment="Center"/>
+
+                                <Button Grid.Column="3" 
+                                        Content="↓" 
+                                        Width="28" Height="28"
+                                        FontSize="14"
+                                        Background="Transparent"
+                                        Foreground="#888888"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Click="BtnMoveDown_Click"
+                                        Margin="4,0,0,0"
+                                        VerticalAlignment="Center"/>
+
+                                <Button Grid.Column="4" 
+                                        Content="✕" 
+                                        Width="28" Height="28"
+                                        FontSize="12"
+                                        Background="Transparent"
+                                        Foreground="#888888"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Click="BtnDelete_Click"
+                                        Margin="4,0,0,0"
+                                        VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- 底部提示 -->
+        <TextBlock Grid.Row="2" 
+                   Text="💡 也可在任务栏面板上直接拖拽排序、拖入固定、拖出删除" 
+                   FontSize="11" 
+                   Foreground="#888888"
+                   Margin="0,10,0,0"/>
+    </Grid>
+</Page>

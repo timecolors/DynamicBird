@@ -1,0 +1,48 @@
+<UserControl x:Class="DynamicBird.UI.Widgets.WidgetSwitcher"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- 固定头部 -->
+            <RowDefinition Height="*"/>
+            <!-- 滚动内容 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 固定底部 -->
+        </Grid.RowDefinitions>
+
+        <!-- ★★★ 固定头部：切换按钮 ★★★ -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8" x:Name="ButtonPanel">
+            <Button x:Name="BtnClipboard" 
+                    Content="📋 剪贴板" 
+                    Width="100" Height="28"
+                    FontSize="12"
+                    Background="#0078D4"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Click="BtnClipboard_Click"/>
+            <Button x:Name="BtnNote" 
+                    Content="📝 便签" 
+                    Width="100" Height="28"
+                    FontSize="12"
+                    Background="#404040"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Margin="8,0,0,0"
+                    Click="BtnNote_Click"/>
+        </StackPanel>
+
+        <!-- ★★★ 滚动内容区 ★★★ -->
+        <ScrollViewer Grid.Row="1" 
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ContentControl x:Name="ContentContainer" />
+        </ScrollViewer>
+
+        <!-- ★★★ 固定底部：状态/操作按钮占位（由子控件自己提供） ★★★ -->
+        <Border Grid.Row="2" Height="32" Margin="0,8,0,0" x:Name="FooterPanel"/>
+    </Grid>
+</UserControl>
