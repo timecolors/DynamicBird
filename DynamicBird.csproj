@@ -19,7 +19,7 @@
 		<Product>灵动鸟 DynamicBird</Product>
 		<AssemblyTitle>灵动鸟</AssemblyTitle>
 		<Description>Windows 桌面边缘面板工具</Description>
-		<Copyright>Copyright © 2026 DynamicBird</Copyright>
+		<Copyright>Copyright © 2026 TideHue</Copyright>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
 		<!-- ★★★ 禁用所有默认包含项（避免重复） ★★★ -->
