@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using DynamicBird.Infrastructure.Utils;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
@@ -24,10 +25,9 @@ namespace DynamicBird.Infrastructure.WinApi
             {
                 try
                 {
-                    string exeDir = AppContext.BaseDirectory;
-                    string dataDir = Path.Combine(exeDir, "Data", "Logs");
+                    string dataDir = AppPaths.LogDirectory;
                     Directory.CreateDirectory(dataDir);
-                    return Path.Combine(dataDir, "system-toast.log");
+                    return AppPaths.SystemToastLogPath;
                 }
                 catch
                 {
@@ -54,6 +54,7 @@ namespace DynamicBird.Infrastructure.WinApi
         /// </summary>
         public static void EnsureRegistered()
         {
+            if (AppPaths.IsPackaged) return; // 商店包由包身份提供 AUMID，无需手工快捷方式
             try
             {
                 string exe = Environment.ProcessPath ?? "";

@@ -2,6 +2,7 @@
 using DynamicBird.Core.Infrastructure.Service;
 using DynamicBird.Core.Services.Configuration;
 using DynamicBird.src.core.Services.Notes;
+using DynamicBird.Infrastructure.Utils;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -31,9 +32,8 @@ namespace DynamicBird.Core.Services
         public NoteManager(ISettingsService settings)
         {
             _settings = settings;
-            string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            _dataFilePath = Path.Combine(dir, "notes.json");
+            if (!Directory.Exists(AppPaths.DataRoot)) Directory.CreateDirectory(AppPaths.DataRoot);
+            _dataFilePath = AppPaths.NotesPath;
         }
 
         public void Initialize()

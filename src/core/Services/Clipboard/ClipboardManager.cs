@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using DynamicBird.Infrastructure.Utils;
 using System.Text;
 using System.Windows;
 using System.Windows.Interop;
@@ -341,9 +342,8 @@ namespace DynamicBird.Core.Services
 
         private string GetHistoryFilePath()
         {
-            string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            return Path.Combine(dir, "clipboard_history.json");
+            if (!Directory.Exists(AppPaths.DataRoot)) Directory.CreateDirectory(AppPaths.DataRoot);
+            return AppPaths.ClipboardHistoryPath;
         }
 
         public bool SaveDroppedFile(string sourcePath, string targetFolder)
@@ -443,10 +443,9 @@ namespace DynamicBird.Core.Services
             {
                 try
                 {
-                    string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "clipboard_cache");
-                    if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                    if (!Directory.Exists(AppPaths.ClipboardCacheDir)) Directory.CreateDirectory(AppPaths.ClipboardCacheDir);
                     string fileName = $"img_{Guid.NewGuid():N}.png";
-                    string filePath = Path.Combine(dir, fileName);
+                    string filePath = Path.Combine(AppPaths.ClipboardCacheDir, fileName);
 
                     var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
                     encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));

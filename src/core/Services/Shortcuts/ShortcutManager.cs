@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Windows.Media;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Core.Services
 {
@@ -29,9 +30,8 @@ namespace DynamicBird.Core.Services
 
         public ShortcutManager()
         {
-            string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            _dataFilePath = Path.Combine(dir, "shortcuts.json");
+            if (!Directory.Exists(AppPaths.DataRoot)) Directory.CreateDirectory(AppPaths.DataRoot);
+            _dataFilePath = AppPaths.ShortcutsPath;
         }
 
         public void Initialize()

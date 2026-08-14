@@ -1,5 +1,7 @@
 ﻿using System;
 
+using DynamicBird.Infrastructure.Utils;
+
 namespace DynamicBird.Core.Infrastructure.Logging
 {
     /// <summary>
@@ -14,13 +16,14 @@ namespace DynamicBird.Core.Infrastructure.Logging
         /// <summary>
         /// 初始化日志系统
         /// </summary>
-        public static void Initialize(LogLevel minLevel = LogLevel.Debug, string logDirectory = "Data/Logs")
+        public static void Initialize(LogLevel minLevel = LogLevel.Debug, string logDirectory = "")
         {
             lock (_lock)
             {
                 if (_initialized) return;
 
-                var fileLogger = new FileLogger(logDirectory, minLevel);
+                string dir = string.IsNullOrWhiteSpace(logDirectory) ? AppPaths.LogDirectory : logDirectory;
+                var fileLogger = new FileLogger(dir, minLevel);
                 var consoleLogger = new ConsoleLogger(minLevel);
                 _logger = new CompositeLogger(consoleLogger, fileLogger);
 
@@ -29,7 +32,7 @@ namespace DynamicBird.Core.Infrastructure.Logging
                 Info("========================================");
                 Info($"日志系统初始化完成");
                 Info($"日志级别: {minLevel}");
-                Info($"日志目录: {logDirectory}");
+                Info($"日志目录: {dir}");
                 Info($"启动时间: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
                 Info("========================================");
             }

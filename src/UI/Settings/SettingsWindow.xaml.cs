@@ -1,5 +1,6 @@
 ﻿using DynamicBird.Core.Services;
 using DynamicBird.Core.Services.Configuration;
+using DynamicBird.Infrastructure.Utils;
 using DynamicBird.src.core.Services.Shortcuts;
 using DynamicBird.UI.Settings.Pages;
 using Microsoft.Win32;
@@ -212,6 +213,13 @@ namespace DynamicBird.UI.Settings
             // ★★★ 自动更新 ★★★
             chkAutoCheckUpdate.IsChecked = _settingsData.AutoCheckUpdate;
             UpdateUpdateStatus();
+
+            // ★★★ 商店版（MSIX）不提供 GitHub 自更新 ★★★
+            UpdateGroup.Visibility = AppPaths.IsPackaged ? Visibility.Collapsed : Visibility.Visible;
+
+            // ★★★ 关于与隐私 ★★★
+            var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            txtAbout.Text = $"灵动鸟 DynamicBird  v{ver?.ToString(3) ?? "1.0.0"}";
         }
 
         private void UpdateUpdateStatus()

@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Infrastructure.WinApi
 {
@@ -36,6 +37,7 @@ namespace DynamicBird.Infrastructure.WinApi
         /// <summary>检查 GitHub 最新 Release；无更新或检查失败返回 null。</summary>
         public static async Task<UpdateInfo?> CheckForUpdateAsync(Version current)
         {
+            if (AppPaths.IsPackaged) return null; // 商店版由 Microsoft Store 负责更新
             if (string.IsNullOrWhiteSpace(GitHubOwner) || string.IsNullOrWhiteSpace(GitHubRepo)) return null;
             try
             {
@@ -151,6 +153,7 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             try
             {
+                if (AppPaths.IsPackaged) return false; // 商店版不使用 GitHub 更新
                 string exeDir = AppContext.BaseDirectory;
                 string currentExe = Path.Combine(exeDir, "DynamicBird.exe");
                 if (!File.Exists(newExePath) || !File.Exists(currentExe)) return false;

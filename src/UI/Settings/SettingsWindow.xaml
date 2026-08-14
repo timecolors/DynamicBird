@@ -606,8 +606,9 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- ========== 分组：自动更新 ========== -->
-                        <Border Background="#FFFFFF"
+                        <!-- ========== 分组：自动更新（商店版隐藏） ========== -->
+                        <Border x:Name="UpdateGroup"
+                                Background="#FFFFFF"
                                 CornerRadius="8"
                                 Padding="10,8"
                                 Margin="0,0,0,10">
@@ -646,6 +647,29 @@
 
                                 <TextBlock x:Name="txtUpdateStatus"
                                            Text="未配置更新源"
+                                           FontSize="11"
+                                           Foreground="#888888"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ========== 分组：关于与隐私 ========== -->
+                        <Border Background="#FFFFFF"
+                                CornerRadius="8"
+                                Padding="10,8"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock x:Name="txtAbout"
+                                           Text="灵动鸟 DynamicBird"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"/>
+                                <TextBlock Text="隐私说明：灵动鸟默认不上传任何个人数据。仅在你启用自动更新时，会向 GitHub Releases 请求版本信息（可能包含你的 IP 地址）；常用网页功能会在本机读取浏览器历史用于展示。所有配置、快捷方式与日志只保存在本机 %LOCALAPPDATA%\DynamicBird，卸载即清理（商店版）。"
+                                           TextWrapping="Wrap"
+                                           FontSize="11"
+                                           Foreground="#888888"
+                                           Margin="0,6,0,0"/>
+                                <TextBlock Text="第三方组件声明见仓库 THIRD-PARTY-NOTICES.md（MIT 协议）。"
+                                           TextWrapping="Wrap"
                                            FontSize="11"
                                            Foreground="#888888"
                                            Margin="0,4,0,0"/>

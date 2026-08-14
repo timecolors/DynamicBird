@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Microsoft.Win32;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Infrastructure.WinApi
 {
@@ -23,14 +24,8 @@ namespace DynamicBird.Infrastructure.WinApi
             public bool IsFavorite { get; set; }
         }
 
-        private static readonly string BaseDir =
-            Path.Combine(AppContext.BaseDirectory, "data");
-
-        private static readonly string FavoritesPath =
-            Path.Combine(BaseDir, "favorite_webs.json");
-
-        private static readonly string RecentPath =
-            Path.Combine(BaseDir, "recent_webs.json");
+        private static readonly string FavoritesPath = AppPaths.FavoritesPath;
+        private static readonly string RecentPath = AppPaths.RecentWebsPath;
 
         private static readonly object _lock = new();
 
@@ -306,7 +301,7 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             try
             {
-                Directory.CreateDirectory(BaseDir);
+                Directory.CreateDirectory(AppPaths.DataRoot);
                 File.WriteAllText(FavoritesPath, JsonSerializer.Serialize(_favorites));
             }
             catch { }
@@ -316,7 +311,7 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             try
             {
-                Directory.CreateDirectory(BaseDir);
+                Directory.CreateDirectory(AppPaths.DataRoot);
                 File.WriteAllText(RecentPath, JsonSerializer.Serialize(_recentOpens));
             }
             catch { }

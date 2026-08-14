@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Infrastructure.WinApi
 {
@@ -25,8 +26,7 @@ namespace DynamicBird.Infrastructure.WinApi
             public DateTime LastUsed { get; set; } = DateTime.Now;
         }
 
-        private static readonly string StorePath =
-            Path.Combine(AppContext.BaseDirectory, "data", "recent_apps.json");
+        private static readonly string StorePath = AppPaths.RecentAppsPath;
 
         private static readonly object _lock = new();
         private static readonly Dictionary<string, RecentApp> _apps = new(StringComparer.OrdinalIgnoreCase);

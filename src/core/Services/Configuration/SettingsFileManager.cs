@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
+using DynamicBird.Infrastructure.Utils;
 using DynamicBird.Core.Services;
 using DynamicBird.Core.Services.Configuration;
 namespace DynamicBird.Core.Services
@@ -10,8 +11,7 @@ namespace DynamicBird.Core.Services
     /// </summary>
     public static class SettingsFileManager
     {
-        private static readonly string ConfigPath =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+        private static readonly string ConfigPath = AppPaths.ConfigPath;
 
         /// <summary>
         /// 从文件加载配置

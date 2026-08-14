@@ -3,6 +3,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using DynamicBird.Core.Infrastructure.Logging;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird
 {
@@ -13,6 +14,9 @@ namespace DynamicBird
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // ★ 旧版本数据迁移（安装目录/Data -> %LOCALAPPDATA%\DynamicBird），必须在日志初始化前执行
+            AppPaths.MigrateLegacyData();
 
             // ★ 单实例保护：已有实例运行时直接退出，避免托盘出现多个进程/图标
             _singleInstanceMutex = new Mutex(true, "DynamicBird_SingleInstance", out bool createdNew);

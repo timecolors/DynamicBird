@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Core.Infrastructure.Logging
 {
@@ -13,9 +14,9 @@ namespace DynamicBird.Core.Infrastructure.Logging
         private string? _currentLogFile;
         private DateTime _currentDate;
 
-        public FileLogger(string logDirectory = "Data/Logs", LogLevel minLevel = LogLevel.Debug)
+        public FileLogger(string logDirectory = "", LogLevel minLevel = LogLevel.Debug)
         {
-            _logDirectory = logDirectory;
+            _logDirectory = string.IsNullOrWhiteSpace(logDirectory) ? AppPaths.LogDirectory : logDirectory;
             _minLevel = minLevel;
             EnsureDirectoryExists();
             OpenLogFile();

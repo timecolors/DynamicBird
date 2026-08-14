@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Windows;
 using DynamicBird.Core.Infrastructure.Logging;
 using DynamicBird.Core.Infrastructure.Service;
+using DynamicBird.Infrastructure.Utils;
 using Microsoft.Win32;
 
 namespace DynamicBird.Core.Services
@@ -97,6 +98,7 @@ namespace DynamicBird.Core.Services
 
         public static bool IsAutoStartEnabled()
         {
+            if (AppPaths.IsPackaged) return IsStartupTaskEnabled();
             try
             {
                 using var key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", false);
@@ -109,6 +111,11 @@ namespace DynamicBird.Core.Services
         {
             try
             {
+                if (AppPaths.IsPackaged)
+                {
+                    ToggleStartupTask(enable);
+                    return;
+                }
                 using var key = Registry.CurrentUser.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
                 if (enable)
                     key?.SetValue("DynamicBird", "\"" + (Environment.ProcessPath ?? "") + "\"");
@@ -118,6 +125,38 @@ namespace DynamicBird.Core.Services
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"设置开机自启失败: {ex.Message}", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>商店版开机自启：使用 MSIX 启动任务（清单中需声明 desktop:StartupTask）。</summary>
+        private const string StartupTaskId = "DynamicBirdStartupTask";
+
+        private static bool IsStartupTaskEnabled()
+        {
+            try
+            {
+                var task = Windows.ApplicationModel.StartupTask.GetAsync(StartupTaskId)
+                    .AsTask().GetAwaiter().GetResult();
+                return task.State == Windows.ApplicationModel.StartupTaskState.Enabled ||
+                       task.State == Windows.ApplicationModel.StartupTaskState.EnabledByPolicy;
+            }
+            catch { return false; }
+        }
+
+        private static void ToggleStartupTask(bool enable)
+        {
+            try
+            {
+                var task = Windows.ApplicationModel.StartupTask.GetAsync(StartupTaskId)
+                    .AsTask().GetAwaiter().GetResult();
+                if (enable)
+                    task.RequestEnableAsync().AsTask().GetAwaiter().GetResult();
+                else
+                    task.Disable();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"设置开机自启失败（商店版）: {ex.Message}", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
     }
