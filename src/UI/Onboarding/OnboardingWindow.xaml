@@ -158,6 +158,12 @@
                             <TextBlock Text="每个边缘/角落显示什么面板（任务栏、小组件、应用辅助、通知坞等）都能在设置里单独指定。" FontSize="12" Foreground="#555555" TextWrapping="Wrap" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
+                    <Border Background="#FFFFFF" CornerRadius="8" Padding="14,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="状态栏快捷操作" FontWeight="SemiBold" FontSize="13"/>
+                            <TextBlock Text="面板顶部的状态栏显示时间、CPU、内存、音量等信息；把鼠标悬停在音量百分比上滚动滚轮，即可直接调大调小音量。" FontSize="12" Foreground="#555555" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
                     <Border Background="#FFFFFF" CornerRadius="8" Padding="14,10">
                         <StackPanel>
                             <TextBlock Text="动画与外观" FontWeight="SemiBold" FontSize="13"/>
