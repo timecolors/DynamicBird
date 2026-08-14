@@ -1,6 +1,7 @@
 ﻿param(
     [string]$OutDir = (Join-Path $PSScriptRoot "Assets"),
-    [string]$IcoPath = (Join-Path $PSScriptRoot "..\assets\icon.ico")
+    [string]$IcoPath = (Join-Path $PSScriptRoot "..\assets\icon.ico"),
+    [string]$SourceImage = ""
 )
 
 # 灵动鸟应用图标生成脚本
@@ -12,6 +13,27 @@
 
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
+
+$srcBmp = $null
+if ($SourceImage -and (Test-Path $SourceImage)) {
+    $srcBmp = New-Object System.Drawing.Bitmap((Resolve-Path $SourceImage).Path)
+    Write-Output "使用源图: $SourceImage"
+}
+
+# 把源图按“contain”等比缩放居中绘制到画布（四周留白）
+function Draw-SourceContained([System.Drawing.Graphics]$g, [double]$canvasW, [double]$canvasH, [double]$iconSize, [double]$padRatio) {
+    if (-not $srcBmp) { return }
+    $pad = $iconSize * $padRatio
+    $box = $iconSize - 2 * $pad
+    $ratio = [Math]::Min($box / $srcBmp.Width, $box / $srcBmp.Height)
+    $w = [Math]::Max(1, [Math]::Round($srcBmp.Width * $ratio))
+    $h = [Math]::Max(1, [Math]::Round($srcBmp.Height * $ratio))
+    $x = [Math]::Round(($canvasW - $w) / 2)
+    $y = [Math]::Round(($canvasH - $h) / 2)
+    $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+    $g.DrawImage($srcBmp, [int]$x, [int]$y, [int]$w, [int]$h)
+}
 
 function New-LayoutPath([double]$size) {
     # 画布留 6% 边距，glyph 占 88% 面积
@@ -41,6 +63,13 @@ function New-IconBitmap([int]$size, [bool]$tile = $false) {
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
     $g.Clear([System.Drawing.Color]::Transparent)
+
+    # 用户源图优先：直接等比缩放绘制，不做矢量重绘
+    if ($srcBmp) {
+        Draw-SourceContained $g $size $size $size 0.04
+        $g.Dispose()
+        return $bmp
+    }
 
     # 圆角方形底色（顶部略亮，Win11 质感）
     $radius = $size * 0.22
@@ -152,20 +181,30 @@ $wpath.AddArc([float](310 - $wd), [float](150 - $wd), [float]$wd, [float]$wd, [f
 $wpath.AddArc([float]0, [float](150 - $wd), [float]$wd, [float]$wd, [float]90, [float]90)
 $wpath.CloseFigure()
 $gw.FillPath($wbg, $wpath)
-$mini = New-IconBitmap 110
-$gw.DrawImage($mini, 20, 20, 110, 110)
+if ($srcBmp) {
+    Draw-SourceContained $gw 310 150 110 0.04
+} else {
+    $mini = New-IconBitmap 110
+    $gw.DrawImage($mini, 20, 20, 110, 110)
+    $mini.Dispose()
+}
 $wide.Save((Join-Path $OutDir "Wide310x150Logo.png"), [System.Drawing.Imaging.ImageFormat]::Png)
-$mini.Dispose(); $wpath.Dispose(); $wbg.Dispose(); $gw.Dispose(); $wide.Dispose()
+$wpath.Dispose(); $wbg.Dispose(); $gw.Dispose(); $wide.Dispose()
 
 # 启动屏 620x300：底色 + 居中图标
 $splash = New-Object System.Drawing.Bitmap(620, 300, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 $gs = [System.Drawing.Graphics]::FromImage($splash)
 $gs.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 $gs.Clear([System.Drawing.Color]::FromArgb(255, 45, 45, 45))   # 与面板底色一致 #2D2D2D
-$logo = New-IconBitmap 96
-$gs.DrawImage($logo, (620 - 96) / 2, (300 - 96) / 2, 96, 96)
+if ($srcBmp) {
+    Draw-SourceContained $gs 620 300 96 0.04
+} else {
+    $logo = New-IconBitmap 96
+    $gs.DrawImage($logo, (620 - 96) / 2, (300 - 96) / 2, 96, 96)
+    $logo.Dispose()
+}
 $splash.Save((Join-Path $OutDir "SplashScreen.png"), [System.Drawing.Imaging.ImageFormat]::Png)
-$logo.Dispose(); $gs.Dispose(); $splash.Dispose()
+$gs.Dispose(); $splash.Dispose()
 
 # 主图（后续可复用）
 $master = New-IconBitmap 512
