@@ -50,7 +50,8 @@ Get-ChildItem (Join-Path $PSScriptRoot "Assets") -Filter *.png | Copy-Item -Dest
 # ---------- 3) 写入版本号 ----------
 $manifest = Join-Path $staging "AppxManifest.xml"
 $xmlText = [System.IO.File]::ReadAllText($manifest)
-$xmlText = [System.Text.RegularExpressions.Regex]::Replace($xmlText, 'Version="[0-9.]+"', "Version=`"$Version`"")
+# 只替换 <Identity> 元素里的 Version，避免误伤 TargetDeviceFamily 的 MinVersion
+$xmlText = [System.Text.RegularExpressions.Regex]::Replace($xmlText, '(?<=<Identity[^>]*Version=")[0-9.]+(?=")', $Version)
 [System.IO.File]::WriteAllText($manifest, $xmlText, (New-Object System.Text.UTF8Encoding($false)))
 
 # ---------- 4) MakeAppx 打包 ----------
