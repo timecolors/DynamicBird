@@ -362,3 +362,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# MSIX 打包产物（构建生成，不入库）
+packaging/Output/

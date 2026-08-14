@@ -15,7 +15,25 @@ namespace DynamicBird.Infrastructure.WinApi
     /// </summary>
     public static class SystemToast
     {
-        public const string Aumid = "DynamicBird";
+        /// <summary>
+        /// Toast AUMID：商店（MSIX）版使用包身份（PFN!App），
+        /// 普通版使用固定 AUMID（配合开始菜单快捷方式注册）。
+        /// </summary>
+        public static string Aumid
+        {
+            get
+            {
+                if (AppPaths.IsPackaged)
+                {
+                    try
+                    {
+                        return Windows.ApplicationModel.Package.Current.Id.FamilyName + "!App";
+                    }
+                    catch { }
+                }
+                return "DynamicBird";
+            }
+        }
         private static readonly Guid PKEY_AppUserModelID = new("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3");
         private static readonly object LogLock = new();
 
