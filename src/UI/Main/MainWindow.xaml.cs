@@ -10,6 +10,7 @@ using DynamicBird.src.core.Services.Clipboard;
 using DynamicBird.src.core.Services.Notes;
 using DynamicBird.src.core.Services.Shortcuts;
 using DynamicBird.src.core.Services.System;
+using DynamicBird.UI.Theme;
 using DynamicBird.UI.Panels;
 using System;
 using System.Linq;
@@ -43,6 +44,7 @@ namespace DynamicBird.UI.Main
 
         public MainWindow()
         {
+            Icon = AppIconHelper.LoadAppIcon();
             try
             {
                 InitializeComponent();

@@ -11,6 +11,7 @@ using DynamicBird.UI.Media;
 using DynamicBird.UI.Panels;
 using DynamicBird.UI.Widgets.Calculator;
 using DynamicBird.UI.Widgets.Timer;
+using DynamicBird.UI.Theme;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -84,16 +85,19 @@ namespace SmokeTest
                     // 2) 面板内嵌播放器：用生成的 WAV 走一遍媒体打开链路
                     Step("player");
                     var player = new PanelMediaPlayer();
+                    Step("player-new");
                     var host = new Window { Width = 420, Height = 340, Content = player };
+                    host.Icon = AppIconHelper.LoadAppIcon();
                     host.Show();
+                    Step("player-show");
                     Step("player-done");
 
                     // 3) 验证窗口捕获（捕获宿主窗口自身）
                     Step("capture");
                     var hwnd = new System.Windows.Interop.WindowInteropHelper(host).Handle;
                     var frame = WindowCaptureService.Capture(hwnd);
-                    if (frame == null) throw new InvalidOperationException("窗口捕获返回空帧");
                     Step("capture-done");
+                    if (frame == null) throw new InvalidOperationException("窗口捕获返回空帧");
 
                     // 4) 验证媒体会话枚举不崩溃（无会话时返回空列表）
                     Step("sessions");

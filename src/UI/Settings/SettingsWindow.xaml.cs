@@ -3,6 +3,7 @@ using DynamicBird.Core.Services.Configuration;
 using DynamicBird.Infrastructure.Utils;
 using DynamicBird.src.core.Services.Shortcuts;
 using DynamicBird.UI.Settings.Pages;
+using DynamicBird.UI.Theme;
 using Microsoft.Win32;
 using System;
 using System.Windows;
@@ -43,6 +44,7 @@ namespace DynamicBird.UI.Settings
         {
             _settings = settings;
             _shortcutService = shortcutService;
+            Icon = AppIconHelper.LoadAppIcon();
             InitializeComponent();
             // Win11 22H2+ 启用 Mica 浅色背景，与系统设置应用观感一致
             SourceInitialized += (_, _) => TryApplyMicaBackdrop();

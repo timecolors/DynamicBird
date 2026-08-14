@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using DynamicBird.UI.Theme;
 
 namespace DynamicBird.UI.Onboarding
 {
@@ -18,6 +19,7 @@ namespace DynamicBird.UI.Onboarding
 
         public OnboardingWindow(Action? onCompleted = null)
         {
+            Icon = AppIconHelper.LoadAppIcon();
             InitializeComponent();
             _onCompleted = onCompleted;
             // 无论点完成/跳过/直接关闭，都视为完成引导

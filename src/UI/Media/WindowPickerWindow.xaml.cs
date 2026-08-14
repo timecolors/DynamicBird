@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using DynamicBird.Infrastructure.WinApi;
+using DynamicBird.UI.Theme;
 
 namespace DynamicBird.UI.Media
 {
@@ -19,6 +20,7 @@ namespace DynamicBird.UI.Media
 
         private WindowPickerWindow(List<WindowPickItem> items, bool embedMode)
         {
+            Icon = AppIconHelper.LoadAppIcon();
             InitializeComponent();
             WindowList.ItemsSource = items;
             if (items.Count > 0) WindowList.SelectedIndex = 0;
