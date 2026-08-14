@@ -50,7 +50,7 @@ namespace DynamicBird.Core.Services
 
             try
             {
-                var entryLocation = Assembly.GetEntryAssembly()?.Location;
+                var entryLocation = Environment.ProcessPath;
                 if (System.IO.File.Exists("Resources/icon.ico"))
                     _notifyIcon.Icon = new System.Drawing.Icon("Resources/icon.ico");
                 else if (!string.IsNullOrEmpty(entryLocation))
@@ -111,7 +111,7 @@ namespace DynamicBird.Core.Services
             {
                 using var key = Registry.CurrentUser.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
                 if (enable)
-                    key?.SetValue("DynamicBird", Assembly.GetEntryAssembly()?.Location ?? "");
+                    key?.SetValue("DynamicBird", "\"" + (Environment.ProcessPath ?? "") + "\"");
                 else
                     key?.DeleteValue("DynamicBird", false);
             }

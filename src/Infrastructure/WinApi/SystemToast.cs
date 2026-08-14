@@ -56,9 +56,7 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             try
             {
-                string exe = Environment.ProcessPath
-                             ?? Assembly.GetEntryAssembly()?.Location
-                             ?? "";
+                string exe = Environment.ProcessPath ?? "";
                 if (string.IsNullOrEmpty(exe) || !File.Exists(exe))
                 {
                     Log("EnsureRegistered: 找不到可执行文件，跳过");
