@@ -66,7 +66,9 @@ function New-IconBitmap([int]$size, [bool]$tile = $false) {
 
     # 用户源图优先：直接等比缩放绘制，不做矢量重绘
     if ($srcBmp) {
-        Draw-SourceContained $g $size $size $size 0.04
+        # JPEG 等无透明通道的满幅图片几乎不留边距；透明 PNG 自动留 4%
+        $srcPad = if ($srcBmp.PixelFormat -like "*Alpha*") { 0.04 } else { 0.02 }
+        Draw-SourceContained $g $size $size $size $srcPad
         $g.Dispose()
         return $bmp
     }
@@ -182,7 +184,7 @@ $wpath.AddArc([float]0, [float](150 - $wd), [float]$wd, [float]$wd, [float]90, [
 $wpath.CloseFigure()
 $gw.FillPath($wbg, $wpath)
 if ($srcBmp) {
-    Draw-SourceContained $gw 310 150 110 0.04
+    Draw-SourceContained $gw 310 150 310 0.0
 } else {
     $mini = New-IconBitmap 110
     $gw.DrawImage($mini, 20, 20, 110, 110)
@@ -197,7 +199,7 @@ $gs = [System.Drawing.Graphics]::FromImage($splash)
 $gs.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 $gs.Clear([System.Drawing.Color]::FromArgb(255, 45, 45, 45))   # 与面板底色一致 #2D2D2D
 if ($srcBmp) {
-    Draw-SourceContained $gs 620 300 96 0.04
+    Draw-SourceContained $gs 620 300 620 0.0
 } else {
     $logo = New-IconBitmap 96
     $gs.DrawImage($logo, (620 - 96) / 2, (300 - 96) / 2, 96, 96)
