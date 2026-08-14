@@ -13,9 +13,9 @@ using DynamicBird.src.core.Services.System;
 using DynamicBird.UI.Panels;
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace DynamicBird.UI.Main
@@ -39,13 +39,42 @@ namespace DynamicBird.UI.Main
         private double _currentTaskbarHeight = 40;
         private DispatcherTimer? _edgeTimer;
         private bool _isDragging = false;
+        private int _edgeTickCount = 0;
 
         public MainWindow()
         {
             try
             {
                 InitializeComponent();
-                AllowsTransparency = true;
+                // ★ 窗口尺寸/位置变化时立即重设圆角区域，避免刚触发面板时短暂显示直角
+                SizeChanged += (_, _) =>
+                {
+                    bool atBottom = Math.Abs((Top + Height) - SystemParameters.PrimaryScreenHeight) < 1.0;
+                    ApplyWindowRegion(atBottom && Height > BottomStripClickThroughPx + 2);
+                };
+                // ★ 非透明窗口：句柄创建后应用圆角窗口区域（尺寸变化由周期刷新覆盖）；
+                //   Win11 22H2+ 尝试启用 Mica 背景，让面板透出系统毛玻璃材质
+                SourceInitialized += (_, _) =>
+                {
+                    // ★ 启动时把窗口移到屏幕外右下角：即使透明度异常也不会在屏幕上露头或拦截鼠标
+                    Left = SystemParameters.PrimaryScreenWidth + 60;
+                    Top = SystemParameters.PrimaryScreenHeight + 60;
+
+                    if (TryApplyMicaBackdrop())
+                    {
+                        Background = new System.Windows.Media.SolidColorBrush(
+                            System.Windows.Media.Color.FromArgb(2, 0x2D, 0x2D, 0x2D));
+                        MainPanel.Background = new System.Windows.Media.SolidColorBrush(
+                            System.Windows.Media.Color.FromArgb(0xEE, 0x2D, 0x2D, 0x2D));
+                    }
+                    ApplyWindowRegion(false);
+                    var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        System.Windows.Interop.HwndSource.FromHwnd(hwnd)?.AddHook(HotkeyWndProc);
+                        RegisterGlobalHotkey(hwnd);
+                    }
+                };
 
                 LogManager.Info("=== 灵动鸟启动 ===");
 
@@ -135,9 +164,21 @@ namespace DynamicBird.UI.Main
                 _sizeController.UserResizeStarted += (started) =>
                 {
                     _isDragging = started;
+                    // ★ 拖拽开始立即停止位置/透明度动画，
+                    //   避免 ShapeAnimator 物理系统与拖拽同时改位置导致抽搐
+                    if (started)
+                    {
+                        _shapeAnimator.StopAll();
+                    }
                 };
 
                 StartEdgeTimer();
+                DynamicBird.Infrastructure.WinApi.ToastMonitor.Start();
+                DynamicBird.Infrastructure.WinApi.RecentAppTracker.Start();
+                CheckForUpdatesAsync();
+                // 首次启动：等界面就绪后弹出引导窗口
+                Dispatcher.BeginInvoke(new Action(ShowOnboardingIfNeeded),
+                    System.Windows.Threading.DispatcherPriority.ApplicationIdle);
 
                 LogManager.Info("UI 组件初始化完成");
             }
@@ -205,25 +246,36 @@ namespace DynamicBird.UI.Main
                 // ★★★ Step 2: ★★★ 获取底部边界（任务栏顶部坐标，DIP 单位） ★★★
                 double bottomBoundary = GetTaskbarTopInDips();
 
-                // ★★★ Step 3: 创建 EdgeTriggerController（传入 bottomBoundary） ★★★
+                // ★★★ 任务栏高度统一换算为 DIP（GetTaskbarHeight 返回的是物理像素） ★★★
+                double dpiScale = 1.0;
+                try
+                {
+                    dpiScale = VisualTreeHelper.GetDpi(this).DpiScaleX;
+                }
+                catch { }
+                if (dpiScale <= 0 || double.IsNaN(dpiScale) || double.IsInfinity(dpiScale))
+                {
+                    dpiScale = 1.0;
+                }
+                // 注意：_currentTaskbarHeight 保持物理像素（MouseLeaveDetector 使用屏幕物理坐标）；
+                // 尺寸计算统一使用 DIP 高度。
+                double taskbarHeightDips = GetTaskbarHeight() / dpiScale;
+
+                // ★★★ Step 3: 创建 EdgeTriggerController（传入 bottomBoundary 与任务栏 DIP 高度） ★★★
                 _edgeController = new EdgeTriggerController(
-                    this, _shapeAnimator, null!, _visibilityController, _settingsService, bottomBoundary);
+                    this, _shapeAnimator, null, _visibilityController, _settingsService, bottomBoundary, taskbarHeightDips);
 
                 // ★★★ Step 4: 创建 WindowSizeController（传入 _edgeController） ★★★
                 _sizeController = new WindowSizeController(
-                    this, ContentContainer, MainPanel, _currentTaskbarHeight, _settingsService, _edgeController);
+                    this, ContentContainer, MainPanel, taskbarHeightDips, _settingsService, _edgeController, bottomBoundary);
 
-                // ★★★ Step 5: 用反射把 _sizeController 补回 EdgeTriggerController ★★★
-                var field = typeof(EdgeTriggerController).GetField("_sizeController",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field != null)
-                {
-                    field.SetValue(_edgeController, _sizeController);
-                }
+                // ★★★ Step 5: 附加尺寸控制器（解除循环依赖，替代反射注入） ★★★
+                _edgeController.SetSizeController(_sizeController);
 
                 // ★★★ Step 6: 创建其余控制器 ★★★
                 _contentController = new PanelContentController(
                     ContentContainer, _settingsService, _shortcutService, _noteService, _clipboardService, _modeService);
+                _contentController.ContentChanged += OnPanelContentChanged;
 
                 _dragController = new DragController(
                     this, MainPanel, _edgeController, _visibilityController, _settingsService);
@@ -257,13 +309,20 @@ namespace DynamicBird.UI.Main
 
         private void StartEdgeTimer()
         {
-            _edgeTimer = new DispatcherTimer();
-            _edgeTimer.Interval = TimeSpan.FromMilliseconds(30);
-            _edgeTimer.Tick += (s, e) =>
-            {
-                if (_modeService.IsDoNotDisturb) return;
+                _edgeTimer = new DispatcherTimer();
+                _edgeTimer.Interval = TimeSpan.FromMilliseconds(30);
+                _edgeTimer.Tick += (s, e) =>
+                {
+                    // 每约 150ms 刷新一次任务栏边界（任务栏自动隐藏/升起时跟随）
+                    _edgeTickCount++;
+                    if (_edgeTickCount % 5 == 0)
+                    {
+                        RefreshTaskbarBoundary();
+                    }
 
-                if (_visibilityController.CheckHideDelayTimeout())
+                    if (_modeService.IsDoNotDisturb) return;
+
+                if (!_edgeController.IsDragging && _visibilityController.CheckHideDelayTimeout())
                 {
                     // 面板已隐藏，跳过后续处理
                 }
@@ -291,6 +350,13 @@ namespace DynamicBird.UI.Main
                     double screenH = SystemParameters.PrimaryScreenHeight;
 
                     EdgeRegion region = EdgeStateDetector.DetectRegion(mouseX, mouseY, screenW, screenH);
+
+                    // ★ 触发位置设置过滤：被勾掉的边缘/角落不呼出面板
+                    if (region != EdgeRegion.Unknown && !IsRegionEnabledBySettings(region))
+                    {
+                        region = EdgeRegion.Unknown;
+                    }
+
                     bool isInsidePanel = IsMouseInsidePanel(mouseX, mouseY);
 
                     if (_edgeController.IsInClinging())
@@ -298,13 +364,25 @@ namespace DynamicBird.UI.Main
                         _edgeController.UpdateClinging(mouseX, mouseY);
                     }
 
-                    if (region != EdgeRegion.Unknown)
+                    // ★ 鼠标在面板内时保持当前模式：不再响应边缘切换，
+                    //   避免“从角落/边缘划向面板时碰到其他边导致内容被意外切换”；
+                    //   但仍跟随边缘滑动实时更新位置
+                    if (isInsidePanel && _visibilityController.IsVisible)
+                    {
+                        _visibilityController.CancelHide();
+                        _visibilityController.UpdateEdge(_edgeController.CurrentEdge);
+                        _edgeController.FollowMouseInPanel(region, mouseX, mouseY, screenW, screenH);
+                    }
+                    else if (region != EdgeRegion.Unknown)
                     {
                         _edgeController.ProcessRegion(region, mouseX, mouseY, screenW, screenH);
+                        _visibilityController.UpdateEdge(_edgeController.CurrentEdge);
 
-                        if (!_visibilityController.IsVisible)
+                        // ★ 右上角由 ProcessRegion 显式隐藏，这里不能再 Show，否则会闪烁；
+                        //   显示统一走滑入锚点动画（IsShown 状态避免动画途中重复触发）
+                        if (!_visibilityController.IsShown && region != EdgeRegion.TopRight)
                         {
-                            _visibilityController.Show();
+                            _edgeController.ShowPanelAtAnchor();
                         }
                     }
                     else
@@ -312,10 +390,16 @@ namespace DynamicBird.UI.Main
                         if (isInsidePanel)
                         {
                             _visibilityController.CancelHide();
+                            _visibilityController.UpdateEdge(_edgeController.CurrentEdge);
                         }
                         else
                         {
-                            if (_settingsService.ClingModeEnabled && _visibilityController.IsVisible && !_edgeController.IsInClinging())
+                            // ★ 尺寸调整/拖拽期间及刚结束后不因鼠标位置触发隐藏
+                            if (_edgeController.IsDragging || _edgeController.IsRecentlyDragged)
+                            {
+                                _visibilityController.CancelHide();
+                            }
+                            else if (_settingsService.ClingModeEnabled && _visibilityController.IsVisible && !_edgeController.IsInClinging())
                             {
                                 _edgeController.StartClinging(mouseX, mouseY);
                             }
@@ -344,6 +428,59 @@ namespace DynamicBird.UI.Main
 
             return mouseX >= panelLeft && mouseX <= panelRight &&
                    mouseY >= panelTop && mouseY <= panelBottom;
+        }
+
+        private void ShowOnboardingIfNeeded()
+        {
+            try
+            {
+                if (_settingsService.OnboardingCompleted) return;
+
+                var onboarding = new DynamicBird.UI.Onboarding.OnboardingWindow(
+                    () => _settingsService.OnboardingCompleted = true);
+                // ★ 非模态显示：引导期间面板功能保持可用（边缘触发等不受影响）
+                onboarding.Show();
+            }
+            catch { }
+        }
+
+        /// <summary>启动后异步检查 GitHub 更新；发现新版本时通知坞弹出更新通知。</summary>
+        private async void CheckForUpdatesAsync()
+        {
+            try
+            {
+                if (!_settingsService.AutoCheckUpdate) return;
+
+                var current = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
+                              ?? new Version(1, 0, 0);
+                var info = await DynamicBird.Infrastructure.WinApi.UpdateService
+                    .CheckForUpdateAsync(current);
+                if (info != null)
+                {
+                    DynamicBird.Infrastructure.WinApi.ToastMonitor.NotifyUpdateAvailable(info);
+                }
+            }
+            catch { }
+        }
+
+        private bool IsRegionEnabledBySettings(EdgeRegion region)
+        {
+            return region switch
+            {
+                EdgeRegion.Top_Left or EdgeRegion.Top_Center or EdgeRegion.Top_Right =>
+                    _settingsService.IsEdgeEnabled("Top"),
+                EdgeRegion.Bottom_Left or EdgeRegion.Bottom_Center or EdgeRegion.Bottom_Right =>
+                    _settingsService.IsEdgeEnabled("Bottom"),
+                EdgeRegion.Left_Top or EdgeRegion.Left_Center or EdgeRegion.Left_Bottom =>
+                    _settingsService.IsEdgeEnabled("Left"),
+                EdgeRegion.Right_Top or EdgeRegion.Right_Center or EdgeRegion.Right_Bottom =>
+                    _settingsService.IsEdgeEnabled("Right"),
+                EdgeRegion.TopLeft => _settingsService.IsCornerEnabled("TopLeft"),
+                EdgeRegion.TopRight => _settingsService.IsCornerEnabled("TopRight"),
+                EdgeRegion.BottomLeft => _settingsService.IsCornerEnabled("BottomLeft"),
+                EdgeRegion.BottomRight => _settingsService.IsCornerEnabled("BottomRight"),
+                _ => true
+            };
         }
 
         private void OnWindowMouseLeave(object sender, MouseEventArgs e)
@@ -410,27 +547,48 @@ namespace DynamicBird.UI.Main
             }
         }
 
-        private void OnRegionChanged(string regionType)
+        private void OnRegionChanged(string regionType, string regionKey)
         {
-            _contentController.LoadContentForRegion(regionType);
+            _contentController.LoadContentForRegion(regionType, regionKey);
         }
 
         private void OnPanelShown()
         {
             // 面板显示时清理残留状态
+            DynamicBird.Infrastructure.WinApi.ToastMonitor.SetPanelVisible(true);
         }
 
         private void OnPanelHidden()
         {
             _edgeController.ClearEdge();
-            ContentContainer.Content = null;
+            DynamicBird.Infrastructure.WinApi.ToastMonitor.SetPanelVisible(false);
+
+            // 滑出动画期间保留内容，动画结束后（或再次显示前）再释放
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (!_visibilityController.IsVisible)
+                {
+                    // ★ 应用辅助（画中画嵌入/视频播放/媒体控制）保留内容不释放，
+                    //   避免面板隐藏导致嵌入窗口被解除、播放中断
+                    if (_contentController.CurrentRegionType == "AppHelper") return;
+                    ContentContainer.Content = null;
+                }
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         private void OnWindowClosed()
         {
+            try
+            {
+                UnregisterGlobalHotkey(new System.Windows.Interop.WindowInteropHelper(this).Handle);
+            }
+            catch { }
+
             LogManager.Info("主窗口关闭");
             _edgeTimer?.Stop();
             _edgeTimer = null;
+            DynamicBird.Infrastructure.WinApi.ToastMonitor.Stop();
+            DynamicBird.Infrastructure.WinApi.RecentAppTracker.Stop();
 
             try { _dragController?.Detach(); } catch { }
             try { (_shapeAnimator as IDisposable)?.Dispose(); } catch { }

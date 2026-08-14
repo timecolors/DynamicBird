@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using DynamicBird.Core.Infrastructure.Logging;
 using DynamicBird.Core.Infrastructure.Service;
 
@@ -8,7 +8,6 @@ namespace DynamicBird.Core.Services.Configuration
     {
         private SettingsData _data;
         private readonly object _lock = new object();
-        private int _mouseLeaveThreshold = 0;
 
         public event Action? SettingsChanged;
 
@@ -25,7 +24,7 @@ namespace DynamicBird.Core.Services.Configuration
             if (IsInitialized) return;
             Reload();
             IsInitialized = true;
-            LogManager.Debug("SettingsManager ³õÊ¼»¯Íê³É");
+            LogManager.Debug("SettingsManager åˆå§‹åŒ–å®Œæˆ");
         }
 
         public void Shutdown()
@@ -33,7 +32,7 @@ namespace DynamicBird.Core.Services.Configuration
             if (!IsInitialized) return;
             Save();
             IsInitialized = false;
-            LogManager.Debug("SettingsManager ÒÑ¹Ø±Õ");
+            LogManager.Debug("SettingsManager å·²å…³é—­");
         }
 
         public void Reload()
@@ -41,7 +40,6 @@ namespace DynamicBird.Core.Services.Configuration
             lock (_lock)
             {
                 _data = SettingsFileManager.Load();
-                _mouseLeaveThreshold = 0;
                 SettingsChanged?.Invoke();
             }
         }
@@ -53,19 +51,6 @@ namespace DynamicBird.Core.Services.Configuration
                 SettingsFileManager.Save(_data);
                 SettingsChanged?.Invoke();
             }
-        }
-
-        // ========== ´¥·¢Î»ÖÃ ==========
-        public string TriggerMode
-        {
-            get => _data.TriggerMode ?? "EdgeFollow";
-            set { _data.TriggerMode = value; Save(); }
-        }
-
-        public string TriggerPosition
-        {
-            get => _data.TriggerPosition ?? "BottomRight";
-            set { _data.TriggerPosition = value; Save(); }
         }
 
         public bool IsEdgeEnabled(string edge)
@@ -118,7 +103,7 @@ namespace DynamicBird.Core.Services.Configuration
             Save();
         }
 
-        // ========== ±ßÐÐÎªÄ£Ê½ ==========
+        // ========== è¾¹è¡Œä¸ºæ¨¡å¼ ==========
         public string GetEdgeMode(string edge)
         {
             return edge switch
@@ -144,7 +129,7 @@ namespace DynamicBird.Core.Services.Configuration
             Save();
         }
 
-        // ========== Íâ¹Û ==========
+        // ========== å¤–è§‚ ==========
         public string BackgroundColor
         {
             get => _data.BackgroundColor ?? "#2D2D2D";
@@ -181,7 +166,7 @@ namespace DynamicBird.Core.Services.Configuration
             set { _data.CustomIconPath = value; Save(); }
         }
 
-        // ========== ÐÎ×´²ÎÊý ==========
+        // ========== å½¢çŠ¶å‚æ•° ==========
         public double StripLengthRatio
         {
             get => _data.StripLengthRatio;
@@ -212,13 +197,6 @@ namespace DynamicBird.Core.Services.Configuration
             set { _data.TriggerRegionRatio = Math.Max(0.1, Math.Min(0.5, value)); Save(); }
         }
 
-        // ========== ¶¯»­Óë²¼¾Ö ==========
-        public int AnimationDurationMs
-        {
-            get => _data.AnimationDurationMs;
-            set { _data.AnimationDurationMs = Math.Max(10, Math.Min(800, value)); Save(); }
-        }
-
         public double HorizontalLayoutThreshold
         {
             get => _data.HorizontalLayoutThreshold;
@@ -231,14 +209,14 @@ namespace DynamicBird.Core.Services.Configuration
             set { _data.TagWidth = Math.Max(40, Math.Min(400, value)); Save(); }
         }
 
-        // ========== ×ÔÊÊÓ¦ÐÐÎª ==========
+        // ========== è‡ªé€‚åº”è¡Œä¸º ==========
         public bool AutoFitOnTrigger
         {
             get => _data.AutoFitOnTrigger;
             set { _data.AutoFitOnTrigger = value; Save(); }
         }
 
-        // ========== ¹Ì¶¨Î»ÖÃ ==========
+        // ========== å›ºå®šä½ç½® ==========
         public string GetFixedShape(string edge)
         {
             return edge switch
@@ -289,7 +267,7 @@ namespace DynamicBird.Core.Services.Configuration
             Save();
         }
 
-        // ========== ÇøÓòÐÎ×´ ==========
+        // ========== åŒºåŸŸå½¢çŠ¶ ==========
         public string GetRegionShape(string edge, string region)
         {
             return region switch
@@ -331,14 +309,7 @@ namespace DynamicBird.Core.Services.Configuration
             Save();
         }
 
-        // ========== Ä£Ê½ÇÐ»» ==========
-        public string CurrentMode
-        {
-            get => _data.CurrentMode ?? "Taskbar";
-            set { _data.CurrentMode = value; Save(); }
-        }
-
-        // ========== ¼ôÌù°åÓë±ãÇ© ==========
+        // ========== å‰ªè´´æ¿ä¸Žä¾¿ç­¾ ==========
         public int ClipboardMaxCount
         {
             get => _data.ClipboardMaxCount;
@@ -369,97 +340,26 @@ namespace DynamicBird.Core.Services.Configuration
             set { _data.NoteShowTitleByDefault = value; Save(); }
         }
 
-        // ========== ÇøÓòÄ£Ê½ÅäÖÃ ==========
-        public string TaskbarRegionMode
-        {
-            get => _data.TaskbarRegionMode ?? "Taskbar";
-            set { _data.TaskbarRegionMode = value; Save(); }
-        }
-
-        public string WidgetRegionMode
-        {
-            get => _data.WidgetRegionMode ?? "Widget";
-            set { _data.WidgetRegionMode = value; Save(); }
-        }
-
-        public string CenterRegionMode
-        {
-            get => _data.CenterRegionMode ?? "AppHelper";
-            set { _data.CenterRegionMode = value; Save(); }
-        }
-
-        public string CornerRegionMode
-        {
-            get => _data.CornerRegionMode ?? "Taskbar";
-            set { _data.CornerRegionMode = value; Save(); }
-        }
-
-        // ========== Ãæ°å³ß´ç ==========
-        public double PanelWidth
-        {
-            get => _data.PanelWidth;
-            set { _data.PanelWidth = Math.Max(200, value); Save(); }
-        }
-
-        public double PanelHeight
-        {
-            get => _data.PanelHeight;
-            set { _data.PanelHeight = Math.Max(100, value); Save(); }
-        }
-
         public bool UseAutoSize
         {
             get => _data.UseAutoSize;
             set { _data.UseAutoSize = value; Save(); }
         }
 
-        // ========== Êó±êÀë¿ªÅÐ¶¨ ==========
-        public string ResolutionPreset
+        // ========== è‡ªåŠ¨æ›´æ–°ï¼ˆGitHub Releasesï¼‰ ==========
+        public bool AutoCheckUpdate
         {
-            get => _data.ResolutionPreset ?? "1080p";
-            set { _data.ResolutionPreset = value; Save(); }
+            get => _data.AutoCheckUpdate;
+            set { _data.AutoCheckUpdate = value; Save(); }
         }
 
-        public string DpiScalePreset
+        public bool OnboardingCompleted
         {
-            get => _data.DpiScalePreset ?? "150%";
-            set { _data.DpiScalePreset = value; Save(); }
+            get => _data.OnboardingCompleted;
+            set { _data.OnboardingCompleted = value; Save(); }
         }
 
-        public int MouseLeaveThreshold
-        {
-            get
-            {
-                if (_mouseLeaveThreshold > 0) return _mouseLeaveThreshold;
-
-                int baseThreshold = ResolutionPreset switch
-                {
-                    "1080p" => 20,
-                    "2K" => 30,
-                    "4K" => 40,
-                    _ => 20
-                };
-
-                double scale = DpiScalePreset switch
-                {
-                    "100%" => 1.0,
-                    "125%" => 1.25,
-                    "150%" => 1.5,
-                    "200%" => 2.0,
-                    _ => 1.0
-                };
-
-                _mouseLeaveThreshold = (int)(baseThreshold * scale);
-                return _mouseLeaveThreshold;
-            }
-        }
-
-        public void ResetMouseLeaveThreshold()
-        {
-            _mouseLeaveThreshold = 0;
-        }
-
-        // ========== ÎðÈÅÄ£Ê½ ==========
+        // ========== å‹¿æ‰°æ¨¡å¼ ==========
         public bool RememberDndMode
         {
             get => _data.RememberDndMode;
@@ -472,7 +372,7 @@ namespace DynamicBird.Core.Services.Configuration
             set { _data.DndModeEnabled = value; Save(); }
         }
 
-        // ========== ÈÎÎñÀ¸ ==========
+        // ========== ä»»åŠ¡æ  ==========
         public double TaskbarIconSize
         {
             get => _data.TaskbarIconSize;
@@ -493,12 +393,12 @@ namespace DynamicBird.Core.Services.Configuration
             }
         }
 
-        // ========== 16¸ö¶ÀÁ¢ÇøÓò³ß´ç£¨º¬ËÄ½Ç£© ==========
+        // ========== 16ä¸ªç‹¬ç«‹åŒºåŸŸå°ºå¯¸ï¼ˆå«å››è§’ï¼‰ ==========
         public (double width, double height) GetUserSize(string regionKey)
         {
             return regionKey switch
             {
-                // 12¸ö±ßÔµÇøÓò
+                // 12ä¸ªè¾¹ç¼˜åŒºåŸŸ
                 "Top_Left" => (_data.UserWidth_Top_Left, _data.UserHeight_Top_Left),
                 "Top_Center" => (_data.UserWidth_Top_Center, _data.UserHeight_Top_Center),
                 "Top_Right" => (_data.UserWidth_Top_Right, _data.UserHeight_Top_Right),
@@ -511,7 +411,7 @@ namespace DynamicBird.Core.Services.Configuration
                 "Right_Top" => (_data.UserWidth_Right_Top, _data.UserHeight_Right_Top),
                 "Right_Center" => (_data.UserWidth_Right_Center, _data.UserHeight_Right_Center),
                 "Right_Bottom" => (_data.UserWidth_Right_Bottom, _data.UserHeight_Right_Bottom),
-                // ¡ï¡ï¡ï 4¸ö½ÇÂäÇøÓò ¡ï¡ï¡ï
+                // â˜…â˜…â˜… 4ä¸ªè§’è½åŒºåŸŸ â˜…â˜…â˜…
                 "TopLeft" => (_data.UserWidth_Corner_TopLeft, _data.UserHeight_Corner_TopLeft),
                 "TopRight" => (_data.UserWidth_Corner_TopRight, _data.UserHeight_Corner_TopRight),
                 "BottomLeft" => (_data.UserWidth_Corner_BottomLeft, _data.UserHeight_Corner_BottomLeft),
@@ -524,7 +424,7 @@ namespace DynamicBird.Core.Services.Configuration
         {
             switch (regionKey)
             {
-                // 12¸ö±ßÔµÇøÓò
+                // 12ä¸ªè¾¹ç¼˜åŒºåŸŸ
                 case "Top_Left": _data.UserWidth_Top_Left = width; _data.UserHeight_Top_Left = height; break;
                 case "Top_Center": _data.UserWidth_Top_Center = width; _data.UserHeight_Top_Center = height; break;
                 case "Top_Right": _data.UserWidth_Top_Right = width; _data.UserHeight_Top_Right = height; break;
@@ -537,7 +437,7 @@ namespace DynamicBird.Core.Services.Configuration
                 case "Right_Top": _data.UserWidth_Right_Top = width; _data.UserHeight_Right_Top = height; break;
                 case "Right_Center": _data.UserWidth_Right_Center = width; _data.UserHeight_Right_Center = height; break;
                 case "Right_Bottom": _data.UserWidth_Right_Bottom = width; _data.UserHeight_Right_Bottom = height; break;
-                // ¡ï¡ï¡ï 4¸ö½ÇÂäÇøÓò ¡ï¡ï¡ï
+                // â˜…â˜…â˜… 4ä¸ªè§’è½åŒºåŸŸ â˜…â˜…â˜…
                 case "TopLeft": _data.UserWidth_Corner_TopLeft = width; _data.UserHeight_Corner_TopLeft = height; break;
                 case "TopRight": _data.UserWidth_Corner_TopRight = width; _data.UserHeight_Corner_TopRight = height; break;
                 case "BottomLeft": _data.UserWidth_Corner_BottomLeft = width; _data.UserHeight_Corner_BottomLeft = height; break;
@@ -547,7 +447,7 @@ namespace DynamicBird.Core.Services.Configuration
             Save();
         }
 
-        // ========== ¶¯»­ÉèÖÃ ==========
+        // ========== åŠ¨ç”»è®¾ç½® ==========
         public bool AnimationsEnabled
         {
             get => _data.AnimationsEnabled;
@@ -581,7 +481,8 @@ namespace DynamicBird.Core.Services.Configuration
         public int HideDelayMs
         {
             get => _data.HideDelayMs;
-            set { _data.HideDelayMs = Math.Max(50, Math.Min(1000, value)); Save(); }
+            // â˜… 0 = å–æ¶ˆå»¶æ—¶éšè—ï¼ˆé¼ æ ‡ä¸€ç¦»å¼€ç«‹å³éšè—ï¼‰
+            set { _data.HideDelayMs = Math.Max(0, Math.Min(1000, value)); Save(); }
         }
 
         public int FlyDurationMs
@@ -590,18 +491,67 @@ namespace DynamicBird.Core.Services.Configuration
             set { _data.FlyDurationMs = Math.Max(100, Math.Min(2000, value)); Save(); }
         }
 
-        // ========== Ð¡ÄñÒÀÈËÄ£Ê½ ==========
+        // ========== å°é¸Ÿä¾äººæ¨¡å¼ ==========
         public bool ClingModeEnabled
         {
             get => _data.ClingModeEnabled;
             set { _data.ClingModeEnabled = value; Save(); }
         }
 
-        // ¡ï¡ï¡ï ÐÂÔö£ºÇøÓò·À¶¶ÑÓ³Ù ¡ï¡ï¡ï
+        // â˜…â˜…â˜… æ–°å¢žï¼šåŒºåŸŸé˜²æŠ–å»¶è¿Ÿ â˜…â˜…â˜…
         public int RegionDebounceMs
         {
             get => _data.RegionDebounceMs;
             set { _data.RegionDebounceMs = Math.Max(30, Math.Min(300, value)); Save(); }
+        }
+
+        public string GetRegionPanel(string regionKey)
+        {
+            return regionKey switch
+            {
+                "Top_Left" => _data.RegionPanel_Top_Left ?? "Default",
+                "Top_Center" => _data.RegionPanel_Top_Center ?? "Default",
+                "Top_Right" => _data.RegionPanel_Top_Right ?? "Default",
+                "Bottom_Left" => _data.RegionPanel_Bottom_Left ?? "Default",
+                "Bottom_Center" => _data.RegionPanel_Bottom_Center ?? "Default",
+                "Bottom_Right" => _data.RegionPanel_Bottom_Right ?? "Default",
+                "Left_Top" => _data.RegionPanel_Left_Top ?? "Default",
+                "Left_Center" => _data.RegionPanel_Left_Center ?? "Default",
+                "Left_Bottom" => _data.RegionPanel_Left_Bottom ?? "Default",
+                "Right_Top" => _data.RegionPanel_Right_Top ?? "Default",
+                "Right_Center" => _data.RegionPanel_Right_Center ?? "Default",
+                "Right_Bottom" => _data.RegionPanel_Right_Bottom ?? "Default",
+                "TopLeft" => _data.RegionPanel_TopLeft ?? "Default",
+                "TopRight" => _data.RegionPanel_TopRight ?? "Default",
+                "BottomLeft" => _data.RegionPanel_BottomLeft ?? "Default",
+                "BottomRight" => _data.RegionPanel_BottomRight ?? "Default",
+                _ => "Default"
+            };
+        }
+
+        public void SetRegionPanel(string regionKey, string panelType)
+        {
+            switch (regionKey)
+            {
+                case "Top_Left": _data.RegionPanel_Top_Left = panelType; break;
+                case "Top_Center": _data.RegionPanel_Top_Center = panelType; break;
+                case "Top_Right": _data.RegionPanel_Top_Right = panelType; break;
+                case "Bottom_Left": _data.RegionPanel_Bottom_Left = panelType; break;
+                case "Bottom_Center": _data.RegionPanel_Bottom_Center = panelType; break;
+                case "Bottom_Right": _data.RegionPanel_Bottom_Right = panelType; break;
+                case "Left_Top": _data.RegionPanel_Left_Top = panelType; break;
+                case "Left_Center": _data.RegionPanel_Left_Center = panelType; break;
+                case "Left_Bottom": _data.RegionPanel_Left_Bottom = panelType; break;
+                case "Right_Top": _data.RegionPanel_Right_Top = panelType; break;
+                case "Right_Center": _data.RegionPanel_Right_Center = panelType; break;
+                case "Right_Bottom": _data.RegionPanel_Right_Bottom = panelType; break;
+                case "TopLeft": _data.RegionPanel_TopLeft = panelType; break;
+                case "TopRight": _data.RegionPanel_TopRight = panelType; break;
+                case "BottomLeft": _data.RegionPanel_BottomLeft = panelType; break;
+                case "BottomRight": _data.RegionPanel_BottomRight = panelType; break;
+                default: return;
+            }
+            Save();
         }
     }
 }

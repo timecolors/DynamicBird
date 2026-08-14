@@ -35,16 +35,13 @@ namespace DynamicBird.UI.Panels
 
         // ============ 窗口任务交互 ============
 
-        private void OnWindowMouseDown(object sender, MouseButtonEventArgs e)
+        // ★ 用 PreviewMouseUp 直接触发关闭：窗口标签列表会每秒刷新，
+        //   按钮可能在下一次刷新中被重建，导致 WPF 的 Click 事件在 MouseUp 阶段丢失。
+        private void CloseBtn_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Border border && border.DataContext is TaskbarItem item && item.Handle.HasValue)
-            {
-                // 如果点击的是关闭按钮，不处理（由关闭按钮自己处理）
-                if (e.OriginalSource is Button) return;
-
-                WindowAction.ToggleMinimize(item.Handle.Value);
-                e.Handled = true;
-            }
+            if (e.ChangedButton != MouseButton.Left) return;
+            OnCloseButtonClick(sender, e);
+            e.Handled = true;
         }
 
         private void OnCloseButtonClick(object sender, RoutedEventArgs e)
@@ -54,7 +51,11 @@ namespace DynamicBird.UI.Panels
                 try
                 {
                     IntPtr hwnd = item.Handle.Value;
+                    DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                        $"[TaskbarClose] 点击关闭: hwnd={hwnd} title='{item.DisplayName}' isWindow={WindowAction.IsWindowAlive(hwnd)}");
                     WindowAction.Close(hwnd);
+                    DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                        $"[TaskbarClose] WM_CLOSE 已发送: hwnd={hwnd}");
 
                     // 立即从列表中移除
                     Dispatcher.BeginInvoke(new Action(() =>
@@ -81,12 +82,5 @@ namespace DynamicBird.UI.Panels
             }
         }
 
-        /// <summary>
-        /// 阻止点击关闭按钮时触发 Border 的 PreviewMouseLeftButtonDown
-        /// </summary>
-        private void OnCloseButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-        }
     }
 }

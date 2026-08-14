@@ -76,14 +76,6 @@ namespace DynamicBird.UI.Panels
             ItemsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public bool PinWindowAsShortcut(string title, string path, ImageSource? icon)
-        {
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
-                return false;
-
-            return _shortcutService.AddShortcut(path, title);
-        }
-
         public bool RemoveShortcut(string id)
         {
             return _shortcutService.RemoveShortcut(id);

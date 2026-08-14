@@ -1,32 +1,49 @@
-﻿using System;
+using System;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace DynamicBird.Core.Controllers
 {
+    /// <summary>
+    /// 面板调整大小：用 WM_NCLBUTTONDOWN + 命中区域码（HTTOP/HTBOTTOM 等）
+    /// 让 Windows 原生接管 resize——与普通窗口行为完全一致，无中间态、不抽搐。
+    /// 拖哪条边哪条边跟随鼠标，对侧固定。
+    /// </summary>
     public class SizeDragHandler
     {
         private readonly Window _window;
         private readonly FrameworkElement _mainPanel;
         private readonly WindowSizeController _controller;
-        private readonly EdgeTriggerController _edgeController;  // ★★★ 新增 ★★★
+        private readonly EdgeTriggerController _edgeController;
 
-        private bool _isResizing = false;
-        private Point _resizeStartPoint;
-        private double _resizeStartWidth;
-        private double _resizeStartHeight;
-        private double _resizeStartLeft;
-        private double _resizeStartTop;
+        private enum ResizeHandle
+        {
+            Top, Bottom, Left, Right,
+            TopLeft, TopRight, BottomLeft, BottomRight
+        }
 
-        private enum HandlePosition { TopLeft, TopRight, BottomLeft, BottomRight }
-        private HandlePosition _handlePosition = HandlePosition.BottomRight;
+        private ResizeHandle? _activeHandle;
 
         public event Action<bool>? UserResizeStarted;
         public event Action? ResizeEnded;
         public event Action<bool>? LockRequest;
 
-        // ★★★ 构造函数增加 EdgeTriggerController 参数 ★★★
+        private const int WM_NCLBUTTONDOWN = 0x00A1;
+        private const int HTLEFT = 10;
+        private const int HTRIGHT = 11;
+        private const int HTTOP = 12;
+        private const int HTTOPLEFT = 13;
+        private const int HTTOPRIGHT = 14;
+        private const int HTBOTTOM = 15;
+        private const int HTBOTTOMLEFT = 16;
+        private const int HTBOTTOMRIGHT = 17;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
         public SizeDragHandler(Window window, FrameworkElement mainPanel, WindowSizeController controller, EdgeTriggerController edgeController)
         {
             _window = window;
@@ -39,7 +56,7 @@ namespace DynamicBird.Core.Controllers
 
         public void Reset()
         {
-            _isResizing = false;
+            _activeHandle = null;
             if (_edgeController != null) _edgeController.IsDragging = false;
             try
             {
@@ -52,24 +69,7 @@ namespace DynamicBird.Core.Controllers
 
         public void UpdateHandlePosition(string edge)
         {
-            if (string.IsNullOrEmpty(edge))
-            {
-                _handlePosition = HandlePosition.BottomRight;
-                return;
-            }
-
-            _handlePosition = edge switch
-            {
-                "TopLeft" => HandlePosition.BottomRight,
-                "TopRight" => HandlePosition.BottomLeft,
-                "BottomLeft" => HandlePosition.TopRight,
-                "BottomRight" => HandlePosition.TopLeft,
-                "Top" => HandlePosition.BottomRight,
-                "Bottom" => HandlePosition.TopRight,
-                "Left" => HandlePosition.BottomRight,
-                "Right" => HandlePosition.BottomLeft,
-                _ => HandlePosition.BottomRight
-            };
+            // 手柄由鼠标位置实时决定，无需预置
         }
 
         public bool HandleMouseDown(object sender, MouseButtonEventArgs e, string mode)
@@ -77,32 +77,34 @@ namespace DynamicBird.Core.Controllers
             try
             {
                 var pos = e.GetPosition(_mainPanel);
-                bool inHandle = IsInHandleArea(pos, mode);
+                var handle = GetHandleAt(pos);
 
-                if (e.ClickCount == 2 && inHandle)
+                if (e.ClickCount == 2 && handle.HasValue)
                 {
                     _controller.RestoreAutoSize();
                     e.Handled = true;
                     return true;
                 }
 
-                if (inHandle)
+                if (!handle.HasValue) return false;
+
+                _activeHandle = handle!.Value;
+                UserResizeStarted?.Invoke(true);
+                LockRequest?.Invoke(true);
+                _edgeController.IsDragging = true;
+
+                // ★ 原生系统 resize：Windows 接管，行为与普通窗口一致
+                var hwnd = new WindowInteropHelper(_window).Handle;
+                if (hwnd != IntPtr.Zero)
                 {
-                    UserResizeStarted?.Invoke(true);
-                    LockRequest?.Invoke(true);
-
-                    _isResizing = true;
-                    _edgeController.IsDragging = true;  // ★★★ 同步到 EdgeController ★★★
-                    _resizeStartPoint = e.GetPosition(_window);
-                    _resizeStartWidth = _window.Width;
-                    _resizeStartHeight = _window.Height;
-                    _resizeStartLeft = _window.Left;
-                    _resizeStartTop = _window.Top;
-                    _mainPanel.CaptureMouse();
-
-                    e.Handled = true;
-                    return true;
+                    int ht = ToHitTest(handle.Value);
+                    SendMessage(hwnd, WM_NCLBUTTONDOWN, (IntPtr)ht, IntPtr.Zero);
                 }
+
+                // SendMessage 返回 = resize 结束
+                FinishResize();
+                e.Handled = true;
+                return true;
             }
             catch (Exception ex)
             {
@@ -113,123 +115,66 @@ namespace DynamicBird.Core.Controllers
             return false;
         }
 
-        public void HandleMouseMove(object sender, MouseEventArgs e, string mode)
+        private void FinishResize()
         {
+            _activeHandle = null;
+            _edgeController.IsDragging = false;
+            _edgeController.NotifyDragEnded();
+            UserResizeStarted?.Invoke(false);
+            LockRequest?.Invoke(false);
+            ResizeEnded?.Invoke();
+            _controller.SaveCurrentSizeWithDelay();
+        }
+
+        private static int ToHitTest(ResizeHandle handle) => handle switch
+        {
+            ResizeHandle.Top => HTTOP,
+            ResizeHandle.Bottom => HTBOTTOM,
+            ResizeHandle.Left => HTLEFT,
+            ResizeHandle.Right => HTRIGHT,
+            ResizeHandle.TopLeft => HTTOPLEFT,
+            ResizeHandle.TopRight => HTTOPRIGHT,
+            ResizeHandle.BottomLeft => HTBOTTOMLEFT,
+            ResizeHandle.BottomRight => HTBOTTOMRIGHT,
+            _ => HTTOP
+        };
+
+        public void HandleMouseMove(object sender, MouseEventArgs e)
+        {
+            // 原生 resize 期间无需手动计算位置；这里只负责手柄光标反馈
             try
             {
                 var pos = e.GetPosition(_mainPanel);
-                bool inHandle = IsInHandleArea(pos, mode);
-                _mainPanel.Cursor = inHandle ? GetHandleCursor() : Cursors.Arrow;
-
-                if (_isResizing)
-                {
-                    var currentPos = e.GetPosition(_window);
-                    double deltaX = currentPos.X - _resizeStartPoint.X;
-                    double deltaY = currentPos.Y - _resizeStartPoint.Y;
-
-                    double screenW = SystemParameters.PrimaryScreenWidth;
-                    double screenH = SystemParameters.PrimaryScreenHeight;
-
-                    double maxW, maxH;
-                    if (mode == "Widget")
-                    {
-                        maxW = screenW * 2.0 / 5.0;
-                        maxH = screenH * 2.0 / 3.0;
-                    }
-                    else
-                    {
-                        maxW = screenW * 0.8;
-                        maxH = screenH * 0.8;
-                    }
-
-                    double minW = mode == "Widget" ? 340 : 120;
-                    double minH = mode == "Widget" ? 220 : 80;
-
-                    double newWidth = Math.Max(minW, _resizeStartWidth + deltaX);
-                    double newHeight = Math.Max(minH, _resizeStartHeight + deltaY);
-                    newWidth = Math.Min(newWidth, maxW);
-                    newHeight = Math.Min(newHeight, maxH);
-
-                    double newLeft = _resizeStartLeft;
-                    double newTop = _resizeStartTop;
-
-                    switch (_handlePosition)
-                    {
-                        case HandlePosition.TopLeft:
-                            newLeft = _resizeStartLeft - (newWidth - _resizeStartWidth);
-                            newTop = _resizeStartTop - (newHeight - _resizeStartHeight);
-                            break;
-                        case HandlePosition.TopRight:
-                            newTop = _resizeStartTop - (newHeight - _resizeStartHeight);
-                            break;
-                        case HandlePosition.BottomLeft:
-                            newLeft = _resizeStartLeft - (newWidth - _resizeStartWidth);
-                            break;
-                        case HandlePosition.BottomRight:
-                            break;
-                    }
-
-                    newLeft = Math.Max(0, Math.Min(newLeft, screenW - newWidth));
-                    newTop = Math.Max(0, Math.Min(newTop, screenH - newHeight));
-
-                    _window.Width = newWidth;
-                    _window.Height = newHeight;
-                    _window.Left = newLeft;
-                    _window.Top = newTop;
-
-                    _window.UpdateLayout();
-                    e.Handled = true;
-                }
+                var handle = GetHandleAt(pos);
+                _mainPanel.Cursor = handle.HasValue ? GetHandleCursor(handle.Value) : Cursors.Arrow;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"SizeDragHandler.HandleMouseMove error: {ex.Message}");
-                ForceRelease();
-            }
+            catch { }
         }
 
         public void HandleMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isResizing)
+            // 原生模式由 SendMessage 返回时统一收尾；此处保留为空实现以兼容调用链
+            if (_activeHandle.HasValue)
             {
-                try
-                {
-                    _isResizing = false;
-                    _edgeController.IsDragging = false;  // ★★★ 同步到 EdgeController ★★★
-                    _mainPanel.ReleaseMouseCapture();
-
-                    e.Handled = true;
-                    ResizeEnded?.Invoke();
-                    LockRequest?.Invoke(false);
-                    UserResizeStarted?.Invoke(false);
-
-                    // ★ 保存尺寸
-                    _controller.SaveCurrentSizeWithDelay();
-
-                    _window.UpdateLayout();
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"SizeDragHandler.HandleMouseUp error: {ex.Message}");
-                    ForceRelease();
-                }
+                _activeHandle = null;
+                _edgeController.IsDragging = false;
+                _edgeController.NotifyDragEnded();
+                UserResizeStarted?.Invoke(false);
+                LockRequest?.Invoke(false);
+                ResizeEnded?.Invoke();
             }
         }
 
         private void OnMainPanelMouseLeave(object sender, MouseEventArgs e)
         {
-            if (_isResizing)
-            {
-                System.Diagnostics.Debug.WriteLine("SizeDragHandler: MouseLeave triggered, forcing release");
-                ForceRelease();
-                e.Handled = true;
-            }
+            // 原生 resize 由系统捕获鼠标，不因暂时离开面板而中断
         }
 
         private void ForceRelease()
         {
-            _isResizing = false;
+            _activeHandle = null;
             if (_edgeController != null) _edgeController.IsDragging = false;
+            _edgeController?.NotifyDragEnded();
             try
             {
                 if (_mainPanel.IsMouseCaptured)
@@ -246,31 +191,43 @@ namespace DynamicBird.Core.Controllers
             Mouse.OverrideCursor = null;
         }
 
-        private bool IsInHandleArea(Point pos, string mode)
+        private ResizeHandle? GetHandleAt(Point pos)
         {
-            double handleSize = 40;
+            double corner = 42;
+            double edgeSize = 8;
             double width = _mainPanel.ActualWidth;
             double height = _mainPanel.ActualHeight;
-            if (width < 10 || height < 10) return false;
+            if (width < 10 || height < 10) return null;
 
-            return _handlePosition switch
-            {
-                HandlePosition.TopLeft => pos.X < handleSize && pos.Y < handleSize,
-                HandlePosition.TopRight => pos.X > width - handleSize && pos.Y < handleSize,
-                HandlePosition.BottomLeft => pos.X < handleSize && pos.Y > height - handleSize,
-                HandlePosition.BottomRight => pos.X > width - handleSize && pos.Y > height - handleSize,
-                _ => false
-            };
+            bool cLeft = pos.X < corner;
+            bool cRight = pos.X > width - corner;
+            bool cTop = pos.Y < corner;
+            bool cBottom = pos.Y > height - corner;
+
+            if (cLeft && cTop) return ResizeHandle.TopLeft;
+            if (cRight && cTop) return ResizeHandle.TopRight;
+            if (cLeft && cBottom) return ResizeHandle.BottomLeft;
+            if (cRight && cBottom) return ResizeHandle.BottomRight;
+
+            bool left = pos.X < edgeSize;
+            bool right = pos.X > width - edgeSize;
+            bool top = pos.Y < edgeSize;
+            bool bottom = pos.Y > height - edgeSize;
+            if (top) return ResizeHandle.Top;
+            if (bottom) return ResizeHandle.Bottom;
+            if (left) return ResizeHandle.Left;
+            if (right) return ResizeHandle.Right;
+            return null;
         }
 
-        private Cursor GetHandleCursor()
+        private Cursor GetHandleCursor(ResizeHandle position)
         {
-            return _handlePosition switch
+            return position switch
             {
-                HandlePosition.TopLeft => Cursors.SizeNWSE,
-                HandlePosition.TopRight => Cursors.SizeNESW,
-                HandlePosition.BottomLeft => Cursors.SizeNESW,
-                HandlePosition.BottomRight => Cursors.SizeNWSE,
+                ResizeHandle.Top or ResizeHandle.Bottom => Cursors.SizeNS,
+                ResizeHandle.Left or ResizeHandle.Right => Cursors.SizeWE,
+                ResizeHandle.TopLeft or ResizeHandle.BottomRight => Cursors.SizeNWSE,
+                ResizeHandle.TopRight or ResizeHandle.BottomLeft => Cursors.SizeNESW,
                 _ => Cursors.Arrow
             };
         }

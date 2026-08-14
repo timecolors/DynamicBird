@@ -2,7 +2,9 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+		<!-- 已安装更高主版本运行时（如 .NET 11）时允许滚动 -->
+		<RollForward>LatestMajor</RollForward>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
@@ -10,25 +12,25 @@
 		<AssemblyName>DynamicBird</AssemblyName>
 		<RootNamespace>DynamicBird</RootNamespace>
 
+		<!-- ★★★ 版本与产品信息（显示在文件属性/任务管理器/关于页） ★★★ -->
+		<Version>1.0.1</Version>
+		<FileVersion>1.0.1.0</FileVersion>
+		<AssemblyVersion>1.0.1.0</AssemblyVersion>
+		<Product>灵动鸟 DynamicBird</Product>
+		<AssemblyTitle>灵动鸟</AssemblyTitle>
+		<Description>Windows 桌面边缘面板工具</Description>
+		<Copyright>Copyright © 2026 DynamicBird</Copyright>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
 		<!-- ★★★ 禁用所有默认包含项（避免重复） ★★★ -->
 		<EnableDefaultItems>false</EnableDefaultItems>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- COM 引用 -->
-		<COMReference Include="Shell32">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>0</VersionMinor>
-			<VersionMajor>1</VersionMajor>
-			<Guid>50a7e9b0-70ef-11d1-b75a-00a0c90564fe</Guid>
-			<Lcid>0</Lcid>
-			<Isolated>false</Isolated>
-			<EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
-
 		<!-- NuGet 包 -->
 		<PackageReference Include="NAudio" Version="2.3.0" />
-		<PackageReference Include="System.Drawing.Common" Version="10.0.10" />
+		<PackageReference Include="System.Management" Version="10.0.11" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -44,6 +46,18 @@
 		<Page Include="src\UI\Settings\SettingsWindow.xaml" />
 		<Page Include="src\UI\Settings\Pages\ShortcutManagementPage.xaml" />
 		<Page Include="src\UI\Status\SystemStatusView.xaml" />
+		<Page Include="src\UI\Theme\Theme.xaml" />
+		<Page Include="src\UI\Theme\AppIcons.xaml" />
+		<Page Include="src\UI\AppHelper\AppHelperView.xaml" />
+		<Page Include="src\UI\AppHelper\MediaControlView.xaml" />
+		<Page Include="src\UI\Panels\NotificationDockView.xaml" />
+		<Page Include="src\UI\Panels\RecentItemsView.xaml" />
+		<Page Include="src\UI\Panels\QuickSettingsView.xaml" />
+		<Page Include="src\UI\Media\PanelMediaPlayer.xaml" />
+		<Page Include="src\UI\Media\WindowPickerWindow.xaml" />
+		<Page Include="src\UI\Onboarding\OnboardingWindow.xaml" />
+		<Page Include="src\UI\Widgets\Calculator\CalculatorWidget.xaml" />
+		<Page Include="src\UI\Widgets\Timer\TimerWidget.xaml" />
 		<Page Include="src\UI\Widgets\ClipboardHistory\ClipboardHistoryWidget.xaml" />
 		<Page Include="src\UI\Widgets\Notes\NoteWidget.xaml" />
 		<Page Include="src\UI\Widgets\WidgetSwitcher.xaml" />

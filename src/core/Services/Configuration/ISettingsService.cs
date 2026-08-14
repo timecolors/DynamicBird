@@ -4,9 +4,6 @@ namespace DynamicBird.Core.Services.Configuration
 {
     public interface ISettingsService
     {
-        // ========== 触发位置 ==========
-        string TriggerMode { get; set; }
-        string TriggerPosition { get; set; }
         bool IsEdgeEnabled(string edge);
         void SetEdgeEnabled(string edge, bool enabled);
         bool IsCornerEnabled(string corner);
@@ -32,7 +29,6 @@ namespace DynamicBird.Core.Services.Configuration
         double TriggerRegionRatio { get; set; }
 
         // ========== 动画与布局 ==========
-        int AnimationDurationMs { get; set; }
         double HorizontalLayoutThreshold { get; set; }
         double TagWidth { get; set; }
 
@@ -49,9 +45,6 @@ namespace DynamicBird.Core.Services.Configuration
         string GetRegionShape(string edge, string region);
         void SetRegionShape(string edge, string region, string shape);
 
-        // ========== 模式切换 ==========
-        string CurrentMode { get; set; }
-
         // ========== 剪贴板与便签 ==========
         int ClipboardMaxCount { get; set; }
         int ClipboardDisplayLength { get; set; }
@@ -59,21 +52,8 @@ namespace DynamicBird.Core.Services.Configuration
         string DefaultNoteColor { get; set; }
         bool NoteShowTitleByDefault { get; set; }
 
-        // ========== 区域模式配置 ==========
-        string TaskbarRegionMode { get; set; }
-        string WidgetRegionMode { get; set; }
-        string CenterRegionMode { get; set; }
-        string CornerRegionMode { get; set; }
-
         // ========== 面板尺寸 ==========
-        double PanelWidth { get; set; }
-        double PanelHeight { get; set; }
         bool UseAutoSize { get; set; }
-
-        // ========== 鼠标离开判定 ==========
-        string ResolutionPreset { get; set; }
-        string DpiScalePreset { get; set; }
-        int MouseLeaveThreshold { get; }
 
         // ========== 勿扰模式 ==========
         bool RememberDndMode { get; set; }
@@ -105,6 +85,22 @@ namespace DynamicBird.Core.Services.Configuration
         /// ★★★ 区域防抖延迟（毫秒） ★★★
         /// </summary>
         int RegionDebounceMs { get; set; }
+
+        /// <summary>
+        /// 获取指定区域的自定义面板类型（"Default" 表示跟随默认布局）。
+        /// </summary>
+        string GetRegionPanel(string regionKey);
+
+        /// <summary>
+        /// 设置指定区域的自定义面板类型。
+        /// </summary>
+        void SetRegionPanel(string regionKey, string panelType);
+
+        // ========== 自动更新 ==========
+        bool AutoCheckUpdate { get; set; }
+
+        /// <summary>是否已完成首次使用引导。</summary>
+        bool OnboardingCompleted { get; set; }
 
         // ========== 重新加载 ==========
         void Reload();

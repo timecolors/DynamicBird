@@ -5,6 +5,50 @@
       Background="Transparent"
       Foreground="#1E1E1E">
 
+    <Page.Resources>
+        <Style x:Key="LightButton" TargetType="Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1E1E1E"/>
+            <Setter Property="BorderBrush" Value="#D0D0D0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#F0F0F0"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#E0E0E0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AccentLightButton" TargetType="Button" BasedOn="{StaticResource LightButton}">
+            <Setter Property="Background" Value="#0078D4"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#0078D4"/>
+        </Style>
+        <Style x:Key="DangerLightButton" TargetType="Button" BasedOn="{StaticResource LightButton}">
+            <Setter Property="Background" Value="#FFF4F4"/>
+            <Setter Property="Foreground" Value="#C42B1C"/>
+            <Setter Property="BorderBrush" Value="#F0C0BB"/>
+        </Style>
+    </Page.Resources>
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,20 +61,12 @@
             <Button x:Name="BtnAddShortcut" 
                     Content="➕ 添加快捷方式" 
                     Width="140" Height="30"
-                    FontSize="12"
-                    Background="#404040"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Cursor="Hand"
+                    Style="{StaticResource AccentLightButton}"
                     Click="BtnAddShortcut_Click"/>
             <Button x:Name="BtnClearAll" 
                     Content="🗑️ 清空全部" 
                     Width="100" Height="30"
-                    FontSize="12"
-                    Background="#553333"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Cursor="Hand"
+                    Style="{StaticResource DangerLightButton}"
                     Margin="10,0,0,0"
                     Click="BtnClearAll_Click"/>
             <TextBlock x:Name="TxtStatus" 
@@ -48,7 +84,7 @@
             <ItemsControl x:Name="ShortcutList" Background="Transparent">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="#2D2D2D" 
+                        <Border Background="#F5F5F5" 
                                 CornerRadius="4"
                                 Padding="8,6"
                                 Margin="0,0,0,4">
@@ -70,7 +106,7 @@
                                 <TextBlock Grid.Column="1" 
                                            Text="{Binding Name}" 
                                            FontSize="13" 
-                                           Foreground="#EEEEEE"
+                                           Foreground="#1E1E1E"
                                            VerticalAlignment="Center"
                                            Margin="8,0,0,0"
                                            TextTrimming="CharacterEllipsis"/>
@@ -80,7 +116,7 @@
                                         Width="28" Height="28"
                                         FontSize="14"
                                         Background="Transparent"
-                                        Foreground="#888888"
+                                        Foreground="#555555"
                                         BorderThickness="0"
                                         Cursor="Hand"
                                         Click="BtnMoveUp_Click"
@@ -92,7 +128,7 @@
                                         Width="28" Height="28"
                                         FontSize="14"
                                         Background="Transparent"
-                                        Foreground="#888888"
+                                        Foreground="#555555"
                                         BorderThickness="0"
                                         Cursor="Hand"
                                         Click="BtnMoveDown_Click"
@@ -104,7 +140,7 @@
                                         Width="28" Height="28"
                                         FontSize="12"
                                         Background="Transparent"
-                                        Foreground="#888888"
+                                        Foreground="#555555"
                                         BorderThickness="0"
                                         Cursor="Hand"
                                         Click="BtnDelete_Click"

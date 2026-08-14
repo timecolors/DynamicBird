@@ -21,6 +21,9 @@ namespace DynamicBird.Infrastructure.WinApi
         private static extern bool IsIconic(IntPtr hWnd);
 
         [DllImport("user32.dll")]
+        private static extern bool IsWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
 
         [DllImport("user32.dll")]
@@ -58,6 +61,20 @@ namespace DynamicBird.Infrastructure.WinApi
         public static void Close(IntPtr hwnd)
         {
             try { SendMessage(hwnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero); } catch { }
+        }
+
+        public static bool IsWindowAlive(IntPtr hwnd) => hwnd != IntPtr.Zero && IsWindow(hwnd);
+
+        public static void Restore(IntPtr hwnd)
+        {
+            try
+            {
+                if (IsIconic(hwnd)) ShowWindow(hwnd, SW_RESTORE);
+                SetForegroundWindow(hwnd);
+                BringWindowToTop(hwnd);
+                SwitchToThisWindow(hwnd, true);
+            }
+            catch { }
         }
 
         public static void ToggleMinimize(IntPtr hwnd)

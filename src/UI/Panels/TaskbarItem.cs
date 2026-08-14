@@ -36,7 +36,7 @@ namespace DynamicBird.UI.Panels
         public string DisplayName { get; set; } = "";
 
         /// <summary>
-        /// 应用路径（仅 Shortcut 类型有效）
+        /// 应用路径（Shortcut 为快捷方式目标；Window 为所属进程 exe，供“固定到任务栏”使用）
         /// </summary>
         public string? Path { get; set; }
 
@@ -88,7 +88,7 @@ namespace DynamicBird.UI.Panels
             };
         }
 
-        public static TaskbarItem FromWindow(IntPtr handle, string title, ImageSource? icon)
+        public static TaskbarItem FromWindow(IntPtr handle, string title, ImageSource? icon, string? exePath = null)
         {
             return new TaskbarItem
             {
@@ -96,6 +96,7 @@ namespace DynamicBird.UI.Panels
                 Type = TaskbarItemType.Window,
                 DisplayName = title,
                 Handle = handle,
+                Path = exePath,
                 Icon = icon,
                 Order = 0,
                 IsVisible = true,

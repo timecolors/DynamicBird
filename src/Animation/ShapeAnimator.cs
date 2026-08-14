@@ -3,6 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Animation
 {
@@ -16,6 +17,8 @@ namespace DynamicBird.Animation
         private double _targetLeft;
         private double _targetTop;
         private bool _hasPositionTarget = false;
+        // 滑入/滑出动画允许位置在屏幕外（隐藏时滑出屏幕、显示时从屏幕外滑入）
+        private bool _allowOffscreen = false;
         private double _vX = 0;
         private double _vY = 0;
         public double PosStiffness { get; private set; } = 180.0;
@@ -30,7 +33,6 @@ namespace DynamicBird.Animation
 
         // ========== 飞行系统（独立） ==========
         private bool _isFlying = false;
-        private bool _flyCompletedTriggered = false;
         private double _flyStartLeft;
         private double _flyStartTop;
         private double _flyTargetLeft;
@@ -124,7 +126,6 @@ namespace DynamicBird.Animation
         {
             _flyDurationMs = Math.Max(50, durationMs);
             _isFlying = true;
-            _flyCompletedTriggered = false;
         }
 
         public void StartFly(double targetLeft, double targetTop)
@@ -135,7 +136,6 @@ namespace DynamicBird.Animation
             _flyTargetTop = targetTop;
             _flyStartTime = DateTime.Now;
             _isFlying = true;
-            _flyCompletedTriggered = false;
             _hasPositionTarget = false;
             EnsureRunning();
         }
@@ -149,6 +149,7 @@ namespace DynamicBird.Animation
             if (_isFlying) return;
             UpdateParametersFromSettings();
 
+            _allowOffscreen = false;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
             double currentWidth = _window.Width;
@@ -171,6 +172,7 @@ namespace DynamicBird.Animation
 
         public void JumpToPosition(double left, double top)
         {
+            _allowOffscreen = false;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
             double currentWidth = _window.Width;
@@ -200,6 +202,7 @@ namespace DynamicBird.Animation
 
         public void SetSizeDirect(double width, double height)
         {
+            _allowOffscreen = false;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
             width = Math.Max(10, Math.Min(width, screenWidth));
@@ -210,16 +213,10 @@ namespace DynamicBird.Animation
             double newLeft = Math.Max(0, Math.Min(currentLeft, screenWidth - width));
             double newTop = Math.Max(0, Math.Min(currentTop, screenHeight - height));
 
-            if (newLeft != currentLeft || newTop != currentTop)
-            {
-                _window.Left = newLeft;
-                _window.Top = newTop;
-                _targetLeft = newLeft;
-                _targetTop = newTop;
-            }
-
-            _window.Width = width;
-            _window.Height = height;
+            // ★ 原子应用：位置 + 尺寸一次 SetWindowPos 完成，避免贴边侧出现中间态
+            WindowRect.ApplyAtomic(_window, newLeft, newTop, width, height);
+            _targetLeft = newLeft;
+            _targetTop = newTop;
         }
 
         // ============================================================
@@ -255,17 +252,32 @@ namespace DynamicBird.Animation
         //  呼出/隐藏（位置 + 透明度 同时进行）
         // ============================================================
 
-        public void SetShowHideTarget(double left, double top, double opacity)
+        /// <summary>
+        /// 只改尺寸、保持当前位置不变（用于隐藏状态下先就位，随后滑入锚点）。
+        /// </summary>
+        public void SetSizeKeepPositionDirect(double width, double height)
+        {
+            width = Math.Max(10, Math.Min(width, SystemParameters.PrimaryScreenWidth));
+            height = Math.Max(10, Math.Min(height, SystemParameters.PrimaryScreenHeight));
+            WindowRect.ApplyAtomic(_window, _window.Left, _window.Top, width, height);
+            _allowOffscreen = false;
+        }
+
+        public void SetShowHideTarget(double left, double top, double opacity, bool allowOffscreen = false)
         {
             UpdateParametersFromSettings();
 
+            _allowOffscreen = allowOffscreen;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
             double currentWidth = _window.Width;
             double currentHeight = _window.Height;
 
-            left = Math.Max(0, Math.Min(left, screenWidth - currentWidth));
-            top = Math.Max(0, Math.Min(top, screenHeight - currentHeight));
+            if (!allowOffscreen)
+            {
+                left = Math.Max(0, Math.Min(left, screenWidth - currentWidth));
+                top = Math.Max(0, Math.Min(top, screenHeight - currentHeight));
+            }
 
             _targetLeft = left;
             _targetTop = top;
@@ -283,6 +295,7 @@ namespace DynamicBird.Animation
 
         public void SetShowHideDirect(double left, double top, double opacity)
         {
+            _allowOffscreen = false;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
             double currentWidth = _window.Width;
@@ -291,8 +304,8 @@ namespace DynamicBird.Animation
             left = Math.Max(0, Math.Min(left, screenWidth - currentWidth));
             top = Math.Max(0, Math.Min(top, screenHeight - currentHeight));
 
-            _window.Left = left;
-            _window.Top = top;
+            // ★ 原子应用位置 + 尺寸
+            WindowRect.ApplyAtomic(_window, left, top, currentWidth, currentHeight);
             _targetLeft = left;
             _targetTop = top;
             _hasPositionTarget = false;
@@ -312,12 +325,22 @@ namespace DynamicBird.Animation
 
         public void SetPositionAndSizeDirect(double left, double top, double width, double height)
         {
-            SetSizeDirect(width, height);
-            if (_isFlying) return;
+            _allowOffscreen = false;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
+            width = Math.Max(10, Math.Min(width, screenWidth));
+            height = Math.Max(10, Math.Min(height, screenHeight));
+
+            // ★ 飞行期间只原子改尺寸，位置由飞行系统接管
+            if (_isFlying)
+            {
+                WindowRect.ApplyAtomic(_window, _window.Left, _window.Top, width, height);
+                return;
+            }
+
             left = Math.Max(0, Math.Min(left, screenWidth - width));
             top = Math.Max(0, Math.Min(top, screenHeight - height));
+            WindowRect.ApplyAtomic(_window, left, top, width, height);
             _targetLeft = left;
             _targetTop = top;
             _hasPositionTarget = true;
@@ -326,12 +349,22 @@ namespace DynamicBird.Animation
 
         public void SetPositionAndSizeWithoutReset(double left, double top, double width, double height)
         {
-            SetSizeDirect(width, height);
-            if (_isFlying) return;
+            _allowOffscreen = false;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
+            width = Math.Max(10, Math.Min(width, screenWidth));
+            height = Math.Max(10, Math.Min(height, screenHeight));
+
+            // ★ 飞行期间只原子改尺寸，位置由飞行系统接管
+            if (_isFlying)
+            {
+                WindowRect.ApplyAtomic(_window, _window.Left, _window.Top, width, height);
+                return;
+            }
+
             left = Math.Max(0, Math.Min(left, screenWidth - width));
             top = Math.Max(0, Math.Min(top, screenHeight - height));
+            WindowRect.ApplyAtomic(_window, left, top, width, height);
             _targetLeft = left;
             _targetTop = top;
             _hasPositionTarget = true;
@@ -340,15 +373,17 @@ namespace DynamicBird.Animation
 
         public void JumpTo(double left, double top, double width, double height)
         {
+            _allowOffscreen = false;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
             left = Math.Max(0, Math.Min(left, screenWidth - width));
             top = Math.Max(0, Math.Min(top, screenHeight - height));
 
-            _window.Left = left;
-            _window.Top = top;
-            _window.Width = Math.Max(10, width);
-            _window.Height = Math.Max(10, height);
+            width = Math.Max(10, width);
+            height = Math.Max(10, height);
+
+            // ★★★ 原子应用：位置和尺寸一次 SetWindowPos 同时设置，贴边侧永远固定 ★★★
+            WindowRect.ApplyAtomic(_window, left, top, width, height);
 
             _targetLeft = left;
             _targetTop = top;
@@ -466,7 +501,6 @@ namespace DynamicBird.Animation
                     _window.Left = _flyTargetLeft;
                     _window.Top = _flyTargetTop;
                     _isFlying = false;
-                    _flyCompletedTriggered = true;
                     FlyCompleted?.Invoke();
                 }
                 return;
@@ -533,13 +567,16 @@ namespace DynamicBird.Animation
                 double newLeft = currentLeft + _vX * dt;
                 double newTop = currentTop + _vY * dt;
 
-                double screenWidth = SystemParameters.PrimaryScreenWidth;
-                double screenHeight = SystemParameters.PrimaryScreenHeight;
-                newLeft = Math.Max(0, Math.Min(newLeft, screenWidth - currentWidth));
-                newTop = Math.Max(0, Math.Min(newTop, screenHeight - currentHeight));
+                if (!_allowOffscreen)
+                {
+                    double screenWidth = SystemParameters.PrimaryScreenWidth;
+                    double screenHeight = SystemParameters.PrimaryScreenHeight;
+                    newLeft = Math.Max(0, Math.Min(newLeft, screenWidth - currentWidth));
+                    newTop = Math.Max(0, Math.Min(newTop, screenHeight - currentHeight));
 
-                if (newLeft <= 0 || newLeft >= screenWidth - currentWidth) _vX = 0;
-                if (newTop <= 0 || newTop >= screenHeight - currentHeight) _vY = 0;
+                    if (newLeft <= 0 || newLeft >= screenWidth - currentWidth) _vX = 0;
+                    if (newTop <= 0 || newTop >= screenHeight - currentHeight) _vY = 0;
+                }
 
                 _window.Left = newLeft;
                 _window.Top = newTop;

@@ -80,57 +80,6 @@ namespace DynamicBird.UI.Settings
             return "Follow";
         }
 
-        public static void SetResolutionPreset(ComboBox combo, string preset)
-        {
-            foreach (ComboBoxItem item in combo.Items)
-            {
-                string content = item.Content?.ToString() ?? "";
-                if (content.StartsWith(preset))
-                {
-                    combo.SelectedItem = item;
-                    break;
-                }
-            }
-            if (combo.SelectedItem == null)
-                combo.SelectedIndex = 0;
-        }
-
-        public static void SetDpiPreset(ComboBox combo, string preset)
-        {
-            foreach (ComboBoxItem item in combo.Items)
-            {
-                string content = item.Content?.ToString() ?? "";
-                if (content == preset)
-                {
-                    combo.SelectedItem = item;
-                    break;
-                }
-            }
-            if (combo.SelectedItem == null)
-                combo.SelectedIndex = 2;
-        }
-
-        public static string GetResolutionPreset(ComboBox combo)
-        {
-            if (combo.SelectedItem is ComboBoxItem item)
-            {
-                string content = item.Content?.ToString() ?? "";
-                if (content.StartsWith("1080p")) return "1080p";
-                if (content.StartsWith("2K")) return "2K";
-                if (content.StartsWith("4K")) return "4K";
-            }
-            return "1080p";
-        }
-
-        public static string GetDpiPreset(ComboBox combo)
-        {
-            if (combo.SelectedItem is ComboBoxItem item)
-            {
-                return item.Content?.ToString() ?? "150%";
-            }
-            return "150%";
-        }
-
         // ---- 颜色转换 ----
 
         public static System.Drawing.Color HexToDrawingColor(string hex)

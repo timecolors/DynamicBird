@@ -102,7 +102,8 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
         {
             if (sender is Border border && border.DataContext is ClipboardManager.ClipboardItem item)
             {
-                if (e.OriginalSource is CheckBox || e.OriginalSource is Button)
+                // 点击发生在复选框或按钮内部（含其子元素）时不触发复制
+                if (IsInsideInteractiveControl(e.OriginalSource as DependencyObject))
                     return;
 
                 _clipboardService.CopyToClipboard(item);
@@ -115,6 +116,17 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
                     timer.Start();
                 }
             }
+        }
+
+        private static bool IsInsideInteractiveControl(DependencyObject? visual)
+        {
+            var dep = visual;
+            while (dep != null)
+            {
+                if (dep is CheckBox || dep is Button) return true;
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+            return false;
         }
 
         private void Item_Checked(object sender, RoutedEventArgs e)

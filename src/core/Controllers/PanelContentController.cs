@@ -4,6 +4,7 @@ using DynamicBird.src.core.Services.Clipboard;
 using DynamicBird.src.core.Services.Notes;
 using DynamicBird.src.core.Services.Shortcuts;
 using DynamicBird.src.core.Services.System;
+using DynamicBird.UI.AppHelper;
 using DynamicBird.UI.Panels;
 using DynamicBird.UI.Widgets;
 using System;
@@ -23,6 +24,9 @@ namespace DynamicBird.Core.Controllers
 
         private IWidget? _currentWidget;
         private string _currentRegionType = "Taskbar";
+        // ★ 画中画实例缓存：呼出面板时复用，避免镜像/播放状态被重置
+        private DynamicBird.UI.AppHelper.AppHelperView? _cachedAppHelper;
+        private DynamicBird.UI.Widgets.WidgetSwitcher? _cachedWidgetSwitcher;
 
         // ★★★ 新增事件 ★★★
         public event Action? LoadingStarted;
@@ -48,7 +52,7 @@ namespace DynamicBird.Core.Controllers
             _modeService = modeService;
         }
 
-        public void LoadContentForRegion(string regionType)
+        public void LoadContentForRegion(string regionType, string regionKey = "")
         {
             _currentRegionType = regionType;
 
@@ -70,47 +74,51 @@ namespace DynamicBird.Core.Controllers
                     break;
 
                 case "Widget":
-                    var widgetSwitcher = new WidgetSwitcher(_settings, _clipboardService, _noteService);
+                    // ★ 小组件实例缓存：呼出面板时保留计时/便签/剪贴板状态
+                    _cachedWidgetSwitcher ??= new WidgetSwitcher(_settings, _clipboardService, _noteService);
+                    var widgetSwitcher = _cachedWidgetSwitcher;
                     newContent = widgetSwitcher;
                     break;
 
                 case "AppHelper":
-                    newContent = new TextBlock
-                    {
-                        Text = "⚡ 应用辅助模式\n(开发中)",
-                        Foreground = System.Windows.Media.Brushes.White,
-                        TextAlignment = TextAlignment.Center,
-                        FontSize = 16,
-                        FontWeight = FontWeights.SemiBold
-                    };
+                    _cachedAppHelper ??= new AppHelperView();
+                    newContent = _cachedAppHelper;
+                    break;
+
+                case "Notification":
+                    newContent = new NotificationDockView();
+                    break;
+
+                case "Recent":
+                    newContent = new RecentItemsView();
+                    break;
+
+                case "QuickSettings":
+                    newContent = new QuickSettingsView();
                     break;
 
                 case "Placeholder":
-                    newContent = new TextBlock
+                    // ★ 四角分工：右下通知坞 / 左下最近使用 / 左上系统开关
+                    newContent = regionKey switch
                     {
-                        Text = "📍 待定",
-                        Foreground = System.Windows.Media.Brushes.White,
-                        TextAlignment = TextAlignment.Center,
-                        FontSize = 16,
-                        FontWeight = FontWeights.SemiBold
+                        "BottomLeft" => new RecentItemsView(),
+                        "TopLeft" => new QuickSettingsView(),
+                        _ => new NotificationDockView()
                     };
                     break;
 
                 default:
-                    newContent = new TextBlock
-                    {
-                        Text = "📍 待定",
-                        Foreground = System.Windows.Media.Brushes.White,
-                        TextAlignment = TextAlignment.Center,
-                        FontSize = 16,
-                        FontWeight = FontWeights.SemiBold
-                    };
+                    newContent = new NotificationDockView();
                     break;
             }
 
             // ★★★ 应用内容 ★★★
             _contentContainer.Content = newContent;
             ContentChanged?.Invoke();
+
+            // ★★★ 记录当前组件并激活（WidgetSwitcher 内部再管理自己的标签页） ★★★
+            _currentWidget = newContent as IWidget;
+            _currentWidget?.OnActivated();
 
             // ★★★ 通知加载完成 ★★★
             LoadingCompleted?.Invoke();

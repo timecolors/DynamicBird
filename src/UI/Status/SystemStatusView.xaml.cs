@@ -150,7 +150,9 @@ namespace DynamicBird.UI.Status
                     float volume = _audioDevice.AudioEndpointVolume.MasterVolumeLevelScalar;
                     int vol = (int)(volume * 100);
                     VolumeText.Text = $"{vol}%";
-                    VolumeIcon.Text = vol > 70 ? "🔊" : vol > 30 ? "🔉" : vol > 0 ? "🔈" : "🔇";
+                    VolumeIcon.SetResourceReference(
+                        System.Windows.Shapes.Path.StrokeProperty,
+                        vol <= 0 ? "DangerBrush" : "TextSecondaryBrush");
                 }
             }
             catch { }
@@ -188,16 +190,19 @@ namespace DynamicBird.UI.Status
                 if (!NetworkInterface.GetIsNetworkAvailable())
                 {
                     NetworkText.Text = "未连接";
-                    NetworkIcon.Text = "❌";
+                    NetworkIcon.SetResourceReference(
+                        System.Windows.Shapes.Path.StrokeProperty, "DangerBrush");
                     return;
                 }
                 NetworkText.Text = "已连接";
-                NetworkIcon.Text = "📶";
+                NetworkIcon.SetResourceReference(
+                    System.Windows.Shapes.Path.StrokeProperty, "TextSecondaryBrush");
             }
             catch
             {
                 NetworkText.Text = "未知";
-                NetworkIcon.Text = "❓";
+                NetworkIcon.SetResourceReference(
+                    System.Windows.Shapes.Path.StrokeProperty, "TextSecondaryBrush");
             }
         }
 
@@ -209,17 +214,22 @@ namespace DynamicBird.UI.Status
                 if (powerStatus.BatteryChargeStatus == System.Windows.Forms.BatteryChargeStatus.NoSystemBattery)
                 {
                     BatteryText.Text = "无电池";
-                    BatteryIcon.Text = "⚡";
+                    BatteryIcon.SetResourceReference(
+                        System.Windows.Shapes.Path.StrokeProperty, "TextSecondaryBrush");
                     return;
                 }
                 int percent = (int)(powerStatus.BatteryLifePercent * 100);
                 BatteryText.Text = $"{percent}%";
-                BatteryIcon.Text = powerStatus.PowerLineStatus == System.Windows.Forms.PowerLineStatus.Online ? "🔌" : "🔋";
+                bool charging = powerStatus.PowerLineStatus == System.Windows.Forms.PowerLineStatus.Online;
+                BatteryIcon.SetResourceReference(
+                    System.Windows.Shapes.Path.StrokeProperty,
+                    charging ? "AccentBrush" : "TextSecondaryBrush");
             }
             catch
             {
                 BatteryText.Text = "--";
-                BatteryIcon.Text = "❓";
+                BatteryIcon.SetResourceReference(
+                    System.Windows.Shapes.Path.StrokeProperty, "TextSecondaryBrush");
             }
         }
     }

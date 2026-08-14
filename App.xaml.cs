@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using DynamicBird.Core.Infrastructure.Logging;
@@ -7,12 +8,31 @@ namespace DynamicBird
 {
     public partial class App : Application
     {
+        private static Mutex? _singleInstanceMutex;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
+            // ★ 单实例保护：已有实例运行时直接退出，避免托盘出现多个进程/图标
+            _singleInstanceMutex = new Mutex(true, "DynamicBird_SingleInstance", out bool createdNew);
+            if (!createdNew)
+            {
+                MessageBox.Show("灵动鸟已在运行", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Information);
+                Current.Shutdown();
+                return;
+            }
+
             // 初始化日志系统（最先执行）
             LogManager.Initialize(LogLevel.Debug);
+
+            // ★ 后台注册 AppUserModelID（创建开始菜单快捷方式），保证系统 Toast 可显示
+            try
+            {
+                System.Threading.Tasks.Task.Run(
+                    DynamicBird.Infrastructure.WinApi.SystemToast.EnsureRegistered);
+            }
+            catch { }
 
             // 全局异常捕获
             this.DispatcherUnhandledException += (s, args) =>

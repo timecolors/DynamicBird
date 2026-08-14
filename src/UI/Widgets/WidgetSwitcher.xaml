@@ -15,24 +15,45 @@
         <!-- ★★★ 固定头部：切换按钮 ★★★ -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8" x:Name="ButtonPanel">
             <Button x:Name="BtnClipboard" 
-                    Content="📋 剪贴板" 
-                    Width="100" Height="28"
-                    FontSize="12"
-                    Background="#0078D4"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    Click="BtnClipboard_Click"/>
+                    Style="{StaticResource AccentButton}"
+                    Height="28"
+                    Padding="8,0"
+                    Click="BtnClipboard_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconClipboard}" Margin="0,0,5,0"/>
+                    <TextBlock Text="剪贴板" FontSize="12" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
             <Button x:Name="BtnNote" 
-                    Content="📝 便签" 
-                    Width="100" Height="28"
-                    FontSize="12"
-                    Background="#404040"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Cursor="Hand"
+                    Height="28"
+                    Padding="8,0"
                     Margin="8,0,0,0"
-                    Click="BtnNote_Click"/>
+                    Click="BtnNote_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconNote}" Margin="0,0,5,0"/>
+                    <TextBlock Text="便签" FontSize="12" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="BtnTimer"
+                    Height="28"
+                    Padding="8,0"
+                    Margin="8,0,0,0"
+                    Click="BtnTimer_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconTimer}" Margin="0,0,5,0"/>
+                    <TextBlock Text="计时" FontSize="12" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="BtnCalc"
+                    Height="28"
+                    Padding="8,0"
+                    Margin="8,0,0,0"
+                    Click="BtnCalc_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconCalc}" Margin="0,0,5,0"/>
+                    <TextBlock Text="计算" FontSize="12" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
 
         <!-- ★★★ 滚动内容区 ★★★ -->

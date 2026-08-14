@@ -2,23 +2,24 @@ using DynamicBird.Core.Services;
 using DynamicBird.Core.Services.Configuration;
 using DynamicBird.src.core.Services.Clipboard;
 using DynamicBird.src.core.Services.Notes;
+using DynamicBird.UI.Widgets.Calculator;
 using DynamicBird.UI.Widgets.ClipboardHistory;
 using DynamicBird.UI.Widgets.Notes;
+using DynamicBird.UI.Widgets.Timer;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace DynamicBird.UI.Widgets
 {
-    public partial class WidgetSwitcher : UserControl
+    public partial class WidgetSwitcher : UserControl, IWidget
     {
         private readonly ClipboardHistoryWidget _clipboardWidget;
         private readonly NoteWidget _noteWidget;
+        private readonly TimerWidget _timerWidget;
+        private readonly CalculatorWidget _calculatorWidget;
         private readonly ISettingsService _settings;
         private string _currentTab;
-
-        private readonly SolidColorBrush HighlightBrush = new SolidColorBrush(Color.FromRgb(0, 120, 212));
-        private readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64));
 
         public WidgetSwitcher(ISettingsService settings, IClipboardService clipboardService, INoteService noteService)
         {
@@ -27,34 +28,88 @@ namespace DynamicBird.UI.Widgets
 
             _clipboardWidget = new ClipboardHistoryWidget(clipboardService);
             _noteWidget = new NoteWidget(noteService, settings);
+            _timerWidget = new TimerWidget();
+            _calculatorWidget = new CalculatorWidget();
 
             _currentTab = _settings.LastWidgetTab;
-            if (string.IsNullOrEmpty(_currentTab)) _currentTab = "Clipboard";
+            if (_currentTab is not ("Clipboard" or "Note" or "Timer" or "Calculator"))
+            {
+                _currentTab = "Clipboard";
+            }
 
             SelectTab(_currentTab);
         }
 
         private void SelectTab(string tab)
         {
+            DeactivateCurrent();
             _currentTab = tab;
             _settings.LastWidgetTab = tab;
 
-            BtnClipboard.Background = tab == "Clipboard" ? HighlightBrush : DefaultBrush;
-            BtnNote.Background = tab == "Note" ? HighlightBrush : DefaultBrush;
+            ApplyTabStyle(BtnClipboard, tab == "Clipboard");
+            ApplyTabStyle(BtnNote, tab == "Note");
+            ApplyTabStyle(BtnTimer, tab == "Timer");
+            ApplyTabStyle(BtnCalc, tab == "Calculator");
 
-            if (tab == "Clipboard")
+            switch (tab)
             {
-                ContentContainer.Content = _clipboardWidget;
-                _clipboardWidget.OnActivated();
-                _noteWidget.OnDeactivated();
-                FooterPanel.Child = _clipboardWidget.GetFooterControl();
+                case "Clipboard":
+                    ContentContainer.Content = _clipboardWidget;
+                    _clipboardWidget.OnActivated();
+                    FooterPanel.Child = _clipboardWidget.GetFooterControl();
+                    break;
+                case "Note":
+                    ContentContainer.Content = _noteWidget;
+                    _noteWidget.OnActivated();
+                    FooterPanel.Child = _noteWidget.GetFooterControl();
+                    break;
+                case "Timer":
+                    ContentContainer.Content = _timerWidget;
+                    _timerWidget.OnActivated();
+                    FooterPanel.Child = _timerWidget.GetFooterControl();
+                    break;
+                case "Calculator":
+                default:
+                    ContentContainer.Content = _calculatorWidget;
+                    _calculatorWidget.OnActivated();
+                    FooterPanel.Child = _calculatorWidget.GetFooterControl();
+                    break;
             }
-            else
+        }
+
+        private void ApplyTabStyle(Button button, bool active)
+        {
+            button.Style = (System.Windows.Style)FindResource(active ? "AccentButton" : "FlatButton");
+        }
+
+        public new string Name => "小组件";
+
+        public UserControl CreateView() => this;
+
+        public void OnActivated()
+        {
+            switch (_currentTab)
             {
-                ContentContainer.Content = _noteWidget;
-                _noteWidget.OnActivated();
-                _clipboardWidget.OnDeactivated();
-                FooterPanel.Child = _noteWidget.GetFooterControl();
+                case "Clipboard": _clipboardWidget.OnActivated(); break;
+                case "Note": _noteWidget.OnActivated(); break;
+                case "Timer": _timerWidget.OnActivated(); break;
+                case "Calculator": _calculatorWidget.OnActivated(); break;
+            }
+        }
+
+        public void OnDeactivated()
+        {
+            DeactivateCurrent();
+        }
+
+        private void DeactivateCurrent()
+        {
+            switch (_currentTab)
+            {
+                case "Clipboard": _clipboardWidget.OnDeactivated(); break;
+                case "Note": _noteWidget.OnDeactivated(); break;
+                case "Timer": _timerWidget.OnDeactivated(); break;
+                case "Calculator": _calculatorWidget.OnDeactivated(); break;
             }
         }
 
@@ -68,6 +123,18 @@ namespace DynamicBird.UI.Widgets
         {
             if (_currentTab == "Note") return;
             SelectTab("Note");
+        }
+
+        private void BtnTimer_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentTab == "Timer") return;
+            SelectTab("Timer");
+        }
+
+        private void BtnCalc_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentTab == "Calculator") return;
+            SelectTab("Calculator");
         }
     }
 }

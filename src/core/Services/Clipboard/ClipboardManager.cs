@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Threading;
 
 namespace DynamicBird.Core.Services
@@ -19,13 +20,21 @@ namespace DynamicBird.Core.Services
     /// </summary>
     public class ClipboardManager : IClipboardService, IService, IDisposable
     {
-        private readonly DispatcherTimer _pollTimer;
         private readonly ISettingsService _settings;
         private string? _lastContentHash;
         private bool _isListening = false;
         private bool _isRestoring = false;
         private readonly object _lock = new object();
         private bool _disposed = false;
+        private HwndSource? _messageWindow;
+
+        private const int WM_CLIPBOARDUPDATE = 0x031D;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+        private static extern bool AddClipboardFormatListener(IntPtr hwnd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+        private static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
 
         public ObservableCollection<ClipboardItem> History { get; } = new ObservableCollection<ClipboardItem>();
 
@@ -38,9 +47,6 @@ namespace DynamicBird.Core.Services
         public ClipboardManager(ISettingsService settings)
         {
             _settings = settings;
-            _pollTimer = new DispatcherTimer();
-            _pollTimer.Interval = TimeSpan.FromMilliseconds(500);
-            _pollTimer.Tick += PollClipboard;
         }
 
         public void Initialize()
@@ -66,19 +72,72 @@ namespace DynamicBird.Core.Services
         {
             if (_isListening) return;
             _isListening = true;
-            _pollTimer.Start();
-            LogManager.Debug("剪贴板监听已启动");
+            CreateClipboardListenerWindow();
+            LogManager.Debug("剪贴板监听已启动（事件驱动）");
         }
 
         public void StopListening()
         {
             if (!_isListening) return;
             _isListening = false;
-            _pollTimer.Stop();
+            DestroyClipboardListenerWindow();
             LogManager.Debug("剪贴板监听已停止");
         }
 
-        private void PollClipboard(object? sender, EventArgs e)
+        /// <summary>创建隐藏消息窗口并注册 WM_CLIPBOARDUPDATE 监听（替代轮询）。</summary>
+        private void CreateClipboardListenerWindow()
+        {
+            try
+            {
+                var p = new HwndSourceParameters("DynamicBirdClipboardListener")
+                {
+                    Width = 0,
+                    Height = 0,
+                    WindowStyle = unchecked((int)0x80000000), // WS_POPUP
+                    ExtendedWindowStyle = 0x80 // WS_EX_TOOLWINDOW
+                };
+                _messageWindow = new HwndSource(p);
+                _messageWindow.AddHook(WndProc);
+                if (!AddClipboardFormatListener(_messageWindow.Handle))
+                {
+                    LogManager.Warning("AddClipboardFormatListener 失败");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error("创建剪贴板监听窗口失败", ex);
+                _messageWindow = null;
+            }
+        }
+
+        private void DestroyClipboardListenerWindow()
+        {
+            try
+            {
+                if (_messageWindow != null)
+                {
+                    if (_messageWindow.Handle != IntPtr.Zero)
+                        RemoveClipboardFormatListener(_messageWindow.Handle);
+                    _messageWindow.Dispose();
+                }
+            }
+            catch { }
+            _messageWindow = null;
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == WM_CLIPBOARDUPDATE)
+            {
+                // 剪贴板变化事件：延迟一拍再读，避免与写入方抢占剪贴板
+                Application.Current?.Dispatcher.BeginInvoke(new Action(CaptureClipboardNow),
+                    System.Windows.Threading.DispatcherPriority.Background);
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        private void CaptureClipboardNow()
         {
             if (!_isListening || _isRestoring) return;
 
@@ -319,7 +378,6 @@ namespace DynamicBird.Core.Services
         {
             if (_disposed) return;
             Shutdown();
-            _pollTimer.Stop();
             _disposed = true;
             GC.SuppressFinalize(this);
         }

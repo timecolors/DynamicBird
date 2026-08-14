@@ -19,14 +19,17 @@ namespace DynamicBird.UI.Main
             if (_modeService.IsDoNotDisturb) return;
 
             _visibilityController.CancelHide();
-            _visibilityController.Show();
+            // 通过锚点滑入/恢复显示（含滑出途中重新进入的情况）
+            _edgeController.ShowPanelAtAnchor();
             _lastMousePosition = e.GetPosition(this);
             _hasLastMousePosition = true;
         }
 
         private void MainPanel_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (_dragController.IsDragging || _dragController.IsRecentlyDragged) return;
+            // ★ 尺寸调整中（_edgeController.IsDragging）不因鼠标暂时离开而隐藏
+            if (_dragController.IsDragging || _dragController.IsRecentlyDragged ||
+                _edgeController.IsDragging || _edgeController.IsRecentlyDragged) return;
             if (_visibilityController.IsLocked || PresentationSource.FromVisual(this) == null) return;
 
             var currentMousePos = e.GetPosition(this);
@@ -64,7 +67,7 @@ namespace DynamicBird.UI.Main
             try
             {
                 var textColor = HexToMediaColor(_settingsService.TextColor);
-                IconText.Foreground = new SolidColorBrush(textColor);
+                IconPath.Stroke = new SolidColorBrush(textColor);
             }
             catch { }
 

@@ -19,17 +19,9 @@ namespace DynamicBird.Core.Controllers
         void OnFlyCompleted();
         void OnStickToMouseSuccess();
 
-        event Action<EdgeRegion, string> ModeSwitchRequested;
-        event Action<double, double, bool> PositionUpdateRequested;
-        event Action<double, double> JumpToPositionRequested;
-        event Action<string> ShowPanelRequested;
-        event Action HidePanelRequested;
-        event Action StartHideDelayRequested;
-        event Action CancelHideDelayRequested;
         event Action StartClingingRequested;
         event Action StopClingingRequested;
         event Action StickToMouseRequested;
         event Action FlyCompleted;
-        event Action<EdgeRegion, double, double> FlyRequested;
     }
 }

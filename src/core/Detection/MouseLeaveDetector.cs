@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Windows;
+using System.Windows.Media;
 using DynamicBird.Core.Services.Configuration;
 
 namespace DynamicBird.Core.Detection
@@ -63,7 +64,11 @@ namespace DynamicBird.Core.Detection
                 bool isOnBottom = Math.Abs(_window.Top + _window.Height - SystemParameters.PrimaryScreenHeight + _taskbarHeight) < 50;
                 double bottomExtension = isOnBottom ? _taskbarHeight + SafetyMargin : 0;
 
-                double threshold = _settings.MouseLeaveThreshold + SafetyMargin;
+                // ★ 阈值按系统 DPI 动态计算（基础 20px × 缩放），不再依赖分辨率预设
+                double dpiScale = 1.0;
+                try { dpiScale = VisualTreeHelper.GetDpi(_window).DpiScaleX; } catch { }
+                if (dpiScale <= 0 || double.IsNaN(dpiScale) || double.IsInfinity(dpiScale)) dpiScale = 1.0;
+                double threshold = 20 * dpiScale + SafetyMargin;
 
                 bool inX = mousePoint.X >= panelLeft - threshold && mousePoint.X <= panelRight + threshold;
                 bool inY = mousePoint.Y >= panelTop - threshold && mousePoint.Y <= panelBottom + threshold + bottomExtension;

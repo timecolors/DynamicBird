@@ -31,7 +31,7 @@ namespace DynamicBird.UI.Panels
             {
                 if (!_windows.Any(i => i.Handle == w.Handle))
                 {
-                    _windows.Add(TaskbarItem.FromWindow(w.Handle, w.Title, w.Icon));
+                    _windows.Add(TaskbarItem.FromWindow(w.Handle, w.Title, w.Icon, w.ProcessPath));
                 }
             }
 
@@ -56,7 +56,7 @@ namespace DynamicBird.UI.Panels
             {
                 if (!_windows.Any(i => i.Handle == w.Handle))
                 {
-                    _windows.Add(TaskbarItem.FromWindow(w.Handle, w.Title, w.Icon));
+                    _windows.Add(TaskbarItem.FromWindow(w.Handle, w.Title, w.Icon, w.ProcessPath));
                 }
                 else
                 {

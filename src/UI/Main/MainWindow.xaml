@@ -6,8 +6,9 @@
         Height="350"
         Width="120"
         WindowStyle="None"
-        AllowsTransparency="True"
-        Background="Transparent"
+        AllowsTransparency="False"
+        Background="#2D2D2D"
+        Opacity="0"
         Topmost="True"
         ShowInTaskbar="False"
         SizeToContent="Manual"
@@ -15,8 +16,8 @@
 
     <WindowChrome.WindowChrome>
         <shell:WindowChrome 
-            ResizeBorderThickness="6" 
-            CaptionHeight="4"
+            ResizeBorderThickness="0"
+            CaptionHeight="0"
             GlassFrameThickness="0"
             CornerRadius="0"/>
     </WindowChrome.WindowChrome>
@@ -53,26 +54,34 @@
                         <!-- ★★★ 图标容器（支持平移） ★★★ -->
                         <Grid Grid.Column="0"
                               x:Name="IconContainer"
-                              Width="30" Height="30"
+                              Width="48" Height="48"
                               VerticalAlignment="Center"
-                              Margin="0,0,12,0">
-                            <TextBlock x:Name="IconText"
-                                       Text="🐦"
-                                       FontSize="22"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Center"
-                                       Cursor="Hand"
-                                       AllowDrop="True"
-                                       MouseEnter="IconText_MouseEnter"
-                                       MouseLeave="IconText_MouseLeave"
-                                       DragEnter="IconText_DragEnter"
-                                       DragLeave="IconText_DragLeave"
-                                       Drop="IconText_Drop"
-                                       MouseDown="IconText_MouseDown">
-                                <TextBlock.RenderTransform>
+                              Margin="0,0,12,0"
+                              Background="Transparent"
+                              AllowDrop="True"
+                              DragEnter="IconText_DragEnter"
+                              DragOver="IconText_DragOver"
+                              DragLeave="IconText_DragLeave"
+                              Drop="IconText_Drop">
+                            <Path x:Name="IconPath"
+                                  Style="{StaticResource LineIcon}"
+                                  Data="{StaticResource IconLogo}"
+                                  Width="24" Height="24"
+                                  Cursor="Hand"
+                                  MouseEnter="IconText_MouseEnter"
+                                  MouseLeave="IconText_MouseLeave"
+                                  MouseDown="IconText_MouseDown"
+                                  MouseRightButtonUp="IconText_MouseRightButtonUp">
+                                <Path.RenderTransform>
                                     <TranslateTransform x:Name="IconTranslate" X="0" Y="0"/>
-                                </TextBlock.RenderTransform>
-                            </TextBlock>
+                                </Path.RenderTransform>
+                            </Path>
+                            <Image x:Name="IconImage"
+                                   Width="24" Height="24"
+                                   Stretch="Uniform"
+                                   Visibility="Collapsed"
+                                   Cursor="Hand"
+                                   IsHitTestVisible="False"/>
                         </Grid>
 
                         <ContentControl Grid.Column="1"

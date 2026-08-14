@@ -17,18 +17,40 @@ namespace DynamicBird.UI.Settings
         private readonly IShortcutService _shortcutService;
         private SettingsData _settingsData = null!;
 
+        // 区域面板自定义选项与区域键
+        private static readonly (string Value, string Display)[] PanelOptions =
+        {
+            ("Default", "默认布局"),
+            ("Taskbar", "任务栏"),
+            ("Widget", "小组件"),
+            ("AppHelper", "应用辅助"),
+            ("Notification", "通知坞"),
+            ("Recent", "最近使用"),
+            ("QuickSettings", "快捷设置"),
+        };
+
+        private static readonly string[] RegionPanelKeys =
+        {
+            "Top_Left", "Top_Center", "Top_Right",
+            "Bottom_Left", "Bottom_Center", "Bottom_Right",
+            "Left_Top", "Left_Center", "Left_Bottom",
+            "Right_Top", "Right_Center", "Right_Bottom",
+            "TopLeft", "TopRight", "BottomLeft", "BottomRight"
+        };
+
         public SettingsWindow(ISettingsService settings, IShortcutService shortcutService)
         {
             _settings = settings;
             _shortcutService = shortcutService;
             InitializeComponent();
+            // Win11 22H2+ 启用 Mica 浅色背景，与系统设置应用观感一致
+            SourceInitialized += (_, _) => TryApplyMicaBackdrop();
             LoadSettings();
             LoadShortcutPage();
 
             // 滑块事件绑定
             sldOpacity.ValueChanged += (s, e) => txtOpacityValue.Text = sldOpacity.Value.ToString("F2");
             sldCornerRadius.ValueChanged += (s, e) => txtCornerRadiusValue.Text = sldCornerRadius.Value.ToString("F0");
-            sldAnimDuration.ValueChanged += (s, e) => txtAnimDuration.Text = sldAnimDuration.Value.ToString("F0");
             sldHorizontalThreshold.ValueChanged += (s, e) => txtHorizontalThreshold.Text = (sldHorizontalThreshold.Value * 100).ToString("F0") + "%";
             sldTagWidth.ValueChanged += (s, e) => txtTagWidth.Text = sldTagWidth.Value.ToString("F0");
 
@@ -45,11 +67,36 @@ namespace DynamicBird.UI.Settings
             // 动画设置滑块
             sldShowHideDuration.ValueChanged += (s, e) => txtShowHideDuration.Text = sldShowHideDuration.Value.ToString("F0") + "ms";
             sldTransformDuration.ValueChanged += (s, e) => txtTransformDuration.Text = sldTransformDuration.Value.ToString("F0") + "ms";
-            sldHideDelay.ValueChanged += (s, e) => txtHideDelay.Text = sldHideDelay.Value.ToString("F0") + "ms";
+            sldHideDelay.ValueChanged += (s, e) => txtHideDelay.Text =
+                sldHideDelay.Value <= 0 ? "0（立即）" : sldHideDelay.Value.ToString("F0") + "ms";
             sldFlyDuration.ValueChanged += (s, e) => txtFlyDuration.Text = sldFlyDuration.Value.ToString("F0") + "ms";
 
             // ★★★ 区域防抖滑块 ★★★
             sldRegionDebounce.ValueChanged += (s, e) => txtRegionDebounce.Text = sldRegionDebounce.Value.ToString("F0") + "ms";
+        }
+
+        [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        private void TryApplyMicaBackdrop()
+        {
+            try
+            {
+                if (Environment.OSVersion.Version.Build < 22621) return;
+                var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero) return;
+
+                const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+                const int DWMSBT_MAINWINDOW = 2;
+                int value = DWMSBT_MAINWINDOW;
+                if (DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref value, sizeof(int)) == 0)
+                {
+                    // Mica 生效后窗口背景接近透明，让毛玻璃材质透出
+                    Background = new System.Windows.Media.SolidColorBrush(
+                        System.Windows.Media.Color.FromArgb(2, 0xF9, 0xF9, 0xF9));
+                }
+            }
+            catch { }
         }
 
         private void LoadShortcutPage()
@@ -107,7 +154,6 @@ namespace DynamicBird.UI.Settings
             txtCustomIcon.Text = _settingsData.CustomIconPath ?? "";
 
             // 动画与布局
-            sldAnimDuration.Value = _settingsData.AnimationDurationMs;
             sldHorizontalThreshold.Value = _settingsData.HorizontalLayoutThreshold;
             sldTagWidth.Value = _settingsData.TagWidth;
 
@@ -123,10 +169,6 @@ namespace DynamicBird.UI.Settings
 
             // 自适应
             chkAutoFitOnTrigger.IsChecked = _settingsData.AutoFitOnTrigger;
-
-            // 分辨率/DPI
-            SettingsUIHelper.SetResolutionPreset(cmbResolutionPreset, _settingsData.ResolutionPreset ?? "1080p");
-            SettingsUIHelper.SetDpiPreset(cmbDpiScale, _settingsData.DpiScalePreset ?? "150%");
 
             // 勿扰
             chkRememberDndMode.IsChecked = _settingsData.RememberDndMode;
@@ -144,7 +186,9 @@ namespace DynamicBird.UI.Settings
             txtTransformDuration.Text = _settingsData.TransformDurationMs + "ms";
 
             sldHideDelay.Value = _settingsData.HideDelayMs;
-            txtHideDelay.Text = _settingsData.HideDelayMs + "ms";
+            txtHideDelay.Text = _settingsData.HideDelayMs <= 0
+                ? "0（立即）"
+                : _settingsData.HideDelayMs + "ms";
 
             sldFlyDuration.Value = _settingsData.FlyDurationMs;
             txtFlyDuration.Text = _settingsData.FlyDurationMs + "ms";
@@ -155,6 +199,91 @@ namespace DynamicBird.UI.Settings
             // ★★★ 区域防抖 ★★★
             sldRegionDebounce.Value = _settingsData.RegionDebounceMs;
             txtRegionDebounce.Text = _settingsData.RegionDebounceMs + "ms";
+
+            // ★★★ 区域面板自定义 ★★★
+            foreach (string key in RegionPanelKeys)
+            {
+                var combo = (ComboBox?)FindName("cmbPanel_" + key);
+                if (combo == null) continue;
+                FillPanelCombo(combo);
+                SelectPanelValue(combo, _settings.GetRegionPanel(key));
+            }
+
+            // ★★★ 自动更新 ★★★
+            chkAutoCheckUpdate.IsChecked = _settingsData.AutoCheckUpdate;
+            UpdateUpdateStatus();
+        }
+
+        private void UpdateUpdateStatus()
+        {
+            string owner = DynamicBird.Infrastructure.WinApi.UpdateService.GitHubOwner;
+            string repo = DynamicBird.Infrastructure.WinApi.UpdateService.GitHubRepo;
+            if (string.IsNullOrWhiteSpace(owner) || string.IsNullOrWhiteSpace(repo))
+            {
+                txtUpdateStatus.Text = "更新源未配置（内置常量待填写）";
+            }
+            else
+            {
+                txtUpdateStatus.Text = $"更新源：github.com/{owner}/{repo}";
+            }
+        }
+
+        private async void BtnCheckUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(DynamicBird.Infrastructure.WinApi.UpdateService.GitHubOwner) ||
+                string.IsNullOrWhiteSpace(DynamicBird.Infrastructure.WinApi.UpdateService.GitHubRepo))
+            {
+                txtUpdateStatus.Text = "更新源未配置，请联系开发者填写";
+                return;
+            }
+
+            btnCheckUpdate.IsEnabled = false;
+            txtUpdateStatus.Text = "正在检查更新…";
+            try
+            {
+                var current = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
+                              ?? new Version(1, 0, 0);
+                var info = await DynamicBird.Infrastructure.WinApi.UpdateService
+                    .CheckForUpdateAsync(current);
+                txtUpdateStatus.Text = info == null
+                    ? "已是最新版本"
+                    : $"发现新版本 v{info.Version}（{info.Tag}），保存设置后可在通知坞点击更新";
+            }
+            catch
+            {
+                txtUpdateStatus.Text = "检查失败，请确认网络和仓库信息";
+            }
+            finally
+            {
+                btnCheckUpdate.IsEnabled = true;
+            }
+        }
+
+        private static void FillPanelCombo(ComboBox combo)
+        {
+            combo.Items.Clear();
+            foreach (var (value, display) in PanelOptions)
+            {
+                combo.Items.Add(new ComboBoxItem { Content = display, Tag = value });
+            }
+        }
+
+        private static void SelectPanelValue(ComboBox combo, string value)
+        {
+            foreach (ComboBoxItem item in combo.Items)
+            {
+                if (item.Tag?.ToString() == value)
+                {
+                    combo.SelectedItem = item;
+                    return;
+                }
+            }
+            combo.SelectedIndex = 0;
+        }
+
+        private static string GetSelectedPanelValue(ComboBox combo)
+        {
+            return (combo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Default";
         }
 
         private ComboBoxItem? GetComboBoxItemByContent(ComboBox combo, string content)
@@ -261,7 +390,6 @@ namespace DynamicBird.UI.Settings
             _settingsData.CustomIconPath = txtCustomIcon.Text;
 
             // 动画与布局
-            _settingsData.AnimationDurationMs = (int)sldAnimDuration.Value;
             _settingsData.HorizontalLayoutThreshold = sldHorizontalThreshold.Value;
             _settingsData.TagWidth = sldTagWidth.Value;
 
@@ -276,10 +404,6 @@ namespace DynamicBird.UI.Settings
 
             // 自适应
             _settingsData.AutoFitOnTrigger = chkAutoFitOnTrigger.IsChecked ?? true;
-
-            // 分辨率/DPI
-            _settingsData.ResolutionPreset = SettingsUIHelper.GetResolutionPreset(cmbResolutionPreset);
-            _settingsData.DpiScalePreset = SettingsUIHelper.GetDpiPreset(cmbDpiScale);
 
             // 勿扰
             _settingsData.RememberDndMode = chkRememberDndMode.IsChecked ?? false;
@@ -306,6 +430,17 @@ namespace DynamicBird.UI.Settings
             // ★★★ 区域防抖 ★★★
             _settingsData.RegionDebounceMs = (int)sldRegionDebounce.Value;
 
+            // ★★★ 区域面板自定义 ★★★
+            foreach (string key in RegionPanelKeys)
+            {
+                var combo = (ComboBox?)FindName("cmbPanel_" + key);
+                if (combo == null) continue;
+                _settings.SetRegionPanel(key, GetSelectedPanelValue(combo));
+            }
+
+            // ★★★ 自动更新 ★★★
+            _settingsData.AutoCheckUpdate = chkAutoCheckUpdate.IsChecked ?? true;
+
             // 保存
             SettingsDataManager.Save(_settingsData);
             _settings.Reload();
@@ -317,6 +452,21 @@ namespace DynamicBird.UI.Settings
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void BtnOnboarding_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var onboarding = new DynamicBird.UI.Onboarding.OnboardingWindow(
+                    () => _settings.OnboardingCompleted = true);
+                onboarding.Owner = this;
+                onboarding.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("打开引导窗口失败", ex);
+            }
         }
     }
 }

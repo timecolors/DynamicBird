@@ -5,6 +5,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Core.Controllers
 {
@@ -14,6 +15,7 @@ namespace DynamicBird.Core.Controllers
         private readonly ContentControl _contentContainer;
         private readonly FrameworkElement _mainPanel;
         private readonly double _taskbarHeight;
+        private double _bottomBoundary;
         private readonly ISettingsService _settings;
         private readonly EdgeTriggerController _edgeController;
 
@@ -33,18 +35,31 @@ namespace DynamicBird.Core.Controllers
 
         public string CurrentMode => _currentMode;
 
+        /// <summary>
+        /// 更新底部贴边边界（任务栏自动隐藏/升起时由主窗口定时刷新）。
+        /// </summary>
+        public void UpdateBottomBoundary(double value)
+        {
+            if (value > 0 && !double.IsNaN(value) && !double.IsInfinity(value))
+            {
+                _bottomBoundary = value;
+            }
+        }
+
         public WindowSizeController(
             Window window,
             ContentControl contentContainer,
             FrameworkElement mainPanel,
             double taskbarHeight,
             ISettingsService settings,
-            EdgeTriggerController edgeController)
+            EdgeTriggerController edgeController,
+            double bottomBoundary)
         {
             _window = window;
             _contentContainer = contentContainer;
             _mainPanel = mainPanel;
             _taskbarHeight = taskbarHeight;
+            _bottomBoundary = bottomBoundary;
             _settings = settings;
             _edgeController = edgeController;
 
@@ -90,7 +105,15 @@ namespace DynamicBird.Core.Controllers
 
             if (_currentMode == "Taskbar")
             {
-                ApplyTaskbarSize();
+                // ★ 允许任务栏面板也保存用户调整后的尺寸
+                if (!_settings.AutoFitOnTrigger && userW > 0 && userH > 0)
+                {
+                    ApplyUserSize(userW, userH);
+                }
+                else
+                {
+                    ApplyTaskbarSize();
+                }
                 return;
             }
 
@@ -125,14 +148,13 @@ namespace DynamicBird.Core.Controllers
         {
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double targetWidth = screenWidth * 2.0 / 3.0;
-            double targetHeight = Math.Max(60, _taskbarHeight * 1.75);
+            double targetHeight = Math.Max(_window.MinHeight, Math.Max(60, _taskbarHeight * 1.75));
 
             if (targetWidth < 200) targetWidth = 200;
             if (targetHeight < 40) targetHeight = 40;
 
-            _window.Width = targetWidth;
-            _window.Height = targetHeight;
-            _window.UpdateLayout();
+            var (newLeft, newTop) = Anchor(_currentEdge, _window.Left, _window.Top, targetWidth, targetHeight);
+            WindowRect.ApplyAtomic(_window, newLeft, newTop, targetWidth, targetHeight);
             SizeChanged?.Invoke();
         }
 
@@ -142,9 +164,8 @@ namespace DynamicBird.Core.Controllers
             double targetSize = screenWidth * 2.0 / 7.0;
             targetSize = Math.Max(100, Math.Min(targetSize, screenWidth * 0.4));
 
-            _window.Width = targetSize;
-            _window.Height = targetSize;
-            _window.UpdateLayout();
+            var (newLeft, newTop) = Anchor(_currentEdge, _window.Left, _window.Top, targetSize, targetSize);
+            WindowRect.ApplyAtomic(_window, newLeft, newTop, targetSize, targetSize);
             SizeChanged?.Invoke();
         }
 
@@ -166,11 +187,13 @@ namespace DynamicBird.Core.Controllers
             var (newLeft, newTop) = _positionCalculator.CalculatePosition(
                 targetWidth, targetHeight, _currentEdge, _window.Left, _window.Top, _window.Width, _window.Height);
 
-            _window.Width = targetWidth;
-            _window.Height = targetHeight;
-            _window.Left = newLeft;
-            _window.Top = newTop;
-            _window.UpdateLayout();
+            // 底部边缘必须贴任务栏顶部边界，而不是屏幕底部
+            if (_currentEdge == "Bottom")
+            {
+                newTop = _bottomBoundary - targetHeight;
+            }
+
+            WindowRect.ApplyAtomic(_window, newLeft, newTop, targetWidth, targetHeight);
             SizeChanged?.Invoke();
         }
 
@@ -179,9 +202,8 @@ namespace DynamicBird.Core.Controllers
             if (width < 100) width = 280;
             if (height < 60) height = 160;
 
-            _window.Width = width;
-            _window.Height = height;
-            _window.UpdateLayout();
+            var (newLeft, newTop) = Anchor(_currentEdge, _window.Left, _window.Top, width, height);
+            WindowRect.ApplyAtomic(_window, newLeft, newTop, width, height);
             SizeChanged?.Invoke();
         }
 
@@ -190,11 +212,28 @@ namespace DynamicBird.Core.Controllers
             if (_isUserResizing) return;
             if (_currentMode != "Widget") return;
             var (minWidth, minHeight) = _sizeCalculator.CalculateMinSize();
-            _window.Width = minWidth;
-            _window.Height = minHeight;
-            _window.UpdateLayout();
+            var (newLeft, newTop) = Anchor(_currentEdge, _window.Left, _window.Top, minWidth, minHeight);
+            WindowRect.ApplyAtomic(_window, newLeft, newTop, minWidth, minHeight);
             SaveCurrentSize();
             SizeChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// 按当前边缘重新锚定窗口位置：贴边侧的坐标始终由目标尺寸决定。
+        /// </summary>
+        private (double left, double top) Anchor(string edge, double left, double top, double width, double height)
+        {
+            double screenW = SystemParameters.PrimaryScreenWidth;
+            double screenH = SystemParameters.PrimaryScreenHeight;
+
+            return edge switch
+            {
+                "Top" => (Math.Max(0, Math.Min(left, screenW - width)), 0),
+                "Bottom" => (Math.Max(0, Math.Min(left, screenW - width)), _bottomBoundary - height),
+                "Left" => (0, Math.Max(0, Math.Min(top, screenH - height))),
+                "Right" => (screenW - width, Math.Max(0, Math.Min(top, screenH - height))),
+                _ => (Math.Max(0, Math.Min(left, screenW - width)), Math.Max(0, Math.Min(top, screenH - height)))
+            };
         }
 
         public void RefreshMinSizeCache()
@@ -240,7 +279,6 @@ namespace DynamicBird.Core.Controllers
         public void SaveCurrentSize()
         {
             if (_settings.AutoFitOnTrigger) return;
-            if (_currentMode == "Taskbar") return;
 
             _settings.SetUserSize(_currentRegionKey, _window.Width, _window.Height);
         }
@@ -259,7 +297,6 @@ namespace DynamicBird.Core.Controllers
             bool handled = _dragHandler.HandleMouseDown(sender, e, _currentMode);
             if (handled)
             {
-                _isUserResizing = true;
                 _settings.UseAutoSize = false;
             }
             return handled;
@@ -267,15 +304,23 @@ namespace DynamicBird.Core.Controllers
 
         public void HandleMouseMove(object sender, MouseEventArgs e)
         {
-            _dragHandler.HandleMouseMove(sender, e, _currentMode);
+            _dragHandler.HandleMouseMove(sender, e);
         }
 
         public void HandleMouseUp(object sender, MouseButtonEventArgs e)
         {
+            bool wasResizing = _isUserResizing;
             _dragHandler.HandleMouseUp(sender, e);
             _isUserResizing = false;
-            _settings.UseAutoSize = false;
-            SaveCurrentSizeWithDelay();
+
+            // ★ 只有真正发生过拖拽缩放时才写入配置；
+            //   否则每次点击（含任务栏关闭按钮）都会 Save → SettingsChanged → 布局重排，
+            //   导致按钮 Click 在 MouseUp 阶段丢失。
+            if (wasResizing)
+            {
+                _settings.UseAutoSize = false;
+                SaveCurrentSizeWithDelay();
+            }
         }
 
         internal void OnSizeChanged() => SizeChanged?.Invoke();

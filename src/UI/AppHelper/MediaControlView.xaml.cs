@@ -1,0 +1,103 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Threading;
+using DynamicBird.Infrastructure.WinApi;
+
+namespace DynamicBird.UI.AppHelper
+{
+    public partial class MediaControlView : UserControl
+    {
+        private readonly DispatcherTimer _refreshTimer;
+        private bool _refreshing;
+
+        public MediaControlView()
+        {
+            InitializeComponent();
+            _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+            _refreshTimer.Tick += async (_, _) => await RefreshAsync();
+            Loaded += async (_, _) => await RefreshAsync();
+            Unloaded += (_, _) => _refreshTimer.Stop();
+        }
+
+        private async System.Threading.Tasks.Task RefreshAsync()
+        {
+            if (_refreshing) return;
+            _refreshing = true;
+            try
+            {
+                var sessions = await MediaSessionController.GetSessionsAsync();
+                SessionList.ItemsSource = sessions.Select(s => new MediaSessionItem(s)).ToList();
+                StatusText.Text = sessions.Count > 0
+                    ? $"检测到 {sessions.Count} 个媒体应用"
+                    : "未检测到正在播放的媒体应用";
+                if (!_refreshTimer.IsEnabled) _refreshTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = "媒体控制不可用";
+                System.Diagnostics.Debug.WriteLine($"刷新媒体会话失败: {ex.Message}");
+            }
+            finally
+            {
+                _refreshing = false;
+            }
+        }
+
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            _ = RefreshAsync();
+        }
+
+        private async void Prev_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetSession(sender) is { } item) await MediaSessionController.PrevAsync(item.Info);
+        }
+
+        private async void PlayPause_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetSession(sender) is { } item) await MediaSessionController.TogglePlayPauseAsync(item.Info);
+        }
+
+        private async void Next_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetSession(sender) is { } item) await MediaSessionController.NextAsync(item.Info);
+        }
+
+        private static MediaSessionItem? GetSession(object sender)
+        {
+            return sender is FrameworkElement fe && fe.DataContext is MediaSessionItem item
+                ? item
+                : null;
+        }
+
+        private void KeyPrev_Click(object sender, RoutedEventArgs e) => MediaKeyHelper.Press(MediaKeyHelper.PrevTrack);
+        private void KeyPlayPause_Click(object sender, RoutedEventArgs e) => MediaKeyHelper.Press(MediaKeyHelper.PlayPause);
+        private void KeyNext_Click(object sender, RoutedEventArgs e) => MediaKeyHelper.Press(MediaKeyHelper.NextTrack);
+        private void KeyVolDown_Click(object sender, RoutedEventArgs e) => MediaKeyHelper.Press(MediaKeyHelper.VolumeDown);
+        private void KeyVolUp_Click(object sender, RoutedEventArgs e) => MediaKeyHelper.Press(MediaKeyHelper.VolumeUp);
+    }
+
+    /// <summary>
+    /// 会话列表项（绑定友好显示字段，不直接暴露 WinRT 对象）。
+    /// </summary>
+    public class MediaSessionItem
+    {
+        public MediaSessionInfo Info { get; }
+        public string AppName => Info.AppName;
+        public string DisplayText => Info.DisplayText;
+        public Geometry PlayGlyph =>
+            (Geometry)(Info.IsPlaying
+                ? Application.Current.FindResource("IconPause")
+                : Application.Current.FindResource("IconPlay"));
+
+        public MediaSessionItem(MediaSessionInfo info)
+        {
+            Info = info;
+        }
+
+    }
+}

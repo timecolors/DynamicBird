@@ -21,6 +21,8 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             public IntPtr Handle { get; set; }
             public string Title { get; set; } = "";
+            /// <summary>所属进程的可执行文件路径（供“固定到任务栏”使用）。</summary>
+            public string ProcessPath { get; set; } = "";
             public ImageSource? Icon { get; set; }
             public string ClassName { get; set; } = "";
             public bool IsVisible { get; set; }
@@ -71,8 +73,11 @@ namespace DynamicBird.Infrastructure.WinApi
                         HasTaskbarButton = showsInTaskbar
                     };
 
-                    // 获取图标
-                    item.Icon = GetWindowIcon(hwnd);
+                    // 获取进程路径（带缓存，供拖拽固定使用）
+                    GetWindowThreadProcessId(hwnd, out uint pid);
+                    item.ProcessPath = GetProcessPath(pid);
+                    // 获取图标（按进程缓存，避免每秒刷新全量重复提取）
+                    item.Icon = GetWindowIcon(hwnd, pid);
 
                     windows.Add(item);
                 }
@@ -89,6 +94,107 @@ namespace DynamicBird.Infrastructure.WinApi
             }
 
             return windows;
+        }
+
+        /// <summary>按窗口句柄获取所属进程的可执行文件路径。</summary>
+        public static string GetProcessPathByHandle(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return "";
+            GetWindowThreadProcessId(hwnd, out uint pid);
+            return GetProcessPath(pid);
+        }
+
+        private static readonly Dictionary<uint, string> _processPathCache = new();
+
+        private static string GetProcessPath(uint pid)
+        {
+            if (pid == 0) return "";
+            if (_processPathCache.TryGetValue(pid, out var cached)) return cached;
+
+            try
+            {
+                using var proc = System.Diagnostics.Process.GetProcessById((int)pid);
+                string? file = proc.MainModule?.FileName;
+                if (!string.IsNullOrEmpty(file))
+                {
+                    _processPathCache[pid] = file.Trim();
+                    return file.Trim();
+                }
+            }
+            catch { }
+
+            _processPathCache[pid] = "";
+            return "";
+        }
+
+        /// <summary>
+        /// 按进程可执行文件路径查找其主窗口（用于“最近打开的应用”点击时直接激活已有窗口）。
+        /// </summary>
+        public static IntPtr? FindWindowByProcessPath(string exePath)
+        {
+            if (string.IsNullOrEmpty(exePath)) return null;
+            string target = exePath.Trim();
+
+            IntPtr? found = null;
+            var callback = new EnumWindowsProc((hwnd, lParam) =>
+            {
+                try
+                {
+                    if (!IsWindowVisible(hwnd)) return true;
+                    if (GetWindowTextLength(hwnd) == 0) return true;
+
+                    GetWindowThreadProcessId(hwnd, out uint pid);
+                    if (pid == 0) return true;
+
+                    using var proc = System.Diagnostics.Process.GetProcessById((int)pid);
+                    string? file = proc.MainModule?.FileName;
+                    if (string.IsNullOrEmpty(file)) return true;
+
+                    if (string.Equals(file.Trim(), target, StringComparison.OrdinalIgnoreCase))
+                    {
+                        found = hwnd;
+                        return false;
+                    }
+                }
+                catch { }
+                return true;
+            });
+
+            EnumWindows(callback, IntPtr.Zero);
+            return found;
+        }
+
+        /// <summary>
+        /// 单次枚举所有可见窗口，建立“进程 exe 路径 → 主窗口句柄”映射（每个 exe 取第一个）。
+        /// 用于最近使用列表批量匹配，避免逐项全量枚举。
+        /// </summary>
+        public static void EnumerateWindowExeHandles(Dictionary<string, IntPtr> result)
+        {
+            if (result == null) return;
+            var callback = new EnumWindowsProc((hwnd, lParam) =>
+            {
+                try
+                {
+                    if (!IsWindowVisible(hwnd)) return true;
+                    if (GetWindowTextLength(hwnd) == 0) return true;
+
+                    GetWindowThreadProcessId(hwnd, out uint pid);
+                    if (pid == 0) return true;
+
+                    using var proc = System.Diagnostics.Process.GetProcessById((int)pid);
+                    string? file = proc.MainModule?.FileName;
+                    if (string.IsNullOrEmpty(file)) return true;
+
+                    if (!result.ContainsKey(file.Trim()))
+                    {
+                        result[file.Trim()] = hwnd;
+                    }
+                }
+                catch { }
+                return true;
+            });
+
+            EnumWindows(callback, IntPtr.Zero);
         }
 
         // ============================================================
@@ -204,8 +310,11 @@ namespace DynamicBird.Infrastructure.WinApi
             return GetClassName(hWnd, buff, nChars) > 0 ? buff.ToString() : "";
         }
 
-        private static ImageSource? GetWindowIcon(IntPtr hwnd)
+        private static readonly Dictionary<uint, ImageSource> _windowIconCache = new();
+
+        private static ImageSource? GetWindowIcon(IntPtr hwnd, uint pid)
         {
+            if (pid != 0 && _windowIconCache.TryGetValue(pid, out var cached)) return cached;
             try
             {
                 IntPtr iconHandle = SendMessage(hwnd, WM_GETICON, (IntPtr)ICON_SMALL, IntPtr.Zero);
@@ -220,10 +329,17 @@ namespace DynamicBird.Infrastructure.WinApi
                 {
                     using (var icon = System.Drawing.Icon.FromHandle(iconHandle))
                     {
-                        return Imaging.CreateBitmapSourceFromHIcon(
+                        var source = Imaging.CreateBitmapSourceFromHIcon(
                             icon.Handle,
                             new Int32Rect(0, 0, icon.Width, icon.Height),
                             BitmapSizeOptions.FromEmptyOptions());
+                        source.Freeze();
+                        if (pid != 0)
+                        {
+                            if (_windowIconCache.Count > 400) _windowIconCache.Clear();
+                            _windowIconCache[pid] = source;
+                        }
+                        return source;
                     }
                 }
             }

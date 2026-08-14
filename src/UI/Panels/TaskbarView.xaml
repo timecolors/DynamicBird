@@ -26,8 +26,7 @@
                     Cursor="Hand"
                     Margin="2"
                     Padding="6,2"
-                    VerticalAlignment="Stretch"
-                    PreviewMouseLeftButtonDown="OnWindowMouseDown">
+                    VerticalAlignment="Stretch">
                 <Grid VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -58,21 +57,22 @@
 
                     <Button Grid.Column="2" 
                             Grid.Row="0"
-                            Content="✕" 
                             Width="18" Height="18"
-                            FontSize="10"
-                            Foreground="#888888"
                             Background="Transparent"
                             BorderThickness="0"
                             Cursor="Hand"
-                            Click="OnCloseButtonClick"
-                            PreviewMouseDown="OnCloseButton_PreviewMouseDown"
+                            PreviewMouseUp="CloseBtn_PreviewMouseUp"
                             Margin="6,0,0,0"
-                            VerticalAlignment="Center"/>
+                            VerticalAlignment="Center"
+                            ToolTip="关闭窗口">
+                        <Path Style="{StaticResource LineIcon}"
+                              Data="{StaticResource IconClose}"
+                              Width="12" Height="12"/>
+                    </Button>
                 </Grid>
             </Border>
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid x:Name="MainGrid" />
+    <Grid x:Name="MainGrid" AllowDrop="True" />
 </UserControl>

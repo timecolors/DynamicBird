@@ -37,6 +37,34 @@ namespace DynamicBird.UI.Main
             UpdateIconText();
         }
 
+        /// <summary>全局热键 Ctrl+Alt+B：切换面板显示/隐藏。</summary>
+        private void HotkeyTogglePanel()
+        {
+            try
+            {
+                if (_visibilityController == null) return;
+
+                if (_visibilityController.IsVisible)
+                {
+                    _visibilityController.Hide();
+                }
+                else
+                {
+                    // 在最后锚定的位置呼出面板（若在勿扰模式则先退出勿扰）
+                    if (_modeService.IsDoNotDisturb)
+                    {
+                        _modeService.IsDoNotDisturb = false;
+                        UpdateIconText();
+                    }
+                    _edgeController.ShowPanelAtAnchor();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error("热键切换面板失败", ex);
+            }
+        }
+
         private void ExitApp()
         {
             LogManager.Info("用户退出应用");

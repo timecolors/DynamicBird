@@ -31,7 +31,24 @@ namespace DynamicBird.UI.Panels
                 int windowCount = _windows.Count;
 
                 double aspectRatio = availableWidth / availableHeight;
-                LayoutMode newMode = (aspectRatio >= 1.0) ? LayoutMode.Horizontal : LayoutMode.Vertical;
+                // ★ 布局阈值接入设置（默认 0.43，值越大越倾向竖向）
+                //   加迟滞：切换后需要超过阈值 ±0.15 才再切换，避免拖拽调整大小时反复重建抽搐
+                double layoutThreshold = _settings.HorizontalLayoutThreshold > 0
+                    ? _settings.HorizontalLayoutThreshold
+                    : 1.0;
+                LayoutMode newMode;
+                if (_currentLayoutMode == LayoutMode.Horizontal)
+                {
+                    newMode = aspectRatio >= layoutThreshold - 0.15
+                        ? LayoutMode.Horizontal
+                        : LayoutMode.Vertical;
+                }
+                else
+                {
+                    newMode = aspectRatio >= layoutThreshold
+                        ? LayoutMode.Horizontal
+                        : LayoutMode.Vertical;
+                }
 
                 bool layoutChanged =
                     newMode != _currentLayoutMode ||
@@ -175,22 +192,34 @@ namespace DynamicBird.UI.Panels
                     double minShortcutWidth = Math.Min(twoIconsWidth, totalWidth * 0.35);
                     minShortcutWidth = Math.Max(60, minShortcutWidth);
 
-                    double shortcutWidth = Math.Max(minShortcutWidth, totalWidth * savedOffset);
-                    shortcutWidth = Math.Min(totalWidth - minShortcutWidth - DIVIDER_THICKNESS - 4, shortcutWidth);
-                    if (shortcutWidth < minShortcutWidth || shortcutWidth > totalWidth - 10)
-                        shortcutWidth = totalWidth * 0.4;
-
-                    double windowWidth = totalWidth - shortcutWidth - DIVIDER_THICKNESS - 4;
-                    if (windowWidth < 10)
+                    // ★ 内容较少时（刚添加第一/第二个快捷方式），让快捷方式列贴合实际内容，
+                    //   避免“一个图标 + 分隔线前一大片空白”。
+                    double contentShortcutWidth = _shortcuts.Count * iconWidth + 8;
+                    if (contentShortcutWidth <= totalWidth * 0.45)
                     {
-                        shortcutWidth = totalWidth * 0.4;
-                        windowWidth = totalWidth - shortcutWidth - DIVIDER_THICKNESS - 4;
-                        if (windowWidth < 10) windowWidth = 10;
+                        MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                        MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                        MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                     }
+                    else
+                    {
+                        double shortcutWidth = Math.Max(minShortcutWidth, totalWidth * savedOffset);
+                        shortcutWidth = Math.Min(totalWidth - minShortcutWidth - DIVIDER_THICKNESS - 4, shortcutWidth);
+                        if (shortcutWidth < minShortcutWidth || shortcutWidth > totalWidth - 10)
+                            shortcutWidth = totalWidth * 0.4;
 
-                    MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(shortcutWidth, GridUnitType.Pixel) });
-                    MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                    MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(windowWidth, GridUnitType.Pixel) });
+                        double windowWidth = totalWidth - shortcutWidth - DIVIDER_THICKNESS - 4;
+                        if (windowWidth < 10)
+                        {
+                            shortcutWidth = totalWidth * 0.4;
+                            windowWidth = totalWidth - shortcutWidth - DIVIDER_THICKNESS - 4;
+                            if (windowWidth < 10) windowWidth = 10;
+                        }
+
+                        MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(shortcutWidth, GridUnitType.Pixel) });
+                        MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                        MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(windowWidth, GridUnitType.Pixel) });
+                    }
                 }
                 else
                 {
