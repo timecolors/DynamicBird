@@ -1,0 +1,341 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using DynamicBird.Core.Services;
+using DynamicBird.Core.Services.Configuration;
+using DynamicBird.Infrastructure.WinApi;
+using DynamicBird.src.core.Services.Clipboard;
+using DynamicBird.src.core.Services.Notes;
+using DynamicBird.src.core.Services.Shortcuts;
+using DynamicBird.UI.AppHelper;
+using DynamicBird.UI.Panels;
+using DynamicBird.UI.Widgets;
+
+namespace ScreenshotGen
+{
+    /// <summary>
+    /// 商店截图生成器：离屏渲染真实面板控件（不读取任何真实用户数据），
+    /// 输出 4K PNG，供 Microsoft Store 一览使用。
+    /// </summary>
+    internal static class Program
+    {
+        private const double CanvasW = 1920;
+        private const double CanvasH = 1080;
+        private const double RenderScale = 2.0;
+
+        [STAThread]
+        private static void Main()
+        {
+            var app = new Application();
+            app.Resources.MergedDictionaries.Add(LoadResource("src/UI/Theme/Theme.xaml"));
+            app.Resources.MergedDictionaries.Add(LoadResource("src/UI/Theme/AppIcons.xaml"));
+
+            string outDir = Path.Combine(FindRepoRoot(), "packaging", "StoreScreenshots");
+            Directory.CreateDirectory(outDir);
+            foreach (var old in Directory.EnumerateFiles(outDir, "*.png")) File.Delete(old);
+
+            // 1) 边缘任务栏：通用示例快捷方式 + 虚拟窗口
+            var taskbarSettings = new FakeSettings();
+            var taskbar = new TaskbarView(new FakeShortcutService(), taskbarSettings, SampleWindows);
+            Render("01-Taskbar.png", taskbar, 1280, 100, new Point(320, 940), outDir);
+
+            // 2) 应用辅助：画中画（镜像窗口 / 嵌入窗口 / 播放视频）
+            Render("02-AppHelper.png", new AppHelperView(), 420, 340, new Point(1476, 370), outDir);
+
+            // 3) 小组件：计算器
+            var calcSettings = new FakeSettings { LastWidgetTab = "Calculator" };
+            Render("03-Widget-Calculator.png",
+                new WidgetSwitcher(calcSettings, new FakeClipboard(), new FakeNotes()),
+                360, 260, new Point(24, 410), outDir);
+
+            // 4) 小组件：计时器
+            var timerSettings = new FakeSettings { LastWidgetTab = "Timer" };
+            Render("04-Widget-Timer.png",
+                new WidgetSwitcher(timerSettings, new FakeClipboard(), new FakeNotes()),
+                360, 260, new Point(24, 700), outDir);
+        }
+
+        private static ResourceDictionary LoadResource(string relativePath)
+        {
+            var uri = new Uri($"pack://application:,,,/DynamicBird;component/{relativePath.Replace('\\', '/')}");
+            return new ResourceDictionary { Source = uri };
+        }
+
+        private static string FindRepoRoot()
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "DynamicBird.csproj")))
+                dir = dir.Parent;
+            return dir?.FullName ?? AppContext.BaseDirectory;
+        }
+
+        private static void Render(string file, FrameworkElement content, double w, double h, Point pos, string outDir)
+        {
+            var canvas = new Canvas
+            {
+                Width = CanvasW,
+                Height = CanvasH,
+                Background = new SolidColorBrush(Color.FromRgb(0xE8, 0xE8, 0xE8))
+            };
+
+            var panel = new Border
+            {
+                Width = w,
+                Height = h,
+                Background = new SolidColorBrush(Color.FromRgb(0x2D, 0x2D, 0x2D)),
+                CornerRadius = new CornerRadius(16),
+                Opacity = 0.9,
+                Padding = new Thickness(4),
+                Child = content
+            };
+            Canvas.SetLeft(panel, pos.X);
+            Canvas.SetTop(panel, pos.Y);
+            canvas.Children.Add(panel);
+
+            canvas.Measure(new Size(CanvasW, CanvasH));
+            canvas.Arrange(new Rect(0, 0, CanvasW, CanvasH));
+            canvas.UpdateLayout();
+
+            var bitmap = new RenderTargetBitmap(
+                (int)(CanvasW * RenderScale), (int)(CanvasH * RenderScale),
+                96 * RenderScale, 96 * RenderScale, PixelFormats.Pbgra32);
+            bitmap.Render(canvas);
+
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using var stream = File.Create(Path.Combine(outDir, file));
+            encoder.Save(stream);
+            Console.WriteLine($"SAVED {Path.Combine(outDir, file)}");
+        }
+
+        private static IEnumerable<WindowListProvider.WindowItem> SampleWindows()
+        {
+            string sys = Environment.GetFolderPath(Environment.SpecialFolder.System);
+            return new List<WindowListProvider.WindowItem>
+            {
+                new()
+                {
+                    Handle = new IntPtr(0x1001),
+                    Title = "文档 - 2026 年度计划.docx",
+                    ProcessPath = @"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE",
+                    Icon = ExtractIcon(@"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE")
+                },
+                new()
+                {
+                    Handle = new IntPtr(0x1002),
+                    Title = "网页 - Microsoft Edge",
+                    ProcessPath = @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                    Icon = ExtractIcon(@"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
+                },
+                new()
+                {
+                    Handle = new IntPtr(0x1003),
+                    Title = "终端 - Windows PowerShell",
+                    ProcessPath = Path.Combine(sys, "WindowsPowerShell", "v1.0", "powershell.exe"),
+                    Icon = ExtractIcon(Path.Combine(sys, "WindowsPowerShell", "v1.0", "powershell.exe"))
+                }
+            };
+        }
+
+        private static ImageSource? ExtractIcon(string path)
+        {
+            try
+            {
+                using var icon = System.Drawing.Icon.ExtractAssociatedIcon(path);
+                if (icon == null) return null;
+                using var bmp = icon.ToBitmap();
+                IntPtr hBitmap = bmp.GetHbitmap();
+                try
+                {
+                    return Imaging.CreateBitmapSourceFromHBitmap(
+                        hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                }
+                finally
+                {
+                    DeleteObject(hBitmap);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
+    }
+
+    /// <summary>测试用设置：全部使用默认值，不读取真实配置。</summary>
+    internal sealed class FakeSettings : ISettingsService
+    {
+        public string BackgroundColor { get; set; } = "#2D2D2D";
+        public string TextColor { get; set; } = "#FFFFFF";
+        public double Opacity { get; set; } = 0.85;
+        public int CornerRadius { get; set; } = 16;
+        public bool ShowSystemStatus { get; set; } = true;
+        public string CustomIconPath { get; set; } = "";
+        public double StripLengthRatio { get; set; } = 0.6;
+        public double StripWidthMultiplier { get; set; } = 1.5;
+        public double SquareShortSideMultiplier { get; set; } = 1.8;
+        public double GoldenRatio { get; set; } = 1.618;
+        public double TriggerRegionRatio { get; set; } = 1.0 / 3.0;
+        public double HorizontalLayoutThreshold { get; set; } = 0.43;
+        public double TagWidth { get; set; } = 120;
+        public bool AutoFitOnTrigger { get; set; } = true;
+        public int ClipboardMaxCount { get; set; } = 10;
+        public int ClipboardDisplayLength { get; set; } = 100;
+        public string LastWidgetTab { get; set; } = "Calculator";
+        public string DefaultNoteColor { get; set; } = "#FFFF99";
+        public bool NoteShowTitleByDefault { get; set; } = true;
+        public bool UseAutoSize { get; set; } = true;
+        public bool RememberDndMode { get; set; }
+        public bool DndModeEnabled { get; set; }
+        public double TaskbarIconSize { get; set; } = 28;
+        public double DividerOffset { get; set; } = 0.4;
+        public bool AnimationsEnabled { get; set; } = true;
+        public string ShowHideEasingType { get; set; } = "CubicEase";
+        public int ShowHideDurationMs { get; set; } = 150;
+        public string TransformEasingType { get; set; } = "CubicEase";
+        public int TransformDurationMs { get; set; } = 250;
+        public int HideDelayMs { get; set; } = 200;
+        public int FlyDurationMs { get; set; } = 500;
+        public bool ClingModeEnabled { get; set; }
+        public int RegionDebounceMs { get; set; } = 80;
+        public bool AutoCheckUpdate { get; set; } = true;
+        public bool OnboardingCompleted { get; set; } = true;
+
+        public event Action? SettingsChanged;
+
+        public bool IsEdgeEnabled(string edge) => true;
+        public void SetEdgeEnabled(string edge, bool enabled) { }
+        public bool IsCornerEnabled(string corner) => true;
+        public void SetCornerEnabled(string corner, bool enabled) { }
+        public string GetEdgeMode(string edge) => "Follow";
+        public void SetEdgeMode(string edge, string mode) { }
+        public string GetFixedShape(string edge) => "Square";
+        public void SetFixedShape(string edge, string shape) { }
+        public double GetFixedOffset(string edge) => 0;
+        public void SetFixedOffset(string edge, double offset) { }
+        public string GetRegionShape(string edge, string region) => "Default";
+        public void SetRegionShape(string edge, string region, string shape) { }
+        public (double width, double height) GetUserSize(string regionKey) => (0, 0);
+        public void SetUserSize(string regionKey, double width, double height) { }
+        public string GetRegionPanel(string regionKey) => "Default";
+        public void SetRegionPanel(string regionKey, string panelType) { }
+        public void Reload() { }
+    }
+
+    /// <summary>测试用快捷方式服务：通用 Windows 应用。</summary>
+    internal sealed class FakeShortcutService : IShortcutService
+    {
+        public ObservableCollection<ShortcutData> Shortcuts { get; } = new();
+
+        public event EventHandler? ShortcutsChanged;
+
+        public FakeShortcutService()
+        {
+            string sys = Environment.GetFolderPath(Environment.SpecialFolder.System);
+            string win = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            Add("记事本", Path.Combine(sys, "notepad.exe"));
+            Add("计算器", Path.Combine(sys, "calc.exe"));
+            Add("画图", Path.Combine(sys, "mspaint.exe"));
+            Add("文件资源管理器", Path.Combine(win, "explorer.exe"));
+            Add("终端", Path.Combine(sys, "WindowsPowerShell", "v1.0", "powershell.exe"));
+        }
+
+        private void Add(string name, string path)
+        {
+            Shortcuts.Add(new ShortcutData
+            {
+                Id = Guid.NewGuid().ToString(),
+                Path = path,
+                Name = name,
+                Order = Shortcuts.Count,
+                CreateTime = DateTime.Now,
+                IsVisible = true
+            });
+        }
+
+        public bool AddShortcut(string path, string? name = null, string? arguments = null) => true;
+        public bool RemoveShortcut(string id) => false;
+        public bool RemoveShortcutByPath(string path) => false;
+        public void MoveShortcut(int fromIndex, int toIndex) { }
+        public void UpdateShortcutName(string id, string newName) { }
+        public void SaveShortcutsOrder() { }
+        public void Reload() { }
+
+        public ImageSource? GetIcon(string path)
+        {
+            try
+            {
+                using var icon = System.Drawing.Icon.ExtractAssociatedIcon(path);
+                if (icon == null) return null;
+                using var bmp = icon.ToBitmap();
+                IntPtr hBitmap = bmp.GetHbitmap();
+                try
+                {
+                    return Imaging.CreateBitmapSourceFromHBitmap(
+                        hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                }
+                finally
+                {
+                    DeleteObject(hBitmap);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
+    }
+
+    /// <summary>测试用剪贴板服务：仅示例数据。</summary>
+    internal sealed class FakeClipboard : IClipboardService
+    {
+        public ObservableCollection<ClipboardManager.ClipboardItem> History { get; } = new()
+        {
+            new ClipboardManager.ClipboardItem { Type = "Text", DisplayText = "示例文本：欢迎使用灵动鸟", Timestamp = DateTime.Now },
+            new ClipboardManager.ClipboardItem { Type = "Text", DisplayText = "https://github.com/timecolors/DynamicBird", Timestamp = DateTime.Now }
+        };
+
+        public event EventHandler? HistoryChanged;
+
+        public void StartListening() { }
+        public void StopListening() { }
+        public void RemoveItem(ClipboardManager.ClipboardItem item) { }
+        public void RemoveItems(IEnumerable<ClipboardManager.ClipboardItem> items) { }
+        public void ClearAll() { }
+        public void CopyToClipboard(ClipboardManager.ClipboardItem item) { }
+        public bool SaveDroppedFile(string sourcePath, string targetFolder) => false;
+    }
+
+    /// <summary>测试用便签服务：空列表。</summary>
+    internal sealed class FakeNotes : INoteService
+    {
+        public ObservableCollection<NoteItem> Notes { get; } = new();
+        public NoteItem? CurrentNote { get; private set; }
+
+        public event EventHandler? NotesChanged;
+
+        public void SetCurrentNote(NoteItem? note) => CurrentNote = note;
+        public NoteItem CreateNote(string? title = null, string? color = null)
+            => new NoteItem { Title = title ?? "便签", Color = color ?? "#FFFF99" };
+        public void DeleteNote(NoteItem note) { }
+        public void UpdateNoteContent(NoteItem note, string content) { }
+        public void UpdateNoteTitle(NoteItem note, string title) { }
+        public void UpdateNoteColor(NoteItem note, string color) { }
+        public void UpdateNoteShowTitle(NoteItem note, bool showTitle) { }
+        public void Save() { }
+    }
+}

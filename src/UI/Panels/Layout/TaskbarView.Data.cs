@@ -25,8 +25,10 @@ namespace DynamicBird.UI.Panels
                 if (item.IsVisible) _shortcuts.Add(item);
             }
 
-            // 获取正在运行的窗口
-            var windows = WindowListProvider.GetOpenWindows(WindowListProvider.WindowFilterMode.UserAppsOnly);
+            // 获取正在运行的窗口（测试/截图时可注入虚拟窗口源）
+            var windows = _windowSource != null
+                ? _windowSource()
+                : WindowListProvider.GetOpenWindows(WindowListProvider.WindowFilterMode.UserAppsOnly);
             foreach (var w in windows)
             {
                 if (!_windows.Any(i => i.Handle == w.Handle))
@@ -44,7 +46,9 @@ namespace DynamicBird.UI.Panels
             if ((DateTime.Now - _lastRefresh).TotalMilliseconds < 500) return;
             _lastRefresh = DateTime.Now;
 
-            var windows = WindowListProvider.GetOpenWindows(WindowListProvider.WindowFilterMode.UserAppsOnly);
+            var windows = _windowSource != null
+                ? _windowSource()
+                : WindowListProvider.GetOpenWindows(WindowListProvider.WindowFilterMode.UserAppsOnly);
             var windowHandles = windows.Select(w => w.Handle).ToHashSet();
 
             // 移除已关闭的窗口

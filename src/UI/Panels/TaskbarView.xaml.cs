@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using DynamicBird.Infrastructure.WinApi;
+using System.Collections.Generic;
 
 namespace DynamicBird.UI.Panels
 {
@@ -13,6 +15,7 @@ namespace DynamicBird.UI.Panels
     {
         private readonly TaskbarShortcutManager _shortcutManager;
         private readonly ISettingsService _settings;
+        private readonly Func<IEnumerable<WindowListProvider.WindowItem>>? _windowSource;
         private DispatcherTimer? _refreshTimer;
         private DateTime _lastRefresh = DateTime.MinValue;
 
@@ -61,8 +64,20 @@ namespace DynamicBird.UI.Panels
         }
 
         public TaskbarView(IShortcutService shortcutService, ISettingsService settings)
+            : this(shortcutService, settings, null)
+        {
+        }
+
+        /// <summary>
+        /// 测试/截图用途：可注入窗口数据源，避免读取真实运行窗口。
+        /// </summary>
+        public TaskbarView(
+            IShortcutService shortcutService,
+            ISettingsService settings,
+            Func<IEnumerable<WindowListProvider.WindowItem>>? windowSource)
         {
             _settings = settings;
+            _windowSource = windowSource;
             InitializeComponent();
             DataContext = this;
 
