@@ -1,4 +1,4 @@
-﻿using DynamicBird.Core.Services;
+using DynamicBird.Core.Services;
 using DynamicBird.Core.Services.Configuration;
 using DynamicBird.src.core.Services.Clipboard;
 using DynamicBird.src.core.Services.Notes;
@@ -27,6 +27,7 @@ namespace DynamicBird.Core.Controllers
         // ★ 画中画实例缓存：呼出面板时复用，避免镜像/播放状态被重置
         private DynamicBird.UI.AppHelper.AppHelperView? _cachedAppHelper;
         private DynamicBird.UI.Widgets.WidgetSwitcher? _cachedWidgetSwitcher;
+        private DynamicBird.UI.AI.AiChatView? _cachedAiChat;
 
         // ★★★ 新增事件 ★★★
         public event Action? LoadingStarted;
@@ -54,6 +55,7 @@ namespace DynamicBird.Core.Controllers
 
         public void LoadContentForRegion(string regionType, string regionKey = "")
         {
+            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"LoadContent type={regionType} key={regionKey}");
             _currentRegionType = regionType;
 
             // ★★★ 通知开始加载 ★★★
@@ -83,6 +85,13 @@ namespace DynamicBird.Core.Controllers
                 case "AppHelper":
                     _cachedAppHelper ??= new AppHelperView();
                     newContent = _cachedAppHelper;
+                    break;
+
+                case "AI":
+                    // ★ AI 助手面板缓存：保持对话状态
+                    _cachedAiChat ??= new DynamicBird.UI.AI.AiChatView();
+                    _cachedAiChat.RefreshSettings();
+                    newContent = _cachedAiChat;
                     break;
 
                 case "Notification":

@@ -59,6 +59,7 @@
                               Margin="0,0,12,0"
                               Background="Transparent"
                               AllowDrop="True"
+                              AutomationProperties.Name="灵动鸟主图标"
                               DragEnter="IconText_DragEnter"
                               DragOver="IconText_DragOver"
                               DragLeave="IconText_DragLeave"

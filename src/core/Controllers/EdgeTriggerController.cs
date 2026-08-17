@@ -1,4 +1,4 @@
-﻿using DynamicBird.Animation;
+using DynamicBird.Animation;
 using DynamicBird.Core.Detection;
 using DynamicBird.Core.Services.Configuration;
 using System;
@@ -682,8 +682,10 @@ namespace DynamicBird.Core.Controllers
             if (!_settings.AutoFitOnTrigger && userW > 0 && userH > 0)
                 return (userW, userH);
 
-            // Widget 360x260（容纳音乐/待办等新小组件），AppHelper 420x340（辅助功能主页）
-            return (type == "Widget" ? 360 : 420, type == "Widget" ? 260 : 340);
+            // Widget 360x260（容纳音乐/待办等新小组件），AppHelper 420x340（辅助功能主页），AI 420x400（对话面板）
+            if (type == "Widget") return (360, 260);
+            if (type == "AI") return (420, 400);
+            return (420, 340);
         }
 
         private string GetRegionShapeSetting(string key)
@@ -798,7 +800,11 @@ namespace DynamicBird.Core.Controllers
                                  r == EdgeRegion.Bottom_Left || r == EdgeRegion.Bottom_Center || r == EdgeRegion.Bottom_Right;
             bool isCenter = r == EdgeRegion.Top_Center || r == EdgeRegion.Bottom_Center ||
                             r == EdgeRegion.Left_Center || r == EdgeRegion.Right_Center;
-            if (isCenter) return "AppHelper";
+            if (isCenter)
+            {
+                // ★ 左边缘中间默认 AI 助手，其余中心默认应用辅助
+                return r == EdgeRegion.Left_Center ? "AI" : "AppHelper";
+            }
             bool isVertical = r == EdgeRegion.Left_Top || r == EdgeRegion.Left_Center || r == EdgeRegion.Left_Bottom ||
                               r == EdgeRegion.Right_Top || r == EdgeRegion.Right_Center || r == EdgeRegion.Right_Bottom;
             if (isVertical) return "Widget";
@@ -808,7 +814,7 @@ namespace DynamicBird.Core.Controllers
 
         private static bool IsValidPanelType(string type)
         {
-            return type is "Taskbar" or "Widget" or "AppHelper" or "Notification" or "Recent" or "QuickSettings";
+            return type is "Taskbar" or "Widget" or "AppHelper" or "Notification" or "Recent" or "QuickSettings" or "AI";
         }
     }
 }

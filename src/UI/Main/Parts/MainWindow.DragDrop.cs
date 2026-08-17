@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using DynamicBird.Core.Services;
 using DynamicBird.Infrastructure.WinApi;
@@ -20,6 +20,7 @@ namespace DynamicBird.UI.Main
         private IconState _currentIconState = IconState.Default;
         private bool _isHovering = false;
         private AppHelperView? _appHelperView;
+        private DynamicBird.UI.AI.AiChatView? _aiChatView;
 
         private void UpdateIconTextInternal()
         {
@@ -94,9 +95,24 @@ namespace DynamicBird.UI.Main
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                e.Effects = DragDropEffects.Copy;
-                _currentIconState = IconState.AddMode;
-                UpdateIconTextInternal();
+                var files = (string[]?)e.Data.GetData(DataFormats.FileDrop);
+                bool isAiPanel = _contentController?.CurrentRegionType == "AI";
+                bool hasFile = files is { Length: > 0 };
+                bool isImage = hasFile && IsImageFile(files![0]);
+
+                if (isAiPanel)
+                {
+                    // ★ AI 面板：接受文件（图片/文本/代码/docx 上传给 AI，不支持的给提示）
+                    e.Effects = DragDropEffects.Copy;
+                    _currentIconState = IconState.AddMode;
+                    UpdateIconTextInternal();
+                }
+                else
+                {
+                    e.Effects = DragDropEffects.Copy;
+                    _currentIconState = IconState.AddMode;
+                    UpdateIconTextInternal();
+                }
             }
             else if (e.Data.GetDataPresent(typeof(TaskbarItem)))
             {
@@ -124,6 +140,12 @@ namespace DynamicBird.UI.Main
             e.Handled = true;
         }
 
+        private static bool IsImageFile(string path)
+        {
+            string ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
+            return ext is ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".webp" or ".tiff" or ".tif";
+        }
+
         private void IconText_DragLeave(object sender, DragEventArgs e)
         {
             ResetIconToDefault();
@@ -146,6 +168,14 @@ namespace DynamicBird.UI.Main
                     if (files != null && files.Length > 0)
                     {
                         string path = files[0];
+
+                        // ★ AI 面板：拖入文件 = 上传给 AI（图片/文本/代码/docx，内部按类型分发）
+                        if (_contentController?.CurrentRegionType == "AI" && _aiChatView != null)
+                        {
+                            _ = _aiChatView.SendFileAsync(path);
+                            return;
+                        }
+
                         if (path.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
                             path = ShortcutLinkResolver.Resolve(path);
                         if (!string.IsNullOrEmpty(path) && System.IO.File.Exists(path))
@@ -214,6 +244,13 @@ namespace DynamicBird.UI.Main
                     return;
                 }
 
+                // ★ AI 面板：点击图标不触发勿扰模式（避免面板内容被误隐藏）
+                if (_contentController?.CurrentRegionType == "AI")
+                {
+                    e.Handled = true;
+                    return;
+                }
+
                 bool newState = !_modeService.IsDoNotDisturb;
                 _modeService.IsDoNotDisturb = newState;
 
@@ -269,6 +306,7 @@ namespace DynamicBird.UI.Main
         internal void OnPanelContentChanged()
         {
             _appHelperView = ContentContainer.Content as AppHelperView;
+            _aiChatView = ContentContainer.Content as DynamicBird.UI.AI.AiChatView;
             UpdateIconTooltip();
         }
 
@@ -276,9 +314,22 @@ namespace DynamicBird.UI.Main
         {
             if (_contentController == null) return;
 
-            IconPath.ToolTip = _contentController.CurrentRegionType == "AppHelper"
-                ? "点击切换辅助功能（媒体控制 / 画中画 / 音乐播放器）\n右键打开快捷菜单"
-                : "点击切换勿扰模式\n拖拽应用到图标可固定 / 删除\n右键打开快捷菜单";
+            string tooltip = _contentController.CurrentRegionType switch
+            {
+                "AppHelper" =>
+                    "点击切换辅助功能（媒体控制 / 画中画 / 音乐播放器）\n右键打开快捷菜单",
+
+                "AI" =>
+                    "点击切换勿扰模式\n拖入文件（图片 / 文本 / 代码 / Word）即可上传给 AI 分析\n右键打开快捷菜单",
+
+                "Taskbar" =>
+                    "点击切换勿扰模式\n拖拽应用/文件到图标可固定到任务栏，拖走可删除\n右键打开快捷菜单",
+
+                _ =>
+                    "点击切换勿扰模式\n拖拽应用到图标可固定 / 删除\n右键打开快捷菜单"
+            };
+
+            IconPath.ToolTip = tooltip;
         }
 
         private void RefreshTaskbarView()

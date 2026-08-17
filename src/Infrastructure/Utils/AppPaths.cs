@@ -26,6 +26,9 @@ namespace DynamicBird.Infrastructure.Utils
         public static string ClipboardHistoryPath => Path.Combine(DataRoot, "clipboard_history.json");
         public static string ClipboardCacheDir => Path.Combine(DataRoot, "clipboard_cache");
         public static string SystemToastLogPath => Path.Combine(LogDirectory, "system-toast.log");
+        public static string AiSettingsPath => Path.Combine(DataRoot, "ai.json");
+        public static string AiHistoryPath => Path.Combine(DataRoot, "ai_history.json");
+        public static string AiSessionsPath => Path.Combine(DataRoot, "ai_sessions.json");
 
         /// <summary>是否运行在 MSIX 打包环境（Microsoft Store 版）。</summary>
         public static bool IsPackaged { get; } = DetectPackaged();

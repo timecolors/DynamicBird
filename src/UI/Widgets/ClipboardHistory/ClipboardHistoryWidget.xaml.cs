@@ -33,13 +33,13 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
 
         public void OnActivated()
         {
-            _clipboardService.StartListening();
+            // 剪贴板监听已由主窗口应用级常驻（保证 AI 面板复制等也进入历史）
             UpdateUI();
         }
 
         public void OnDeactivated()
         {
-            _clipboardService.StopListening();
+            // 不再停用全局监听
         }
 
         public FrameworkElement GetFooterControl()

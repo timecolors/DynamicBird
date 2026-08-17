@@ -163,6 +163,9 @@ namespace DynamicBird.UI.Main
 
                 _edgeController.RegionChanged += OnRegionChanged;
 
+                // ★ AI 面板内的“打开设置”按钮
+                DynamicBird.UI.AI.AiChatView.OpenSettingsRequested += OpenSettings;
+
                 _sizeController.UserResizeStarted += (started) =>
                 {
                     _isDragging = started;
@@ -177,6 +180,8 @@ namespace DynamicBird.UI.Main
                 StartEdgeTimer();
                 DynamicBird.Infrastructure.WinApi.ToastMonitor.Start();
                 DynamicBird.Infrastructure.WinApi.RecentAppTracker.Start();
+                // ★ 剪贴板监听应用级常驻：任何来源的复制（含 AI 面板“复制”按钮）都会进入历史
+                _clipboardService.StartListening();
                 CheckForUpdatesAsync();
                 // 首次启动：等界面就绪后弹出引导窗口
                 Dispatcher.BeginInvoke(new Action(ShowOnboardingIfNeeded),
@@ -371,12 +376,16 @@ namespace DynamicBird.UI.Main
                     //   但仍跟随边缘滑动实时更新位置
                     if (isInsidePanel && _visibilityController.IsVisible)
                     {
+                        // 用户已直接用鼠标与面板交互：解除热键钉住，恢复自动隐藏
+                        _visibilityController.SetHotkeyPinned(false);
                         _visibilityController.CancelHide();
                         _visibilityController.UpdateEdge(_edgeController.CurrentEdge);
                         _edgeController.FollowMouseInPanel(region, mouseX, mouseY, screenW, screenH);
                     }
                     else if (region != EdgeRegion.Unknown)
                     {
+                        // 鼠标回到屏幕边缘：恢复正常的边缘触发行为
+                        _visibilityController.SetHotkeyPinned(false);
                         _edgeController.ProcessRegion(region, mouseX, mouseY, screenW, screenH);
                         _visibilityController.UpdateEdge(_edgeController.CurrentEdge);
 
@@ -415,6 +424,7 @@ namespace DynamicBird.UI.Main
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Timer error: {ex.Message}");
+                    DynamicBird.Core.Infrastructure.Logging.LogManager.Error("边缘定时器异常", ex);
                 }
             };
             _edgeTimer.Start();
@@ -591,6 +601,7 @@ namespace DynamicBird.UI.Main
             _edgeTimer = null;
             DynamicBird.Infrastructure.WinApi.ToastMonitor.Stop();
             DynamicBird.Infrastructure.WinApi.RecentAppTracker.Stop();
+            try { _clipboardService.StopListening(); } catch { }
 
             try { _dragController?.Detach(); } catch { }
             try { (_shapeAnimator as IDisposable)?.Dispose(); } catch { }
