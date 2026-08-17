@@ -685,6 +685,39 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
                     <StackPanel>
 
+                        <!-- ========== 状态栏与天气 ========== -->
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="📊 状态栏显示项" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                                <TextBlock Text="选择面板顶部状态栏要显示的项。"
+                                           FontSize="11" Foreground="#777777" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                                <WrapPanel>
+                                    <CheckBox x:Name="chkStatusTime" Content="时间" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusCpu" Content="CPU" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusMemory" Content="内存" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusFps" Content="帧率" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusVolume" Content="音量" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusNetwork" Content="网络" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusBattery" Content="电量" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusWeather" Content="天气" FontSize="12" Margin="0,0,0,6"/>
+                                </WrapPanel>
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="城市" VerticalAlignment="Center" FontSize="12"/>
+                                    <ComboBox Grid.Column="1" x:Name="cmbWeatherCity" IsEditable="True"
+                                              IsTextSearchEnabled="False" FontSize="12" Height="30"
+                                              VerticalContentAlignment="Center" Padding="4,0"
+                                              SelectionChanged="CmbWeatherCity_SelectionChanged"
+                                              ToolTip="输入城市名会自动联想（如 北京 / Shanghai / New York）；留空则按网络 IP 自动定位。"/>
+                                </Grid>
+                                <TextBlock Text="启用天气后，灵动鸟会向 open-meteo.com（天气与城市联想）与 ipwho.is（IP 定位）发起请求，仅在你勾选“天气”时发生。"
+                                           FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
                         <Border Background="#FFFFFF"
                                 CornerRadius="8"
                                 Padding="10,8"
@@ -1069,6 +1102,117 @@
                 </ScrollViewer>
             </TabItem>
 
+
+            <!-- ====== ★★★ 选项卡5：AI 助手设置 ★★★ ====== -->
+            <TabItem Header="🤖 AI">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                    <StackPanel>
+
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🤖 AI 助手" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                                <TextBlock Text="灵动鸟内置 AI 助手：对话、翻译、总结、解释代码等。你的 API Key 只保存在本机（ai.json），请求直接发往你选择的模型服务商，不经任何中间服务器。"
+                                           FontSize="11" Foreground="#777777" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                <CheckBox x:Name="chkAiEnabled" Content="启用 AI 助手" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🏢 服务商预设" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBlock Text="选择后自动填入 API 地址与常见模型，也可手动修改。"
+                                           FontSize="11" Foreground="#777777" Margin="0,0,0,6"/>
+                                <ComboBox x:Name="cmbAiProvider" Width="260" FontSize="12" HorizontalAlignment="Left" SelectionChanged="CmbAiProvider_SelectionChanged"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🌐 API 地址" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBox x:Name="txtAiBaseUrl" FontSize="12" Padding="6,4"/>
+                                <TextBlock Text="OpenAI 兼容的 Chat Completions 地址，例如 https://api.deepseek.com/v1、http://localhost:11434/v1（Ollama）"
+                                           FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🔑 API Key" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <PasswordBox x:Name="pwdAiKey" FontSize="12" Padding="6,4"/>
+                                <TextBlock Text="仅保存在本机 %LOCALAPPDATA%\DynamicBird\ai.json，不会上传。留空表示无需鉴权（如本地 Ollama）。"
+                                           FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🧠 模型" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBox x:Name="txtAiModel" FontSize="12" Padding="6,4"/>
+                                <TextBlock Text="填写服务商支持的模型名，例如 deepseek-chat、gpt-4o-mini、llama3.2。"
+                                           FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="📝 系统提示词" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBox x:Name="txtAiSystemPrompt" FontSize="12" Padding="6,4" MinHeight="56" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="⚙️ 高级" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="44"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="温度" VerticalAlignment="Center" FontSize="12"/>
+                                    <Slider Grid.Column="1" x:Name="sldAiTemperature" Minimum="0" Maximum="2" Value="0.7"
+                                            TickFrequency="0.1" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Column="2" x:Name="txtAiTemperature" Text="0.7" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="44"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="上下文窗口" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Column="1" x:Name="txtAiContextWindow" Text="32768" FontSize="12" Padding="4,2" VerticalContentAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="token" FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" TextAlignment="Right"/>
+                                </Grid>
+                                <TextBlock Text="超过窗口时自动丢弃最早的对话。常见值：DeepSeek 64K、GPT-4o 128K、本地 Ollama 8K。设为 0 不裁剪。"
+                                           FontSize="10.5" Foreground="#888888" Margin="80,0,0,8" TextWrapping="Wrap"/>
+                                <CheckBox x:Name="chkAiWebSearch" Content="联网搜索（需服务商支持，如 DeepSeek）" FontSize="12" Margin="0,0,0,6"/>
+                                <CheckBox x:Name="chkAiReasoning" Content="深度思考（需模型支持，如 reasoning_effort / reasoner 模型）" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button x:Name="btnAiTest" Grid.Column="0" Content="测试连接" Width="90" Height="30"
+                                            Style="{StaticResource Win11Button}" FontSize="12" Click="BtnAiTest_Click"/>
+                                    <TextBlock x:Name="txtAiTestStatus" Grid.Column="1" FontSize="11.5"
+                                               VerticalAlignment="Center" Margin="10,0,0,0" TextWrapping="Wrap"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock FontSize="11" Foreground="#888888"
+                                   Text="🔒 隐私：灵动鸟不收集、不上传任何 AI 对话数据。所有请求由本机直接发送到你选择的模型服务商，受该服务商的隐私政策约束。"
+                                   TextWrapping="Wrap"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
         </TabControl>
 
         <!-- 底部按钮 -->

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DynamicBird.Core.Infrastructure.Logging;
 using DynamicBird.Core.Infrastructure.Service;
 
@@ -358,6 +358,20 @@ namespace DynamicBird.Core.Services.Configuration
             get => _data.OnboardingCompleted;
             set { _data.OnboardingCompleted = value; Save(); }
         }
+
+        // ========== 状态栏显示项 ==========
+        public bool StatusShowTime { get => _data.StatusShowTime; set { _data.StatusShowTime = value; Save(); } }
+        public bool StatusShowCpu { get => _data.StatusShowCpu; set { _data.StatusShowCpu = value; Save(); } }
+        public bool StatusShowMemory { get => _data.StatusShowMemory; set { _data.StatusShowMemory = value; Save(); } }
+        public bool StatusShowFps { get => _data.StatusShowFps; set { _data.StatusShowFps = value; Save(); } }
+        public bool StatusShowVolume { get => _data.StatusShowVolume; set { _data.StatusShowVolume = value; Save(); } }
+        public bool StatusShowNetwork { get => _data.StatusShowNetwork; set { _data.StatusShowNetwork = value; Save(); } }
+        public bool StatusShowBattery { get => _data.StatusShowBattery; set { _data.StatusShowBattery = value; Save(); } }
+        public bool StatusShowWeather { get => _data.StatusShowWeather; set { _data.StatusShowWeather = value; Save(); } }
+
+        // ========== 天气 ==========
+        public bool WeatherEnabled { get => _data.WeatherEnabled; set { _data.WeatherEnabled = value; Save(); } }
+        public string? WeatherCity { get => _data.WeatherCity; set { _data.WeatherCity = value; Save(); } }
 
         // ========== 勿扰模式 ==========
         public bool RememberDndMode

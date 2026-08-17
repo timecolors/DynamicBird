@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using DynamicBird.Core.Services.Configuration;
+using DynamicBird.Infrastructure.WinApi;
 using NAudio.CoreAudioApi;
 
 namespace DynamicBird.UI.Status
@@ -12,6 +14,7 @@ namespace DynamicBird.UI.Status
     public partial class SystemStatusView : UserControl
     {
         private DispatcherTimer _timer;
+        private DispatcherTimer? _weatherTimer;
         private PerformanceCounter? _cpuCounter;
         private PerformanceCounter? _memoryCounter;
         private int _frameCount = 0;
@@ -19,6 +22,9 @@ namespace DynamicBird.UI.Status
         private int _currentFps = 0;
 
         private MMDevice? _audioDevice;
+        private ISettingsService? _settings;
+        private bool _weatherEnabled;
+        private string _weatherCity = "";
 
         public SystemStatusView()
         {
@@ -50,9 +56,56 @@ namespace DynamicBird.UI.Status
             Unloaded += (s, e) =>
             {
                 _timer?.Stop();
+                _weatherTimer?.Stop();
                 CompositionTarget.Rendering -= OnRendering;
                 _audioDevice?.Dispose();
             };
+        }
+
+        /// <summary>应用设置：控制各状态项显隐与天气开关。</summary>
+        public void ApplySettings(ISettingsService settings)
+        {
+            _settings = settings;
+            _weatherEnabled = settings.WeatherEnabled;
+            _weatherCity = settings.WeatherCity ?? "";
+
+            SetVisible(TimePanel, settings.StatusShowTime);
+            SetVisible(CpuPanel, settings.StatusShowCpu);
+            SetVisible(MemoryPanel, settings.StatusShowMemory);
+            SetVisible(FpsPanel, settings.StatusShowFps);
+            SetVisible(VolumePanel, settings.StatusShowVolume);
+            SetVisible(NetworkPanel, settings.StatusShowNetwork);
+            SetVisible(BatteryPanel, settings.StatusShowBattery);
+            SetVisible(WeatherPanel, settings.StatusShowWeather && _weatherEnabled);
+
+            if (_weatherEnabled && settings.StatusShowWeather)
+            {
+                WeatherText.Text = "天气…";
+                _ = RefreshWeatherAsync();
+                _weatherTimer ??= new DispatcherTimer { Interval = TimeSpan.FromMinutes(15) };
+                _weatherTimer.Tick += (_, _) => _ = RefreshWeatherAsync();
+                _weatherTimer.Start();
+            }
+            else
+            {
+                _weatherTimer?.Stop();
+            }
+        }
+
+        private static void SetVisible(FrameworkElement el, bool visible)
+        {
+            el.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private async System.Threading.Tasks.Task RefreshWeatherAsync()
+        {
+            var w = await WeatherService.GetWeatherAsync(_weatherCity);
+
+            // 确保回到 UI 线程更新（await 可能在无 SynchronizationContext 时落到线程池）
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                WeatherText.Text = w.HasValue ? w.Value.Text : "天气不可用";
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         private void InitAudioDevice()

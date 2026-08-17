@@ -1,4 +1,5 @@
-﻿using DynamicBird.Core.Services;
+using DynamicBird.Core.Services;
+using DynamicBird.Core.Services.Ai;
 using DynamicBird.Core.Services.Configuration;
 using DynamicBird.Infrastructure.Utils;
 using DynamicBird.src.core.Services.Shortcuts;
@@ -29,6 +30,7 @@ namespace DynamicBird.UI.Settings
             ("Notification", "通知坞"),
             ("Recent", "最近使用"),
             ("QuickSettings", "快捷设置"),
+            ("AI", "AI 助手"),
         };
 
         private static readonly string[] RegionPanelKeys =
@@ -50,6 +52,13 @@ namespace DynamicBird.UI.Settings
             SourceInitialized += (_, _) => TryApplyMicaBackdrop();
             LoadSettings();
             LoadShortcutPage();
+
+            // 可编辑 ComboBox 的文本变化：订阅内部 TextBox 冒泡的路由事件
+            cmbWeatherCity.AddHandler(TextBox.TextChangedEvent,
+                new TextChangedEventHandler(CmbWeatherCity_TextChanged));
+
+            // AI 高级参数滑块
+            sldAiTemperature.ValueChanged += (s, e) => txtAiTemperature.Text = sldAiTemperature.Value.ToString("F1");
 
             // 滑块事件绑定
             sldOpacity.ValueChanged += (s, e) => txtOpacityValue.Text = sldOpacity.Value.ToString("F2");
@@ -212,6 +221,17 @@ namespace DynamicBird.UI.Settings
                 SelectPanelValue(combo, _settings.GetRegionPanel(key));
             }
 
+            // ★★★ 状态栏显示项与天气 ★★★
+            chkStatusTime.IsChecked = _settingsData.StatusShowTime;
+            chkStatusCpu.IsChecked = _settingsData.StatusShowCpu;
+            chkStatusMemory.IsChecked = _settingsData.StatusShowMemory;
+            chkStatusFps.IsChecked = _settingsData.StatusShowFps;
+            chkStatusVolume.IsChecked = _settingsData.StatusShowVolume;
+            chkStatusNetwork.IsChecked = _settingsData.StatusShowNetwork;
+            chkStatusBattery.IsChecked = _settingsData.StatusShowBattery;
+            chkStatusWeather.IsChecked = _settingsData.StatusShowWeather;
+            cmbWeatherCity.Text = _settingsData.WeatherCity ?? "";
+
             // ★★★ 自动更新 ★★★
             chkAutoCheckUpdate.IsChecked = _settingsData.AutoCheckUpdate;
             UpdateUpdateStatus();
@@ -222,6 +242,45 @@ namespace DynamicBird.UI.Settings
             // ★★★ 关于与隐私 ★★★
             var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             txtAbout.Text = $"灵动鸟 DynamicBird  v{ver?.ToString(3) ?? "1.0.0"}";
+
+            // ★★★ AI 助手设置 ★★★
+            LoadAiSettings();
+        }
+
+        private bool _loadingAi;
+
+        private void LoadAiSettings()
+        {
+            var ai = AiSettingsStore.Load();
+            _loadingAi = true;
+            chkAiEnabled.IsChecked = ai.Enabled;
+            txtAiBaseUrl.Text = ai.BaseUrl;
+            pwdAiKey.Password = ai.ApiKey;
+            txtAiModel.Text = ai.Model;
+            txtAiSystemPrompt.Text = ai.SystemPrompt;
+            sldAiTemperature.Value = Math.Clamp(ai.Temperature, 0, 2);
+            txtAiTemperature.Text = ai.Temperature.ToString("F1");
+            txtAiContextWindow.Text = ai.ContextWindowTokens.ToString();
+            chkAiWebSearch.IsChecked = ai.EnableWebSearch;
+            chkAiReasoning.IsChecked = ai.EnableReasoning;
+
+            cmbAiProvider.Items.Clear();
+            foreach (var (name, display, _, _) in AiSettings.Presets)
+            {
+                cmbAiProvider.Items.Add(new ComboBoxItem { Content = display, Tag = name });
+            }
+            int idx = -1;
+            for (int i = 0; i < AiSettings.Presets.Length; i++)
+            {
+                if (string.Equals(ai.BaseUrl.TrimEnd('/'),
+                        AiSettings.Presets[i].Url.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+                {
+                    idx = i;
+                    break;
+                }
+            }
+            cmbAiProvider.SelectedIndex = idx;
+            _loadingAi = false;
         }
 
         private void UpdateUpdateStatus()
@@ -266,6 +325,107 @@ namespace DynamicBird.UI.Settings
             finally
             {
                 btnCheckUpdate.IsEnabled = true;
+            }
+        }
+
+        // ========== 天气城市联想 ==========
+
+        private System.Windows.Threading.DispatcherTimer? _citySearchTimer;
+        private bool _citySelecting;
+
+        private void CmbWeatherCity_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_citySelecting) return;
+            _citySearchTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+            _citySearchTimer.Tick -= CitySearchTick;
+            _citySearchTimer.Tick += CitySearchTick;
+            _citySearchTimer.Stop();
+            _citySearchTimer.Start();
+        }
+
+        private async void CitySearchTick(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (_citySearchTimer != null) _citySearchTimer.Stop();
+                string q = cmbWeatherCity.Text.Trim();
+                if (q.Length < 2)
+                {
+                    cmbWeatherCity.ItemsSource = null;
+                    cmbWeatherCity.IsDropDownOpen = false;
+                    return;
+                }
+                var cities = await DynamicBird.Infrastructure.WinApi.WeatherService.SearchCitiesAsync(q);
+                if (cmbWeatherCity.Text.Trim() != q) return; // 输入已变化，丢弃过期结果
+                cmbWeatherCity.ItemsSource = cities;
+                cmbWeatherCity.IsDropDownOpen = cities.Count > 0;
+            }
+            catch { }
+        }
+
+        private void CmbWeatherCity_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbWeatherCity.SelectedItem is DynamicBird.Infrastructure.WinApi.WeatherService.CitySuggestion city)
+            {
+                _citySelecting = true;
+                cmbWeatherCity.Text = city.Name;
+                _citySelecting = false;
+                cmbWeatherCity.IsDropDownOpen = false;
+            }
+        }
+
+        // ========== AI 助手设置事件 ==========
+
+        private void CmbAiProvider_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loadingAi) return;
+            if (cmbAiProvider.SelectedItem is ComboBoxItem item && item.Tag is string name)
+            {
+                var preset = Array.Find(AiSettings.Presets, p => p.Name == name);
+                if (preset.Name != null)
+                {
+                    txtAiBaseUrl.Text = preset.Url;
+                    txtAiModel.Text = preset.Model;
+                }
+            }
+        }
+
+        private async void BtnAiTest_Click(object sender, RoutedEventArgs e)
+        {
+            var testSettings = new AiSettings
+            {
+                Enabled = true,
+                BaseUrl = string.IsNullOrWhiteSpace(txtAiBaseUrl.Text) ? "https://api.deepseek.com/v1" : txtAiBaseUrl.Text.Trim(),
+                ApiKey = pwdAiKey.Password ?? "",
+                Model = string.IsNullOrWhiteSpace(txtAiModel.Text) ? "deepseek-chat" : txtAiModel.Text.Trim()
+            };
+
+            btnAiTest.IsEnabled = false;
+            txtAiTestStatus.Text = "测试中…";
+            txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(120, 120, 120));
+            try
+            {
+                using var client = new AiChatClient();
+                string? err = await client.TestConnectionAsync(testSettings);
+                if (err == null)
+                {
+                    txtAiTestStatus.Text = "✅ 连接成功";
+                    txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(60, 170, 90));
+                }
+                else
+                {
+                    txtAiTestStatus.Text = "❌ " + err;
+                    txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(200, 80, 70));
+                }
+            }
+            catch (Exception ex)
+            {
+                txtAiTestStatus.Text = "❌ " + ex.Message;
+                txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(200, 80, 70));
+            }
+            finally
+            {
+                btnAiTest.IsEnabled = true;
             }
         }
 
@@ -448,8 +608,35 @@ namespace DynamicBird.UI.Settings
                 _settings.SetRegionPanel(key, GetSelectedPanelValue(combo));
             }
 
+            // ★★★ 状态栏显示项与天气 ★★★
+            _settingsData.StatusShowTime = chkStatusTime.IsChecked ?? true;
+            _settingsData.StatusShowCpu = chkStatusCpu.IsChecked ?? true;
+            _settingsData.StatusShowMemory = chkStatusMemory.IsChecked ?? true;
+            _settingsData.StatusShowFps = chkStatusFps.IsChecked ?? true;
+            _settingsData.StatusShowVolume = chkStatusVolume.IsChecked ?? true;
+            _settingsData.StatusShowNetwork = chkStatusNetwork.IsChecked ?? true;
+            _settingsData.StatusShowBattery = chkStatusBattery.IsChecked ?? true;
+            _settingsData.StatusShowWeather = chkStatusWeather.IsChecked ?? false;
+            _settingsData.WeatherCity = cmbWeatherCity.Text.Trim();
+
             // ★★★ 自动更新 ★★★
             _settingsData.AutoCheckUpdate = chkAutoCheckUpdate.IsChecked ?? true;
+
+            // ★★★ AI 助手设置（独立存储） ★★★
+            int.TryParse(txtAiContextWindow.Text, out int contextWindow);
+            var aiSettings = new AiSettings
+            {
+                Enabled = chkAiEnabled.IsChecked ?? false,
+                BaseUrl = string.IsNullOrWhiteSpace(txtAiBaseUrl.Text) ? "https://api.deepseek.com/v1" : txtAiBaseUrl.Text.Trim(),
+                ApiKey = pwdAiKey.Password ?? "",
+                Model = string.IsNullOrWhiteSpace(txtAiModel.Text) ? "deepseek-chat" : txtAiModel.Text.Trim(),
+                Temperature = sldAiTemperature.Value,
+                ContextWindowTokens = Math.Max(0, contextWindow),
+                EnableWebSearch = chkAiWebSearch.IsChecked ?? false,
+                EnableReasoning = chkAiReasoning.IsChecked ?? false,
+                SystemPrompt = txtAiSystemPrompt.Text
+            };
+            AiSettingsStore.Save(aiSettings);
 
             // 保存
             SettingsDataManager.Save(_settingsData);

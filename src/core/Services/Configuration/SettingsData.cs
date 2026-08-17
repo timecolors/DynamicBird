@@ -1,9 +1,12 @@
-﻿using System;
+using System;
 
 namespace DynamicBird.Core.Services.Configuration
 {
     public class SettingsData
     {
+        // ========== 语言（zh-CN / en-US，空=跟随系统） ==========
+        public string? Language { get; set; } = "zh-CN";
+
         public bool Edge_Top { get; set; } = true;
         public bool Edge_Bottom { get; set; } = true;
         public bool Edge_Left { get; set; } = true;
@@ -156,5 +159,19 @@ namespace DynamicBird.Core.Services.Configuration
 
         // ========== 首次引导 ==========
         public bool OnboardingCompleted { get; set; } = false;
+
+        // ========== 状态栏显示项 ==========
+        public bool StatusShowTime { get; set; } = true;
+        public bool StatusShowCpu { get; set; } = true;
+        public bool StatusShowMemory { get; set; } = true;
+        public bool StatusShowFps { get; set; } = true;
+        public bool StatusShowVolume { get; set; } = true;
+        public bool StatusShowNetwork { get; set; } = true;
+        public bool StatusShowBattery { get; set; } = true;
+        public bool StatusShowWeather { get; set; } = false;
+
+        // ========== 天气（Open-Meteo，免费无 Key） ==========
+        public bool WeatherEnabled { get; set; } = false;
+        public string? WeatherCity { get; set; } = "";   // 空 = 按 IP 自动定位
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -84,8 +84,12 @@ namespace DynamicBird.UI.Main
             {
                 if (_settingsService.ShowSystemStatus)
                 {
-                    if (SystemStatusContainer.Content == null)
-                        SystemStatusContainer.Content = new SystemStatusView();
+                    if (SystemStatusContainer.Content is not DynamicBird.UI.Status.SystemStatusView statusView)
+                    {
+                        statusView = new DynamicBird.UI.Status.SystemStatusView();
+                        SystemStatusContainer.Content = statusView;
+                    }
+                    statusView.ApplySettings(_settingsService);
                     SystemStatusContainer.Visibility = Visibility.Visible;
                 }
                 else

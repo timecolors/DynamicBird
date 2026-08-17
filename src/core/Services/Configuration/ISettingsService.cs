@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DynamicBird.Core.Services.Configuration
 {
@@ -101,6 +101,20 @@ namespace DynamicBird.Core.Services.Configuration
 
         /// <summary>是否已完成首次使用引导。</summary>
         bool OnboardingCompleted { get; set; }
+
+        // ========== 状态栏显示项 ==========
+        bool StatusShowTime { get; set; }
+        bool StatusShowCpu { get; set; }
+        bool StatusShowMemory { get; set; }
+        bool StatusShowFps { get; set; }
+        bool StatusShowVolume { get; set; }
+        bool StatusShowNetwork { get; set; }
+        bool StatusShowBattery { get; set; }
+        bool StatusShowWeather { get; set; }
+
+        // ========== 天气 ==========
+        bool WeatherEnabled { get; set; }
+        string? WeatherCity { get; set; }
 
         // ========== 重新加载 ==========
         void Reload();
