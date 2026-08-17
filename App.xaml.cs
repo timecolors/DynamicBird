@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -29,6 +29,14 @@ namespace DynamicBird
 
             // 初始化日志系统（最先执行）
             LogManager.Initialize(LogLevel.Debug);
+
+            // ★ 本地化：按配置语言初始化（zh-CN / en-US，空=跟随系统）
+            try
+            {
+                var lang = DynamicBird.Core.Services.SettingsFileManager.Load().Language;
+                DynamicBird.UI.Localization.LocalizationManager.Instance.SetCulture(lang);
+            }
+            catch { }
 
             // ★ 后台注册 AppUserModelID（创建开始菜单快捷方式），保证系统 Toast 可显示
             try

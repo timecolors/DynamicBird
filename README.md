@@ -35,6 +35,11 @@
 - **音量与亮度**、**蓝牙**、**Wi-Fi**、**移动热点**、**省电模式**、快速打开 Windows 设置
 - Volume & brightness, Bluetooth, Wi-Fi, mobile hotspot, battery saver, and quick access to Windows Settings.
 
+### 🤖 AI 助手 / AI Assistant
+- 左边缘中间区域默认呼出 **AI 聊天面板**：流式对话、Markdown 渲染、快捷指令（翻译/总结/解释代码/润色）、历史记忆
+- 在设置 → AI 中填写 **OpenAI 兼容** 服务商（DeepSeek / OpenAI / SiliconFlow / Ollama 本地 / OpenRouter / Moonshot / 智谱 / Groq…）与模型，**API Key 仅保存在本机**，请求直连你选择的模型服务商，无账号、无中间服务器
+- AI Assistant panel on the left-center edge: streaming chat, Markdown, quick presets, and history. Bring your own OpenAI-compatible provider & API key — stored locally only.
+
 ### 通知坞与最近使用 / Notification Dock & Recent Items
 - 聚合系统通知；一键打开最近使用的程序、文件与网页
 - Aggregate system notifications; reopen recently used apps, files, and web pages in one click.
@@ -101,7 +106,20 @@ dotnet publish -c Release -p:PublishProfile=win-x64
 
 # 打包 MSIX（商店版，需要 Windows SDK）
 .\packaging\build-msix.ps1
+
+# 单元测试（边缘检测/配置序列化/更新解析）
+dotnet test tests/DynamicBird.Tests/DynamicBird.Tests.csproj
 ```
+
+> 已配置 [GitHub Actions](.github/workflows/build.yml)：每次推送自动构建 + 单元测试 + 冒烟测试；
+> 打 `v*` tag 时自动发布 win-x64 单文件、打包 MSIX 并生成 Release 草稿。
+
+---
+
+## 🌐 本地化 / Localization
+
+内置中英双语（zh-CN 默认 / en-US），配置项 `Language` 切换，空值跟随系统。
+新增字符串与语言详见 [docs/LOCALIZATION.md](docs/LOCALIZATION.md)。
 
 ---
 

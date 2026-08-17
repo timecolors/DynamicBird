@@ -85,7 +85,8 @@
                     <Border Background="#FFFFFF" CornerRadius="8" Padding="14,10" Margin="0,0,0,10">
                         <StackPanel>
                             <TextBlock Text="上 / 下 / 左 / 右边缘" FontWeight="SemiBold" FontSize="13"/>
-                            <TextBlock Text="鼠标移到屏幕边缘即呼出对应面板（任务栏、应用辅助等），移开自动隐藏。" FontSize="12" Foreground="#555555" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            <TextBlock Text="鼠标移到屏幕边缘即呼出对应面板，移开自动隐藏。默认分工：&#x0a;左边缘中间 = AI 助手　·　上 / 下 / 右边缘中心 = 应用辅助（画中画、媒体控制）&#x0a;上下边缘两侧 = 任务栏　·　左右边缘 = 小组件" FontSize="12" Foreground="#555555" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            <TextBlock Text="每个区域显示什么面板都能在设置里自由指定（包括 AI 助手）。" FontSize="11" Foreground="#888888" TextWrapping="Wrap" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
                     <Border Background="#FFFFFF" CornerRadius="8" Padding="14,10" Margin="0,0,0,10">
@@ -162,6 +163,12 @@
                         <StackPanel>
                             <TextBlock Text="状态栏快捷操作" FontWeight="SemiBold" FontSize="13"/>
                             <TextBlock Text="面板顶部的状态栏显示时间、CPU、内存、音量等信息；把鼠标悬停在音量百分比上滚动滚轮，即可直接调大调小音量。" FontSize="12" Foreground="#555555" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#FFFFFF" CornerRadius="8" Padding="14,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="AI 助手" FontWeight="SemiBold" FontSize="13"/>
+                            <TextBlock Text="左边缘中间呼出 AI 对话面板：流式回复、快捷指令（翻译 / 总结 / 解释代码 / 润色）、多会话管理。&#x0a;把图片文件拖到面板左侧的灵动鸟图标，即可把图片发给 AI 分析（需模型支持识图，如 gpt-4o、glm-4v、qwen-vl 等）。&#x0a;在 设置 → AI 中填一个 OpenAI 兼容的服务商（DeepSeek、Ollama 本地、SiliconFlow 等）与模型即可使用；API Key 只保存在本机，请求直连你选择的服务商。" FontSize="12" Foreground="#555555" TextWrapping="Wrap" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
                     <Border Background="#FFFFFF" CornerRadius="8" Padding="14,10">

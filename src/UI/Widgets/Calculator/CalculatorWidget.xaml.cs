@@ -39,7 +39,7 @@ namespace DynamicBird.UI.Widgets.Calculator
         {
             var status = new TextBlock
             {
-                Text = "支持键盘输入",
+                Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Calculator_FooterHint"],
                 FontSize = 10,
                 Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(102, 102, 102)),
                 VerticalAlignment = VerticalAlignment.Center

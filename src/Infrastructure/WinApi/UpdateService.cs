@@ -187,7 +187,7 @@ namespace DynamicBird.Infrastructure.WinApi
             }
         }
 
-        private static Version? ParseVersion(string tag)
+        internal static Version? ParseVersion(string tag)
         {
             string v = tag.TrimStart('v', 'V');
             int cut = v.IndexOfAny(new[] { '-', '+' });
@@ -195,7 +195,7 @@ namespace DynamicBird.Infrastructure.WinApi
             return Version.TryParse(v, out var ver) ? ver : null;
         }
 
-        private static string ParseSha256(string? body)
+        internal static string ParseSha256(string? body)
         {
             if (string.IsNullOrEmpty(body)) return "";
             foreach (var line in body.Split('\n'))

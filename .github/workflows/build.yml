@@ -1,0 +1,128 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: Build + Unit Tests + Smoke
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore DynamicBird.sln
+
+      - name: Build Debug
+        run: dotnet build DynamicBird.sln -c Debug --no-restore -v minimal
+
+      - name: Unit Tests
+        run: dotnet test tests/DynamicBird.Tests/DynamicBird.Tests.csproj -c Debug --no-build -v minimal
+
+      - name: Smoke Test
+        shell: pwsh
+        run: |
+          $p = Join-Path $env:RUNNER_TEMP "smoke"
+          New-Item -ItemType Directory -Force -Path $p | Out-Null
+          dotnet build tools/SmokeTest/SmokeTest.csproj -c Debug -o $p -v minimal
+          $proc = Start-Process -FilePath (Join-Path $p "SmokeTest.exe") -WorkingDirectory $p -PassThru
+          Start-Sleep -Seconds 25
+          if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
+          $result = Get-Content (Join-Path $p "smoke-result.txt") -ErrorAction SilentlyContinue
+          if (-not $result -or -not $result.StartsWith("SMOKE OK")) {
+            Write-Error "Smoke test failed: $result"
+          } else {
+            Write-Output $result
+          }
+
+  publish:
+    name: Publish win-x64 (single-file)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Publish
+        run: dotnet publish DynamicBird.csproj -c Release -p:PublishProfile=win-x64 -v minimal
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DynamicBird-win-x64
+          path: bin/publish/win-x64/DynamicBird.exe
+
+  msix:
+    name: Package MSIX (unsigned)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Publish
+        run: dotnet publish DynamicBird.csproj -c Release -p:PublishProfile=win-x64 -v minimal
+
+      - name: Build MSIX
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $ver = $tag.TrimStart('v')
+          .packaginguild-msix.ps1 -Version "$ver.0" -PublisherCN "CN=FAFCE538-611A-4FA6-9046-8E37F31B8034"
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DynamicBird-msix
+          path: packaging/Output/*.msix
+
+  release:
+    name: Draft GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [publish, msix]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: DynamicBird-win-x64
+          path: release
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: DynamicBird-msix
+          path: release-msix
+
+      - name: Assemble
+        shell: bash
+        run: |
+          mkdir -p final
+          cp release/DynamicBird.exe final/DynamicBird.exe
+          cp release-msix/*.msix final/ 2>/dev/null || true
+
+      - name: Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: DynamicBird ${{ github.ref_name }}
+          draft: true
+          files: final/*
