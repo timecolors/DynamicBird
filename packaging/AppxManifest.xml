@@ -7,7 +7,7 @@
   <!-- ★ 产品身份（来自合作伙伴中心 Product identity，勿手改） -->
   <Identity Name="TideHue.DynamicBird"
             Publisher="CN=FAFCE538-611A-4FA6-9046-8E37F31B8034"
-            Version="1.0.1.0"
+            Version="1.0.2.0"
             ProcessorArchitecture="x64"/>
 
   <Properties>

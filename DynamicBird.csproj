@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
@@ -13,9 +13,9 @@
 		<RootNamespace>DynamicBird</RootNamespace>
 
 		<!-- ★★★ 版本与产品信息（显示在文件属性/任务管理器/关于页） ★★★ -->
-		<Version>1.0.1</Version>
-		<FileVersion>1.0.1.0</FileVersion>
-		<AssemblyVersion>1.0.1.0</AssemblyVersion>
+		<Version>1.0.2</Version>
+		<FileVersion>1.0.2.0</FileVersion>
+		<AssemblyVersion>1.0.2.0</AssemblyVersion>
 		<Product>灵动鸟 DynamicBird</Product>
 		<AssemblyTitle>灵动鸟</AssemblyTitle>
 		<Description>Windows 桌面边缘面板工具</Description>
@@ -27,8 +27,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<!-- 供单元测试访问 internal 成员 -->
+		<InternalsVisibleTo Include="DynamicBird.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<!-- NuGet 包 -->
 		<PackageReference Include="NAudio" Version="2.3.0" />
+		<PackageReference Include="Serilog" Version="4.2.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="System.Management" Version="10.0.11" />
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
 	</ItemGroup>
@@ -61,6 +68,7 @@
 		<Page Include="src\UI\Widgets\ClipboardHistory\ClipboardHistoryWidget.xaml" />
 		<Page Include="src\UI\Widgets\Notes\NoteWidget.xaml" />
 		<Page Include="src\UI\Widgets\WidgetSwitcher.xaml" />
+		<Page Include="src\UI\AI\AiChatView.xaml" />
 
 		<!-- ★★★ 所有 CS 文件（递归包含） ★★★ -->
 		<Compile Include="src\**\*.cs" Exclude="**\obj\**\*.cs" />
@@ -72,6 +80,14 @@
 		<None Update="assets\icon.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+
+		<!-- ★★★ 本地化资源（中性=zh-CN，en-US 卫星资源） ★★★ -->
+		<EmbeddedResource Include="src\UI\Localization\Strings.resx">
+			<LogicalName>DynamicBird.UI.Localization.Strings.resources</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="src\UI\Localization\Strings.en-US.resx">
+			<LogicalName>DynamicBird.UI.Localization.Strings.en-US.resources</LogicalName>
+		</EmbeddedResource>
 		<None Update="Properties\Settings.settings">
 			<Generator>SettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
