@@ -88,7 +88,7 @@ jobs:
         run: |
           $tag = "${{ github.ref_name }}"
           $ver = $tag.TrimStart('v')
-          .packaginguild-msix.ps1 -Version "$ver.0" -PublisherCN "CN=FAFCE538-611A-4FA6-9046-8E37F31B8034"
+          ./packaging/build-msix.ps1 -Version "$ver.0" -PublisherCN "CN=FAFCE538-611A-4FA6-9046-8E37F31B8034"
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
