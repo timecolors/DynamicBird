@@ -1,4 +1,4 @@
-﻿using DynamicBird.Core.Infrastructure.Logging;
+using DynamicBird.Core.Infrastructure.Logging;
 using DynamicBird.UI.Settings;
 using System;
 using System.Windows;
@@ -46,6 +46,8 @@ namespace DynamicBird.UI.Main
 
                 if (_visibilityController.IsVisible)
                 {
+                    // ★ 解除钉住并隐藏；若面板处于“跟随边缘”状态则直接隐藏
+                    _visibilityController.SetHotkeyPinned(false);
                     _visibilityController.Hide();
                 }
                 else
@@ -56,6 +58,8 @@ namespace DynamicBird.UI.Main
                         _modeService.IsDoNotDisturb = false;
                         UpdateIconText();
                     }
+                    // ★ 钉住：避免 30ms 边缘定时器因鼠标不在边缘/面板上而立刻隐藏
+                    _visibilityController.SetHotkeyPinned(true);
                     _edgeController.ShowPanelAtAnchor();
                 }
             }

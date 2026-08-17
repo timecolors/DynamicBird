@@ -1,4 +1,4 @@
-﻿using DynamicBird.Animation;
+using DynamicBird.Animation;
 using DynamicBird.Core.Detection;
 using DynamicBird.Core.Services;
 using DynamicBird.Core.Services.Configuration;
@@ -24,6 +24,10 @@ namespace DynamicBird.Core.Controllers
         private DateTime _hideDelayStart = DateTime.MinValue;
         private int _hideDelayMs = 0;
         private bool _isInHideDelay = false;
+
+        // ★ 热键钉住：Ctrl+Alt+B 呼出的面板不随鼠标位置自动隐藏，
+        //   直到再次按热键、鼠标移到边缘/面板、或进入勿扰模式。
+        private bool _hotkeyPinned;
 
         // 显示状态（目标态）：避免定时器每 30ms 重复触发动画目标导致闪烁/透明度不稳
         private bool _visible;
@@ -74,6 +78,16 @@ namespace DynamicBird.Core.Controllers
         }
 
         public void SetPanelLock(bool locked) => _lockManager.SetLock(locked);
+
+        /// <summary>设置“热键钉住”状态：钉住期间面板不自动隐藏，直到解除或再次手动隐藏。</summary>
+        public void SetHotkeyPinned(bool pinned)
+        {
+            _hotkeyPinned = pinned;
+            if (pinned) CancelHide();
+        }
+
+        /// <summary>是否处于热键钉住状态。</summary>
+        public bool IsHotkeyPinned => _hotkeyPinned;
 
         public void Show(string edge = "")
         {
@@ -154,18 +168,27 @@ namespace DynamicBird.Core.Controllers
 
         public void ForceHide()
         {
+            _hotkeyPinned = false;
+            if (_lockManager.IsLocked) return;
+            if (!_visible && _mainPanel.Opacity <= 0.01) return;
+
             CancelHide();
             _visible = false;
-            if (_mainPanel.Opacity > 0)
-            {
-                _shapeAnimator.SetOpacityDirect(0);
-                PanelHidden?.Invoke();
-            }
+            _lastAnchorLeft = double.NaN;
+            _lastAnchorTop = double.NaN;
+
+            // 内容立即透明（避免黑块残留），同时把位置物理目标设为屏幕外，
+            // ShapeAnimator 会把窗口真正滑出屏幕（而不是留在原位变成黑块）
+            _shapeAnimator.SetOpacityDirect(0);
+            var (lx, ly) = GetSlideOutTarget();
+            _shapeAnimator.SetShowHideTarget(lx, ly, 0, allowOffscreen: true);
+            PanelHidden?.Invoke();
         }
 
         public void HideWithDelay()
         {
             if (_lockManager.IsLocked) return;
+            if (_hotkeyPinned) return; // ★ 热键呼出后面板不自动隐藏
             if (Mouse.LeftButton == MouseButtonState.Pressed) return;
             if (_mouseLeaveDetector.IsMouseNearPanel()) return;
             if (IsVisible == false) return;

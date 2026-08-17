@@ -65,7 +65,7 @@ namespace DynamicBird.UI.Widgets.Timer
         {
             var status = new TextBlock
             {
-                Text = "正计时 / 倒计时 / 闹钟：各模式独立计时与输入，切换不重置",
+                Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Timer_FooterHint"],
                 FontSize = 10,
                 Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102)),
                 VerticalAlignment = VerticalAlignment.Center
@@ -146,6 +146,13 @@ namespace DynamicBird.UI.Widgets.Timer
             s.Running = false;
             s.AlarmTriggered = false;
             s.EndUtc = null;
+
+            // ★ 修复：预设点击后同步输入框，避免“开始”时 ToggleCountDown
+            //   读取旧的 时/分 输入值覆盖预设时长（如点 1:00 实际从 5:00 开始）。
+            int totalSeconds = (int)s.TotalSeconds;
+            TxtHour.Text = (totalSeconds / 3600).ToString(CultureInfo.InvariantCulture);
+            TxtMin.Text = ((totalSeconds % 3600) / 60).ToString(CultureInfo.InvariantCulture);
+
             UpdateDisplay();
         }
 
