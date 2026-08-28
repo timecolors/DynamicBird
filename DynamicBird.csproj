@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-		<!-- 宸插畨瑁呮洿楂樹富鐗堟湰杩愯鏃讹紙濡?.NET 11锛夋椂鍏佽婊氬姩 -->
+		<!-- 已安装更高主版本运行时（如 .NET 11）时允许滚动 -->
 		<RollForward>LatestMajor</RollForward>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
@@ -12,27 +12,27 @@
 		<AssemblyName>DynamicBird</AssemblyName>
 		<RootNamespace>DynamicBird</RootNamespace>
 
-		<!-- 鈽呪槄鈽?鐗堟湰涓庝骇鍝佷俊鎭紙鏄剧ず鍦ㄦ枃浠跺睘鎬?浠诲姟绠＄悊鍣?鍏充簬椤碉級 鈽呪槄鈽?-->
+		<!-- ★★★ 版本与产品信息（显示在文件属性/任务管理器/关于页） ★★★ -->
 		<Version>1.0.3</Version>
 		<FileVersion>1.0.3.0</FileVersion>
 		<AssemblyVersion>1.0.3.0</AssemblyVersion>
-		<Product>鐏靛姩楦?DynamicBird</Product>
-		<AssemblyTitle>鐏靛姩楦?/AssemblyTitle>
-		<Description>Windows 妗岄潰杈圭紭闈㈡澘宸ュ叿</Description>
-		<Copyright>Copyright 漏 2026 TideHue</Copyright>
+		<Product>灵动鸟 DynamicBird</Product>
+		<AssemblyTitle>灵动鸟</AssemblyTitle>
+		<Description>Windows 桌面边缘面板工具</Description>
+		<Copyright>Copyright © 2026 TideHue</Copyright>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
-		<!-- 鈽呪槄鈽?绂佺敤鎵€鏈夐粯璁ゅ寘鍚」锛堥伩鍏嶉噸澶嶏級 鈽呪槄鈽?-->
+		<!-- ★★★ 禁用所有默认包含项（避免重复） ★★★ -->
 		<EnableDefaultItems>false</EnableDefaultItems>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- 渚涘崟鍏冩祴璇曡闂?internal 鎴愬憳 -->
+		<!-- 供单元测试访问 internal 成员 -->
 		<InternalsVisibleTo Include="DynamicBird.Tests" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- NuGet 鍖?-->
+		<!-- NuGet 包 -->
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
 		<PackageReference Include="NAudio" Version="2.3.0" />
 		<PackageReference Include="Serilog" Version="4.2.0" />
@@ -42,13 +42,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- 鈽呪槄鈽?App.xaml 鈽呪槄鈽?-->
+		<!-- ★★★ App.xaml ★★★ -->
 		<ApplicationDefinition Include="App.xaml">
 			<Generator>MSBuild:Compile</Generator>
 			<SubType>Designer</SubType>
 		</ApplicationDefinition>
 
-		<!-- 鈽呪槄鈽?鎵€鏈?XAML 鏂囦欢锛圥age锛?鈽呪槄鈽?-->
+		<!-- ★★★ 所有 XAML 文件（Page） ★★★ -->
 		<Page Include="src\UI\Main\MainWindow.xaml" />
 		<Page Include="src\UI\Panels\TaskbarView.xaml" />
 		<Page Include="src\UI\Settings\SettingsWindow.xaml" />
@@ -71,23 +71,23 @@
 		<Page Include="src\UI\Widgets\Notes\NoteWidget.xaml" />
 		<Page Include="src\UI\Widgets\WidgetSwitcher.xaml" />
 		<Page Include="src\UI\Widgets\Dynamic\WidgetEditorWindow.xaml" />
-    <Page Include="src\UI\Widgets\Dynamic\WidgetMarketWindow.xaml" />
+		<Page Include="src\UI\Widgets\Dynamic\WidgetMarketWindow.xaml" />
 		<Page Include="src\UI\Widgets\TextAi\TextAiWidget.xaml" />
 		<Page Include="src\UI\Widgets\WindowControlView.xaml" />
 		<Page Include="src\UI\AI\AiChatView.xaml" />
 
-		<!-- 鈽呪槄鈽?鎵€鏈?CS 鏂囦欢锛堥€掑綊鍖呭惈锛?鈽呪槄鈽?-->
+		<!-- ★★★ 所有 CS 文件（递归包含） ★★★ -->
 		<Compile Include="src\**\*.cs" Exclude="**\obj\**\*.cs" />
 		<Compile Remove="src\UI\Debug\**" />
 		<Compile Include="App.xaml.cs" />
 		<Compile Include="Properties\Settings.Designer.cs" />
 
-		<!-- 鈽呪槄鈽?璧勬簮鏂囦欢 鈽呪槄鈽?-->
+		<!-- ★★★ 资源文件 ★★★ -->
 		<None Update="assets\icon.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 
-		<!-- 鈽呪槄鈽?鏈湴鍖栬祫婧愶紙涓€?zh-CN锛宔n-US 鍗槦璧勬簮锛?鈽呪槄鈽?-->
+		<!-- ★★★ 本地化资源（中英双语嵌入资源） ★★★ -->
 		<EmbeddedResource Include="src\UI\Localization\Strings.resx">
 			<LogicalName>DynamicBird.UI.Localization.Strings.resources</LogicalName>
 		</EmbeddedResource>
@@ -101,4 +101,3 @@
 	</ItemGroup>
 
 </Project>
-
