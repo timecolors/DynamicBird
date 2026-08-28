@@ -373,3 +373,7 @@ tools/*.csv
 tools/flick/
 tools/p1/
 tools/p2/
+
+# AI 交接文档（不入库）
+docs/HANDOFF.md
+docs/INTERACTION-MODEL.md
