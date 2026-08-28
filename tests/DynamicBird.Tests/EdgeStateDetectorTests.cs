@@ -14,7 +14,7 @@ public class EdgeStateDetectorTests
     [Theory]
     [InlineData(0, 0)]
     [InlineData(5, 5)]
-    [InlineData(23, 23)]
+    [InlineData(11, 11)]
     public void TopLeft_Corner_Detected(double x, double y)
     {
         Assert.Equal(EdgeRegion.TopLeft, EdgeStateDetector.DetectRegion(x, y, W, H));
@@ -32,7 +32,7 @@ public class EdgeStateDetectorTests
 
     [Theory]
     [InlineData(5, 715)]
-    [InlineData(23, 700)]
+    [InlineData(11, 709)]
     public void BottomLeft_Corner_Detected(double x, double y)
     {
         Assert.Equal(EdgeRegion.BottomLeft, EdgeStateDetector.DetectRegion(x, y, W, H));
@@ -40,7 +40,7 @@ public class EdgeStateDetectorTests
 
     [Theory]
     [InlineData(1275, 715)]
-    [InlineData(1258, 697)]
+    [InlineData(1275, 710)]
     public void BottomRight_Corner_Detected(double x, double y)
     {
         Assert.Equal(EdgeRegion.BottomRight, EdgeStateDetector.DetectRegion(x, y, W, H));
@@ -51,10 +51,10 @@ public class EdgeStateDetectorTests
     [Theory]
     [InlineData(100, 5, EdgeRegion.Top_Left)]
     [InlineData(640, 0, EdgeRegion.Top_Center)]
-    [InlineData(1100, 10, EdgeRegion.Top_Right)]
+    [InlineData(1100, 5, EdgeRegion.Top_Right)]
     [InlineData(100, 715, EdgeRegion.Bottom_Left)]
     [InlineData(640, 719, EdgeRegion.Bottom_Center)]
-    [InlineData(1100, 710, EdgeRegion.Bottom_Right)]
+    [InlineData(1100, 715, EdgeRegion.Bottom_Right)]
     public void Horizontal_Edge_Regions(double x, double y, EdgeRegion expected)
     {
         Assert.Equal(expected, EdgeStateDetector.DetectRegion(x, y, W, H));
@@ -65,10 +65,10 @@ public class EdgeStateDetectorTests
     [Theory]
     [InlineData(5, 100, EdgeRegion.Left_Top)]
     [InlineData(0, 360, EdgeRegion.Left_Center)]
-    [InlineData(10, 650, EdgeRegion.Left_Bottom)]
+    [InlineData(5, 650, EdgeRegion.Left_Bottom)]
     [InlineData(1275, 100, EdgeRegion.Right_Top)]
     [InlineData(1280, 360, EdgeRegion.Right_Center)]
-    [InlineData(1270, 650, EdgeRegion.Right_Bottom)]
+    [InlineData(1275, 650, EdgeRegion.Right_Bottom)]
     public void Vertical_Edge_Regions(double x, double y, EdgeRegion expected)
     {
         Assert.Equal(expected, EdgeStateDetector.DetectRegion(x, y, W, H));
@@ -90,7 +90,7 @@ public class EdgeStateDetectorTests
     [Fact]
     public void Corner_Threshold_Wider_Than_Edge()
     {
-        // 24px 内为角，12px 内为边；在角区外、边区内的点应判定为边
+        // 角区 = 边缘阈值×2（默认 12px），边缘 = 6px；在角区外、边区内的点应判定为边
         var nearCornerButEdge = EdgeStateDetector.DetectRegion(30, 5, W, H);
         Assert.Equal(EdgeRegion.Top_Left, nearCornerButEdge);
     }

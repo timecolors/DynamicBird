@@ -31,11 +31,122 @@ namespace DynamicBird.UI.Main
 
         private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
         private const int DWMSBT_MAINWINDOW = 2;
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+        private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+        private const int DWMWCP_ROUND = 2;
+
+        // ★ Win11 22H2+：启用 DWM 原生圆角后跳过 SetWindowRgn（两者互斥，Mica 下不可混用）
+        private bool _useDwmCorner;
         private const int WM_HOTKEY = 0x0312;
         private const int HotkeyId = 0x5A11;
+        private const int TextAiHotkeyId = 0x5A12;
         private const uint MOD_CONTROL = 0x0002;
         private const uint MOD_ALT = 0x0001;
         private const uint VK_B = 0x42; // B
+
+        // ========== 面板点击穿透（按住修饰键时鼠标点击穿透面板，操作下层窗口）==========
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int vKey);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongW", SetLastError = true)]
+        private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongW", SetLastError = true)]
+        private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
+        private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW", SetLastError = true)]
+        private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_TRANSPARENT = 0x00000020;
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOZORDER = 0x0004;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_FRAMECHANGED = 0x0020;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+        private const int VK_CONTROL = 0x11;
+        private const int VK_MENU = 0x12;
+        private const int VK_SHIFT = 0x10;
+
+        private bool _passthroughActive;
+
+        private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
+        {
+            return IntPtr.Size == 8 ? GetWindowLongPtr64(hWnd, nIndex)
+                                    : new IntPtr(GetWindowLong32(hWnd, nIndex));
+        }
+
+        private static void SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr value)
+        {
+            if (IntPtr.Size == 8) SetWindowLongPtr64(hWnd, nIndex, value);
+            else SetWindowLong32(hWnd, nIndex, value.ToInt32());
+        }
+
+        /// <summary>当前穿透修饰键是否按下（GetAsyncKeyState 轮询，焦点不在本窗口也可靠）。</summary>
+        private bool IsPassthroughModifierDown()
+        {
+            switch (_settingsService.PassthroughModifier)
+            {
+                case "Alt": return (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
+                case "Shift": return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+                case "None": return false;
+                default: return (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+            }
+        }
+
+        /// <summary>
+        /// 按住穿透修饰键 → 窗口加 WS_EX_TRANSPARENT（鼠标命中测试跳过本窗口，
+        /// 点击穿透到面板覆盖区域下方的屏幕内容）；松开 → 移除。
+        /// </summary>
+        private void UpdatePassthroughState()
+        {
+            bool down = IsPassthroughModifierDown();
+            if (down == _passthroughActive) return;
+            _passthroughActive = down;
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero) return;
+                long ex = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
+                long nv = down ? (ex | WS_EX_TRANSPARENT) : (ex & ~WS_EX_TRANSPARENT);
+                if (nv != ex)
+                {
+                    SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(nv));
+                    // ★ 刷新窗口样式：命中测试立即生效（否则 WS_EX_TRANSPARENT 可能延迟/不生效）
+                    SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+                }
+                // ★ 视觉提示：按住穿透键时窗口半透明（提示鼠标可穿透），松开恢复。
+                //   配合 SuppressOpacityReset 防止 ShowAt 的 EnsureWindowVisible 每 tick 重置透明度
+                _visibilityController.SuppressOpacityReset = down;
+                // ★ 视觉提示：穿透时面板明显变透明（提示可穿透），松开恢复。
+                //   面板主体是窗口背景（MainPanel 透明）→ 降低背景 alpha（Mica 透出更多）
+                //   + 内容略淡（解除动画锁定后设置 MainPanel.Opacity）
+                MainPanel.BeginAnimation(System.Windows.UIElement.OpacityProperty, null);
+                if (down)
+                {
+                    // ★ 穿透提示：面板背景变浅灰 + 内容淡出（深色面板下"变透明"不可见，浅色提示才明显）
+                    Background = new System.Windows.Media.SolidColorBrush(
+                        System.Windows.Media.Color.FromArgb(0xE0, 0x5A, 0x5A, 0x5A));
+                    MainPanel.Opacity = 0.3;
+                }
+                else
+                {
+                    Background = new System.Windows.Media.SolidColorBrush(
+                        System.Windows.Media.Color.FromArgb(0xE0, 0x2D, 0x2D, 0x2D));
+                    MainPanel.Opacity = _visibilityController.Opacity;
+                }
+            }
+            catch { }
+        }
+
+        private IntPtr _hwnd = IntPtr.Zero;
 
         [DllImport("user32.dll")]
         private static extern IntPtr CreateRectRgn(int left, int top, int right, int bottom);
@@ -101,47 +212,108 @@ namespace DynamicBird.UI.Main
         }
 
         /// <summary>
-        /// 尝试启用 Win11 Mica 背景（22H2+）。成功返回 true；Win10/失败返回 false。
+        /// Win11 22H2+（Build 22621+）：启用 Fluent 材质 —— 强制深色 Mica 毛玻璃 + DWM 原生圆角。
+        /// Mica 与 DWM 圆角同属 DWM 合成：圆角外自动透明且点击穿透，替代 SetWindowRgn。
+        /// （SetWindowRgn 与 Mica 混用会因 DWM 合成不受区域裁剪而在圆角外填充白/黑块。）
+        /// Win10/旧版返回 false，调用方回退 SetWindowRgn 圆角方案。
         /// </summary>
-        private bool TryApplyMicaBackdrop()
+        private bool TryApplyWin11FluentMaterial(IntPtr hwnd)
         {
+            if (hwnd == IntPtr.Zero) return false;
+            if (Environment.OSVersion.Version.Build < 22621) return false;
             try
             {
-                if (Environment.OSVersion.Version.Build < 22621) return false;
-                var hwnd = new WindowInteropHelper(this).Handle;
-                if (hwnd == IntPtr.Zero) return false;
-
-                int value = DWMSBT_MAINWINDOW;
-                return DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref value, sizeof(int)) == 0;
+                // ★ 强制深色：面板内容是浅色文字（#EEEEEE），浅色系统主题下 Mica 也必须是深色，否则文字不可读
+                int dark = 1;
+                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref dark, sizeof(int));
+                // Mica 毛玻璃背景
+                int backdrop = DWMSBT_MAINWINDOW;
+                if (DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int)) != 0) return false;
+                // DWM 原生圆角（圆角外透明 + 点击穿透由 DWM 处理）
+                int corner = DWMWCP_ROUND;
+                DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref corner, sizeof(int));
+                _useDwmCorner = true;
+                return true;
             }
             catch { return false; }
         }
 
-        /// <summary>注册全局热键 Ctrl+Alt+B：切换面板显示/隐藏。</summary>
+        /// <summary>注册全局热键 Ctrl+Alt+B：切换面板显示/隐藏；并按设置注册划词翻译 热键。</summary>
         private void RegisterGlobalHotkey(IntPtr hwnd)
         {
+            _hwnd = hwnd;
             try
             {
                 RegisterHotKey(hwnd, HotkeyId, MOD_CONTROL | MOD_ALT, VK_B);
             }
             catch { }
+            // 服务可能尚未初始化（SourceInitialized 早于 InitializeCoreServices），稍后再补注册
+            ReapplyTextAiHotkey();
         }
 
         private void UnregisterGlobalHotkey(IntPtr hwnd)
         {
             try
             {
-                if (hwnd != IntPtr.Zero) UnregisterHotKey(hwnd, HotkeyId);
+                if (hwnd != IntPtr.Zero)
+                {
+                    UnregisterHotKey(hwnd, HotkeyId);
+                    UnregisterHotKey(hwnd, TextAiHotkeyId);
+                }
             }
             catch { }
         }
 
+        /// <summary>
+        /// 按设置重新注册划词翻译 全局热键（启动完成 / 设置保存后调用）。
+        /// 未设置、划词翻译 小组件被关闭时注销；注册失败（冲突）时提示用户。
+        /// </summary>
+        private void ReapplyTextAiHotkey()
+        {
+            if (_hwnd == IntPtr.Zero || _settingsService == null) return;
+            try
+            {
+                UnregisterHotKey(_hwnd, TextAiHotkeyId);
+
+                if (!_settingsService.IsWidgetEnabled("TextAi")) return;
+                string hotkey = _settingsService.TextAiHotkey;
+                if (string.IsNullOrWhiteSpace(hotkey)) return;
+
+                if (DynamicBird.Infrastructure.WinApi.HotkeyParser.TryParse(hotkey, out uint mods, out uint vk))
+                {
+                    if (!RegisterHotKey(_hwnd, TextAiHotkeyId, mods, vk))
+                    {
+                        DynamicBird.Infrastructure.WinApi.SystemToast.Show(
+                            "灵动鸟", string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Set_HotkeyOccupied"], hotkey));
+                        DynamicBird.Core.Infrastructure.Logging.LogManager.Warning($"划词翻译 热键注册失败（冲突？）: {hotkey}");
+                    }
+                }
+                else
+                {
+                    DynamicBird.Core.Infrastructure.Logging.LogManager.Warning($"划词翻译 热键格式无效: {hotkey}");
+                }
+            }
+            catch (Exception ex)
+            {
+                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("重新注册划词热键失败", ex);
+            }
+        }
+
         private IntPtr HotkeyWndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if (msg == WM_HOTKEY && wParam.ToInt32() == HotkeyId)
+            if (msg == WM_HOTKEY)
             {
-                HotkeyTogglePanel();
-                handled = true;
+                int id = wParam.ToInt32();
+                if (id == HotkeyId)
+                {
+                    HotkeyTogglePanel();
+                    handled = true;
+                }
+                else if (id == TextAiHotkeyId)
+                {
+                    OnTextAiHotkey();
+                    handled = true;
+                }
             }
             return IntPtr.Zero;
         }
@@ -226,6 +398,8 @@ namespace DynamicBird.UI.Main
         {
             try
             {
+                // ★ 容错上限用主屏高度（与 GetTaskbarTopInDips 内部基准一致，稳定）；
+                //   窗口隐藏于屏幕外时 Screen 查询不可靠，且此处仅作钳制容错。
                 double screenH = SystemParameters.PrimaryScreenHeight;
                 double boundary = GetTaskbarTopInDips();
 
@@ -290,7 +464,7 @@ namespace DynamicBird.UI.Main
                 if (scale <= 0 || double.IsNaN(scale) || double.IsInfinity(scale)) scale = 1.0;
                 int w = Math.Max(1, (int)Math.Round(ActualWidth * scale));
                 int h = Math.Max(1, (int)Math.Round(ActualHeight * scale));
-                int radius = Math.Max(2, (int)(16 * scale * 2)); // 16 DIP 圆角 → 椭圆直径
+                int radius = Math.Max(2, (int)(8 * scale * 2)); // 8 DIP 圆角（对齐 Win11 Fluent）→ 椭圆直径
 
                 string sig = $"{w}x{h}|{carveBottom}";
                 if (sig == _lastRegionSignature) return;

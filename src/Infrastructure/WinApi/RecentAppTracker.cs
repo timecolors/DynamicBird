@@ -127,11 +127,11 @@ namespace DynamicBird.Infrastructure.WinApi
             return baseName.ToLowerInvariant() switch
             {
                 "qq" or "qqnt" => "QQ",
-                "wechat" or "weixin" => "微信",
+                "wechat" or "weixin" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Wechat"],
                 "chrome" => "Chrome",
                 "msedge" => "Edge",
                 "devenv" => "Visual Studio",
-                "explorer" => "文件资源管理器",
+                "explorer" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Explorer"],
                 _ => baseName
             };
         }

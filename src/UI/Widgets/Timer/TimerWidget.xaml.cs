@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using DynamicBird.Infrastructure.WinApi;
+using DynamicBird.UI.Localization;
 using DynamicBird.UI.Widgets;
 
 namespace DynamicBird.UI.Widgets.Timer
@@ -53,7 +54,7 @@ namespace DynamicBird.UI.Widgets.Timer
             UpdateDisplay();
         }
 
-        public new string Name => "计时器";
+        public new string Name => LocalizationManager.Instance["WidgetTabs_Timer"];
 
         public UserControl CreateView() => this;
 
@@ -63,14 +64,8 @@ namespace DynamicBird.UI.Widgets.Timer
 
         public FrameworkElement GetFooterControl()
         {
-            var status = new TextBlock
-            {
-                Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Timer_FooterHint"],
-                FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102)),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            return new StackPanel { Orientation = Orientation.Horizontal, Children = { status } };
+            // ★ 用户要求：去掉底部提示行（"正计时/倒计时/闹钟：各模式独立计时…"），保持面板简洁。
+            return new StackPanel();
         }
 
         private TimerState Current => _mode switch
@@ -124,13 +119,13 @@ namespace DynamicBird.UI.Widgets.Timer
             PresetPanel.Visibility = _mode == TimerMode.CountDown ? Visibility.Visible : Visibility.Collapsed;
             ProgressArea.Visibility = _mode == TimerMode.CountDown ? Visibility.Visible : Visibility.Collapsed;
 
-            TxtInputUnit.Text = _mode == TimerMode.Alarm ? "目标时间" : "分";
+            TxtInputUnit.Text = _mode == TimerMode.Alarm ? LocalizationManager.Instance["Timer_InputUnit"] : LocalizationManager.Instance["UI_TimerWidget_419"];
             TxtHour.ToolTip = _mode == TimerMode.Alarm
-                ? "目标小时（0-23）"
-                : "小时";
+                ? LocalizationManager.Instance["Timer_TipTargetHours"]
+                : LocalizationManager.Instance["Timer_TipHours"];
             TxtMin.ToolTip = _mode == TimerMode.Alarm
-                ? "目标分钟（0-59）。若该时间已过，自动顺延到明天提醒"
-                : "分钟";
+                ? LocalizationManager.Instance["Timer_TipTargetMinutes"]
+                : LocalizationManager.Instance["Timer_TipMinutes"];
         }
 
         // ================= 预设（仅倒计时） =================
@@ -210,7 +205,7 @@ namespace DynamicBird.UI.Widgets.Timer
                 !int.TryParse(TxtMin.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int m) ||
                 h < 0 || h > 23 || m < 0 || m > 59)
             {
-                StateText.Text = "请输入有效时间（时 0-23，分 0-59）";
+                StateText.Text = LocalizationManager.Instance["Timer_InvalidTime"];
                 StateText.Foreground = new SolidColorBrush(Color.FromRgb(255, 150, 90));
                 return;
             }
@@ -315,7 +310,7 @@ namespace DynamicBird.UI.Widgets.Timer
             _alarm.Running = false;
             _alarm.AlarmTriggered = true;
 
-            SystemToast.Show("灵动鸟", $"闹钟时间到：{_alarm.TargetTime.Value:HH:mm}");
+            SystemToast.Show("灵动鸟", string.Format(LocalizationManager.Instance["Timer_AlarmToast"], _alarm.TargetTime.Value.ToString("HH:mm")));
             try { System.Media.SystemSounds.Exclamation.Play(); } catch { }
 
             if (_mode == TimerMode.Alarm) UpdateDisplay();
@@ -348,17 +343,17 @@ namespace DynamicBird.UI.Widgets.Timer
 
             if (s.AlarmTriggered)
             {
-                StateText.Text = "⏰ 时间到！";
+                StateText.Text = LocalizationManager.Instance["Timer_TimeUp"];
                 StateText.Foreground = new SolidColorBrush(Color.FromRgb(255, 120, 120));
                 TimeText.Foreground = new SolidColorBrush(Color.FromRgb(255, 120, 120));
-                BtnStart.Content = "⏰ 停止提醒";
+                BtnStart.Content = LocalizationManager.Instance["Timer_StopAlarm"];
             }
             else
             {
-                StateText.Text = s.Running ? "计时中…" : "就绪";
+                StateText.Text = s.Running ? LocalizationManager.Instance["Timer_Running"] : LocalizationManager.Instance["UI_TimerWidget_416"];
                 StateText.Foreground = new SolidColorBrush(Color.FromRgb(138, 138, 138));
                 TimeText.Foreground = new SolidColorBrush(Color.FromRgb(238, 238, 238));
-                BtnStart.Content = s.Running ? "⏸ 暂停" : "▶ 开始";
+                BtnStart.Content = s.Running ? LocalizationManager.Instance["Timer_Pause"] : LocalizationManager.Instance["UI_TimerWidget_424"];
             }
 
             if (_mode == TimerMode.CountUp)
@@ -388,10 +383,10 @@ namespace DynamicBird.UI.Widgets.Timer
             if (s.AlarmTriggered)
             {
                 TimeText.Text = s.TargetTime?.ToString("HH:mm") ?? "00:00";
-                StateText.Text = "⏰ 时间到！";
+                StateText.Text = LocalizationManager.Instance["Timer_TimeUp"];
                 StateText.Foreground = new SolidColorBrush(Color.FromRgb(255, 120, 120));
                 TimeText.Foreground = new SolidColorBrush(Color.FromRgb(255, 120, 120));
-                BtnStart.Content = "⏰ 停止提醒";
+                BtnStart.Content = LocalizationManager.Instance["Timer_StopAlarm"];
                 return;
             }
 
@@ -401,10 +396,10 @@ namespace DynamicBird.UI.Widgets.Timer
                 TimeText.Text = target.ToString("HH:mm");
                 var remain = target - DateTime.Now;
                 if (remain.TotalSeconds < 0) remain = TimeSpan.Zero;
-                StateText.Text = $"闹钟 · {remain.Hours:00}:{remain.Minutes:00}:{remain.Seconds:00} 后提醒";
+                StateText.Text = string.Format(LocalizationManager.Instance["Timer_AlarmRemain"], remain.Hours, remain.Minutes, remain.Seconds);
                 StateText.Foreground = new SolidColorBrush(Color.FromRgb(255, 190, 90));
                 TimeText.Foreground = new SolidColorBrush(Color.FromRgb(238, 238, 238));
-                BtnStart.Content = "✕ 取消闹钟";
+                BtnStart.Content = LocalizationManager.Instance["Timer_CancelAlarm"];
                 return;
             }
 
@@ -414,10 +409,10 @@ namespace DynamicBird.UI.Widgets.Timer
             h = Math.Clamp(h, 0, 23);
             m = Math.Clamp(m, 0, 59);
             TimeText.Text = $"{h:00}:{m:00}";
-            StateText.Text = "设定目标时间，到点系统提醒";
+            StateText.Text = LocalizationManager.Instance["Timer_SetAlarmHint"];
             StateText.Foreground = new SolidColorBrush(Color.FromRgb(138, 138, 138));
             TimeText.Foreground = new SolidColorBrush(Color.FromRgb(238, 238, 238));
-            BtnStart.Content = "⏰ 设定闹钟";
+            BtnStart.Content = LocalizationManager.Instance["Timer_SetAlarm"];
         }
     }
 }

@@ -231,6 +231,7 @@ namespace ScreenshotGen
         public string GetRegionPanel(string regionKey) => "Default";
         public void SetRegionPanel(string regionKey, string panelType) { }
         public void Reload() { }
+        public void Apply(DynamicBird.Core.Services.Configuration.SettingsData data) { }
     }
 
     /// <summary>测试用快捷方式服务：通用 Windows 应用。</summary>

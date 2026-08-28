@@ -93,7 +93,7 @@ namespace DynamicBird.Core.Services.Ai
         private static string BuildTitle(List<ChatMessage> messages)
         {
             var firstUser = messages.FirstOrDefault(m => m.Role == ChatRole.User);
-            if (firstUser == null) return "旧对话";
+            if (firstUser == null) return DynamicBird.UI.Localization.LocalizationManager.Instance["Session_Old"];
             string t = firstUser.Content.Trim();
             return t.Length > 20 ? t[..20] + "…" : t;
         }

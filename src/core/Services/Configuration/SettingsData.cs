@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 
 namespace DynamicBird.Core.Services.Configuration
 {
     public class SettingsData
     {
         // ========== 语言（zh-CN / en-US，空=跟随系统） ==========
-        public string? Language { get; set; } = "zh-CN";
+        public string? Language { get; set; } = "";
 
         public bool Edge_Top { get; set; } = true;
         public bool Edge_Bottom { get; set; } = true;
@@ -71,6 +72,10 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 剪贴板与便签 ==========
         public int ClipboardMaxCount { get; set; } = 10;
         public int ClipboardDisplayLength { get; set; } = 100;
+        // 图片缩略化：最长边超过该值（px）时缩放后保存；0 = 不缩放
+        public int ClipboardImageMaxWidth { get; set; } = 1280;
+        // 图片缓存总大小上限（MB）：超限时按"未收藏且最旧"优先清理缓存文件
+        public int ClipboardImageCacheLimitMB { get; set; } = 50;
         public string? LastWidgetTab { get; set; } = "Clipboard";
         public string? DefaultNoteColor { get; set; } = "#FFFF99";
         public bool NoteShowTitleByDefault { get; set; } = true;
@@ -123,8 +128,21 @@ namespace DynamicBird.Core.Services.Configuration
 
         // ========== 动画设置 ==========
         public bool AnimationsEnabled { get; set; } = true;
+        // ★ 旧版"呼出/隐藏共用"字段（保留兼容；新字段为空/0 时迁移用）
         public string ShowHideEasingType { get; set; } = "CubicEase";
-        public int ShowHideDurationMs { get; set; } = 150;      // ★ 从 300 改为 150
+        public int ShowHideDurationMs { get; set; } = 150;
+        // ★ 触发（呼出）动画：类型(Fade/Slide/Zoom/Elastic/Custom) + 时长 + 特化参数
+        public string ShowAnimationType { get; set; } = "";    // 空=待迁移
+        public int ShowAnimationDurationMs { get; set; } = 0;  // 0=待迁移
+        public double ShowAnimationZoomFrom { get; set; } = 0.5;      // Zoom：起始比例
+        public int ShowAnimationOscillations { get; set; } = 3;       // Elastic：振荡次数
+        public double ShowAnimationSpringiness { get; set; } = 3;     // Elastic：弹性强度
+        // ★ 隐藏动画：类型 + 时长 + 特化参数
+        public string HideAnimationType { get; set; } = "";    // 空=待迁移
+        public int HideAnimationDurationMs { get; set; } = 0;  // 0=待迁移
+        public double HideAnimationZoomTo { get; set; } = 0.5;        // Zoom：目标比例
+        public int HideAnimationOscillations { get; set; } = 3;
+        public double HideAnimationSpringiness { get; set; } = 3;
         public string TransformEasingType { get; set; } = "CubicEase";
         public int TransformDurationMs { get; set; } = 250;
         public int HideDelayMs { get; set; } = 200;            // ★ 从 300 改为 200
@@ -133,8 +151,33 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 小鸟依人模式 ==========
         public bool ClingModeEnabled { get; set; } = false;
 
+        // ========== 贴边吸附范围（px）：面板边缘距屏幕边小于该值 → 磁铁吸附贴边（0=关闭） ==========
+        public int SnapRangePx { get; set; } = 30;
+
+        // ========== 内容切换稳定防抖（ms）：切换后图标中置，稳定该时长后归位并显示内容 ==========
+        public int ContentStabilizeMs { get; set; } = 400;
+
+        // ========== 面板点击穿透修饰键（None / Ctrl / Alt / Shift）==========
+        // 按住该键 + 点击可穿透面板，点击面板覆盖区域下方的屏幕内容
+        public string? PassthroughModifier { get; set; } = "Ctrl";
+
         // ========== 区域防抖延迟 ==========
         public int RegionDebounceMs { get; set; } = 80;
+
+        // ========== 灵动鸟性能模式（Smooth / Normal / PowerSaver） ==========
+        // 一键预设：Smooth=面板动画全开更柔滑；Normal=平衡；PowerSaver=关动画最省电
+        public string? PerformanceMode { get; set; } = "Normal";
+
+        // ========== 边缘触发距离与延时（防误触） ==========
+        // 触发距离（DIP）：鼠标距屏幕边缘多远判定为贴边；越小越难误触（默认 6，原 12 偏宽）
+        public int TriggerDistancePx { get; set; } = 6;
+
+        // 全局触发延时（ms）：鼠标进入边缘区域后停留多久才呼出面板；0 = 立即
+        public int TriggerDelayMs { get; set; } = 150;
+
+        // 逐区域触发延时 / 隐藏延时覆盖（regionKey → ms）；缺省用全局值
+        public System.Collections.Generic.Dictionary<string, int>? RegionTriggerDelay { get; set; }
+        public System.Collections.Generic.Dictionary<string, int>? RegionHideDelay { get; set; }
 
         // ========== 各区域自定义面板（Default = 跟随默认布局） ==========
         public string? RegionPanel_Top_Left { get; set; } = "Default";
@@ -173,5 +216,22 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 天气（Open-Meteo，免费无 Key） ==========
         public bool WeatherEnabled { get; set; } = false;
         public string? WeatherCity { get; set; } = "";   // 空 = 按 IP 自动定位
+
+        // 天气城市选择器里的"最近使用"（最多保留 8 个）
+        public System.Collections.Generic.List<string>? WeatherRecentCities { get; set; }
+
+        // ========== 小组件显示开关（用户选择面板中保留哪些功能） ==========
+        public bool WidgetEnabled_Clipboard { get; set; } = true;
+        public bool WidgetEnabled_Note { get; set; } = true;
+        public bool WidgetEnabled_Timer { get; set; } = true;
+        public bool WidgetEnabled_Calculator { get; set; } = true;
+        public bool WidgetEnabled_TextAi { get; set; } = true;
+
+        /// <summary>用户插件小组件（Widget_&lt;id&gt;）的启用覆盖；缺省视为启用。</summary>
+        public Dictionary<string, bool> WidgetPluginOverrides { get; set; } = new();
+
+        // ========== 划词翻译 ==========
+        // 全局热键字符串（如 "Ctrl+Alt+Q"）；空 = 未设置（面板内提示去设置）
+        public string? TextAiHotkey { get; set; } = "";
     }
 }

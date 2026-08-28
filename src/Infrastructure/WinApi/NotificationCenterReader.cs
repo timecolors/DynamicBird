@@ -122,7 +122,7 @@ namespace DynamicBird.Infrastructure.WinApi
                 if (texts.Count == 0)
                 {
                     bool hasImage = doc.Descendants("image").Any();
-                    message = hasImage ? "[图片]" : "[无内容]";
+                    message = hasImage ? DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Image"] : DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Empty"];
                 }
                 else if (texts.Count == 1)
                 {
@@ -155,14 +155,14 @@ namespace DynamicBird.Infrastructure.WinApi
         /// <summary>把 AUMID / 包名转成可读短名（取最后一段）。</summary>
         public static string FriendlyAppName(string? appId)
         {
-            if (string.IsNullOrWhiteSpace(appId)) return "系统通知";
+            if (string.IsNullOrWhiteSpace(appId)) return DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_System"];
             var parts = appId.Split(new[] { '.', '!', '-' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
             // 去掉常见系统前缀，避免显示成 "Microsoft.Windows.xxx"
             while (parts.Count > 1 && (parts[0] == "Microsoft" || parts[0] == "Windows"))
                 parts.RemoveAt(0);
 
-            if (parts.Count == 0) return "系统通知";
+            if (parts.Count == 0) return DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_System"];
 
             string name = parts[^1];
             // 末尾是 "App" 之类无意义后缀时，用前一段（如 "xxx!App" -> "xxx"）

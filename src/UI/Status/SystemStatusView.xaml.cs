@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using DynamicBird.Core.Services.Configuration;
+using DynamicBird.UI.Localization;
 using DynamicBird.Infrastructure.WinApi;
 using NAudio.CoreAudioApi;
 
@@ -66,7 +67,8 @@ namespace DynamicBird.UI.Status
         public void ApplySettings(ISettingsService settings)
         {
             _settings = settings;
-            _weatherEnabled = settings.WeatherEnabled;
+            // ★ 天气启用 = "状态栏显示天气" 勾选（WeatherEnabled 字段无独立入口，不再作为门槛）
+            _weatherEnabled = settings.StatusShowWeather;
             _weatherCity = settings.WeatherCity ?? "";
 
             SetVisible(TimePanel, settings.StatusShowTime);
@@ -80,7 +82,7 @@ namespace DynamicBird.UI.Status
 
             if (_weatherEnabled && settings.StatusShowWeather)
             {
-                WeatherText.Text = "天气…";
+                WeatherText.Text = LocalizationManager.Instance["Status_WeatherLoading"];
                 _ = RefreshWeatherAsync();
                 _weatherTimer ??= new DispatcherTimer { Interval = TimeSpan.FromMinutes(15) };
                 _weatherTimer.Tick += (_, _) => _ = RefreshWeatherAsync();
@@ -99,13 +101,42 @@ namespace DynamicBird.UI.Status
 
         private async System.Threading.Tasks.Task RefreshWeatherAsync()
         {
-            var w = await WeatherService.GetWeatherAsync(_weatherCity);
+            var w = await WeatherService.GetWeatherWithCityAsync(_weatherCity);
 
             // 确保回到 UI 线程更新（await 可能在无 SynchronizationContext 时落到线程池）
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                WeatherText.Text = w.HasValue ? w.Value.Text : "天气不可用";
+                if (w.HasValue)
+                {
+                    // 显示生效城市名 + 天气，如 保定 · ☀️ 25° 晴；IP 定位无城市名时只显示天气
+                    WeatherText.Text = string.IsNullOrEmpty(w.Value.City)
+                        ? w.Value.Text
+                        : w.Value.City + " · " + w.Value.Text;
+                }
+                else
+                {
+                    WeatherText.Text = LocalizationManager.Instance["Status_WeatherUnavailable"];
+                }
             }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        /// <summary>单击 → 立即刷新天气状态；双击 → 用默认浏览器打开该城市天气预报网页。</summary>
+        private async void WeatherPanel_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (e.ClickCount == 2)
+                {
+                    await WeatherService.OpenForecastPageAsync(_weatherCity);
+                }
+                else
+                {
+                    // ★ 单击：立即重新查询天气（不等 15 分钟定时器）
+                    WeatherText.Text = LocalizationManager.Instance["Status_WeatherLoading"];
+                    await RefreshWeatherAsync();
+                }
+            }
+            catch { }
         }
 
         private void InitAudioDevice()
@@ -242,18 +273,18 @@ namespace DynamicBird.UI.Status
             {
                 if (!NetworkInterface.GetIsNetworkAvailable())
                 {
-                    NetworkText.Text = "未连接";
+                    NetworkText.Text = LocalizationManager.Instance["Status_NetDisconnected"];
                     NetworkIcon.SetResourceReference(
                         System.Windows.Shapes.Path.StrokeProperty, "DangerBrush");
                     return;
                 }
-                NetworkText.Text = "已连接";
+                NetworkText.Text = LocalizationManager.Instance["UI_SystemStatusView_401"];
                 NetworkIcon.SetResourceReference(
                     System.Windows.Shapes.Path.StrokeProperty, "TextSecondaryBrush");
             }
             catch
             {
-                NetworkText.Text = "未知";
+                NetworkText.Text = LocalizationManager.Instance["Status_NetUnknown"];
                 NetworkIcon.SetResourceReference(
                     System.Windows.Shapes.Path.StrokeProperty, "TextSecondaryBrush");
             }
@@ -266,7 +297,7 @@ namespace DynamicBird.UI.Status
                 var powerStatus = System.Windows.Forms.SystemInformation.PowerStatus;
                 if (powerStatus.BatteryChargeStatus == System.Windows.Forms.BatteryChargeStatus.NoSystemBattery)
                 {
-                    BatteryText.Text = "无电池";
+                    BatteryText.Text = LocalizationManager.Instance["Status_NoBattery"];
                     BatteryIcon.SetResourceReference(
                         System.Windows.Shapes.Path.StrokeProperty, "TextSecondaryBrush");
                     return;

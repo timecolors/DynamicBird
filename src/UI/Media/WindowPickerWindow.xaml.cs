@@ -27,15 +27,15 @@ namespace DynamicBird.UI.Media
 
             if (embedMode)
             {
-                Title = "选择要嵌入的窗口";
-                ModeHintText.Text = "嵌入真实窗口：窗口会移动到面板内，可直接操作（第二块显示屏）。";
-                BtnConfirm.Content = "开始嵌入";
+                Title = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_EmbedTitle"];
+                ModeHintText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_EmbedHint"];
+                BtnConfirm.Content = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_EmbedBtn"];
             }
             else
             {
-                Title = "选择要镜像的窗口";
-                ModeHintText.Text = "截图镜像：原窗口位置不变，面板内显示其画面，可点击操作。";
-                BtnConfirm.Content = "开始镜像";
+                Title = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_MirrorTitle"];
+                ModeHintText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_MirrorHint"];
+                BtnConfirm.Content = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_MirrorBtn"];
             }
         }
 

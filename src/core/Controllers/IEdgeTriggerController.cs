@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DynamicBird.Core.Controllers
 {
@@ -18,6 +18,10 @@ namespace DynamicBird.Core.Controllers
         void SetClingModeEnabled(bool enabled);
         void OnFlyCompleted();
         void OnStickToMouseSuccess();
+
+        event Action<string, string>? SwitchStarted;
+
+        void CompletePendingSwitch();
 
         event Action StartClingingRequested;
         event Action StopClingingRequested;

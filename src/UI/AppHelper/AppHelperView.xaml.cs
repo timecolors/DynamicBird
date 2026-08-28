@@ -70,10 +70,10 @@ namespace DynamicBird.UI.AppHelper
         private void RebuildPages()
         {
             _pages.Clear();
-            _pages.Add(new PageInfo("画中画", "镜像窗口或播放视频文件", _player));
+            _pages.Add(new PageInfo(DynamicBird.UI.Localization.LocalizationManager.Instance["AppHelper_Pip"], DynamicBird.UI.Localization.LocalizationManager.Instance["AppHelper_PipDesc"], _player));
             if (_hasMediaSessions)
             {
-                _pages.Add(new PageInfo("媒体控制", "控制正在播放的 QQ 音乐、浏览器等应用", _mediaControl));
+                _pages.Add(new PageInfo(DynamicBird.UI.Localization.LocalizationManager.Instance["AppHelper_Media"], DynamicBird.UI.Localization.LocalizationManager.Instance["AppHelper_MediaDesc"], _mediaControl));
             }
 
             if (_pageIndex >= _pages.Count) _pageIndex = 0;

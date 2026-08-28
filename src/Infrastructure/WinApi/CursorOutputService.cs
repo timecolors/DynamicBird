@@ -36,7 +36,7 @@ namespace DynamicBird.Infrastructure.WinApi
                 Log($"TryLockTarget fg={hwnd} own={IsOwnWindow(hwnd)}");
                 if (hwnd == IntPtr.Zero || IsOwnWindow(hwnd))
                 {
-                    error = "请先点击要输出的目标窗口（如 Word / 记事本）";
+                    error = DynamicBird.UI.Localization.LocalizationManager.Instance["Cursor_ClickTarget"];
                     return false;
                 }
 
@@ -79,7 +79,7 @@ namespace DynamicBird.Infrastructure.WinApi
             }
             catch (Exception ex)
             {
-                error = "锁定失败：" + ex.Message;
+                error = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Cursor_LockFailed"], ex.Message);
                 Log("lock fail: " + ex.Message);
                 return false;
             }

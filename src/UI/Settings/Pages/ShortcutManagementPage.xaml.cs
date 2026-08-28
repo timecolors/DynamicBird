@@ -1,4 +1,4 @@
-﻿using DynamicBird.Core.Services;
+using DynamicBird.Core.Services;
 using DynamicBird.src.core.Services.Shortcuts;
 using Microsoft.Win32;
 using System;
@@ -44,7 +44,7 @@ namespace DynamicBird.UI.Settings.Pages
 
         private void UpdateStatus()
         {
-            TxtStatus.Text = $"{_items.Count} 个快捷方式";
+            TxtStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Count"], _items.Count);
         }
 
         private void BtnAddShortcut_Click(object sender, RoutedEventArgs e)
@@ -63,11 +63,11 @@ namespace DynamicBird.UI.Settings.Pages
                 if (_shortcutService.AddShortcut(path, name))
                 {
                     LoadShortcuts();
-                    TxtStatus.Text = $"✅ 已添加: {name}";
+                    TxtStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Added"], name);
                 }
                 else
                 {
-                    TxtStatus.Text = "⚠️ 已存在或添加失败";
+                    TxtStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_AddFailed"];
                 }
             }
         }
@@ -75,7 +75,7 @@ namespace DynamicBird.UI.Settings.Pages
         private void BtnClearAll_Click(object sender, RoutedEventArgs e)
         {
             if (_items.Count == 0) return;
-            if (MessageBox.Show("确定要清空所有快捷方式吗？", "确认",
+            if (MessageBox.Show(DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_ClearConfirm"], DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Confirm"],
                 MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 var ids = _items.Select(i => i.Id).ToList();
@@ -84,7 +84,7 @@ namespace DynamicBird.UI.Settings.Pages
                     _shortcutService.RemoveShortcut(id);
                 }
                 LoadShortcuts();
-                TxtStatus.Text = "🗑️ 已清空";
+                TxtStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Cleared"];
             }
         }
 
@@ -120,7 +120,7 @@ namespace DynamicBird.UI.Settings.Pages
             {
                 _shortcutService.RemoveShortcut(item.Id);
                 LoadShortcuts();
-                TxtStatus.Text = $"🗑️ 已删除: {item.Name}";
+                TxtStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Deleted"], item.Name);
             }
         }
     }

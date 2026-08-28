@@ -147,20 +147,92 @@ namespace DynamicBird.UI.AppHelper
             catch { return false; }
         }
 
+        /// <summary>
+        /// 常见应用的 AUMID 前缀 → 显示名映射。
+        /// AUMID 形如 "Tencent.QQMusic.xxx"，前缀匹配映射名，避免显示成 "Tencent"。
+        /// 匹配规则：AUMID 按 "AppId!" 分割取应用段，再按 "." 前缀匹配映射表；
+        /// 未命中时回退取第一段（原行为）。
+        /// </summary>
+        private static readonly (string Prefix, string Name)[] AppNameMap =
+        {
+            ("Tencent.QQMusic", "QQ 音乐"),
+            ("Tencent.QQ", "QQ"),
+            ("Tencent.QiDian", "起点读书"),
+            ("SpotifyAB.SpotifyMusic", "Spotify"),
+            ("Spotify", "Spotify"),
+            ("NetEase", "网易云音乐"),
+            ("CloudMusic", "网易云音乐"),
+            ("Kugou", "酷狗音乐"),
+            ("KuWo", "酷我音乐"),
+            ("1Password", "1Password"),
+            ("Google.Chrome", "Chrome"),
+            ("Chrome", "Chrome"),
+            ("MSEdge", "Edge"),
+            ("Microsoft.Edge", "Edge"),
+            ("Mozilla.Firefox", "Firefox"),
+            ("Firefox", "Firefox"),
+            ("BraveSoftware.BraveBrowser", "Brave"),
+            ("VLC", "VLC"),
+            ("VideoLAN", "VLC 播放器"),
+            ("PotPlayer", "PotPlayer"),
+            ("DAUM.PotPlayer", "PotPlayer"),
+            ("PotPlayerMini", "PotPlayer"),
+            ("Foobar2000", "foobar2000"),
+            ("foobar2000", "foobar2000"),
+            ("AIMP", "AIMP"),
+            ("MusicBee", "MusicBee"),
+            ("SPlayer", "迅雷看看"),
+            ("Xunlei", "迅雷"),
+            ("bilibili", "哔哩哔哩"),
+            ("BiliBili", "哔哩哔哩"),
+            ("Douyin", "抖音"),
+            ("Youtube", "YouTube"),
+            ("YouTube", "YouTube"),
+            ("Twitch", "Twitch"),
+            ("Plex", "Plex"),
+            ("Emby", "Emby"),
+            ("Jellyfin", "Jellyfin"),
+            ("Snap", "Snap 应用"),
+            ("WeGame", "WeGame"),
+            ("Steam", "Steam"),
+            ("EAC", "EasyAntiCheat"),
+            ("Zoom", "Zoom"),
+            ("Teams", "Teams"),
+            ("Microsoft.Teams", "Teams"),
+            ("DingTalk", "钉钉"),
+            ("Feishu", "飞书"),
+            ("Lark", "飞书"),
+            ("WeCom", "企业微信"),
+            ("企业微信", "企业微信"),
+            ("Weixin", "微信"),
+            ("WeChat", "微信"),
+            ("dingtalk", "钉钉"),
+        };
+
         private static string FriendlyAppName(string sourceAppUserModelId)
         {
             if (string.IsNullOrEmpty(sourceAppUserModelId)) return "未知应用";
 
-            // 常见 AUMID 形如 "Tencent.QQMusic..."/"Spotify..."/"Chrome..."，
-            // 取第一段作为友好名称
-            int dot = sourceAppUserModelId.IndexOf('.');
-            if (dot > 0 && dot < sourceAppUserModelId.Length - 1)
+            // 形如 "Tencent.QQMusic.xxx" 或 "SpotifyAB.SpotifyMusic_zhtwkyt98bp6g!App"
+            string app = sourceAppUserModelId;
+            int bang = app.IndexOf('!');
+            if (bang > 0) app = app[..bang];
+
+            foreach (var (prefix, name) in AppNameMap)
             {
-                string head = sourceAppUserModelId[..dot];
+                if (app.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    return name;
+            }
+
+            // 未命中：取第一段（原行为）
+            int dot = app.IndexOf('.');
+            if (dot > 0 && dot < app.Length - 1)
+            {
+                string head = app[..dot];
                 if (!head.Contains('!') && !head.Contains('{'))
                     return head;
             }
-            return sourceAppUserModelId;
+            return app;
         }
     }
 }

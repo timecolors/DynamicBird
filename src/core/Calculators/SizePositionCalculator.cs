@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Windows;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Core.Calculators
 {
@@ -24,8 +25,10 @@ namespace DynamicBird.Core.Calculators
             double currentLeft, double currentTop,
             double currentWidth, double currentHeight)
         {
-            double screenW = SystemParameters.PrimaryScreenWidth;
-            double screenH = SystemParameters.PrimaryScreenHeight;
+            var wa = ScreenMetrics.GetCachedScreenForWindow(
+                _window.Left, _window.Top, _window.Width, _window.Height);
+            double screenW = wa.Width;
+            double screenH = wa.Height;
 
             double newLeft = currentLeft;
             double newTop = currentTop;
@@ -77,8 +80,10 @@ namespace DynamicBird.Core.Calculators
             double mouseX, double mouseY,
             double currentWidth, double currentHeight)
         {
-            double screenW = SystemParameters.PrimaryScreenWidth;
-            double screenH = SystemParameters.PrimaryScreenHeight;
+            var wa = ScreenMetrics.GetCachedScreenForWindow(
+                _window.Left, _window.Top, _window.Width, _window.Height);
+            double screenW = wa.Width;
+            double screenH = wa.Height;
 
             double left = 0, top = 0;
             switch (edge)

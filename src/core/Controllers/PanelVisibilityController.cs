@@ -2,6 +2,7 @@ using DynamicBird.Animation;
 using DynamicBird.Core.Detection;
 using DynamicBird.Core.Services;
 using DynamicBird.Core.Services.Configuration;
+using DynamicBird.Infrastructure.Utils;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -38,7 +39,13 @@ namespace DynamicBird.Core.Controllers
         public event Action? PanelShown;
 
         public bool IsLocked => _lockManager.IsLocked;
-        public bool IsVisible => _mainPanel.Opacity > 0.5;
+        // ★ 基于 _visible 标志而非 Opacity：透视模式（按住穿透键）下 MainPanel.Opacity=0.3，
+        //   若用 Opacity>0.5 判定会把"显示中的面板"误判为隐藏 → ShowAt 反复触发
+        //   RepositionOffscreenForSide 瞬移（快速滑动时面板横跳闪烁）。
+        public bool IsVisible => _visible;
+
+        /// <summary>当前边缘区域键（隐藏延时按区域读取）。</summary>
+        public string CurrentRegionKey { get; set; } = "";
         // 是否已请求显示（滑入/滑出动画期间也保持 true/false，用于避免定时器重复触发目标）
         public bool IsShown => _visible;
         public bool IsInHideDelay => _isInHideDelay;
@@ -79,6 +86,9 @@ namespace DynamicBird.Core.Controllers
 
         public void SetPanelLock(bool locked) => _lockManager.SetLock(locked);
 
+        /// <summary>穿透提示期间不重置窗口透明度（MainWindow 在穿透键按下时设置）。</summary>
+        public bool SuppressOpacityReset { get; set; }
+
         /// <summary>设置“热键钉住”状态：钉住期间面板不自动隐藏，直到解除或再次手动隐藏。</summary>
         public void SetHotkeyPinned(bool pinned)
         {
@@ -111,7 +121,7 @@ namespace DynamicBird.Core.Controllers
         /// 以指定锚点滑入显示：从屏幕外滑到锚点并淡入。
         /// 同一锚点重复调用是幂等的（避免重置动画速度）。
         /// </summary>
-        public void ShowAt(double left, double top)
+        public void ShowAt(double left, double top, string edge = "")
         {
             CancelHide();
             EnsureWindowVisible();
@@ -126,7 +136,7 @@ namespace DynamicBird.Core.Controllers
                 {
                     _shapeAnimator.SetShowHideTarget(left, top, _opacity, allowOffscreen: true);
                 }
-                else if (_mainPanel.Opacity < _opacity - 0.05)
+                else if (_mainPanel.Opacity < _opacity - 0.05 && !SuppressOpacityReset)
                 {
                     _shapeAnimator.SetOpacityTarget(_opacity);
                 }
@@ -136,8 +146,72 @@ namespace DynamicBird.Core.Controllers
             _visible = true;
             _lastAnchorLeft = left;
             _lastAnchorTop = top;
-            _shapeAnimator.SetShowHideTarget(left, top, _opacity, allowOffscreen: true);
+            // ★ 跨边修复：面板若不在目标边附近（如上次在上边外隐藏），
+            //   先瞬移到目标边对应的屏幕外位置，再从该边滑入，避免"从屏幕中间飞过来"。
+            //   滑入方向按"触发边"判定（左边缘→左侧，底部→下方……）。
+            RepositionOffscreenForSide(left, top, edge);
+            // ★ 呼出动画：用"触发动画"类型与参数
+            _shapeAnimator.SetShowHideTarget(left, top, _opacity, allowOffscreen: true,
+                _settings.ShowAnimationType, _settings.ShowAnimationDurationMs,
+                _settings.ShowAnimationZoomFrom, _settings.ShowAnimationOscillations, _settings.ShowAnimationSpringiness);
             PanelShown?.Invoke();
+        }
+
+        /// <summary>
+        /// 显示前把面板预置到目标贴边方向的屏幕外，保证从正确的边滑入。
+        /// 隐藏时面板会滑到某边的屏幕外；若下次显示的是另一边（跨边），
+        /// 直接从旧位置做动画会"飞"过整个屏幕。此方法检测跨边并先瞬移。
+        /// 同边（当前位置已在该边屏幕外附近）则保持原有滑入动画。
+        /// </summary>
+        private void RepositionOffscreenForSide(double targetLeft, double targetTop, string edge = "")
+        {
+            try
+            {
+                var wa = ScreenMetrics.GetCachedScreenForWindow(
+                    _window.Left, _window.Top, _window.Width, _window.Height);
+                double sw = wa.Width;
+                double sh = wa.Height;
+                double w = _window.Width;
+                double h = _window.Height;
+
+                double preLeft = _window.Left, preTop = _window.Top;
+                if (!string.IsNullOrEmpty(edge))
+                {
+                    // ★ 按触发边判定滑入方向（底部左侧面板从下方滑入、左边缘从左侧滑入……）
+                    switch (edge)
+                    {
+                        case "Left": preLeft = -w; preTop = targetTop; break;
+                        case "Right": preLeft = sw; preTop = targetTop; break;
+                        case "Top": preLeft = targetLeft; preTop = -h; break;
+                        case "Bottom": preLeft = targetLeft; preTop = sh; break;
+                        default: return; // 无明确边缘：不预置
+                    }
+                }
+                else
+                {
+                    // 无触发边信息：按目标位置推断（垂直边优先）
+                    bool atLeft = targetLeft <= 0;
+                    bool atRight = targetLeft >= sw - w - 1;
+                    bool atTop = !atLeft && !atRight && targetTop <= 0;
+                    bool atBottom = !atLeft && !atRight && targetTop >= sh - h - 1;
+                    if (!atTop && !atBottom && !atLeft && !atRight) return; // 非贴边，不预置
+                    if (atLeft) { preLeft = -w; preTop = targetTop; }
+                    else if (atRight) { preLeft = sw; preTop = targetTop; }
+                    else if (atTop) { preLeft = targetLeft; preTop = -h; }
+                    else if (atBottom) { preLeft = targetLeft; preTop = sh; }
+                }
+
+                // 已在目标边屏幕外附近：不瞬移，保持原有滑入动画
+                if (Math.Abs(_window.Left - preLeft) < w * 0.5 &&
+                    Math.Abs(_window.Top - preTop) < h * 0.5)
+                {
+                    return;
+                }
+
+                // 跨边：先原子瞬移到目标边的屏幕外，再滑入
+                _shapeAnimator.JumpTo(preLeft, preTop, w, h);
+            }
+            catch { }
         }
 
         /// <summary>启动时窗口整体透明（Opacity=0），首次显示时恢复。</summary>
@@ -145,7 +219,8 @@ namespace DynamicBird.Core.Controllers
         {
             try
             {
-                if (_window.Opacity < 1.0) _window.Opacity = 1.0;
+                // ★ 穿透提示期间（SuppressOpacityReset=true）不重置窗口透明度（穿透时窗口半透明提示）
+            if (_window.Opacity < 1.0 && !SuppressOpacityReset) _window.Opacity = 1.0;
             }
             catch { }
         }
@@ -160,9 +235,16 @@ namespace DynamicBird.Core.Controllers
             _lastAnchorLeft = double.NaN;
             _lastAnchorTop = double.NaN;
 
-            // 滑出屏幕（方向取决于当前贴边边缘）
+            // ★ 隐藏：设置动画滑出（用"隐藏动画"类型与参数）+ 渲染循环兜底——
+            //   动画正常则由设置参数驱动（顺滑滑出）；动画被其他逻辑打断时，
+            //   渲染循环（cling）接管把位置推到屏幕外（到位自动停）→ 永不卡半路（无黑框）。
             var (lx, ly) = GetSlideOutTarget();
-            _shapeAnimator.SetShowHideTarget(lx, ly, 0, allowOffscreen: true);
+            _shapeAnimator.SetShowHideTarget(lx, ly, 0, allowOffscreen: true,
+                _settings.HideAnimationType, _settings.HideAnimationDurationMs,
+                _settings.HideAnimationZoomTo, _settings.HideAnimationOscillations, _settings.HideAnimationSpringiness);
+            // ★ 不再加 cling 兜底：渲染循环每帧写本地值会干扰 Window.Left 动画时钟
+            //   （800ms 动画被打成瞬间到位）。动画本身由 Animate 完成回调锁定终值，
+            //   打断源（StartFollowPosition 等）已修复 → 滑出动画自然完成、无黑框。
             PanelHidden?.Invoke();
         }
 
@@ -181,7 +263,12 @@ namespace DynamicBird.Core.Controllers
             // ShapeAnimator 会把窗口真正滑出屏幕（而不是留在原位变成黑块）
             _shapeAnimator.SetOpacityDirect(0);
             var (lx, ly) = GetSlideOutTarget();
-            _shapeAnimator.SetShowHideTarget(lx, ly, 0, allowOffscreen: true);
+            _shapeAnimator.SetShowHideTarget(lx, ly, 0, allowOffscreen: true,
+                _settings.HideAnimationType, _settings.HideAnimationDurationMs,
+                _settings.HideAnimationZoomTo, _settings.HideAnimationOscillations, _settings.HideAnimationSpringiness);
+            // ★ 不再加 cling 兜底：渲染循环每帧写本地值会干扰 Window.Left 动画时钟
+            //   （800ms 动画被打成瞬间到位）。动画本身由 Animate 完成回调锁定终值，
+            //   打断源（StartFollowPosition 等）已修复 → 滑出动画自然完成、无黑框。
             PanelHidden?.Invoke();
         }
 
@@ -192,8 +279,11 @@ namespace DynamicBird.Core.Controllers
             if (Mouse.LeftButton == MouseButtonState.Pressed) return;
             if (_mouseLeaveDetector.IsMouseNearPanel()) return;
             if (IsVisible == false) return;
+            // ★ 已在延时中：不重置计时（tick 每 30ms 重复调用本方法，
+            //   若每次重置 _hideDelayStart，200ms 延时永远到不了 → 面板永不隐藏）
+            if (_isInHideDelay) return;
 
-            _hideDelayMs = _settings.HideDelayMs;
+            _hideDelayMs = _settings.GetHideDelay(CurrentRegionKey);
 
             // ★ 延时隐藏设为 0 = 取消延时，鼠标一离开立即隐藏
             if (_hideDelayMs <= 0)
@@ -240,8 +330,10 @@ namespace DynamicBird.Core.Controllers
 
         private (double left, double top) GetSlideOutTarget()
         {
-            double sw = SystemParameters.PrimaryScreenWidth;
-            double sh = SystemParameters.PrimaryScreenHeight;
+            var wa = ScreenMetrics.GetCachedScreenForWindow(
+                _window.Left, _window.Top, _window.Width, _window.Height);
+            double sw = wa.Width;
+            double sh = wa.Height;
             double w = _window.Width;
             double h = _window.Height;
             const double margin = 12;

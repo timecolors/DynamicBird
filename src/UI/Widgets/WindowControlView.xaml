@@ -1,0 +1,53 @@
+<UserControl x:Class="DynamicBird.UI.Widgets.WindowControlView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:DynamicBird.UI.Localization"
+             Background="Transparent">
+    <StackPanel Margin="8" VerticalAlignment="Center">
+        <TextBlock x:Name="TitleText"
+                   FontSize="13" FontWeight="SemiBold" Foreground="#EEEEEE"
+                   TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis"
+                   Margin="0,0,0,8" VerticalAlignment="Center"
+                   Text="{Binding Item[WC_Title], Source={x:Static loc:LocalizationManager.Instance}}"/>
+        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!-- 最小化 -->
+            <Button x:Name="BtnMinimize" Style="{StaticResource IconButton}" Tag="min"
+                    Click="Action_Click" ToolTip="{Binding Item[WC_Minimize], Source={x:Static loc:LocalizationManager.Instance}}">
+                <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconMinus}" Width="14" Height="14"/>
+            </Button>
+            <!-- 最大化/还原 -->
+            <Button x:Name="BtnMaximize" Style="{StaticResource IconButton}" Tag="max"
+                    Click="Action_Click" ToolTip="{Binding Item[WC_Maximize], Source={x:Static loc:LocalizationManager.Instance}}">
+                <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconMaximize}" Width="14" Height="14"/>
+            </Button>
+            <!-- 关闭 -->
+            <Button x:Name="BtnClose" Style="{StaticResource IconButton}" Tag="close"
+                    Click="Action_Click" ToolTip="{Binding Item[WC_Close], Source={x:Static loc:LocalizationManager.Instance}}">
+                <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconClose}" Width="14" Height="14"/>
+            </Button>
+            <!-- 置顶 -->
+            <Button x:Name="BtnPin" Style="{StaticResource IconButton}" Tag="pin"
+                    Click="Action_Click" ToolTip="{Binding Item[WC_Pin], Source={x:Static loc:LocalizationManager.Instance}}">
+                <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconPin}" Width="14" Height="14"/>
+            </Button>
+            <!-- 贴靠：左半屏 -->
+            <Button x:Name="BtnSnapLeft" Style="{StaticResource IconButton}" Tag="snap_left"
+                    Click="Action_Click" ToolTip="{Binding Item[WC_SnapLeft], Source={x:Static loc:LocalizationManager.Instance}}">
+                <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconSnapLeft}" Width="14" Height="14"/>
+            </Button>
+            <!-- 贴靠：右半屏 -->
+            <Button x:Name="BtnSnapRight" Style="{StaticResource IconButton}" Tag="snap_right"
+                    Click="Action_Click" ToolTip="{Binding Item[WC_SnapRight], Source={x:Static loc:LocalizationManager.Instance}}">
+                <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconSnapRight}" Width="14" Height="14"/>
+            </Button>
+            <!-- 贴靠：居中 -->
+            <Button x:Name="BtnSnapCenter" Style="{StaticResource IconButton}" Tag="snap_center"
+                    Click="Action_Click" ToolTip="{Binding Item[WC_SnapCenter], Source={x:Static loc:LocalizationManager.Instance}}">
+                <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconCenter}" Width="14" Height="14"/>
+            </Button>
+        </WrapPanel>
+        <TextBlock x:Name="HintText" FontSize="10" Foreground="#8A8A8A"
+                   TextAlignment="Center" Margin="0,6,0,0"
+                   Text="{Binding Item[WC_Hint], Source={x:Static loc:LocalizationManager.Instance}}"/>
+    </StackPanel>
+</UserControl>

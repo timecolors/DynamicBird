@@ -28,6 +28,8 @@ namespace DynamicBird.Core.Controllers
         private DynamicBird.UI.AppHelper.AppHelperView? _cachedAppHelper;
         private DynamicBird.UI.Widgets.WidgetSwitcher? _cachedWidgetSwitcher;
         private DynamicBird.UI.AI.AiChatView? _cachedAiChat;
+        // ★ 任务栏视图缓存：贴边切换频繁触发 LoadContent，重建快捷方式布局是卡顿主因
+        private DynamicBird.UI.Panels.TaskbarView? _cachedTaskbarView;
 
         // ★★★ 新增事件 ★★★
         public event Action? LoadingStarted;
@@ -36,6 +38,19 @@ namespace DynamicBird.Core.Controllers
         public event Action? ContentChanged;
 
         public string CurrentRegionType => _currentRegionType;
+
+        /// <summary>当前缓存的小组件切换器（可能为 null，尚未创建）。</summary>
+        public DynamicBird.UI.Widgets.WidgetSwitcher? WidgetSwitcher => _cachedWidgetSwitcher;
+
+        /// <summary>
+        /// 显示小组件面板并切换到指定标签（如划词热键跳转到 TextAi）。
+        /// 面板当前是其他内容时强制切到小组件，标签不存在时保持当前标签。
+        /// </summary>
+        public void ShowWidgetTab(string tab)
+        {
+            LoadContentForRegion("Widget");
+            _cachedWidgetSwitcher?.SelectTab(tab);
+        }
 
         public PanelContentController(
             ContentControl contentContainer,
@@ -56,6 +71,22 @@ namespace DynamicBird.Core.Controllers
         public void LoadContentForRegion(string regionType, string regionKey = "")
         {
             DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"LoadContent type={regionType} key={regionKey}");
+
+            // ★ 同类型不重建：同一边内滑动（如 Left_Top → Left_Center）内容相同，
+            //   直接复用当前实例，避免每次 new TaskbarView 导致的贴边切换卡顿
+            if (regionType == _currentRegionType && _currentWidget != null)
+            {
+                // ★ 隐藏时 OnPanelHidden 会把 ContentContainer.Content 清空（滑出动画后释放视觉树），
+                //   同类型复用（隐藏后回到同一边）必须重新挂载缓存实例，否则面板空白
+                if (_contentContainer.Content == null && _currentWidget is System.Windows.FrameworkElement cached)
+                {
+                    _contentContainer.Content = cached;
+                    _currentWidget.OnActivated();
+                    ContentChanged?.Invoke();
+                }
+                return;
+            }
+
             _currentRegionType = regionType;
 
             // ★★★ 通知开始加载 ★★★
@@ -72,12 +103,22 @@ namespace DynamicBird.Core.Controllers
             switch (regionType)
             {
                 case "Taskbar":
-                    newContent = new TaskbarView(_shortcutService, _settings);
+                    // ★ 缓存任务栏视图：切走再切回不重建（快捷方式布局/窗口列表保持）
+                    _cachedTaskbarView ??= new DynamicBird.UI.Panels.TaskbarView(_shortcutService, _settings);
+                    newContent = _cachedTaskbarView;
                     break;
 
                 case "Widget":
                     // ★ 小组件实例缓存：呼出面板时保留计时/便签/剪贴板状态
-                    _cachedWidgetSwitcher ??= new WidgetSwitcher(_settings, _clipboardService, _noteService);
+                    if (_cachedWidgetSwitcher == null)
+                    {
+                        _cachedWidgetSwitcher = new WidgetSwitcher(_settings, _clipboardService, _noteService);
+                        // ★ 小组件内部切标签 → 面板按新内容重新自适应尺寸（延迟到布局完成，测量更准确）
+                        _cachedWidgetSwitcher.ContentSizeChanged += () =>
+                            System.Windows.Application.Current?.Dispatcher.BeginInvoke(
+                                () => ContentChanged?.Invoke(),
+                                System.Windows.Threading.DispatcherPriority.Loaded);
+                    }
                     var widgetSwitcher = _cachedWidgetSwitcher;
                     newContent = widgetSwitcher;
                     break;
@@ -94,6 +135,11 @@ namespace DynamicBird.Core.Controllers
                     newContent = _cachedAiChat;
                     break;
 
+                case "WindowControl":
+                    // ★ 右上角窗口操作中心（不缓存：每次显示都刷新前台窗口信息）
+                    newContent = new DynamicBird.UI.Widgets.WindowControlView();
+                    break;
+
                 case "Notification":
                     newContent = new NotificationDockView();
                     break;
@@ -103,7 +149,7 @@ namespace DynamicBird.Core.Controllers
                     break;
 
                 case "QuickSettings":
-                    newContent = new QuickSettingsView();
+                    newContent = new QuickSettingsView(_settings);
                     break;
 
                 case "Placeholder":
@@ -111,7 +157,7 @@ namespace DynamicBird.Core.Controllers
                     newContent = regionKey switch
                     {
                         "BottomLeft" => new RecentItemsView(),
-                        "TopLeft" => new QuickSettingsView(),
+                        "TopLeft" => new QuickSettingsView(_settings),
                         _ => new NotificationDockView()
                     };
                     break;

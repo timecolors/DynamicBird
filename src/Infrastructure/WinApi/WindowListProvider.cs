@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -102,6 +102,14 @@ namespace DynamicBird.Infrastructure.WinApi
             if (hwnd == IntPtr.Zero) return "";
             GetWindowThreadProcessId(hwnd, out uint pid);
             return GetProcessPath(pid);
+        }
+
+        /// <summary>按窗口句柄获取所属进程 Id；失败返回 0。</summary>
+        public static uint GetProcessId(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return 0;
+            GetWindowThreadProcessId(hwnd, out uint pid);
+            return pid;
         }
 
         private static readonly Dictionary<uint, string> _processPathCache = new();

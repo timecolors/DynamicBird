@@ -61,14 +61,14 @@ namespace DynamicBird.Core.Detection
 
                 // ★★★ 底部额外扩展任务栏高度 ★★★
                 // 当面板在底部边缘时，任务栏区域也应该算作"附近"
-                bool isOnBottom = Math.Abs(_window.Top + _window.Height - SystemParameters.PrimaryScreenHeight + _taskbarHeight) < 50;
+                var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
+                    _window.Left, _window.Top, _window.Width, _window.Height);
+                bool isOnBottom = Math.Abs(_window.Top + _window.Height - wa.Height + _taskbarHeight) < 50;
                 double bottomExtension = isOnBottom ? _taskbarHeight + SafetyMargin : 0;
 
-                // ★ 阈值按系统 DPI 动态计算（基础 20px × 缩放），不再依赖分辨率预设
-                double dpiScale = 1.0;
-                try { dpiScale = VisualTreeHelper.GetDpi(_window).DpiScaleX; } catch { }
-                if (dpiScale <= 0 || double.IsNaN(dpiScale) || double.IsInfinity(dpiScale)) dpiScale = 1.0;
-                double threshold = 20 * dpiScale + SafetyMargin;
+                // ★ 严格面板边界：鼠标离开面板即视为"已离开"开始隐藏计时。
+                //   仅保留极小防抖余量（4 物理像素），避免边缘像素抖动反复计时/取消。
+                double threshold = 4.0;
 
                 bool inX = mousePoint.X >= panelLeft - threshold && mousePoint.X <= panelRight + threshold;
                 bool inY = mousePoint.Y >= panelTop - threshold && mousePoint.Y <= panelBottom + threshold + bottomExtension;

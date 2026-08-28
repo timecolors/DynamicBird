@@ -1,6 +1,6 @@
 <UserControl x:Class="DynamicBird.UI.AppHelper.MediaControlView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
     <Grid Margin="2">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,7 +16,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0"
                        x:Name="StatusText"
-                       Text="正在扫描系统媒体会话…"
+                       Text="{Binding Item[UI_MediaControlView_37], Source={x:Static loc:LocalizationManager.Instance}}"
                        FontSize="11"
                        Foreground="#8A8A8A"
                        VerticalAlignment="Center"
@@ -25,10 +25,10 @@
                     Style="{StaticResource FlatButton}"
                     Height="26"
                     Click="Refresh_Click"
-                    ToolTip="刷新">
+                    ToolTip="{Binding Item[UI_MediaControlView_38], Source={x:Static loc:LocalizationManager.Instance}}">
                 <StackPanel Orientation="Horizontal">
                     <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconRefresh}" Margin="0,0,5,0"/>
-                    <TextBlock Text="刷新" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Item[UI_MediaControlView_39], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
         </Grid>
@@ -83,19 +83,19 @@
                         <Button Grid.Column="2"
                                 Style="{StaticResource IconButton}"
                                 Click="Prev_Click"
-                                ToolTip="上一首">
+                                ToolTip="{Binding Item[UI_MediaControlView_40], Source={x:Static loc:LocalizationManager.Instance}}">
                             <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconPrev}"/>
                         </Button>
                         <Button Grid.Column="3"
                                 Style="{StaticResource IconButton}"
                                 Click="PlayPause_Click"
-                                ToolTip="播放/暂停">
+                                ToolTip="{Binding Item[UI_MediaControlView_41], Source={x:Static loc:LocalizationManager.Instance}}">
                             <Path Style="{StaticResource LineIcon}" Data="{Binding PlayGlyph}"/>
                         </Button>
                         <Button Grid.Column="4"
                                 Style="{StaticResource IconButton}"
                                 Click="Next_Click"
-                                ToolTip="下一首">
+                                ToolTip="{Binding Item[UI_MediaControlView_42], Source={x:Static loc:LocalizationManager.Instance}}">
                             <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconNext}"/>
                         </Button>
                     </Grid>
@@ -107,24 +107,24 @@
         <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="0,6,0,0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Text="媒体键"
+                    <TextBlock Text="{Binding Item[UI_MediaControlView_43], Source={x:Static loc:LocalizationManager.Instance}}"
                                FontSize="10"
                                Foreground="#8A8A8A"
                                VerticalAlignment="Center"
                                Margin="0,0,6,0"/>
-                    <Button Style="{StaticResource IconButton}" Click="KeyPrev_Click" ToolTip="上一首">
+                    <Button Style="{StaticResource IconButton}" Click="KeyPrev_Click" ToolTip="{Binding Item[UI_MediaControlView_44], Source={x:Static loc:LocalizationManager.Instance}}">
                         <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconPrev}"/>
                     </Button>
-                    <Button Style="{StaticResource IconButton}" Click="KeyPlayPause_Click" ToolTip="播放/暂停">
+                    <Button Style="{StaticResource IconButton}" Click="KeyPlayPause_Click" ToolTip="{Binding Item[UI_MediaControlView_45], Source={x:Static loc:LocalizationManager.Instance}}">
                         <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconPlay}"/>
                     </Button>
-                    <Button Style="{StaticResource IconButton}" Click="KeyNext_Click" ToolTip="下一首">
+                    <Button Style="{StaticResource IconButton}" Click="KeyNext_Click" ToolTip="{Binding Item[UI_MediaControlView_46], Source={x:Static loc:LocalizationManager.Instance}}">
                         <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconNext}"/>
                     </Button>
-                    <Button Style="{StaticResource IconButton}" Click="KeyVolDown_Click" ToolTip="音量减">
+                    <Button Style="{StaticResource IconButton}" Click="KeyVolDown_Click" ToolTip="{Binding Item[UI_MediaControlView_47], Source={x:Static loc:LocalizationManager.Instance}}">
                         <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconVolume}"/>
                     </Button>
-                    <Button Style="{StaticResource IconButton}" Click="KeyVolUp_Click" ToolTip="音量加">
+                    <Button Style="{StaticResource IconButton}" Click="KeyVolUp_Click" ToolTip="{Binding Item[UI_MediaControlView_48], Source={x:Static loc:LocalizationManager.Instance}}">
                         <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconVolume}"/>
                     </Button>
                 </StackPanel>

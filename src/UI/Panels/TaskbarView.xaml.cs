@@ -1,4 +1,4 @@
-﻿using DynamicBird.Core.Services;
+using DynamicBird.Core.Services;
 using DynamicBird.Core.Services.Configuration;
 using DynamicBird.src.core.Services.Shortcuts;
 using System;
@@ -100,14 +100,26 @@ namespace DynamicBird.UI.Panels
 
         public void RefreshData() => LoadItems();
 
+        /// <summary>窗口事件钩子回调（UI 线程）：窗口列表变化时刷新（节流已由钩子合并）。</summary>
+        private void OnWindowEventChanged()
+        {
+            try { RefreshWindows(); } catch { }
+        }
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             InitializeDragDropEvents();
 
+            // ★ 事件驱动 + 轮询兜底：窗口创建/关闭/标题变化由 WindowEventHook 实时通知；
+            //   轮询降至 5s 兜底（钩子失败或极端场景），空闲 CPU 占用大幅下降。
             _refreshTimer = new DispatcherTimer();
-            _refreshTimer.Interval = TimeSpan.FromSeconds(1);
+            _refreshTimer.Interval = TimeSpan.FromSeconds(5);
             _refreshTimer.Tick += (s, args) => RefreshWindows();
             _refreshTimer.Start();
+
+            // ★ 全局窗口事件钩子（进程内共享，只在面板显示时订阅）
+            WindowEventHook.Changed += OnWindowEventChanged;
+            WindowEventHook.Start();
             UpdateLayout();
 
             Dispatcher.BeginInvoke(new Action(() =>
@@ -127,6 +139,8 @@ namespace DynamicBird.UI.Panels
         {
             _refreshTimer?.Stop();
             _refreshTimer = null;
+
+            WindowEventHook.Changed -= OnWindowEventChanged;
 
             _shortcutScrollHandler?.Detach();
             _shortcutScrollHandler = null;

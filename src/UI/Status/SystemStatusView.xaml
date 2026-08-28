@@ -1,6 +1,6 @@
 <UserControl x:Class="DynamicBird.UI.Status.SystemStatusView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 
         <StackPanel x:Name="TimePanel" Orientation="Horizontal">
@@ -35,7 +35,7 @@
 
         <StackPanel x:Name="NetworkPanel" Orientation="Horizontal" Margin="0,0,15,0">
             <Path x:Name="NetworkIcon" Style="{StaticResource LineIcon}" Data="{StaticResource IconWifi}"/>
-            <TextBlock x:Name="NetworkText" Text="已连接" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
+            <TextBlock x:Name="NetworkText" Text="{Binding Item[UI_SystemStatusView_401], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
         </StackPanel>
 
         <StackPanel x:Name="BatteryPanel" Orientation="Horizontal" Margin="0,0,15,0">
@@ -43,8 +43,10 @@
             <TextBlock x:Name="BatteryText" Text="85%" FontSize="13" Foreground="#AAAAAA" Margin="4,0,0,0"/>
         </StackPanel>
 
-        <StackPanel x:Name="WeatherPanel" Orientation="Horizontal" Visibility="Collapsed">
-            <TextBlock x:Name="WeatherText" Text="天气…" FontSize="13" Foreground="#AAAAAA"/>
+        <StackPanel x:Name="WeatherPanel" Orientation="Horizontal" Visibility="Collapsed"
+                    Cursor="Hand" MouseLeftButtonUp="WeatherPanel_MouseLeftButtonUp"
+                    ToolTip="{Binding Item[Status_WeatherClick], Source={x:Static loc:LocalizationManager.Instance}}">
+            <TextBlock x:Name="WeatherText" Text="{Binding Item[UI_SystemStatusView_402], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="13" Foreground="#AAAAAA"/>
         </StackPanel>
 
     </StackPanel>

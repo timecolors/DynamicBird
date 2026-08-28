@@ -1,7 +1,8 @@
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Resources;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DynamicBird.UI.Localization
 {
@@ -19,6 +20,9 @@ namespace DynamicBird.UI.Localization
         public static LocalizationManager Instance { get; } = new();
 
         private readonly ResourceManager _resources;
+
+        /// <summary>进程启动时的系统 UI 语言快照（跟随系统时回退用）。</summary>
+        private static readonly CultureInfo SystemCulture = CultureInfo.CurrentUICulture;
 
         private LocalizationManager()
         {
@@ -46,22 +50,60 @@ namespace DynamicBird.UI.Localization
         /// <summary>当前语言名称（如 zh-CN / en-US）。</summary>
         public string CurrentCultureName => CultureInfo.CurrentUICulture.Name;
 
-        /// <summary>切换语言并通知所有绑定刷新。参数为空时回退系统语言。</summary>
+        /// <summary>切换语言并通知所有绑定刷新。参数为空时跟随 Windows 系统显示语言。</summary>
         public void SetCulture(string? cultureName)
         {
             try
             {
                 var culture = string.IsNullOrWhiteSpace(cultureName)
-                    ? CultureInfo.InstalledUICulture
+                    ? GetSystemUiCulture()
                     : new CultureInfo(cultureName);
                 CultureInfo.CurrentUICulture = culture;
             }
             catch
             {
-                CultureInfo.CurrentUICulture = CultureInfo.InstalledUICulture;
+                CultureInfo.CurrentUICulture = GetSystemUiCulture();
             }
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
         }
+
+        /// <summary>
+        /// 跟随 Windows 系统"显示语言"（GetUserDefaultUILanguage：用户实际看到的界面语言，
+        /// 而不是安装介质语言 InstalledUICulture——装的中文系统但显示语言改英文时，应显示英文）。
+        /// 仅支持中/英；其他语言（日/德…）回退英文。
+        /// </summary>
+        private static CultureInfo GetSystemUiCulture()
+        {
+            try
+            {
+                int lcid = GetUserDefaultUILanguage();
+                if (lcid != 0)
+                {
+                    var c = new CultureInfo(lcid);
+                    return Normalize(c.Name);
+                }
+            }
+            catch { }
+            try
+            {
+                return Normalize(SystemCulture.Name);
+            }
+            catch { }
+            return CultureInfo.GetCultureInfo("en-US");
+        }
+
+        private static CultureInfo Normalize(string name)
+        {
+            if (name.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
+                return CultureInfo.GetCultureInfo("zh-CN");
+            if (name.StartsWith("en", StringComparison.OrdinalIgnoreCase))
+                return CultureInfo.GetCultureInfo("en-US");
+            // 其他语言没有本地化资源：回退英文（比中文更通用）
+            return CultureInfo.GetCultureInfo("en-US");
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern int GetUserDefaultUILanguage();
 
         public event PropertyChangedEventHandler? PropertyChanged;
     }

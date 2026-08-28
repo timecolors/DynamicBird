@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using DynamicBird.Core.Services.Configuration;
 
@@ -135,9 +135,14 @@ namespace DynamicBird.Core.Detection
 
         public ShapeResult GetFixedShapeResult(string position, string shapeType, double taskbarHeight)
         {
+            var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
+                System.Windows.Application.Current?.MainWindow?.Left ?? 0,
+                System.Windows.Application.Current?.MainWindow?.Top ?? 0,
+                System.Windows.Application.Current?.MainWindow?.Width ?? 1920,
+                System.Windows.Application.Current?.MainWindow?.Height ?? 1080);
             double screenLength = position == "Top" || position == "Bottom"
-                ? SystemParameters.PrimaryScreenWidth
-                : SystemParameters.PrimaryScreenHeight;
+                ? wa.Width
+                : wa.Height;
 
             bool isHorizontal = (position == "Top" || position == "Bottom");
             double baseWidth = taskbarHeight * _settings.StripWidthMultiplier;

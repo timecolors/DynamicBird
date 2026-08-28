@@ -164,10 +164,14 @@ namespace DynamicBird.Core.Services
                     History.Insert(0, item);
 
                     int maxCount = _settings.ClipboardMaxCount;
-                    while (History.Count > maxCount)
+                    // ★ 记忆库：收藏（IsPinned）的条目不被自动清理淘汰
+                    while (History.Count > maxCount && History.Any(i => !i.IsPinned))
                     {
-                        var removed = History[History.Count - 1];
-                        History.RemoveAt(History.Count - 1);
+                        int last = History.Count - 1;
+                        while (last >= 0 && History[last].IsPinned) last--;
+                        if (last < 0) break;
+                        var removed = History[last];
+                        History.RemoveAt(last);
                         removed.CleanupCache();
                     }
 
@@ -198,7 +202,7 @@ namespace DynamicBird.Core.Services
                     {
                         var img = System.Windows.Clipboard.GetImage();
                         if (img != null)
-                            return ClipboardItem.FromImage(img);
+                            return ClipboardItem.FromImage(img, _settings.ClipboardImageMaxWidth);
                     }
                     catch { }
                 }
@@ -292,6 +296,18 @@ namespace DynamicBird.Core.Services
             }
         }
 
+        /// <summary>收藏/取消收藏（收藏条目不被自动清理，记忆库核心）。</summary>
+        public void SetPinned(ClipboardItem item, bool pinned)
+        {
+            lock (_lock)
+            {
+                if (item.IsPinned == pinned) return;
+                item.IsPinned = pinned;
+                SaveHistory();
+                HistoryChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
         private string? GetCurrentClipboardHash()
         {
             try
@@ -337,6 +353,54 @@ namespace DynamicBird.Core.Services
             catch (Exception ex)
             {
                 LogManager.Error("保存剪贴板历史失败", ex);
+            }
+
+            // ★ 图片缓存总量上限：超限时清理"未被收藏引用且最旧"的缓存文件
+            try { EnforceImageCacheLimit(); } catch { }
+        }
+
+        /// <summary>
+        /// 图片缓存总量控制：缓存目录总大小超过 ClipboardImageCacheLimitMB 时，
+        /// 按文件修改时间从旧到新删除"不在收藏条目中"的图片缓存，直到低于上限。
+        /// 收藏（IsPinned）条目的图片永不自动删除。
+        /// </summary>
+        private void EnforceImageCacheLimit()
+        {
+            int limitMB = _settings.ClipboardImageCacheLimitMB;
+            if (limitMB <= 0) return;
+
+            string dir = AppPaths.ClipboardCacheDir;
+            if (!Directory.Exists(dir)) return;
+
+            // 收藏条目引用的缓存文件（保护集）
+            var pinnedCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in History)
+            {
+                if (item.IsPinned && !string.IsNullOrEmpty(item.CachePath))
+                    pinnedCache.Add(item.CachePath);
+            }
+
+            var files = Directory.GetFiles(dir, "*.png")
+                .Select(f => new FileInfo(f))
+                .Where(fi => !pinnedCache.Contains(fi.FullName))
+                .OrderBy(fi => fi.LastWriteTime)
+                .ToList();
+
+            long limitBytes = (long)limitMB * 1024 * 1024;
+            long total = files.Sum(fi => fi.Length);
+            if (total <= limitBytes) return;
+
+            foreach (var fi in files)
+            {
+                if (total <= limitBytes) break;
+                try
+                {
+                    long len = fi.Length;
+                    fi.Delete();
+                    total -= len;
+                    LogManager.Debug($"剪贴板图片缓存清理: {fi.Name} (-{len / 1024}KB)");
+                }
+                catch { }
             }
         }
 
@@ -395,6 +459,9 @@ namespace DynamicBird.Core.Services
             public DateTime Timestamp { get; set; } = DateTime.Now;
             public string? HtmlContent { get; set; }
 
+            /// <summary>收藏到常用（不被自动清理上限淘汰）。</summary>
+            public bool IsPinned { get; set; }
+
             public string GetHashString()
             {
                 if (Type == "Text") return HashText(FullText ?? DisplayText);
@@ -439,7 +506,7 @@ namespace DynamicBird.Core.Services
                 };
             }
 
-            public static ClipboardItem FromImage(System.Windows.Media.Imaging.BitmapSource image)
+            public static ClipboardItem FromImage(System.Windows.Media.Imaging.BitmapSource image, int maxWidth = 0)
             {
                 try
                 {
@@ -447,16 +514,41 @@ namespace DynamicBird.Core.Services
                     string fileName = $"img_{Guid.NewGuid():N}.png";
                     string filePath = Path.Combine(AppPaths.ClipboardCacheDir, fileName);
 
+                    // ★ 缩略化：最长边超过 maxWidth 时等比缩放后再保存（默认 1280px），
+                    //   大幅降低磁盘占用与历史加载开销；恢复时粘贴的也是缩略图（清晰度足够）。
+                    var toSave = image;
+                    int saveWidth = image.PixelWidth;
+                    int saveHeight = image.PixelHeight;
+                    if (maxWidth > 0)
+                    {
+                        int longSide = Math.Max(image.PixelWidth, image.PixelHeight);
+                        if (longSide > maxWidth)
+                        {
+                            double scale = (double)maxWidth / longSide;
+                            saveWidth = Math.Max(1, (int)Math.Round(image.PixelWidth * scale));
+                            saveHeight = Math.Max(1, (int)Math.Round(image.PixelHeight * scale));
+                            try
+                            {
+                                var scaled = new System.Windows.Media.Imaging.TransformedBitmap(
+                                    image, new System.Windows.Media.ScaleTransform(scale, scale));
+                                toSave = System.Windows.Media.Imaging.BitmapFrame.Create(scaled);
+                            }
+                            catch { /* 缩放失败则保存原图 */ }
+                        }
+                    }
+
                     var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
-                    encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));
-                    using var stream = File.OpenWrite(filePath);
-                    encoder.Save(stream);
+                    encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(toSave));
+                    using (var stream = File.OpenWrite(filePath))
+                    {
+                        encoder.Save(stream);
+                    }
 
                     return new ClipboardItem
                     {
                         Type = "Image",
                         CachePath = filePath,
-                        DisplayText = $"🖼️ 图片 ({image.PixelWidth}×{image.PixelHeight})"
+                        DisplayText = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Clip_ImageSize"], saveWidth, saveHeight)
                     };
                 }
                 catch
@@ -464,7 +556,7 @@ namespace DynamicBird.Core.Services
                     return new ClipboardItem
                     {
                         Type = "Image",
-                        DisplayText = "🖼️ 图片 (保存失败)"
+                        DisplayText = DynamicBird.UI.Localization.LocalizationManager.Instance["Clip_ImageSaveFailed"]
                     };
                 }
             }
@@ -506,12 +598,13 @@ namespace DynamicBird.Core.Services
                         CachePath = data.CachePath,
                         FilePaths = data.FilePaths,
                         Timestamp = data.Timestamp,
-                        HtmlContent = data.HtmlContent
+                        HtmlContent = data.HtmlContent,
+                        IsPinned = data.IsPinned
                     };
 
                     if (item.Type == "Image" && !string.IsNullOrEmpty(item.CachePath) && !File.Exists(item.CachePath))
                     {
-                        item.DisplayText = "🖼️ 图片 (文件丢失)";
+                        item.DisplayText = DynamicBird.UI.Localization.LocalizationManager.Instance["Clip_ImageMissing"];
                     }
                     return item;
                 }
@@ -529,7 +622,8 @@ namespace DynamicBird.Core.Services
                     CachePath = CachePath,
                     FilePaths = FilePaths,
                     Timestamp = Timestamp,
-                    HtmlContent = HtmlContent
+                    HtmlContent = HtmlContent,
+                    IsPinned = IsPinned
                 };
             }
 
@@ -587,6 +681,9 @@ namespace DynamicBird.Core.Services
             public List<string>? FilePaths { get; set; }
             public DateTime Timestamp { get; set; }
             public string? HtmlContent { get; set; }
+
+            /// <summary>收藏（不被自动清理）。</summary>
+            public bool IsPinned { get; set; }
         }
     }
 }

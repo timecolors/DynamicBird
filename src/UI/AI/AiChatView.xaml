@@ -4,7 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             d:DesignWidth="400" d:DesignHeight="520">
+             d:DesignWidth="400" d:DesignHeight="520" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
     <Grid Margin="2">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -24,14 +24,14 @@
             <Path Grid.Column="0" Style="{StaticResource LineIconAccent}" Data="{StaticResource IconAi}"
                   Width="18" Height="18" Margin="0,0,8,0"/>
             <StackPanel Grid.Column="1">
-                <TextBlock Text="AI 助手" FontSize="14" FontWeight="SemiBold" Foreground="#EEEEEE"/>
+                <TextBlock Text="{Binding Item[UI_AiChatView_1], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="14" FontWeight="SemiBold" Foreground="#EEEEEE"/>
                 <TextBlock x:Name="ModelText" Text="" FontSize="10" Foreground="#8A8A8A" Margin="0,2,0,0"/>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <Button x:Name="BtnSettings" Content="⚙" Style="{StaticResource FlatButton}" Height="26" Width="28"
-                        FontSize="12" Click="BtnSettings_Click" ToolTip="打开 AI 设置" Margin="0,0,4,0"/>
-                <Button x:Name="BtnClear" Content="🧹 清空" Style="{StaticResource FlatButton}" Height="26" Padding="8,0"
-                        FontSize="11" Click="BtnClear_Click" ToolTip="清空当前对话消息"/>
+                        FontSize="12" Click="BtnSettings_Click" ToolTip="{Binding Item[UI_AiChatView_2], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,4,0"/>
+                <Button x:Name="BtnClear" Content="{Binding Item[UI_AiChatView_3], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource FlatButton}" Height="26" Padding="8,0"
+                        FontSize="11" Click="BtnClear_Click" ToolTip="{Binding Item[UI_AiChatView_4], Source={x:Static loc:LocalizationManager.Instance}}"/>
             </StackPanel>
         </Grid>
 
@@ -46,12 +46,12 @@
                       Height="26" FontSize="12"
                       VerticalContentAlignment="Center"
                       SelectionChanged="SessionCombo_SelectionChanged"/>
-            <Button x:Name="BtnNewSession" Grid.Column="1" Content="➕ 新建"
+            <Button x:Name="BtnNewSession" Grid.Column="1" Content="{Binding Item[UI_AiChatView_5], Source={x:Static loc:LocalizationManager.Instance}}"
                     Style="{StaticResource FlatButton}" Height="26" Padding="10,0" FontSize="11.5"
-                    Margin="6,0,0,0" Click="BtnNewSession_Click" ToolTip="新建对话"/>
-            <Button x:Name="BtnDeleteSession" Grid.Column="2" Content="🗑 删除"
+                    Margin="6,0,0,0" Click="BtnNewSession_Click" ToolTip="{Binding Item[UI_AiChatView_6], Source={x:Static loc:LocalizationManager.Instance}}"/>
+            <Button x:Name="BtnDeleteSession" Grid.Column="2" Content="{Binding Item[UI_AiChatView_7], Source={x:Static loc:LocalizationManager.Instance}}"
                     Style="{StaticResource FlatButton}" Height="26" Padding="10,0" FontSize="11.5"
-                    Margin="6,0,0,0" Click="BtnDeleteSession_Click" ToolTip="删除当前对话"/>
+                    Margin="6,0,0,0" Click="BtnDeleteSession_Click" ToolTip="{Binding Item[UI_AiChatView_8], Source={x:Static loc:LocalizationManager.Instance}}"/>
         </Grid>
 
         <!-- 消息区 -->
@@ -80,7 +80,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding PlainText}" TextWrapping="Wrap"
                                                        FontSize="12.5" Foreground="White"/>
-                                            <Button Content="✏" ToolTip="编辑这条消息"
+                                            <Button Content="✏" ToolTip="{Binding Item[UI_AiChatView_9], Source={x:Static loc:LocalizationManager.Instance}}"
                                                     Background="Transparent" BorderThickness="0"
                                                     Foreground="#B8D4F5" FontSize="11" Padding="4,0"
                                                     Cursor="Hand" VerticalAlignment="Top" Margin="4,0,0,0"
@@ -102,13 +102,13 @@
                                                                    IsToolBarVisible="False"/>
                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0"
                                                     HorizontalAlignment="Right">
-                                            <Button Content="📋 复制" ToolTip="复制回复原文（Markdown）"
+                                            <Button Content="{Binding Item[UI_AiChatView_10], Source={x:Static loc:LocalizationManager.Instance}}" ToolTip="{Binding Item[UI_AiChatView_11], Source={x:Static loc:LocalizationManager.Instance}}"
                                                     Style="{StaticResource FlatButton}" Height="20" FontSize="10" Padding="6,0"
                                                     Click="AiCopy_Click" Tag="{Binding}"/>
-                                            <Button Content="🔄 重新生成" ToolTip="换一个回答"
+                                            <Button Content="{Binding Item[UI_AiChatView_12], Source={x:Static loc:LocalizationManager.Instance}}" ToolTip="{Binding Item[UI_AiChatView_13], Source={x:Static loc:LocalizationManager.Instance}}"
                                                     Style="{StaticResource FlatButton}" Height="20" FontSize="10" Padding="6,0" Margin="2,0,0,0"
                                                     Click="AiRegen_Click" Tag="{Binding}"/>
-                                            <Button Content="💾 保存" ToolTip="保存为 Markdown 文件"
+                                            <Button Content="{Binding Item[UI_AiChatView_14], Source={x:Static loc:LocalizationManager.Instance}}" ToolTip="{Binding Item[UI_AiChatView_15], Source={x:Static loc:LocalizationManager.Instance}}"
                                                     Style="{StaticResource FlatButton}" Height="20" FontSize="10" Padding="6,0" Margin="2,0,0,0"
                                                     Click="AiSave_Click" Tag="{Binding}"/>
                                         </StackPanel>
@@ -142,16 +142,16 @@
             <StackPanel x:Name="EmptyPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
                 <Path Style="{StaticResource LineIconAccent}" Data="{StaticResource IconAi}"
                       Width="40" Height="40" HorizontalAlignment="Center" Margin="0,0,0,12"/>
-                <TextBlock x:Name="EmptyTitle" Text="AI 助手" FontSize="16" FontWeight="SemiBold"
+                <TextBlock x:Name="EmptyTitle" Text="{Binding Item[UI_AiChatView_16], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="16" FontWeight="SemiBold"
                            Foreground="#EEEEEE" HorizontalAlignment="Center"/>
-                <TextBlock x:Name="EmptyHint" Text="我可以帮你翻译、总结、解释代码、写文档…" FontSize="12"
+                <TextBlock x:Name="EmptyHint" Text="{Binding Item[UI_AiChatView_17], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12"
                            Foreground="#8A8A8A" HorizontalAlignment="Center" Margin="0,6,0,0" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="300"/>
                 <StackPanel x:Name="ExamplePanel" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
-                    <Button Content="翻译一段文字" Style="{StaticResource FlatButton}" Height="26" FontSize="11.5" Padding="10,0" Click="Example_Click" Tag="translate"/>
-                    <Button Content="总结一篇文章" Style="{StaticResource FlatButton}" Height="26" FontSize="11.5" Padding="10,0" Margin="6,0,0,0" Click="Example_Click" Tag="summarize"/>
-                    <Button Content="解释代码" Style="{StaticResource FlatButton}" Height="26" FontSize="11.5" Padding="10,0" Margin="6,0,0,0" Click="Example_Click" Tag="explain"/>
+                    <Button Content="{Binding Item[UI_AiChatView_18], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource FlatButton}" Height="26" FontSize="11.5" Padding="10,0" Click="Example_Click" Tag="translate"/>
+                    <Button Content="{Binding Item[UI_AiChatView_19], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource FlatButton}" Height="26" FontSize="11.5" Padding="10,0" Margin="6,0,0,0" Click="Example_Click" Tag="summarize"/>
+                    <Button Content="{Binding Item[UI_AiChatView_20], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource FlatButton}" Height="26" FontSize="11.5" Padding="10,0" Margin="6,0,0,0" Click="Example_Click" Tag="explain"/>
                 </StackPanel>
-                <Button x:Name="BtnEmptySettings" Content="⚙ 打开 AI 设置" Style="{StaticResource AccentButton}"
+                <Button x:Name="BtnEmptySettings" Content="{Binding Item[UI_AiChatView_21], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource AccentButton}"
                         Height="30" FontSize="12" Padding="14,0" Margin="0,14,0,0" HorizontalAlignment="Center"
                         Click="BtnSettings_Click" Visibility="Collapsed"/>
             </StackPanel>
@@ -164,15 +164,15 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="快捷:" FontSize="11" Foreground="#8A8A8A" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <Button Content="翻译" Style="{StaticResource FlatButton}" Height="24" FontSize="11" Padding="8,0" Click="Preset_Click" Tag="translate"/>
-                <Button Content="总结" Style="{StaticResource FlatButton}" Height="24" FontSize="11" Padding="8,0" Margin="4,0,0,0" Click="Preset_Click" Tag="summarize"/>
-                <Button Content="解释代码" Style="{StaticResource FlatButton}" Height="24" FontSize="11" Padding="8,0" Margin="4,0,0,0" Click="Preset_Click" Tag="explain"/>
-                <Button Content="润色" Style="{StaticResource FlatButton}" Height="24" FontSize="11" Padding="8,0" Margin="4,0,0,0" Click="Preset_Click" Tag="polish"/>
+                <TextBlock Text="{Binding Item[UI_AiChatView_22], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" Foreground="#8A8A8A" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <Button Content="{Binding Item[UI_AiChatView_23], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource FlatButton}" Height="24" FontSize="11" Padding="8,0" Click="Preset_Click" Tag="translate"/>
+                <Button Content="{Binding Item[UI_AiChatView_24], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource FlatButton}" Height="24" FontSize="11" Padding="8,0" Margin="4,0,0,0" Click="Preset_Click" Tag="summarize"/>
+                <Button Content="{Binding Item[UI_AiChatView_25], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource FlatButton}" Height="24" FontSize="11" Padding="8,0" Margin="4,0,0,0" Click="Preset_Click" Tag="explain"/>
+                <Button Content="{Binding Item[UI_AiChatView_26], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource FlatButton}" Height="24" FontSize="11" Padding="8,0" Margin="4,0,0,0" Click="Preset_Click" Tag="polish"/>
             </StackPanel>
-            <Button x:Name="BtnCursorOutput" Grid.Column="1" Content="⌨ 输出到光标"
+            <Button x:Name="BtnCursorOutput" Grid.Column="1" Content="{Binding Item[UI_AiChatView_27], Source={x:Static loc:LocalizationManager.Instance}}"
                     Style="{StaticResource FlatButton}" Height="24" Padding="8,0" FontSize="11"
-                    ToolTip="开启后，AI 回复会直接输入到你选好的光标位置（如 Word / 记事本），焦点切换不影响输出位置；再点一次停止"
+                    ToolTip="{Binding Item[UI_AiChatView_28], Source={x:Static loc:LocalizationManager.Instance}}"
                     Click="BtnCursorOutput_Click"/>
         </Grid>
 
@@ -192,18 +192,18 @@
                      FontSize="12.5"
                      AutomationProperties.AutomationId="AiInput"
                      PreviewKeyDown="InputBox_PreviewKeyDown"
-                     ToolTip="输入问题，Enter 发送，Shift+Enter 换行"/>
+                     ToolTip="{Binding Item[UI_AiChatView_29], Source={x:Static loc:LocalizationManager.Instance}}"/>
             <Button x:Name="BtnExpandInput" Grid.Column="1" Content="↕"
                     Style="{StaticResource FlatButton}" Width="26" Height="30" FontSize="13"
-                    ToolTip="展开 / 收起输入框（多行输入）"
+                    ToolTip="{Binding Item[UI_AiChatView_30], Source={x:Static loc:LocalizationManager.Instance}}"
                     Click="BtnExpandInput_Click" Margin="4,0,0,0"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="4,0,0,0">
-                <Button x:Name="BtnSend" Content="发送" Style="{StaticResource AccentButton}"
+                <Button x:Name="BtnSend" Content="{Binding Item[UI_AiChatView_31], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource AccentButton}"
                         Width="58" Height="30" FontSize="12" Click="BtnSend_Click"
                         AutomationProperties.AutomationId="AiSend"/>
                 <Button x:Name="BtnStop" Content="■" Style="{StaticResource FlatButton}"
                         Width="30" Height="30" FontSize="11" Margin="4,0,0,0"
-                        Click="BtnStop_Click" Visibility="Collapsed" ToolTip="停止生成"/>
+                        Click="BtnStop_Click" Visibility="Collapsed" ToolTip="{Binding Item[UI_AiChatView_32], Source={x:Static loc:LocalizationManager.Instance}}"/>
             </StackPanel>
         </Grid>
     </Grid>

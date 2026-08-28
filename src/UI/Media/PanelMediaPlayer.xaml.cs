@@ -62,7 +62,7 @@ namespace DynamicBird.UI.Media
             if (hwnd.HasValue)
             {
                 var title = WindowTitleProvider.GetWindowTitle(hwnd.Value);
-                StartMirror(hwnd.Value, string.IsNullOrEmpty(title) ? "窗口" : title, embed);
+                StartMirror(hwnd.Value, string.IsNullOrEmpty(title) ? DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Window"] : title, embed);
             }
         }
 
@@ -82,7 +82,7 @@ namespace DynamicBird.UI.Media
             _mirroring = true;
             _mirrorZoom = 1.0;
             PlaceholderText.Visibility = Visibility.Collapsed;
-            MirrorTitleText.Text = embed ? $"嵌入：{title}" : $"镜像：{title}";
+            MirrorTitleText.Text = embed ? string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_EmbedTitle"], title) : string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_MirrorTitle"], title);
             MirrorStatusBar.Visibility = Visibility.Collapsed;
             MirrorImage.Visibility = Visibility.Collapsed;
 
@@ -114,7 +114,7 @@ namespace DynamicBird.UI.Media
                     _mirroring = false;
                     _captureHwnd = IntPtr.Zero;
                     MirrorTitleText.Text = "";
-                    MirrorStatusText.Text = "窗口已最小化，请恢复后再镜像";
+                    MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Minimized"];
                     MirrorStatusBar.Visibility = Visibility.Visible;
                     return;
                 }
@@ -127,7 +127,7 @@ namespace DynamicBird.UI.Media
         /// <summary>DWM 缩略图镜像（GPU 合成），失败回退后台抓帧。</summary>
         private void StartThumbnailMirror(string title)
         {
-            MirrorTitleText.Text = $"镜像：{title}";
+            MirrorTitleText.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_MirrorTitle"], title);
             MirrorImage.Visibility = Visibility.Collapsed;
             int gen = ++_embedGeneration;
             Dispatcher.BeginInvoke(new Action(() =>
@@ -158,7 +158,7 @@ namespace DynamicBird.UI.Media
         public void StopAll()
         {
             StopMirror();
-            PlaceholderText.Text = "🖼 镜像窗口　·　📌 嵌入窗口\n鼠标滚轮可缩放镜像画面";
+            PlaceholderText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["UI_PanelMediaPlayer_50"].Replace("\n", Environment.NewLine);
             PlaceholderText.Visibility = Visibility.Visible;
         }
 
@@ -200,7 +200,7 @@ namespace DynamicBird.UI.Media
                     UnhookWindowEvents();
                     _captureHwnd = IntPtr.Zero;
                     _mirroring = false;
-                    MirrorStatusText.Text = "窗口已关闭";
+                    MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
                     MirrorStatusBar.Visibility = Visibility.Visible;
                 }
                 else if (WindowCaptureService.IsMinimized(_captureHwnd))
@@ -208,7 +208,7 @@ namespace DynamicBird.UI.Media
                     // 缩略图对最小化窗口空白：解除并提示，恢复后点击提示条继续
                     _thumbnailHost.Detach();
                     UnhookWindowEvents();
-                    MirrorStatusText.Text = "窗口已最小化，恢复后点击此处继续镜像";
+                    MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_MinimizedClick"];
                     MirrorStatusBar.Visibility = Visibility.Visible;
                 }
                 else
@@ -226,7 +226,7 @@ namespace DynamicBird.UI.Media
                 EmbedHost.Detach();
                 _returnedHwnd = IntPtr.Zero;
                 _returnedTitle = "";
-                MirrorStatusText.Text = "窗口已关闭";
+                MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
                 MirrorStatusBar.Visibility = Visibility.Visible;
                 return;
             }
@@ -241,7 +241,7 @@ namespace DynamicBird.UI.Media
                 _captureHwnd = IntPtr.Zero;
                 _mirroring = false;
                 MirrorTitleText.Text = "";
-                MirrorStatusText.Text = $"窗口“{_returnedTitle}”已回到任务栏，点击此处重新嵌入面板";
+                MirrorStatusText.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Returned"], _returnedTitle);
                 MirrorStatusBar.Visibility = Visibility.Visible;
             }
             else
@@ -292,7 +292,7 @@ namespace DynamicBird.UI.Media
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             MirrorImage.Source = null;
-                            MirrorStatusText.Text = "窗口已关闭";
+                            MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
                             MirrorStatusBar.Visibility = Visibility.Visible;
                         }));
                         break;
@@ -303,7 +303,7 @@ namespace DynamicBird.UI.Media
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             MirrorImage.Source = null;
-                            MirrorStatusText.Text = "窗口已最小化，恢复后继续镜像";
+                            MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_MinimizedContinue"];
                             MirrorStatusBar.Visibility = Visibility.Visible;
                         }));
                         break;
@@ -404,16 +404,16 @@ namespace DynamicBird.UI.Media
                     return;
                 }
 
-                StartMirror(hwnd, string.IsNullOrEmpty(title) ? "窗口" : title, embed: true);
+                StartMirror(hwnd, string.IsNullOrEmpty(title) ? DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Window"] : title, embed: true);
                 MirrorStatusBar.Visibility = Visibility.Collapsed;
             }
         }
 
         /// <summary>
         /// 把面板内的鼠标坐标映射到源窗口客户端坐标并转发，
-        /// 使镜像可以像操作原窗口一样点击/拖拽。
+        /// 使镜像可以像操作原窗口一样点击/拖拽（左键与右键）。
         /// </summary>
-        private void ForwardMirrorMouse(Point pos, bool down)
+        private void ForwardMirrorMouse(Point pos, bool down, bool right = false)
         {
             try
             {
@@ -425,6 +425,20 @@ namespace DynamicBird.UI.Media
                         out clientX, out clientY);
                 if (!mapped)
                 {
+                    return;
+                }
+
+                if (right)
+                {
+                    if (down)
+                    {
+                        WindowCaptureService.SetForeground(_captureHwnd);
+                        WindowCaptureService.SendMouseEvent(_captureHwnd, WindowCaptureService.MouseMessage.RightDown, clientX, clientY);
+                    }
+                    else
+                    {
+                        WindowCaptureService.SendMouseEvent(_captureHwnd, WindowCaptureService.MouseMessage.RightUp, clientX, clientY);
+                    }
                     return;
                 }
 
@@ -441,11 +455,61 @@ namespace DynamicBird.UI.Media
             catch { }
         }
 
+        /// <summary>
+        /// 右键按下/抬起：镜像模式且非嵌入时转发给源窗口。
+        /// 用 Preview 事件在 WPF 弹出系统上下文菜单之前拦截。
+        /// </summary>
+        private void VideoArea_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (_mirroring && !EmbedHost.IsEmbedded && _captureHwnd != IntPtr.Zero)
+            {
+                ForwardMirrorMouse(e.GetPosition(VideoArea), down: true, right: true);
+                VideoArea.CaptureMouse();
+                e.Handled = true;
+            }
+        }
+
+        private void VideoArea_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_mirroring && !EmbedHost.IsEmbedded && _captureHwnd != IntPtr.Zero)
+            {
+                ForwardMirrorMouse(e.GetPosition(VideoArea), down: false, right: true);
+                VideoArea.ReleaseMouseCapture();
+                e.Handled = true;
+            }
+        }
+
         // ================= 缩放 =================
 
         private void VideoArea_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (_mirroring && EmbedHost.IsEmbedded) return;
+
+            // ★ Ctrl+滚轮 = 转发滚轮给源窗口（镜像可滚动页面/缩放网页等），
+            //   普通滚轮保持原有缩放画面行为。
+            if (_mirroring && !EmbedHost.IsEmbedded && _captureHwnd != IntPtr.Zero &&
+                (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+            {
+                try
+                {
+                    bool mapped = _thumbnailHost.IsActive
+                        ? MapThumbnailToClient(e.GetPosition(VideoArea), out int clientX, out int clientY)
+                        : WindowCaptureService.MapToClient(_captureHwnd, e.GetPosition(VideoArea),
+                            VideoArea.ActualWidth, VideoArea.ActualHeight,
+                            _mirrorFrameSize.Width, _mirrorFrameSize.Height,
+                            out clientX, out clientY);
+                    if (mapped)
+                    {
+                        WindowCaptureService.SetForeground(_captureHwnd);
+                        // WM_MOUSEWHEEL 的 lParam 需要屏幕坐标
+                        var screenPt = VideoArea.PointToScreen(e.GetPosition(VideoArea));
+                        WindowCaptureService.SendMouseWheel(_captureHwnd, e.Delta, (int)screenPt.X, (int)screenPt.Y);
+                    }
+                }
+                catch { }
+                e.Handled = true;
+                return;
+            }
 
             // ★ DWM 缩略图镜像：滚轮缩放画面（等比，中心不变）
             if (_mirroring && _thumbnailHost.IsActive)

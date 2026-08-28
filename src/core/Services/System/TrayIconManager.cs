@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Windows;
 using DynamicBird.Core.Infrastructure.Logging;
@@ -64,12 +64,12 @@ namespace DynamicBird.Core.Services
             _notifyIcon.Visible = true;
 
             var menu = new System.Windows.Forms.ContextMenuStrip();
-            menu.Items.Add("设置", null, (s, e) => _onOpenSettings());
+            menu.Items.Add(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Settings"], null, (s, e) => _onOpenSettings());
             menu.Items.Add("-");
-            menu.Items.Add("显示 / 隐藏", null, (s, e) => _onToggleWindow());
+            menu.Items.Add(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Toggle"], null, (s, e) => _onToggleWindow());
             menu.Items.Add("-");
 
-            var autoStartItem = new System.Windows.Forms.ToolStripMenuItem("开机自启")
+            var autoStartItem = new System.Windows.Forms.ToolStripMenuItem(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_AutoStart"])
             {
                 CheckOnClick = true,
                 Checked = IsAutoStartEnabled()
@@ -77,7 +77,7 @@ namespace DynamicBird.Core.Services
             autoStartItem.Click += (s, e) => ToggleAutoStart(autoStartItem.Checked);
             menu.Items.Add(autoStartItem);
             menu.Items.Add("-");
-            menu.Items.Add("退出", null, (s, e) => _onExit());
+            menu.Items.Add(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Exit"], null, (s, e) => _onExit());
 
             _notifyIcon.ContextMenuStrip = menu;
             _notifyIcon.DoubleClick += (s, e) => _onToggleWindow();
@@ -124,7 +124,7 @@ namespace DynamicBird.Core.Services
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"设置开机自启失败: {ex.Message}", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_AutoStartFail"], ex.Message), "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -156,7 +156,7 @@ namespace DynamicBird.Core.Services
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"设置开机自启失败（商店版）: {ex.Message}", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_AutoStartFailStore"], ex.Message), "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
     }

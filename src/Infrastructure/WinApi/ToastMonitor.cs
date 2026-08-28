@@ -164,8 +164,8 @@ namespace DynamicBird.Infrastructure.WinApi
             var item = new ToastNotificationItem
             {
                 Id = key,
-                AppName = "灵动鸟",
-                Message = $"发现新版本 v{info.Version}，点击下载更新",
+                AppName = DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_AppName"],
+                Message = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_NewVersion"], info.Version),
                 Time = DateTime.Now,
                 AppId = "dynamicbird-update"
             };
@@ -178,7 +178,7 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             var item = new ToastNotificationItem
             {
-                AppName = "灵动鸟",
+                AppName = DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_AppName"],
                 Message = message,
                 Time = DateTime.Now,
                 AppId = "dynamicbird-update-status"
@@ -190,31 +190,31 @@ namespace DynamicBird.Infrastructure.WinApi
 
         private static async System.Threading.Tasks.Task InstallUpdateAsync(UpdateService.UpdateInfo info)
         {
-            NotifyUpdateStatus($"正在下载 v{info.Version}…");
+            NotifyUpdateStatus(string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Downloading"], info.Version));
             string? pkg = await UpdateService.DownloadUpdateAsync(info);
             if (pkg == null)
             {
-                NotifyUpdateStatus("下载失败，请检查网络后重试");
+                NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_DownloadFailed"]);
                 return;
             }
 
-            NotifyUpdateStatus("正在解压更新包…");
+            NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Extracting"]);
             string? exe = await UpdateService.ExtractExeAsync(pkg);
             if (exe == null)
             {
-                NotifyUpdateStatus("更新包解析失败");
+                NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_ExtractFailed"]);
                 return;
             }
 
             if (UpdateService.ApplyUpdate(exe))
             {
-                NotifyUpdateStatus("更新已就绪，正在重启完成安装…");
+                NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Ready"]);
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(
                     new Action(() => System.Windows.Application.Current?.Shutdown()));
             }
             else
             {
-                NotifyUpdateStatus("安装失败，请手动下载最新版本");
+                NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_InstallFailed"]);
             }
         }
 
@@ -365,7 +365,7 @@ namespace DynamicBird.Infrastructure.WinApi
                             string appName = GetFriendlyProcessName((int)pid);
                             var item = new ToastNotificationItem
                             {
-                                AppName = string.IsNullOrEmpty(appName) ? "未知应用" : appName,
+                                AppName = string.IsNullOrEmpty(appName) ? DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_UnknownApp"] : appName,
                                 Message = text.Length > 240 ? text[..240] + "…" : text,
                                 PopupHwnd = hwnd,
                                 ProcessId = (int)pid,
@@ -497,18 +497,18 @@ namespace DynamicBird.Infrastructure.WinApi
                 string name = proc.ProcessName;
                 string friendly = name.ToLowerInvariant() switch
                 {
-                    "wechat" or "weixin" => "微信",
+                    "wechat" or "weixin" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Wechat"],
                     "qq" or "qqnt" => "QQ",
                     "tim" => "TIM",
-                    "dingtalk" => "钉钉",
-                    "feishu" or "lark" => "飞书",
-                    "wechatwork" or "wework" => "企业微信",
+                    "dingtalk" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Dingtalk"],
+                    "feishu" or "lark" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Feishu"],
+                    "wechatwork" or "wework" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_WxWork"],
                     "wps" => "WPS",
                     "chrome" => "Chrome",
                     "msedge" => "Edge",
                     "firefox" => "Firefox",
                     "devenv" => "Visual Studio",
-                    "explorer" => "资源管理器",
+                    "explorer" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Explorer"],
                     _ => name
                 };
                 _appNameCache[pid] = friendly;

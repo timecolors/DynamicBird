@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using DynamicBird.Core.Infrastructure.Logging;
 using DynamicBird.Core.Infrastructure.Service;
 
@@ -8,6 +9,13 @@ namespace DynamicBird.Core.Services.Configuration
     {
         private SettingsData _data;
         private readonly object _lock = new object();
+        private bool _applyingPreset; // 应用性能预设期间不触发"自定义"检测
+
+        // ★ 防抖落盘：拖动滑块等高频 set 时，内存即时更新，但落盘与 SettingsChanged
+        //   合并为 300ms 一次，避免写盘风暴与 UI 全量刷新风暴。
+        private Timer? _saveTimer;
+        private bool _saveDirty;
+        private const int SaveDebounceMs = 300;
 
         public event Action? SettingsChanged;
 
@@ -30,13 +38,16 @@ namespace DynamicBird.Core.Services.Configuration
         public void Shutdown()
         {
             if (!IsInitialized) return;
-            Save();
+            FlushSaveNow(); // 关闭前强制落盘（防抖未触发时兜底）
             IsInitialized = false;
             LogManager.Debug("SettingsManager 已关闭");
         }
 
         public void Reload()
         {
+            // ★ 刷新前先强制落盘内存中的待保存改动（防抖 300ms 内点刷新会丢改动：
+            //   例如刚关掉小鸟依人未落盘，Reload 读到旧值又恢复开启）。
+            FlushSaveNow();
             lock (_lock)
             {
                 _data = SettingsFileManager.Load();
@@ -44,13 +55,127 @@ namespace DynamicBird.Core.Services.Configuration
             }
         }
 
+        /// <summary>立即写入磁盘并通知设置变化（设置页实时保存入口）。</summary>
+        public void SaveSettings()
+        {
+            Save();
+        }
+
+        /// <summary>
+        /// 用一份完整的 SettingsData 替换内部数据并落盘。
+        /// 设置窗口的 ApplyControlsToData 把控件值写入本地副本后调用此方法，
+        /// 把副本整体同步进 SettingsManager（否则设置改动只改副本、不落盘，
+        /// 刷新/重启后全部还原——曾导致"关掉小鸟依人刷新又开"）。
+        /// </summary>
+        public void Apply(SettingsData data)
+        {
+            // ★ 设置窗口保存入口：整体替换数据并立即落盘 + 立即通知。
+            //   调用方（SaveSettingsNow）已自带防抖，这里不再叠加 300ms 延迟，
+            //   保证"保存即生效"且 SettingsChanged 同步触发。
+            lock (_lock)
+            {
+                _data = data;
+                _saveDirty = true;
+                _saveTimer?.Dispose();
+                _saveTimer = null;
+            }
+            try
+            {
+                lock (_lock)
+                {
+                    SettingsFileManager.Save(_data);
+                }
+                NotifySettingsChanged();
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error("设置落盘失败", ex);
+            }
+        }
+
         private void Save()
         {
             lock (_lock)
             {
-                SettingsFileManager.Save(_data);
-                SettingsChanged?.Invoke();
+                _saveDirty = true;
+                if (_saveTimer == null)
+                {
+                    _saveTimer = new Timer(_ => FlushSaveNow(), null, SaveDebounceMs, Timeout.Infinite);
+                }
+                else
+                {
+                    _saveTimer.Change(SaveDebounceMs, Timeout.Infinite);
+                }
             }
+        }
+
+        // ========== 属性样板瘦身辅助 ==========
+
+        /// <summary>简单赋值 + 自动保存（替代 4 行样板 setter）。</summary>
+        private void SetField<T>(Action<T> setter, T value)
+        {
+            setter(value);
+            Save();
+        }
+
+        /// <summary>钳制赋值 + 自动保存（替代"Math.Max/Min + Save"样板）。</summary>
+        private void SetField(Action<int> setter, int value, int min, int max)
+        {
+            setter(Math.Max(min, Math.Min(max, value)));
+            Save();
+        }
+
+        /// <summary>钳制赋值 + 自动保存（double 版）。</summary>
+        private void SetField(Action<double> setter, double value, double min, double max)
+        {
+            setter(Math.Max(min, Math.Min(max, value)));
+            Save();
+        }
+
+        /// <summary>防抖到期/关闭时：落盘一次并触发一次 SettingsChanged。</summary>
+        private void FlushSaveNow()
+        {
+            bool shouldSave;
+            lock (_lock)
+            {
+                _saveTimer?.Dispose();
+                _saveTimer = null;
+                shouldSave = _saveDirty;
+                _saveDirty = false;
+            }
+            if (!shouldSave) return;
+            try
+            {
+                lock (_lock)
+                {
+                    SettingsFileManager.Save(_data);
+                }
+                NotifySettingsChanged();
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error("设置落盘失败", ex);
+            }
+        }
+
+        /// <summary>
+        /// 触发 SettingsChanged（订阅者含 UI 刷新逻辑，必须在 UI 线程执行）。
+        /// Timer 线程调用时封送回 WPF Dispatcher；无 Dispatcher 环境（单元测试）直接调用。
+        /// </summary>
+        private void NotifySettingsChanged()
+        {
+            var app = System.Windows.Application.Current;
+            if (app != null &&
+                app.Dispatcher != null &&
+                !app.Dispatcher.CheckAccess())
+            {
+                app.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try { SettingsChanged?.Invoke(); } catch (Exception ex) { LogManager.Error("设置变更通知失败", ex); }
+                }));
+                return;
+            }
+            try { SettingsChanged?.Invoke(); } catch (Exception ex) { LogManager.Error("设置变更通知失败", ex); }
         }
 
         public bool IsEdgeEnabled(string edge)
@@ -133,87 +258,87 @@ namespace DynamicBird.Core.Services.Configuration
         public string BackgroundColor
         {
             get => _data.BackgroundColor ?? "#2D2D2D";
-            set { _data.BackgroundColor = value; Save(); }
+            set => SetField(v => _data.BackgroundColor = v, value);
         }
 
         public string TextColor
         {
             get => _data.TextColor ?? "#FFFFFF";
-            set { _data.TextColor = value; Save(); }
+            set => SetField(v => _data.TextColor = v, value);
         }
 
         public double Opacity
         {
             get => _data.Opacity;
-            set { _data.Opacity = Math.Max(0, Math.Min(1, value)); Save(); }
+            set => SetField(v => _data.Opacity = v, value, 0, 1);
         }
 
         public int CornerRadius
         {
             get => _data.CornerRadius;
-            set { _data.CornerRadius = Math.Max(0, Math.Min(50, value)); Save(); }
+            set => SetField(v => _data.CornerRadius = v, value, 0, 50);
         }
 
         public bool ShowSystemStatus
         {
             get => _data.ShowSystemStatus;
-            set { _data.ShowSystemStatus = value; Save(); }
+            set => SetField(v => _data.ShowSystemStatus = v, value);
         }
 
         public string CustomIconPath
         {
             get => _data.CustomIconPath ?? "";
-            set { _data.CustomIconPath = value; Save(); }
+            set => SetField(v => _data.CustomIconPath = v, value);
         }
 
         // ========== 形状参数 ==========
         public double StripLengthRatio
         {
             get => _data.StripLengthRatio;
-            set { _data.StripLengthRatio = Math.Max(0.1, Math.Min(1.0, value)); Save(); }
+            set => SetField(v => _data.StripLengthRatio = v, value, 0.1, 1.0);
         }
 
         public double StripWidthMultiplier
         {
             get => _data.StripWidthMultiplier;
-            set { _data.StripWidthMultiplier = Math.Max(0.5, Math.Min(3.0, value)); Save(); }
+            set => SetField(v => _data.StripWidthMultiplier = v, value, 0.5, 3.0);
         }
 
         public double SquareShortSideMultiplier
         {
             get => _data.SquareShortSideMultiplier;
-            set { _data.SquareShortSideMultiplier = Math.Max(1.0, Math.Min(4.0, value)); Save(); }
+            set => SetField(v => _data.SquareShortSideMultiplier = v, value, 1.0, 4.0);
         }
 
         public double GoldenRatio
         {
             get => _data.GoldenRatio;
-            set { _data.GoldenRatio = Math.Max(1.0, Math.Min(3.0, value)); Save(); }
+            set => SetField(v => _data.GoldenRatio = v, value, 1.0, 3.0);
         }
 
         public double TriggerRegionRatio
         {
             get => _data.TriggerRegionRatio;
-            set { _data.TriggerRegionRatio = Math.Max(0.1, Math.Min(0.5, value)); Save(); }
+            set => SetField(v => _data.TriggerRegionRatio = v, value, 0.1, 0.5);
         }
 
         public double HorizontalLayoutThreshold
         {
             get => _data.HorizontalLayoutThreshold;
-            set { _data.HorizontalLayoutThreshold = Math.Max(0.1, Math.Min(1.0, value)); Save(); }
+            set => SetField(v => _data.HorizontalLayoutThreshold = v, value, 0.1, 1.0);
         }
 
         public double TagWidth
         {
             get => _data.TagWidth;
-            set { _data.TagWidth = Math.Max(40, Math.Min(400, value)); Save(); }
+            set => SetField(v => _data.TagWidth = v, value, 40, 400);
         }
 
         // ========== 自适应行为 ==========
         public bool AutoFitOnTrigger
         {
             get => _data.AutoFitOnTrigger;
-            set { _data.AutoFitOnTrigger = value; Save(); }
+            set => SetField(v => _data.AutoFitOnTrigger = v, value);
         }
 
         // ========== 固定位置 ==========
@@ -313,77 +438,212 @@ namespace DynamicBird.Core.Services.Configuration
         public int ClipboardMaxCount
         {
             get => _data.ClipboardMaxCount;
-            set { _data.ClipboardMaxCount = Math.Max(1, Math.Min(50, value)); Save(); }
+            set => SetField(v => _data.ClipboardMaxCount = v, value, 1, 50);
         }
 
         public int ClipboardDisplayLength
         {
             get => _data.ClipboardDisplayLength;
-            set { _data.ClipboardDisplayLength = Math.Max(10, Math.Min(500, value)); Save(); }
+            set => SetField(v => _data.ClipboardDisplayLength = v, value, 10, 500);
+        }
+
+        public int ClipboardImageMaxWidth
+        {
+            get => _data.ClipboardImageMaxWidth;
+            set => SetField(v => _data.ClipboardImageMaxWidth = v, value, 0, 4096);
+        }
+
+        public int ClipboardImageCacheLimitMB
+        {
+            get => _data.ClipboardImageCacheLimitMB;
+            set => SetField(v => _data.ClipboardImageCacheLimitMB = v, value, 5, 1024);
         }
 
         public string LastWidgetTab
         {
             get => _data.LastWidgetTab ?? "Clipboard";
-            set { _data.LastWidgetTab = value; Save(); }
+            set => SetField(v => _data.LastWidgetTab = v, value);
         }
 
         public string DefaultNoteColor
         {
             get => _data.DefaultNoteColor ?? "#FFFF99";
-            set { _data.DefaultNoteColor = value; Save(); }
+            set => SetField(v => _data.DefaultNoteColor = v, value);
         }
 
         public bool NoteShowTitleByDefault
         {
             get => _data.NoteShowTitleByDefault;
-            set { _data.NoteShowTitleByDefault = value; Save(); }
+            set => SetField(v => _data.NoteShowTitleByDefault = v, value);
         }
 
         public bool UseAutoSize
         {
             get => _data.UseAutoSize;
-            set { _data.UseAutoSize = value; Save(); }
+            set => SetField(v => _data.UseAutoSize = v, value);
         }
 
         // ========== 自动更新（GitHub Releases） ==========
         public bool AutoCheckUpdate
         {
             get => _data.AutoCheckUpdate;
-            set { _data.AutoCheckUpdate = value; Save(); }
+            set => SetField(v => _data.AutoCheckUpdate = v, value);
         }
 
         public bool OnboardingCompleted
         {
             get => _data.OnboardingCompleted;
-            set { _data.OnboardingCompleted = value; Save(); }
+            set => SetField(v => _data.OnboardingCompleted = v, value);
         }
 
         // ========== 状态栏显示项 ==========
-        public bool StatusShowTime { get => _data.StatusShowTime; set { _data.StatusShowTime = value; Save(); } }
-        public bool StatusShowCpu { get => _data.StatusShowCpu; set { _data.StatusShowCpu = value; Save(); } }
-        public bool StatusShowMemory { get => _data.StatusShowMemory; set { _data.StatusShowMemory = value; Save(); } }
-        public bool StatusShowFps { get => _data.StatusShowFps; set { _data.StatusShowFps = value; Save(); } }
-        public bool StatusShowVolume { get => _data.StatusShowVolume; set { _data.StatusShowVolume = value; Save(); } }
-        public bool StatusShowNetwork { get => _data.StatusShowNetwork; set { _data.StatusShowNetwork = value; Save(); } }
-        public bool StatusShowBattery { get => _data.StatusShowBattery; set { _data.StatusShowBattery = value; Save(); } }
-        public bool StatusShowWeather { get => _data.StatusShowWeather; set { _data.StatusShowWeather = value; Save(); } }
+        public bool StatusShowTime { get => _data.StatusShowTime; set => SetField(v => _data.StatusShowTime = v, value); }
+        public bool StatusShowCpu { get => _data.StatusShowCpu; set => SetField(v => _data.StatusShowCpu = v, value); }
+        public bool StatusShowMemory { get => _data.StatusShowMemory; set => SetField(v => _data.StatusShowMemory = v, value); }
+        public bool StatusShowFps { get => _data.StatusShowFps; set => SetField(v => _data.StatusShowFps = v, value); }
+        public bool StatusShowVolume { get => _data.StatusShowVolume; set => SetField(v => _data.StatusShowVolume = v, value); }
+        public bool StatusShowNetwork { get => _data.StatusShowNetwork; set => SetField(v => _data.StatusShowNetwork = v, value); }
+        public bool StatusShowBattery { get => _data.StatusShowBattery; set => SetField(v => _data.StatusShowBattery = v, value); }
+        public bool StatusShowWeather { get => _data.StatusShowWeather; set => SetField(v => _data.StatusShowWeather = v, value); }
 
         // ========== 天气 ==========
-        public bool WeatherEnabled { get => _data.WeatherEnabled; set { _data.WeatherEnabled = value; Save(); } }
-        public string? WeatherCity { get => _data.WeatherCity; set { _data.WeatherCity = value; Save(); } }
+        public bool WeatherEnabled { get => _data.WeatherEnabled; set => SetField(v => _data.WeatherEnabled = v, value); }
+        public string? WeatherCity { get => _data.WeatherCity; set => SetField(v => _data.WeatherCity = v, value); }
+
+        // ========== 灵动鸟性能模式 ==========
+        public string PerformanceMode
+        {
+            get => _data.PerformanceMode ?? "Normal";
+            set => SetField(v => _data.PerformanceMode = v, value);
+        }
+
+        /// <summary>应用性能预设（内部标志保护：不触发自定义检测）。</summary>
+        public void SetPerformanceMode(string mode)
+        {
+            _applyingPreset = true;
+            try
+            {
+                PerformancePresets.Apply(this, mode);
+                _data.PerformanceMode = mode;
+            }
+            finally
+            {
+                _applyingPreset = false;
+            }
+            Save();
+        }
+
+        /// <summary>非预设应用路径修改相关参数 → 自动进入自定义模式。</summary>
+        private void MarkCustomIfPreset()
+        {
+            if (_applyingPreset) return;
+            if (_data.PerformanceMode != PerformancePresets.Custom)
+            {
+                _data.PerformanceMode = PerformancePresets.Custom;
+            }
+        }
+
+        // ========== 边缘触发距离与延时 ==========
+        public int TriggerDistancePx
+        {
+            get => _data.TriggerDistancePx;
+            set { _data.TriggerDistancePx = Math.Max(2, Math.Min(20, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public int TriggerDelayMs
+        {
+            get => _data.TriggerDelayMs;
+            set { _data.TriggerDelayMs = Math.Max(0, Math.Min(1000, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public int GetTriggerDelay(string regionKey)
+        {
+            if (_data.RegionTriggerDelay != null &&
+                _data.RegionTriggerDelay.TryGetValue(regionKey, out int v))
+                return Math.Max(0, Math.Min(1000, v));
+            return TriggerDelayMs;
+        }
+
+        public void SetTriggerDelay(string regionKey, int ms)
+        {
+            _data.RegionTriggerDelay ??= new System.Collections.Generic.Dictionary<string, int>();
+            _data.RegionTriggerDelay[regionKey] = Math.Max(0, Math.Min(1000, ms));
+            Save();
+        }
+
+        public int GetHideDelay(string regionKey)
+        {
+            if (_data.RegionHideDelay != null &&
+                _data.RegionHideDelay.TryGetValue(regionKey, out int v))
+                return Math.Max(0, Math.Min(1000, v));
+            return HideDelayMs;
+        }
+
+        public void SetHideDelay(string regionKey, int ms)
+        {
+            _data.RegionHideDelay ??= new System.Collections.Generic.Dictionary<string, int>();
+            _data.RegionHideDelay[regionKey] = Math.Max(0, Math.Min(1000, ms));
+            Save();
+        }
+
+        // ========== 小组件显示开关 ==========
+        public bool IsWidgetEnabled(string widgetKey)
+        {
+            // ★ 用户 C# 插件小组件：启用状态存 WidgetPluginOverrides（缺省启用）
+            if (widgetKey.StartsWith("Widget_", StringComparison.Ordinal))
+                return _data.WidgetPluginOverrides.TryGetValue(widgetKey, out var v) ? v : true;
+
+            return widgetKey switch
+            {
+                "Clipboard" => _data.WidgetEnabled_Clipboard,
+                "Note" => _data.WidgetEnabled_Note,
+                "Timer" => _data.WidgetEnabled_Timer,
+                "Calculator" => _data.WidgetEnabled_Calculator,
+                "TextAi" => _data.WidgetEnabled_TextAi,
+                _ => true
+            };
+        }
+
+        public void SetWidgetEnabled(string widgetKey, bool enabled)
+        {
+            // ★ 用户 C# 插件小组件
+            if (widgetKey.StartsWith("Widget_", StringComparison.Ordinal))
+            {
+                _data.WidgetPluginOverrides[widgetKey] = enabled;
+                Save();
+                return;
+            }
+
+            switch (widgetKey)
+            {
+                case "Clipboard": _data.WidgetEnabled_Clipboard = enabled; break;
+                case "Note": _data.WidgetEnabled_Note = enabled; break;
+                case "Timer": _data.WidgetEnabled_Timer = enabled; break;
+                case "Calculator": _data.WidgetEnabled_Calculator = enabled; break;
+                case "TextAi": _data.WidgetEnabled_TextAi = enabled; break;
+                default: return;
+            }
+            Save();
+        }
+
+        // ========== 划词翻译 热键 ==========
+        public string TextAiHotkey
+        {
+            get => _data.TextAiHotkey ?? "";
+            set => SetField(v => _data.TextAiHotkey = v, value);
+        }
 
         // ========== 勿扰模式 ==========
         public bool RememberDndMode
         {
             get => _data.RememberDndMode;
-            set { _data.RememberDndMode = value; Save(); }
+            set => SetField(v => _data.RememberDndMode = v, value);
         }
 
         public bool DndModeEnabled
         {
             get => _data.DndModeEnabled;
-            set { _data.DndModeEnabled = value; Save(); }
+            set => SetField(v => _data.DndModeEnabled = v, value);
         }
 
         // ========== 任务栏 ==========
@@ -465,58 +725,137 @@ namespace DynamicBird.Core.Services.Configuration
         public bool AnimationsEnabled
         {
             get => _data.AnimationsEnabled;
-            set { _data.AnimationsEnabled = value; Save(); }
+            set { _data.AnimationsEnabled = value; MarkCustomIfPreset(); Save(); }
         }
 
         public string ShowHideEasingType
         {
             get => _data.ShowHideEasingType ?? "CubicEase";
-            set { _data.ShowHideEasingType = value; Save(); }
+            set => SetField(v => _data.ShowHideEasingType = v, value);
         }
 
         public int ShowHideDurationMs
         {
             get => _data.ShowHideDurationMs;
-            set { _data.ShowHideDurationMs = Math.Max(100, Math.Min(800, value)); Save(); }
+            set { _data.ShowHideDurationMs = Math.Max(100, Math.Min(800, value)); MarkCustomIfPreset(); Save(); }
         }
 
         public string TransformEasingType
         {
             get => _data.TransformEasingType ?? "CubicEase";
-            set { _data.TransformEasingType = value; Save(); }
+            set => SetField(v => _data.TransformEasingType = v, value);
+        }
+
+        // ========== 触发/隐藏动画（类型 + 时长 + 特化参数） ==========
+        public string ShowAnimationType
+        {
+            get => string.IsNullOrEmpty(_data.ShowAnimationType) ? "Slide" : _data.ShowAnimationType;
+            set { _data.ShowAnimationType = value; MarkCustomIfPreset(); Save(); }
+        }
+
+        public int ShowAnimationDurationMs
+        {
+            get => _data.ShowAnimationDurationMs > 0 ? _data.ShowAnimationDurationMs : _data.ShowHideDurationMs;
+            set { _data.ShowAnimationDurationMs = Math.Max(30, Math.Min(2000, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public double ShowAnimationZoomFrom
+        {
+            get => _data.ShowAnimationZoomFrom;
+            set { _data.ShowAnimationZoomFrom = Math.Max(0.05, Math.Min(0.95, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public int ShowAnimationOscillations
+        {
+            get => _data.ShowAnimationOscillations;
+            set { _data.ShowAnimationOscillations = Math.Max(1, Math.Min(10, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public double ShowAnimationSpringiness
+        {
+            get => _data.ShowAnimationSpringiness;
+            set { _data.ShowAnimationSpringiness = Math.Max(1, Math.Min(10, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public string HideAnimationType
+        {
+            get => string.IsNullOrEmpty(_data.HideAnimationType) ? _data.ShowAnimationType : _data.HideAnimationType;
+            set { _data.HideAnimationType = value; MarkCustomIfPreset(); Save(); }
+        }
+
+        public int HideAnimationDurationMs
+        {
+            get => _data.HideAnimationDurationMs > 0 ? _data.HideAnimationDurationMs : _data.ShowAnimationDurationMs;
+            set { _data.HideAnimationDurationMs = Math.Max(30, Math.Min(2000, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public double HideAnimationZoomTo
+        {
+            get => _data.HideAnimationZoomTo;
+            set { _data.HideAnimationZoomTo = Math.Max(0.05, Math.Min(0.95, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public int HideAnimationOscillations
+        {
+            get => _data.HideAnimationOscillations;
+            set { _data.HideAnimationOscillations = Math.Max(1, Math.Min(10, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        public double HideAnimationSpringiness
+        {
+            get => _data.HideAnimationSpringiness;
+            set { _data.HideAnimationSpringiness = Math.Max(1, Math.Min(10, value)); MarkCustomIfPreset(); Save(); }
         }
 
         public int TransformDurationMs
         {
             get => _data.TransformDurationMs;
-            set { _data.TransformDurationMs = Math.Max(100, Math.Min(600, value)); Save(); }
+            set { _data.TransformDurationMs = Math.Max(100, Math.Min(600, value)); MarkCustomIfPreset(); Save(); }
         }
 
         public int HideDelayMs
         {
             get => _data.HideDelayMs;
             // ★ 0 = 取消延时隐藏（鼠标一离开立即隐藏）
-            set { _data.HideDelayMs = Math.Max(0, Math.Min(1000, value)); Save(); }
+            set { _data.HideDelayMs = Math.Max(0, Math.Min(1000, value)); MarkCustomIfPreset(); Save(); }
         }
 
         public int FlyDurationMs
         {
             get => _data.FlyDurationMs;
-            set { _data.FlyDurationMs = Math.Max(100, Math.Min(2000, value)); Save(); }
+            set { _data.FlyDurationMs = Math.Max(0, Math.Min(2000, value)); MarkCustomIfPreset(); Save(); }
         }
 
         // ========== 小鸟依人模式 ==========
         public bool ClingModeEnabled
         {
             get => _data.ClingModeEnabled;
-            set { _data.ClingModeEnabled = value; Save(); }
+            set => SetField(v => _data.ClingModeEnabled = v, value);
+        }
+
+        public int SnapRangePx
+        {
+            get => _data.SnapRangePx;
+            set => SetField(v => _data.SnapRangePx = Math.Max(0, Math.Min(100, value)), value);
+        }
+
+        public int ContentStabilizeMs
+        {
+            get => _data.ContentStabilizeMs;
+            set => SetField(v => _data.ContentStabilizeMs = Math.Max(200, Math.Min(800, value)), value);
+        }
+
+        public string? PassthroughModifier
+        {
+            get => _data.PassthroughModifier ?? "Ctrl";
+            set => SetField(v => _data.PassthroughModifier = v, string.IsNullOrWhiteSpace(value) ? "Ctrl" : value);
         }
 
         // ★★★ 新增：区域防抖延迟 ★★★
         public int RegionDebounceMs
         {
             get => _data.RegionDebounceMs;
-            set { _data.RegionDebounceMs = Math.Max(30, Math.Min(300, value)); Save(); }
+            set { _data.RegionDebounceMs = Math.Max(30, Math.Min(300, value)); MarkCustomIfPreset(); Save(); }
         }
 
         public string GetRegionPanel(string regionKey)

@@ -24,10 +24,2493 @@
   <data name="WidgetTabs_Calculator" xml:space="preserve">
     <value>Calculator</value>
   </data>
+  <data name="WidgetTabs_TextAi" xml:space="preserve">
+    <value>Translate Selection</value>
+  </data>
   <data name="Timer_FooterHint" xml:space="preserve">
     <value>Count-up / Count-down / Alarm: each mode keeps its own timing; switching never resets</value>
   </data>
   <data name="Calculator_FooterHint" xml:space="preserve">
     <value>Keyboard input supported</value>
+  </data>
+  <data name="TextAi_NotConfigured" xml:space="preserve">
+    <value>AI service is not configured yet: enable it and fill in the API Key in Settings → AI Assistant.</value>
+  </data>
+  <data name="TextAi_Reading" xml:space="preserve">
+    <value>Reading selected text…</value>
+  </data>
+  <data name="TextAi_NoSelection" xml:space="preserve">
+    <value>No selected text found: select some text in an app first, then press the hotkey</value>
+  </data>
+  <data name="TextAi_Translating" xml:space="preserve">
+    <value>Translating…</value>
+  </data>
+  <data name="TextAi_EmptyResult" xml:space="preserve">
+    <value>The model returned nothing, please retry</value>
+  </data>
+  <data name="TextAi_Failed" xml:space="preserve">
+    <value>Translation failed: </value>
+  </data>
+  <data name="UI_AiChatView_1" xml:space="preserve">
+    <value>AI Assistant</value>
+  </data>
+  <data name="UI_AiChatView_2" xml:space="preserve">
+    <value>Open AI settings</value>
+  </data>
+  <data name="UI_AiChatView_3" xml:space="preserve">
+    <value>🧹 Clear</value>
+  </data>
+  <data name="UI_AiChatView_4" xml:space="preserve">
+    <value>Clear current conversation messages</value>
+  </data>
+  <data name="UI_AiChatView_5" xml:space="preserve">
+    <value>➕ New</value>
+  </data>
+  <data name="UI_AiChatView_6" xml:space="preserve">
+    <value>New conversation</value>
+  </data>
+  <data name="UI_AiChatView_7" xml:space="preserve">
+    <value>🗑 Delete</value>
+  </data>
+  <data name="UI_AiChatView_8" xml:space="preserve">
+    <value>Delete current conversation</value>
+  </data>
+  <data name="UI_AiChatView_9" xml:space="preserve">
+    <value>Edit this message</value>
+  </data>
+  <data name="UI_AiChatView_10" xml:space="preserve">
+    <value>📋 Copy</value>
+  </data>
+  <data name="UI_AiChatView_11" xml:space="preserve">
+    <value>Copy reply (Markdown)</value>
+  </data>
+  <data name="UI_AiChatView_12" xml:space="preserve">
+    <value>🔄 Regenerate</value>
+  </data>
+  <data name="UI_AiChatView_13" xml:space="preserve">
+    <value>Get another answer</value>
+  </data>
+  <data name="UI_AiChatView_14" xml:space="preserve">
+    <value>💾 Save</value>
+  </data>
+  <data name="UI_AiChatView_15" xml:space="preserve">
+    <value>Save as Markdown file</value>
+  </data>
+  <data name="UI_AiChatView_16" xml:space="preserve">
+    <value>AI Assistant</value>
+  </data>
+  <data name="UI_AiChatView_17" xml:space="preserve">
+    <value>I can translate, summarize, explain code, write documents…</value>
+  </data>
+  <data name="UI_AiChatView_18" xml:space="preserve">
+    <value>Translate a passage</value>
+  </data>
+  <data name="UI_AiChatView_19" xml:space="preserve">
+    <value>Summarize an article</value>
+  </data>
+  <data name="UI_AiChatView_20" xml:space="preserve">
+    <value>Explain code</value>
+  </data>
+  <data name="UI_AiChatView_21" xml:space="preserve">
+    <value>⚙ Open AI settings</value>
+  </data>
+  <data name="UI_AiChatView_22" xml:space="preserve">
+    <value>Quick:</value>
+  </data>
+  <data name="UI_AiChatView_23" xml:space="preserve">
+    <value>Translate</value>
+  </data>
+  <data name="UI_AiChatView_24" xml:space="preserve">
+    <value>Summarize</value>
+  </data>
+  <data name="UI_AiChatView_25" xml:space="preserve">
+    <value>Explain code</value>
+  </data>
+  <data name="UI_AiChatView_26" xml:space="preserve">
+    <value>Polish</value>
+  </data>
+  <data name="UI_AiChatView_27" xml:space="preserve">
+    <value>⌨ Output to cursor</value>
+  </data>
+  <data name="UI_AiChatView_28" xml:space="preserve">
+    <value>When enabled, AI replies are typed directly at your chosen cursor position (e.g. Word / Notepad); switching focus won't move the output position; click again to stop</value>
+  </data>
+  <data name="UI_AiChatView_29" xml:space="preserve">
+    <value>Type a question, Enter to send, Shift+Enter for a new line</value>
+  </data>
+  <data name="UI_AiChatView_30" xml:space="preserve">
+    <value>Expand / collapse the input box (multi-line input)</value>
+  </data>
+  <data name="UI_AiChatView_31" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="UI_AiChatView_32" xml:space="preserve">
+    <value>Stop generating</value>
+  </data>
+  <data name="UI_AppHelperView_33" xml:space="preserve">
+    <value>Media controls</value>
+  </data>
+  <data name="UI_AppHelperView_34" xml:space="preserve">
+    <value>Control media apps that are playing</value>
+  </data>
+  <data name="UI_AppHelperView_35" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="UI_AppHelperView_36" xml:space="preserve">
+    <value>Next page</value>
+  </data>
+  <data name="UI_MediaControlView_37" xml:space="preserve">
+    <value>Scanning system media sessions…</value>
+  </data>
+  <data name="UI_MediaControlView_38" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="UI_MediaControlView_39" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="UI_MediaControlView_40" xml:space="preserve">
+    <value>Previous track</value>
+  </data>
+  <data name="UI_MediaControlView_41" xml:space="preserve">
+    <value>Play/Pause</value>
+  </data>
+  <data name="UI_MediaControlView_42" xml:space="preserve">
+    <value>Next track</value>
+  </data>
+  <data name="UI_MediaControlView_43" xml:space="preserve">
+    <value>Media keys</value>
+  </data>
+  <data name="UI_MediaControlView_44" xml:space="preserve">
+    <value>Previous track</value>
+  </data>
+  <data name="UI_MediaControlView_45" xml:space="preserve">
+    <value>Play/Pause</value>
+  </data>
+  <data name="UI_MediaControlView_46" xml:space="preserve">
+    <value>Next track</value>
+  </data>
+  <data name="UI_MediaControlView_47" xml:space="preserve">
+    <value>Volume down</value>
+  </data>
+  <data name="UI_MediaControlView_48" xml:space="preserve">
+    <value>Volume up</value>
+  </data>
+  <data name="UI_MainWindow_49" xml:space="preserve">
+    <value>DynamicBird</value>
+  </data>
+  <data name="UI_PanelMediaPlayer_50" xml:space="preserve">
+    <value>🖼 Mirror window　·　📌 Embed window
+Mouse wheel zooms the mirrored view</value>
+  </data>
+  <data name="UI_PanelMediaPlayer_51" xml:space="preserve">
+    <value>Window minimized, click to restore</value>
+  </data>
+  <data name="UI_PanelMediaPlayer_52" xml:space="preserve">
+    <value>Mirror window (shows the view; the original window stays in place)</value>
+  </data>
+  <data name="UI_PanelMediaPlayer_53" xml:space="preserve">
+    <value>Embed window (puts the real window into the panel — a second display)</value>
+  </data>
+  <data name="UI_PanelMediaPlayer_54" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="UI_WindowPickerWindow_55" xml:space="preserve">
+    <value>Select window</value>
+  </data>
+  <data name="UI_WindowPickerWindow_56" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="UI_WindowPickerWindow_57" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="UI_OnboardingWindow_58" xml:space="preserve">
+    <value>DynamicBird - Welcome</value>
+  </data>
+  <data name="UI_OnboardingWindow_59" xml:space="preserve">
+    <value>DynamicBird</value>
+  </data>
+  <data name="UI_OnboardingWindow_60" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="UI_OnboardingWindow_61" xml:space="preserve">
+    <value>Edges &amp; Corners</value>
+  </data>
+  <data name="UI_OnboardingWindow_62" xml:space="preserve">
+    <value>Taskbar Actions</value>
+  </data>
+  <data name="UI_OnboardingWindow_63" xml:space="preserve">
+    <value>Icon &amp; Hotkeys</value>
+  </data>
+  <data name="UI_OnboardingWindow_64" xml:space="preserve">
+    <value>Settings Features</value>
+  </data>
+  <data name="UI_OnboardingWindow_65" xml:space="preserve">
+    <value>Get Started</value>
+  </data>
+  <data name="UI_OnboardingWindow_66" xml:space="preserve">
+    <value>🐦 Welcome to DynamicBird</value>
+  </data>
+  <data name="UI_OnboardingWindow_67" xml:space="preserve">
+    <value>A desktop edge-panel tool that fits Windows.</value>
+  </data>
+  <data name="UI_OnboardingWindow_68" xml:space="preserve">
+    <value>Move the mouse to the screen edge and the panel slides out; quick actions, notifications and widgets are at hand.</value>
+  </data>
+  <data name="UI_OnboardingWindow_69" xml:space="preserve">
+    <value>💡 No extra dependencies needed: edge triggering, window pinning and system notifications all use native Windows capabilities.</value>
+  </data>
+  <data name="UI_OnboardingWindow_70" xml:space="preserve">
+    <value>🎯 Edge Triggering &amp; Corner Duties</value>
+  </data>
+  <data name="UI_OnboardingWindow_71" xml:space="preserve">
+    <value>Top / Bottom / Left / Right Edges</value>
+  </data>
+  <data name="UI_OnboardingWindow_72" xml:space="preserve">
+    <value>Move the mouse to a screen edge to bring up its panel; moving away hides it. Default layout:
+Left edge center = AI Assistant · Top / Bottom / Right edge center = App Helper (PiP, media)
+Top / Bottom edge sides = Taskbar · Left / Right edges = Widgets</value>
+  </data>
+  <data name="UI_OnboardingWindow_73" xml:space="preserve">
+    <value>What each region shows can be freely set in Settings (including the AI Assistant).</value>
+  </data>
+  <data name="UI_OnboardingWindow_74" xml:space="preserve">
+    <value>Four Corners</value>
+  </data>
+  <data name="UI_OnboardingWindow_75" xml:space="preserve">
+    <value>Bottom-right = Notification Dock · Bottom-left = Recent Items · Top-left = Quick Settings (WiFi / Volume / Brightness / Battery saver)
+Top-right = none (to avoid interfering with closing windows).</value>
+  </data>
+  <data name="UI_OnboardingWindow_76" xml:space="preserve">
+    <value>What each region shows and its trigger toggle can be customized in Settings.</value>
+  </data>
+  <data name="UI_OnboardingWindow_77" xml:space="preserve">
+    <value>📌 Taskbar: Pin, Close, Reorder</value>
+  </data>
+  <data name="UI_OnboardingWindow_78" xml:space="preserve">
+    <value>Pin apps</value>
+  </data>
+  <data name="UI_OnboardingWindow_79" xml:space="preserve">
+    <value>Drag a running window tab onto the icon in the top-left of the panel and release to pin it as a shortcut (the icon turns into ＋ while dragging).</value>
+  </data>
+  <data name="UI_OnboardingWindow_80" xml:space="preserve">
+    <value>Close &amp; Reorder</value>
+  </data>
+  <data name="UI_OnboardingWindow_81" xml:space="preserve">
+    <value>The ✕ on the right of a window tab closes the window; drag tabs to reorder; drag a shortcut onto the top-left icon to remove it (the icon turns into a trash can).</value>
+  </data>
+  <data name="UI_OnboardingWindow_82" xml:space="preserve">
+    <value>⚙️ Settings, DND &amp; Updates</value>
+  </data>
+  <data name="UI_OnboardingWindow_83" xml:space="preserve">
+    <value>The DynamicBird icon</value>
+  </data>
+  <data name="UI_OnboardingWindow_84" xml:space="preserve">
+    <value>Left-click: toggle Do Not Disturb; right-click: open Settings / refresh / exit.</value>
+  </data>
+  <data name="UI_OnboardingWindow_85" xml:space="preserve">
+    <value>Global hotkey Ctrl + Alt + B</value>
+  </data>
+  <data name="UI_OnboardingWindow_86" xml:space="preserve">
+    <value>Show / hide the panel anytime, without touching the screen edge.</value>
+  </data>
+  <data name="UI_OnboardingWindow_87" xml:space="preserve">
+    <value>Translate-Selection Hotkey</value>
+  </data>
+  <data name="UI_OnboardingWindow_88" xml:space="preserve">
+    <value>Select text in any app and press this hotkey to bring up the panel and translate (requires configuring a service in Settings → AI). Leave empty = disabled.</value>
+  </data>
+  <data name="UI_OnboardingWindow_89" xml:space="preserve">
+    <value>Click this box, then press the key combination you want (e.g. Ctrl+Alt+Q). Ctrl/Alt/Shift/Win modifiers required.</value>
+  </data>
+  <data name="UI_OnboardingWindow_90" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="UI_OnboardingWindow_91" xml:space="preserve">
+    <value>Auto update</value>
+  </data>
+  <data name="UI_OnboardingWindow_92" xml:space="preserve">
+    <value>After configuring a GitHub repo in Settings, new versions are announced in the notification dock; click to download.</value>
+  </data>
+  <data name="UI_OnboardingWindow_93" xml:space="preserve">
+    <value>✨ Settings Features Worth Knowing</value>
+  </data>
+  <data name="UI_OnboardingWindow_94" xml:space="preserve">
+    <value>Follow-the-bird mode</value>
+  </data>
+  <data name="UI_OnboardingWindow_95" xml:space="preserve">
+    <value>When enabled, the panel follows the mouse as it leaves the panel (like a bird following you); when the mouse stops, the panel stays nearby — handy for carrying the panel wherever you need it.</value>
+  </data>
+  <data name="UI_OnboardingWindow_96" xml:space="preserve">
+    <value>Auto-fit / Fixed position</value>
+  </data>
+  <data name="UI_OnboardingWindow_97" xml:space="preserve">
+    <value>Auto-fit on trigger: the panel resizes to its content; disable it to freely resize by dragging the panel edge, and the size is remembered.</value>
+  </data>
+  <data name="UI_OnboardingWindow_98" xml:space="preserve">
+    <value>Per-region panel customization</value>
+  </data>
+  <data name="UI_OnboardingWindow_99" xml:space="preserve">
+    <value>Which panel each edge/corner shows (taskbar, widgets, app helper, notification dock, etc.) can be set individually in Settings.</value>
+  </data>
+  <data name="UI_OnboardingWindow_100" xml:space="preserve">
+    <value>Status bar quick actions</value>
+  </data>
+  <data name="UI_OnboardingWindow_101" xml:space="preserve">
+    <value>The status bar at the top shows time, CPU, memory, volume, etc.; hover over the volume percentage and scroll to adjust volume up/down.</value>
+  </data>
+  <data name="UI_OnboardingWindow_102" xml:space="preserve">
+    <value>AI Assistant</value>
+  </data>
+  <data name="UI_OnboardingWindow_103" xml:space="preserve">
+    <value>Bring up the AI chat panel from the left edge center: streaming replies, quick commands (translate / summarize / explain code / polish), multi-session management.
+Drag an image file onto the DynamicBird icon on the left side of the panel to send it to the AI for analysis (requires a vision-capable model such as gpt-4o, glm-4v, qwen-vl, etc.).
+Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.) and a model in Settings → AI; the API key stays on this machine and requests go directly to the provider you choose.</value>
+  </data>
+  <data name="UI_OnboardingWindow_104" xml:space="preserve">
+    <value>Animations &amp; Appearance</value>
+  </data>
+  <data name="UI_OnboardingWindow_105" xml:space="preserve">
+    <value>Show/hide animations, easing types, corner radius, opacity and icon size are all adjustable; Mica frosted-glass background is supported on Win11.</value>
+  </data>
+  <data name="UI_OnboardingWindow_106" xml:space="preserve">
+    <value>✅ All Set</value>
+  </data>
+  <data name="UI_OnboardingWindow_107" xml:space="preserve">
+    <value>Try moving the mouse to the screen edge. Everything can be adjusted in Settings, and you can revisit this guide anytime.</value>
+  </data>
+  <data name="UI_OnboardingWindow_108" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="UI_OnboardingWindow_109" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="UI_OnboardingWindow_110" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="UI_NotificationDockView_111" xml:space="preserve">
+    <value>🔔 Notification Dock</value>
+  </data>
+  <data name="UI_NotificationDockView_112" xml:space="preserve">
+    <value>Clear notifications</value>
+  </data>
+  <data name="UI_QuickSettingsView_113" xml:space="preserve">
+    <value>⚡ Quick Toggles</value>
+  </data>
+  <data name="UI_QuickSettingsView_114" xml:space="preserve">
+    <value>Quick access to common system settings</value>
+  </data>
+  <data name="UI_QuickSettingsView_115" xml:space="preserve">
+    <value>Mute</value>
+  </data>
+  <data name="UI_QuickSettingsView_116" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="UI_QuickSettingsView_117" xml:space="preserve">
+    <value>Detecting…</value>
+  </data>
+  <data name="UI_QuickSettingsView_118" xml:space="preserve">
+    <value>Detecting…</value>
+  </data>
+  <data name="UI_QuickSettingsView_119" xml:space="preserve">
+    <value>Mobile hotspot</value>
+  </data>
+  <data name="UI_QuickSettingsView_120" xml:space="preserve">
+    <value>Detecting…</value>
+  </data>
+  <data name="UI_QuickSettingsView_121" xml:space="preserve">
+    <value>Open battery saver settings</value>
+  </data>
+  <data name="UI_QuickSettingsView_122" xml:space="preserve">
+    <value>Battery saver</value>
+  </data>
+  <data name="UI_QuickSettingsView_123" xml:space="preserve">
+    <value>Open Windows settings</value>
+  </data>
+  <data name="UI_QuickSettingsView_124" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="UI_RecentItemsView_125" xml:space="preserve">
+    <value>🧭 Recent Items</value>
+  </data>
+  <data name="UI_RecentItemsView_126" xml:space="preserve">
+    <value>Recently opened files, running apps, favorite web pages</value>
+  </data>
+  <data name="UI_RecentItemsView_127" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="UI_RecentItemsView_128" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="UI_RecentItemsView_129" xml:space="preserve">
+    <value>Apps</value>
+  </data>
+  <data name="UI_RecentItemsView_130" xml:space="preserve">
+    <value>Web</value>
+  </data>
+  <data name="UI_RecentItemsView_131" xml:space="preserve">
+    <value>Type a URL and press Enter or click save, e.g. bilibili.com</value>
+  </data>
+  <data name="UI_RecentItemsView_132" xml:space="preserve">
+    <value>＋ Save Favorite</value>
+  </data>
+  <data name="UI_TaskbarView_133" xml:space="preserve">
+    <value>Close window</value>
+  </data>
+  <data name="UI_SettingsWindow_134" xml:space="preserve">
+    <value>🐦 DynamicBird Settings</value>
+  </data>
+  <data name="UI_SettingsWindow_135" xml:space="preserve">
+    <value>🐦 DynamicBird Settings</value>
+  </data>
+  <data name="UI_SettingsWindow_136" xml:space="preserve">
+    <value>⚙️ Taskbar</value>
+  </data>
+  <data name="UI_SettingsWindow_137" xml:space="preserve">
+    <value>📐 Layout &amp; Display</value>
+  </data>
+  <data name="UI_SettingsWindow_138" xml:space="preserve">
+    <value>Icon size</value>
+  </data>
+  <data name="UI_SettingsWindow_139" xml:space="preserve">
+    <value>Display size of shortcut icons. Range 16-48px; re-trigger the panel to apply.</value>
+  </data>
+  <data name="UI_SettingsWindow_140" xml:space="preserve">
+    <value>Tab width</value>
+  </data>
+  <data name="UI_SettingsWindow_141" xml:space="preserve">
+    <value>Max width of task tab text; overflow is truncated with an ellipsis.</value>
+  </data>
+  <data name="UI_SettingsWindow_142" xml:space="preserve">
+    <value>Corner radius</value>
+  </data>
+  <data name="UI_SettingsWindow_143" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="UI_SettingsWindow_144" xml:space="preserve">
+    <value>🎯 Trigger &amp; Position</value>
+  </data>
+  <data name="UI_SettingsWindow_145" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="UI_SettingsWindow_146" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="UI_SettingsWindow_147" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="UI_SettingsWindow_148" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="UI_SettingsWindow_149" xml:space="preserve">
+    <value>When checked, moving the mouse to the corresponding screen edge pops up the panel.</value>
+  </data>
+  <data name="UI_SettingsWindow_150" xml:space="preserve">
+    <value>Top-left</value>
+  </data>
+  <data name="UI_SettingsWindow_151" xml:space="preserve">
+    <value>Top-right</value>
+  </data>
+  <data name="UI_SettingsWindow_152" xml:space="preserve">
+    <value>Bottom-left</value>
+  </data>
+  <data name="UI_SettingsWindow_153" xml:space="preserve">
+    <value>Bottom-right</value>
+  </data>
+  <data name="UI_SettingsWindow_154" xml:space="preserve">
+    <value>When checked, moving the mouse to a screen corner pops up the panel (corner trigger takes priority over edges).</value>
+  </data>
+  <data name="UI_SettingsWindow_155" xml:space="preserve">
+    <value>Edge</value>
+  </data>
+  <data name="UI_SettingsWindow_156" xml:space="preserve">
+    <value>Behavior mode</value>
+  </data>
+  <data name="UI_SettingsWindow_157" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="UI_SettingsWindow_158" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="UI_SettingsWindow_159" xml:space="preserve">
+    <value>Follow mouse</value>
+  </data>
+  <data name="UI_SettingsWindow_160" xml:space="preserve">
+    <value>Fixed position</value>
+  </data>
+  <data name="UI_SettingsWindow_161" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="UI_SettingsWindow_162" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_163" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_164" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_165" xml:space="preserve">
+    <value>Follow mouse: the panel moves along the edge with the mouse. Fixed position: the panel stays at a specific spot on the edge.</value>
+  </data>
+  <data name="UI_SettingsWindow_166" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="UI_SettingsWindow_167" xml:space="preserve">
+    <value>Follow mouse</value>
+  </data>
+  <data name="UI_SettingsWindow_168" xml:space="preserve">
+    <value>Fixed position</value>
+  </data>
+  <data name="UI_SettingsWindow_169" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="UI_SettingsWindow_170" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_171" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_172" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_173" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="UI_SettingsWindow_174" xml:space="preserve">
+    <value>Follow mouse</value>
+  </data>
+  <data name="UI_SettingsWindow_175" xml:space="preserve">
+    <value>Fixed position</value>
+  </data>
+  <data name="UI_SettingsWindow_176" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="UI_SettingsWindow_177" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_178" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_179" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_180" xml:space="preserve">
+    <value>Follow mouse: the panel moves along the edge with the mouse. Fixed position: the panel stays at a specific spot on the edge.</value>
+  </data>
+  <data name="UI_SettingsWindow_181" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="UI_SettingsWindow_182" xml:space="preserve">
+    <value>Follow mouse</value>
+  </data>
+  <data name="UI_SettingsWindow_183" xml:space="preserve">
+    <value>Fixed position</value>
+  </data>
+  <data name="UI_SettingsWindow_184" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="UI_SettingsWindow_185" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_186" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_187" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_188" xml:space="preserve">
+    <value>Follow mouse: the panel moves along the edge with the mouse. Fixed position: the panel stays at a specific spot on the edge.</value>
+  </data>
+  <data name="UI_SettingsWindow_189" xml:space="preserve">
+    <value>🗂 Region Panels</value>
+  </data>
+  <data name="UI_SettingsWindow_190" xml:space="preserve">
+    <value>Set which panel each edge/corner shows. Choose "Default layout" to use the current default assignment.</value>
+  </data>
+  <data name="UI_SettingsWindow_191" xml:space="preserve">
+    <value>Top-Left</value>
+  </data>
+  <data name="UI_SettingsWindow_192" xml:space="preserve">
+    <value>Top-Mid</value>
+  </data>
+  <data name="UI_SettingsWindow_193" xml:space="preserve">
+    <value>Top-Right</value>
+  </data>
+  <data name="UI_SettingsWindow_194" xml:space="preserve">
+    <value>Bottom-Left</value>
+  </data>
+  <data name="UI_SettingsWindow_195" xml:space="preserve">
+    <value>Bottom-Mid</value>
+  </data>
+  <data name="UI_SettingsWindow_196" xml:space="preserve">
+    <value>Bottom-Right</value>
+  </data>
+  <data name="UI_SettingsWindow_197" xml:space="preserve">
+    <value>Left-Top</value>
+  </data>
+  <data name="UI_SettingsWindow_198" xml:space="preserve">
+    <value>Left-Mid</value>
+  </data>
+  <data name="UI_SettingsWindow_199" xml:space="preserve">
+    <value>Left-Bottom</value>
+  </data>
+  <data name="UI_SettingsWindow_200" xml:space="preserve">
+    <value>Right-Top</value>
+  </data>
+  <data name="UI_SettingsWindow_201" xml:space="preserve">
+    <value>Right-Mid</value>
+  </data>
+  <data name="UI_SettingsWindow_202" xml:space="preserve">
+    <value>Right-Bottom</value>
+  </data>
+  <data name="UI_SettingsWindow_203" xml:space="preserve">
+    <value>Top-left</value>
+  </data>
+  <data name="UI_SettingsWindow_204" xml:space="preserve">
+    <value>Top-right</value>
+  </data>
+  <data name="UI_SettingsWindow_205" xml:space="preserve">
+    <value>Bottom-left</value>
+  </data>
+  <data name="UI_SettingsWindow_206" xml:space="preserve">
+    <value>Bottom-right</value>
+  </data>
+  <data name="UI_SettingsWindow_207" xml:space="preserve">
+    <value>⚡ Advanced Settings</value>
+  </data>
+  <data name="UI_SettingsWindow_208" xml:space="preserve">
+    <value>Layout threshold</value>
+  </data>
+  <data name="UI_SettingsWindow_209" xml:space="preserve">
+    <value>Aspect-ratio threshold for switching between horizontal/vertical layouts. Larger values need a wider panel to switch to the horizontal layout.</value>
+  </data>
+  <data name="UI_SettingsWindow_210" xml:space="preserve">
+    <value>Auto-fit on each trigger</value>
+  </data>
+  <data name="UI_SettingsWindow_211" xml:space="preserve">
+    <value>On: auto-fit content size on every edge trigger. Off: keep the manually dragged size.</value>
+  </data>
+  <data name="UI_SettingsWindow_212" xml:space="preserve">
+    <value>Remember DND state</value>
+  </data>
+  <data name="UI_SettingsWindow_213" xml:space="preserve">
+    <value>When enabled, the Do Not Disturb state is saved and restored on next launch.</value>
+  </data>
+  <data name="UI_SettingsWindow_214" xml:space="preserve">
+    <value>🐦 Follow-the-bird mode</value>
+  </data>
+  <data name="UI_SettingsWindow_215" xml:space="preserve">
+    <value>When enabled, the panel softly follows the mouse and sticks to it; when disabled, the panel stays where it is after leaving the edge.</value>
+  </data>
+  <data name="UI_SettingsWindow_216" xml:space="preserve">
+    <value>Recommended</value>
+  </data>
+  <data name="UI_SettingsWindow_217" xml:space="preserve">
+    <value>Region debounce</value>
+  </data>
+  <data name="UI_SettingsWindow_218" xml:space="preserve">
+    <value>Debounce delay when the mouse jitters at region boundaries. Smaller = faster but may misfire; larger = more stable but slower. Recommended 80ms.</value>
+  </data>
+  <data name="UI_SettingsWindow_219" xml:space="preserve">
+    <value>📍 Region Shapes (Advanced)</value>
+  </data>
+  <data name="UI_SettingsWindow_220" xml:space="preserve">
+    <value>Tip: choose "Default" to use the global logic</value>
+  </data>
+  <data name="UI_SettingsWindow_221" xml:space="preserve">
+    <value>Set the panel shape per screen region: Square / Horizontal strip / Vertical strip.</value>
+  </data>
+  <data name="UI_SettingsWindow_222" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="UI_SettingsWindow_223" xml:space="preserve">
+    <value>Left/Mid/Right</value>
+  </data>
+  <data name="UI_SettingsWindow_224" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_225" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_226" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_227" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_228" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_229" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_230" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_231" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_232" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_233" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_234" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_235" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_236" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="UI_SettingsWindow_237" xml:space="preserve">
+    <value>Left/Mid/Right</value>
+  </data>
+  <data name="UI_SettingsWindow_238" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_239" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_240" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_241" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_242" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_243" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_244" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_245" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_246" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_247" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_248" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_249" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_250" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="UI_SettingsWindow_251" xml:space="preserve">
+    <value>Top/Mid/Bottom</value>
+  </data>
+  <data name="UI_SettingsWindow_252" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_253" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_254" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_255" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_256" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_257" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_258" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_259" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_260" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_261" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_262" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_263" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_264" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="UI_SettingsWindow_265" xml:space="preserve">
+    <value>Top/Mid/Bottom</value>
+  </data>
+  <data name="UI_SettingsWindow_266" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_267" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_268" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_269" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_270" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_271" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_272" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_273" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_274" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="UI_SettingsWindow_275" xml:space="preserve">
+    <value>Square</value>
+  </data>
+  <data name="UI_SettingsWindow_276" xml:space="preserve">
+    <value>Horizontal strip</value>
+  </data>
+  <data name="UI_SettingsWindow_277" xml:space="preserve">
+    <value>Vertical strip</value>
+  </data>
+  <data name="UI_SettingsWindow_278" xml:space="preserve">
+    <value>🌐 General</value>
+  </data>
+  <data name="UI_SettingsWindow_279" xml:space="preserve">
+    <value>🌐 Interface Language</value>
+  </data>
+  <data name="UI_SettingsWindow_280" xml:space="preserve">
+    <value>Changing the interface language takes effect immediately and persists on next launch.</value>
+  </data>
+  <data name="UI_SettingsWindow_281" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="UI_SettingsWindow_282" xml:space="preserve">
+    <value>Follow system</value>
+  </data>
+  <data name="UI_SettingsWindow_283" xml:space="preserve">
+    <value>Simplified Chinese</value>
+  </data>
+  <data name="UI_SettingsWindow_284" xml:space="preserve">
+    <value>🎨 Appearance</value>
+  </data>
+  <data name="UI_SettingsWindow_285" xml:space="preserve">
+    <value>Background color</value>
+  </data>
+  <data name="UI_SettingsWindow_286" xml:space="preserve">
+    <value>Choose</value>
+  </data>
+  <data name="UI_SettingsWindow_287" xml:space="preserve">
+    <value>Text color</value>
+  </data>
+  <data name="UI_SettingsWindow_288" xml:space="preserve">
+    <value>Choose</value>
+  </data>
+  <data name="UI_SettingsWindow_289" xml:space="preserve">
+    <value>Custom icon</value>
+  </data>
+  <data name="UI_SettingsWindow_290" xml:space="preserve">
+    <value>Choose image</value>
+  </data>
+  <data name="UI_SettingsWindow_291" xml:space="preserve">
+    <value>Choose an image to replace the DynamicBird icon (PNG, JPG, ICO, etc.).</value>
+  </data>
+  <data name="UI_SettingsWindow_292" xml:space="preserve">
+    <value>Show system status</value>
+  </data>
+  <data name="UI_SettingsWindow_293" xml:space="preserve">
+    <value>Show time, CPU, memory, volume, network, battery, FPS etc. at the top of the panel.</value>
+  </data>
+  <data name="UI_SettingsWindow_294" xml:space="preserve">
+    <value>🔄 Auto Update</value>
+  </data>
+  <data name="UI_SettingsWindow_295" xml:space="preserve">
+    <value>Checks GitHub Releases and downloads updates. The update package must be DynamicBird.exe or a zip containing it, with the SHA256 in the release notes.</value>
+  </data>
+  <data name="UI_SettingsWindow_296" xml:space="preserve">
+    <value>Enable auto update (check GitHub for the latest version at startup)</value>
+  </data>
+  <data name="UI_SettingsWindow_297" xml:space="preserve">
+    <value>Check now</value>
+  </data>
+  <data name="UI_SettingsWindow_298" xml:space="preserve">
+    <value>Update source not configured</value>
+  </data>
+  <data name="UI_SettingsWindow_299" xml:space="preserve">
+    <value>灵动鸟 DynamicBird</value>
+  </data>
+  <data name="UI_SettingsWindow_300" xml:space="preserve">
+    <value>Privacy: DynamicBird uploads no personal data by default. Only when auto update is enabled does it request version info from GitHub Releases (which may include your IP); the web-favorites feature reads browser history locally. All config, shortcuts and logs stay in %LOCALAPPDATA%\DynamicBird and are removed on uninstall (Store version).</value>
+  </data>
+  <data name="UI_SettingsWindow_301" xml:space="preserve">
+    <value>Third-party notices are in the repo's THIRD-PARTY-NOTICES.md (MIT).</value>
+  </data>
+  <data name="UI_SettingsWindow_302" xml:space="preserve">
+    <value>🧰 Widgets</value>
+  </data>
+  <data name="UI_SettingsWindow_303" xml:space="preserve">
+    <value>📊 Status Bar Items</value>
+  </data>
+  <data name="UI_SettingsWindow_304" xml:space="preserve">
+    <value>Choose which items the status bar at the top of the panel shows.</value>
+  </data>
+  <data name="UI_SettingsWindow_305" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="UI_SettingsWindow_306" xml:space="preserve">
+    <value>Memory</value>
+  </data>
+  <data name="UI_SettingsWindow_307" xml:space="preserve">
+    <value>FPS</value>
+  </data>
+  <data name="UI_SettingsWindow_308" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="UI_SettingsWindow_309" xml:space="preserve">
+    <value>Network</value>
+  </data>
+  <data name="UI_SettingsWindow_310" xml:space="preserve">
+    <value>Battery</value>
+  </data>
+  <data name="UI_SettingsWindow_311" xml:space="preserve">
+    <value>Weather</value>
+  </data>
+  <data name="UI_SettingsWindow_312" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="UI_SettingsWindow_313" xml:space="preserve">
+    <value>Click the "Choose…" button to search and pick a city; leave empty to locate by network IP.</value>
+  </data>
+  <data name="UI_SettingsWindow_314" xml:space="preserve">
+    <value>When weather is enabled, DynamicBird sends requests to open-meteo.com (weather &amp; city suggestions) and ipwho.is (IP location), only when "Weather" is checked.</value>
+  </data>
+  <data name="UI_SettingsWindow_315" xml:space="preserve">
+    <value>🧩 Panel Widgets</value>
+  </data>
+  <data name="UI_SettingsWindow_316" xml:space="preserve">
+    <value>Choose which widgets stay in the widget panel. Unchecking hides the tab (data is kept).</value>
+  </data>
+  <data name="UI_SettingsWindow_317" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="UI_SettingsWindow_318" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="UI_SettingsWindow_319" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+  <data name="UI_SettingsWindow_320" xml:space="preserve">
+    <value>Calculator</value>
+  </data>
+  <data name="UI_SettingsWindow_321" xml:space="preserve">
+    <value>Translate Selection</value>
+  </data>
+  <data name="UI_SettingsWindow_322" xml:space="preserve">
+    <value>Translate-Selection hotkey</value>
+  </data>
+  <data name="UI_SettingsWindow_323" xml:space="preserve">
+    <value>Click this box, then press the key combination you want (e.g. Ctrl+Alt+Q). Ctrl/Alt/Shift/Win modifiers required.</value>
+  </data>
+  <data name="UI_SettingsWindow_324" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="UI_SettingsWindow_325" xml:space="preserve">
+    <value>After setting, select text in any app and press the hotkey to bring up the panel and translate. Leave empty = not set.</value>
+  </data>
+  <data name="UI_SettingsWindow_326" xml:space="preserve">
+    <value>📋 Clipboard History</value>
+  </data>
+  <data name="UI_SettingsWindow_327" xml:space="preserve">
+    <value>Max items</value>
+  </data>
+  <data name="UI_SettingsWindow_328" xml:space="preserve">
+    <value>Preview chars</value>
+  </data>
+  <data name="UI_SettingsWindow_329" xml:space="preserve">
+    <value>Max items kept in clipboard history, and how many characters are previewed in the list.</value>
+  </data>
+  <data name="UI_SettingsWindow_330" xml:space="preserve">
+    <value>📝 Notes</value>
+  </data>
+  <data name="UI_SettingsWindow_331" xml:space="preserve">
+    <value>Default color</value>
+  </data>
+  <data name="UI_SettingsWindow_332" xml:space="preserve">
+    <value>Choose</value>
+  </data>
+  <data name="UI_SettingsWindow_333" xml:space="preserve">
+    <value>Default background color for new notes. Each note's color can be changed individually in the note editor.</value>
+  </data>
+  <data name="UI_SettingsWindow_334" xml:space="preserve">
+    <value>Show title on new notes by default</value>
+  </data>
+  <data name="UI_SettingsWindow_335" xml:space="preserve">
+    <value>When enabled, new notes show a title bar; otherwise only the content.</value>
+  </data>
+  <data name="UI_SettingsWindow_336" xml:space="preserve">
+    <value>💡 Notes are stored in Data/notes.json, clipboard history in Data/clipboard_history.json</value>
+  </data>
+  <data name="UI_SettingsWindow_337" xml:space="preserve">
+    <value>📌 Shortcuts</value>
+  </data>
+  <data name="UI_SettingsWindow_338" xml:space="preserve">
+    <value>🎬 Animations</value>
+  </data>
+  <data name="UI_SettingsWindow_339" xml:space="preserve">
+    <value>🎬 Animation Settings</value>
+  </data>
+  <data name="UI_SettingsWindow_340" xml:space="preserve">
+    <value>Enable animations</value>
+  </data>
+  <data name="UI_SettingsWindow_341" xml:space="preserve">
+    <value>📌 Show/Hide</value>
+  </data>
+  <data name="UI_SettingsWindow_342" xml:space="preserve">
+    <value>Animation when the panel slides in/out from the edge</value>
+  </data>
+  <data name="UI_SettingsWindow_343" xml:space="preserve">
+    <value>Easing type</value>
+  </data>
+  <data name="UI_SettingsWindow_344" xml:space="preserve">
+    <value>Linear</value>
+  </data>
+  <data name="UI_SettingsWindow_345" xml:space="preserve">
+    <value>Cubic</value>
+  </data>
+  <data name="UI_SettingsWindow_346" xml:space="preserve">
+    <value>Quadratic</value>
+  </data>
+  <data name="UI_SettingsWindow_347" xml:space="preserve">
+    <value>Quartic</value>
+  </data>
+  <data name="UI_SettingsWindow_348" xml:space="preserve">
+    <value>Quintic</value>
+  </data>
+  <data name="UI_SettingsWindow_349" xml:space="preserve">
+    <value>Elastic</value>
+  </data>
+  <data name="UI_SettingsWindow_350" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="UI_SettingsWindow_351" xml:space="preserve">
+    <value>Bounce</value>
+  </data>
+  <data name="UI_SettingsWindow_352" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="UI_SettingsWindow_353" xml:space="preserve">
+    <value>Linear: constant speed, no easing
+Cubic: fast then slow, smooth and natural (recommended)
+Quadratic: softer than cubic
+Quartic: very smooth, good for long animations
+Quintic: extremely smooth
+Elastic: bouncy oscillation, lively
+Back: slight overshoot then settle
+Bounce: bounces at the end, good for endings</value>
+  </data>
+  <data name="UI_SettingsWindow_354" xml:space="preserve">
+    <value>🔄 Transform/Switch</value>
+  </data>
+  <data name="UI_SettingsWindow_355" xml:space="preserve">
+    <value>Animation for panel resizing / region switching / flying across edges</value>
+  </data>
+  <data name="UI_SettingsWindow_356" xml:space="preserve">
+    <value>Easing type</value>
+  </data>
+  <data name="UI_SettingsWindow_357" xml:space="preserve">
+    <value>Linear</value>
+  </data>
+  <data name="UI_SettingsWindow_358" xml:space="preserve">
+    <value>Cubic</value>
+  </data>
+  <data name="UI_SettingsWindow_359" xml:space="preserve">
+    <value>Quadratic</value>
+  </data>
+  <data name="UI_SettingsWindow_360" xml:space="preserve">
+    <value>Quartic</value>
+  </data>
+  <data name="UI_SettingsWindow_361" xml:space="preserve">
+    <value>Quintic</value>
+  </data>
+  <data name="UI_SettingsWindow_362" xml:space="preserve">
+    <value>Elastic</value>
+  </data>
+  <data name="UI_SettingsWindow_363" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="UI_SettingsWindow_364" xml:space="preserve">
+    <value>Bounce</value>
+  </data>
+  <data name="UI_SettingsWindow_365" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="UI_SettingsWindow_366" xml:space="preserve">
+    <value>Linear: constant speed, no easing
+Cubic: fast then slow, smooth and natural (recommended)
+Quadratic: softer than cubic
+Quartic: very smooth, good for long animations
+Quintic: extremely smooth
+Elastic: bouncy oscillation, lively
+Back: slight overshoot then settle
+Bounce: bounces at the end, good for endings</value>
+  </data>
+  <data name="UI_SettingsWindow_367" xml:space="preserve">
+    <value>🚀 Fly Duration</value>
+  </data>
+  <data name="UI_SettingsWindow_368" xml:space="preserve">
+    <value>Movement speed when flying across edges. Smaller = faster, larger = slower.</value>
+  </data>
+  <data name="UI_SettingsWindow_369" xml:space="preserve">
+    <value>⏱️ Delayed Hide</value>
+  </data>
+  <data name="UI_SettingsWindow_370" xml:space="preserve">
+    <value>How long after the mouse leaves the panel before the hide animation starts</value>
+  </data>
+  <data name="UI_SettingsWindow_371" xml:space="preserve">
+    <value>Wait time</value>
+  </data>
+  <data name="UI_SettingsWindow_372" xml:space="preserve">
+    <value>💡 With animations off, show/hide/switch are instant. Delayed hide still applies (the panel vanishes after the delay). Flying still works with animations off (the panel doesn't disappear, but transforms are instant).</value>
+  </data>
+  <data name="UI_SettingsWindow_373" xml:space="preserve">
+    <value>🤖 AI Assistant</value>
+  </data>
+  <data name="UI_SettingsWindow_374" xml:space="preserve">
+    <value>DynamicBird has a built-in AI assistant: chat, translate, summarize, explain code, etc. Your API key stays on this machine (ai.json); requests go directly to the model provider you choose, with no intermediate server.</value>
+  </data>
+  <data name="UI_SettingsWindow_375" xml:space="preserve">
+    <value>Enable AI assistant</value>
+  </data>
+  <data name="UI_SettingsWindow_376" xml:space="preserve">
+    <value>🏢 Provider Presets</value>
+  </data>
+  <data name="UI_SettingsWindow_377" xml:space="preserve">
+    <value>Selecting one fills in the API URL and common models automatically; you can also edit manually.</value>
+  </data>
+  <data name="UI_SettingsWindow_378" xml:space="preserve">
+    <value>🌐 API URL</value>
+  </data>
+  <data name="UI_SettingsWindow_379" xml:space="preserve">
+    <value>OpenAI-compatible Chat Completions URL, e.g. https://api.deepseek.com/v1, http://localhost:11434/v1 (Ollama)</value>
+  </data>
+  <data name="UI_SettingsWindow_380" xml:space="preserve">
+    <value>Stored locally only in %LOCALAPPDATA%\DynamicBird\ai.json, never uploaded. Leave empty if no auth is needed (e.g. local Ollama).</value>
+  </data>
+  <data name="UI_SettingsWindow_381" xml:space="preserve">
+    <value>🧠 Model</value>
+  </data>
+  <data name="UI_SettingsWindow_382" xml:space="preserve">
+    <value>Enter a model name the provider supports, e.g. deepseek-chat, gpt-4o-mini, llama3.2.</value>
+  </data>
+  <data name="UI_SettingsWindow_383" xml:space="preserve">
+    <value>📝 System Prompt</value>
+  </data>
+  <data name="UI_SettingsWindow_384" xml:space="preserve">
+    <value>⚙️ Advanced</value>
+  </data>
+  <data name="UI_SettingsWindow_385" xml:space="preserve">
+    <value>Temperature</value>
+  </data>
+  <data name="UI_SettingsWindow_386" xml:space="preserve">
+    <value>Context window</value>
+  </data>
+  <data name="UI_SettingsWindow_387" xml:space="preserve">
+    <value>Drops the oldest messages when the window is exceeded. Common values: DeepSeek 64K, GPT-4o 128K, local Ollama 8K. Set 0 to never trim.</value>
+  </data>
+  <data name="UI_SettingsWindow_388" xml:space="preserve">
+    <value>Web search (requires provider support, e.g. DeepSeek)</value>
+  </data>
+  <data name="UI_SettingsWindow_389" xml:space="preserve">
+    <value>Deep thinking (requires model support, e.g. reasoning_effort / reasoner models)</value>
+  </data>
+  <data name="UI_SettingsWindow_390" xml:space="preserve">
+    <value>Test connection</value>
+  </data>
+  <data name="UI_SettingsWindow_391" xml:space="preserve">
+    <value>🔒 Privacy: DynamicBird collects or uploads no AI conversation data. All requests are sent directly from this machine to the model provider you choose and are subject to that provider's privacy policy.</value>
+  </data>
+  <data name="UI_SettingsWindow_392" xml:space="preserve">
+    <value>View guide</value>
+  </data>
+  <data name="UI_SettingsWindow_393" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="UI_SettingsWindow_394" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="UI_SettingsWindow_395" xml:space="preserve">
+    <value>Saves current settings to config.json; they take effect after closing.</value>
+  </data>
+  <data name="UI_ShortcutManagementPage_396" xml:space="preserve">
+    <value>Shortcut Management</value>
+  </data>
+  <data name="UI_ShortcutManagementPage_397" xml:space="preserve">
+    <value>➕ Add Shortcut</value>
+  </data>
+  <data name="UI_ShortcutManagementPage_398" xml:space="preserve">
+    <value>🗑️ Clear All</value>
+  </data>
+  <data name="UI_ShortcutManagementPage_399" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="UI_ShortcutManagementPage_400" xml:space="preserve">
+    <value>💡 You can also drag on the taskbar panel to reorder, drag in to pin, drag out to delete</value>
+  </data>
+  <data name="UI_SystemStatusView_401" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="UI_SystemStatusView_402" xml:space="preserve">
+    <value>Weather…</value>
+  </data>
+  <data name="UI_WidgetSwitcher_403" xml:space="preserve">
+    <value>No widgets enabled: check the ones you want in Settings → Widgets</value>
+  </data>
+  <data name="UI_CalculatorWidget_404" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="UI_CalculatorWidget_405" xml:space="preserve">
+    <value>Scientific</value>
+  </data>
+  <data name="UI_CalculatorWidget_406" xml:space="preserve">
+    <value>Programmer</value>
+  </data>
+  <data name="UI_NoteWidget_407" xml:space="preserve">
+    <value>Toggle title</value>
+  </data>
+  <data name="UI_NoteWidget_408" xml:space="preserve">
+    <value>Choose color</value>
+  </data>
+  <data name="UI_TextAiWidget_409" xml:space="preserve">
+    <value>Translate Selection</value>
+  </data>
+  <data name="UI_TextAiWidget_410" xml:space="preserve">
+    <value>⚙ Settings</value>
+  </data>
+  <data name="UI_TextAiWidget_411" xml:space="preserve">
+    <value>Selected text</value>
+  </data>
+  <data name="UI_TextAiWidget_412" xml:space="preserve">
+    <value>Translation</value>
+  </data>
+  <data name="UI_TimerWidget_413" xml:space="preserve">
+    <value>Count up</value>
+  </data>
+  <data name="UI_TimerWidget_414" xml:space="preserve">
+    <value>Count down</value>
+  </data>
+  <data name="UI_TimerWidget_415" xml:space="preserve">
+    <value>Alarm</value>
+  </data>
+  <data name="UI_TimerWidget_416" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="UI_TimerWidget_417" xml:space="preserve">
+    <value>Hours</value>
+  </data>
+  <data name="UI_TimerWidget_418" xml:space="preserve">
+    <value>Minutes</value>
+  </data>
+  <data name="UI_TimerWidget_419" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="UI_TimerWidget_420" xml:space="preserve">
+    <value>Focus 25 min</value>
+  </data>
+  <data name="UI_TimerWidget_421" xml:space="preserve">
+    <value>Break 5 min</value>
+  </data>
+  <data name="UI_TimerWidget_422" xml:space="preserve">
+    <value>Break 10 min</value>
+  </data>
+  <data name="UI_TimerWidget_423" xml:space="preserve">
+    <value>Quick 1 min</value>
+  </data>
+  <data name="UI_TimerWidget_424" xml:space="preserve">
+    <value>▶ Start</value>
+  </data>
+  <data name="UI_TimerWidget_425" xml:space="preserve">
+    <value>↺ Reset</value>
+  </data>
+  <data name="TextAi_Copy" xml:space="preserve">
+    <value>📋 Copy</value>
+  </data>
+  <data name="TextAi_Copied" xml:space="preserve">
+    <value>✅ Copied</value>
+  </data>
+  <data name="Timer_InputUnit" xml:space="preserve">
+    <value>Target time</value>
+  </data>
+  <data name="Timer_TipTargetHours" xml:space="preserve">
+    <value>Target hour (0-23)</value>
+  </data>
+  <data name="Timer_TipHours" xml:space="preserve">
+    <value>Hours</value>
+  </data>
+  <data name="Timer_TipTargetMinutes" xml:space="preserve">
+    <value>Target minute (0-59). If the time has passed, it's postponed to tomorrow</value>
+  </data>
+  <data name="Timer_TipMinutes" xml:space="preserve">
+    <value>Minutes</value>
+  </data>
+  <data name="Timer_InvalidTime" xml:space="preserve">
+    <value>Enter a valid time (h 0-23, m 0-59)</value>
+  </data>
+  <data name="Timer_AlarmToast" xml:space="preserve">
+    <value>Alarm: {0}</value>
+  </data>
+  <data name="Timer_TimeUp" xml:space="preserve">
+    <value>⏰ Time's up!</value>
+  </data>
+  <data name="Timer_StopAlarm" xml:space="preserve">
+    <value>⏰ Stop alarm</value>
+  </data>
+  <data name="Timer_Running" xml:space="preserve">
+    <value>Running…</value>
+  </data>
+  <data name="Timer_Pause" xml:space="preserve">
+    <value>⏸ Pause</value>
+  </data>
+  <data name="Timer_AlarmRemain" xml:space="preserve">
+    <value>Alarm in {0:00}:{1:00}:{2:00}</value>
+  </data>
+  <data name="Timer_CancelAlarm" xml:space="preserve">
+    <value>✕ Cancel alarm</value>
+  </data>
+  <data name="Timer_SetAlarmHint" xml:space="preserve">
+    <value>Set a target time; a system reminder will fire at that time</value>
+  </data>
+  <data name="Timer_SetAlarm" xml:space="preserve">
+    <value>⏰ Set alarm</value>
+  </data>
+  <data name="Calc_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Note_New" xml:space="preserve">
+    <value>➕ New</value>
+  </data>
+  <data name="Note_Delete" xml:space="preserve">
+    <value>✕ Delete</value>
+  </data>
+  <data name="Note_Status" xml:space="preserve">
+    <value>Note {0}/{1}</value>
+  </data>
+  <data name="Note_NoNote" xml:space="preserve">
+    <value>No notes</value>
+  </data>
+  <data name="Note_DefaultTitle" xml:space="preserve">
+    <value>Note {0}</value>
+  </data>
+  <data name="Note_DeleteConfirm" xml:space="preserve">
+    <value>Delete note "{0}"?</value>
+  </data>
+  <data name="Note_Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Clip_DeleteSelected" xml:space="preserve">
+    <value>🗑️ Delete selected</value>
+  </data>
+  <data name="Clip_ClearAll" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="Clip_Count" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="Clip_SearchPlaceholder" xml:space="preserve">
+    <value>Search…</value>
+  </data>
+  <data name="Clip_FilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Clip_FilterPinned" xml:space="preserve">
+    <value>★Pinned</value>
+  </data>
+  <data name="Clip_FilterText" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Clip_FilterLink" xml:space="preserve">
+    <value>Links</value>
+  </data>
+  <data name="Clip_FilterImage" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="Clip_FilterFile" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="Clip_Pin" xml:space="preserve">
+    <value>Pin (never auto-cleared)</value>
+  </data>
+
+  <data name="Clip_Copied" xml:space="preserve">
+    <value>✅ Copied</value>
+  </data>
+  <data name="Clip_Deleted" xml:space="preserve">
+    <value>🗑️ Deleted {0} items</value>
+  </data>
+  <data name="Clip_ClearConfirm" xml:space="preserve">
+    <value>Clear all clipboard history?</value>
+  </data>
+  <data name="Clip_Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Clip_Cleared" xml:space="preserve">
+    <value>🗑️ Cleared</value>
+  </data>
+  <data name="Status_WeatherLoading" xml:space="preserve">
+    <value>Weather…</value>
+  </data>
+  <data name="Status_WeatherUnavailable" xml:space="preserve">
+    <value>Weather unavailable</value>
+  </data>
+  <data name="Status_NetDisconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="Status_NetUnknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Status_NoBattery" xml:space="preserve">
+    <value>No battery</value>
+  </data>
+  <data name="Recent_Files" xml:space="preserve">
+    <value>Recently opened files ({0})</value>
+  </data>
+  <data name="Recent_Apps" xml:space="preserve">
+    <value>Recently opened apps ({0})</value>
+  </data>
+  <data name="Recent_Webs" xml:space="preserve">
+    <value>Favorites &amp; recent web pages ({0})</value>
+  </data>
+  <data name="Notify_Title" xml:space="preserve">
+    <value>🔔 Notification dock ({0})</value>
+  </data>
+  <data name="Notify_TitleEmpty" xml:space="preserve">
+    <value>🔔 Notification dock</value>
+  </data>
+  <data name="QS_On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="QS_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="QS_Enabled" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="QS_Disabled" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="QS_Unavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="Media_Detected" xml:space="preserve">
+    <value>{0} media apps found</value>
+  </data>
+  <data name="Media_None" xml:space="preserve">
+    <value>No playing media apps found</value>
+  </data>
+  <data name="Media_Unavailable" xml:space="preserve">
+    <value>Media controls unavailable</value>
+  </data>
+  <data name="Ai_NotEnabled" xml:space="preserve">
+    <value>⚠ AI is not enabled: open Settings → AI and fill in the provider and API Key, then retry.</value>
+  </data>
+  <data name="Ai_BadImage" xml:space="preserve">
+    <value>⚠ Unsupported image format: drag in PNG / JPG / BMP / GIF / WebP files.</value>
+  </data>
+  <data name="Ai_ImageChatTitle" xml:space="preserve">
+    <value>Image chat</value>
+  </data>
+  <data name="Ai_UnsupportedFile" xml:space="preserve">
+    <value>⚠ This file type is not supported yet. Currently supported: images (PNG/JPG/BMP/GIF/WebP), text &amp; code files (TXT/MD/CS/JSON/LOG etc.), Word documents (DOCX).</value>
+  </data>
+  <data name="Ai_NoTextInFile" xml:space="preserve">
+    <value>⚠ No text could be read from this file.</value>
+  </data>
+  <data name="Ai_Truncated" xml:space="preserve">
+    <value>…(content too long, truncated; showing the first {0} characters)</value>
+  </data>
+  <data name="Ai_FileLabelDocx" xml:space="preserve">
+    <value>📄 Word document</value>
+  </data>
+  <data name="Ai_FileLabelGeneric" xml:space="preserve">
+    <value>📄 File</value>
+  </data>
+  <data name="Ai_CursorOutputStart" xml:space="preserve">
+    <value>⌨ Output to cursor</value>
+  </data>
+  <data name="Ai_CursorOutputAiming" xml:space="preserve">
+    <value>⌨ Click the target window…</value>
+  </data>
+  <data name="Ai_CursorOutputActive" xml:space="preserve">
+    <value>⌨ Outputting…</value>
+  </data>
+  <data name="Ai_EmptyTitleNotConfigured" xml:space="preserve">
+    <value>AI not configured</value>
+  </data>
+  <data name="Ai_EmptyHintConfigured" xml:space="preserve">
+    <value>I can translate, summarize, explain code, write documents… try the sample questions below</value>
+  </data>
+  <data name="Ai_EmptyHintNotConfigured" xml:space="preserve">
+    <value>Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.) and a model in Settings → AI to start chatting</value>
+  </data>
+  <data name="Ai_VisionHint" xml:space="preserve">
+    <value>Tip: the current model may not support image recognition. Switch to a vision-capable model in Settings → AI (e.g. gpt-4o, glm-4v, qwen-vl), or use the local Ollama llava model.</value>
+  </data>
+  <data name="Ai_ModelText" xml:space="preserve">
+    <value>Model: {0}</value>
+  </data>
+  <data name="Ai_ModelContext" xml:space="preserve">
+    <value>Model: {0} · context {1}% (trimmed to window)</value>
+  </data>
+  <data name="Ai_OnlyRecent" xml:space="preserve">
+    <value>⏪ Only showing the latest {0} messages; full history is saved locally</value>
+  </data>
+  <data name="Ai_NewChatTitle" xml:space="preserve">
+    <value>New chat</value>
+  </data>
+  <data name="Ai_ModelNotConfigured" xml:space="preserve">
+    <value>Not configured (enable it in Settings → AI)</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Tray_Toggle" xml:space="preserve">
+    <value>Show / Hide</value>
+  </data>
+  <data name="Tray_AutoStart" xml:space="preserve">
+    <value>Launch at startup</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Tray_AutoStartFail" xml:space="preserve">
+    <value>Failed to set launch at startup: {0}</value>
+  </data>
+  <data name="Tray_AutoStartFailStore" xml:space="preserve">
+    <value>Failed to set launch at startup (Store version): {0}</value>
+  </data>
+  <data name="Session_New" xml:space="preserve">
+    <value>New chat</value>
+  </data>
+  <data name="Session_Old" xml:space="preserve">
+    <value>Previous chat</value>
+  </data>
+  <data name="Weather_Desc0" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Weather_Desc1" xml:space="preserve">
+    <value>Mostly clear</value>
+  </data>
+  <data name="Weather_Desc2" xml:space="preserve">
+    <value>Partly cloudy</value>
+  </data>
+  <data name="Weather_Desc3" xml:space="preserve">
+    <value>Overcast</value>
+  </data>
+  <data name="Weather_Desc45" xml:space="preserve">
+    <value>Fog</value>
+  </data>
+  <data name="Weather_Desc51" xml:space="preserve">
+    <value>Drizzle</value>
+  </data>
+  <data name="Weather_Desc61" xml:space="preserve">
+    <value>Rain</value>
+  </data>
+  <data name="Weather_Desc71" xml:space="preserve">
+    <value>Snow</value>
+  </data>
+  <data name="Weather_Desc80" xml:space="preserve">
+    <value>Showers</value>
+  </data>
+  <data name="Weather_Desc85" xml:space="preserve">
+    <value>Snow showers</value>
+  </data>
+  <data name="Weather_Desc95" xml:space="preserve">
+    <value>Thunderstorm</value>
+  </data>
+  <data name="Weather_Desc96" xml:space="preserve">
+    <value>Thunderstorm with hail</value>
+  </data>
+  <data name="Weather_DescUnknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Clip_ImageSize" xml:space="preserve">
+    <value>🖼️ Image ({0}×{1})</value>
+  </data>
+  <data name="Clip_ImageSaveFailed" xml:space="preserve">
+    <value>🖼️ Image (save failed)</value>
+  </data>
+  <data name="Clip_ImageMissing" xml:space="preserve">
+    <value>🖼️ Image (file missing)</value>
+  </data>
+  <data name="Capture_NoFg" xml:space="preserve">
+    <value>Cannot get the foreground window</value>
+  </data>
+  <data name="Capture_SwitchApp" xml:space="preserve">
+    <value>Switch to the app with the selected text first, then press the hotkey</value>
+  </data>
+  <data name="Capture_Failed" xml:space="preserve">
+    <value>Failed to read selected text: {0}</value>
+  </data>
+  <data name="Cursor_ClickTarget" xml:space="preserve">
+    <value>Click the target window to output to first (e.g. Word / Notepad)</value>
+  </data>
+  <data name="Cursor_LockFailed" xml:space="preserve">
+    <value>Lock failed: {0}</value>
+  </data>
+  <data name="Pip_Window" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="Pip_EmbedTitle" xml:space="preserve">
+    <value>Embedded: {0}</value>
+  </data>
+  <data name="Pip_MirrorTitle" xml:space="preserve">
+    <value>Mirrored: {0}</value>
+  </data>
+  <data name="Pip_Minimized" xml:space="preserve">
+    <value>The window is minimized; restore it before mirroring</value>
+  </data>
+  <data name="Pip_MinimizedClick" xml:space="preserve">
+    <value>Window minimized; restore it and click here to continue mirroring</value>
+  </data>
+  <data name="Pip_Closed" xml:space="preserve">
+    <value>Window closed</value>
+  </data>
+  <data name="Pip_Returned" xml:space="preserve">
+    <value>Window "{0}" is back on the taskbar; click here to re-embed it into the panel</value>
+  </data>
+  <data name="Pip_MinimizedContinue" xml:space="preserve">
+    <value>Window minimized; mirroring continues after restore</value>
+  </data>
+  <data name="Wp_EmbedTitle" xml:space="preserve">
+    <value>Select a window to embed</value>
+  </data>
+  <data name="Wp_EmbedHint" xml:space="preserve">
+    <value>Embed a real window: it moves into the panel and can be operated directly (a second display).</value>
+  </data>
+  <data name="Wp_EmbedBtn" xml:space="preserve">
+    <value>Embed</value>
+  </data>
+  <data name="Wp_MirrorTitle" xml:space="preserve">
+    <value>Select a window to mirror</value>
+  </data>
+  <data name="Wp_MirrorHint" xml:space="preserve">
+    <value>Screenshot mirror: the original window stays put; its view is shown in the panel and can be clicked.</value>
+  </data>
+  <data name="Wp_MirrorBtn" xml:space="preserve">
+    <value>Mirror</value>
+  </data>
+  <data name="AppHelper_Pip" xml:space="preserve">
+    <value>PiP</value>
+  </data>
+  <data name="AppHelper_PipDesc" xml:space="preserve">
+    <value>Mirror a window or play a video file</value>
+  </data>
+  <data name="AppHelper_Media" xml:space="preserve">
+    <value>Media controls</value>
+  </data>
+  <data name="AppHelper_MediaDesc" xml:space="preserve">
+    <value>Control playing apps such as QQ Music, browsers, etc.</value>
+  </data>
+  <data name="Scm_Count" xml:space="preserve">
+    <value>{0} shortcuts</value>
+  </data>
+  <data name="Scm_Added" xml:space="preserve">
+    <value>✅ Added: {0}</value>
+  </data>
+  <data name="Scm_AddFailed" xml:space="preserve">
+    <value>⚠️ Already exists or failed to add</value>
+  </data>
+  <data name="Scm_ClearConfirm" xml:space="preserve">
+    <value>Clear all shortcuts?</value>
+  </data>
+  <data name="Scm_Cleared" xml:space="preserve">
+    <value>🗑️ Cleared</value>
+  </data>
+  <data name="Scm_Deleted" xml:space="preserve">
+    <value>🗑️ Deleted: {0}</value>
+  </data>
+  <data name="Scm_Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Toast_NewVersion" xml:space="preserve">
+    <value>New version v{0} available; click to download</value>
+  </data>
+  <data name="Toast_Downloading" xml:space="preserve">
+    <value>Downloading v{0}…</value>
+  </data>
+  <data name="Toast_DownloadFailed" xml:space="preserve">
+    <value>Download failed; check your network and retry</value>
+  </data>
+  <data name="Toast_Extracting" xml:space="preserve">
+    <value>Extracting the update package…</value>
+  </data>
+  <data name="Toast_ExtractFailed" xml:space="preserve">
+    <value>Failed to parse the update package</value>
+  </data>
+  <data name="Toast_Ready" xml:space="preserve">
+    <value>Update ready; restarting to finish the installation…</value>
+  </data>
+  <data name="Toast_InstallFailed" xml:space="preserve">
+    <value>Installation failed; please download the latest version manually</value>
+  </data>
+  <data name="Toast_UnknownApp" xml:space="preserve">
+    <value>Unknown app</value>
+  </data>
+  <data name="Toast_Image" xml:space="preserve">
+    <value>[image]</value>
+  </data>
+  <data name="Toast_Empty" xml:space="preserve">
+    <value>[no content]</value>
+  </data>
+  <data name="Toast_System" xml:space="preserve">
+    <value>System notification</value>
+  </data>
+  <data name="Toast_AppName" xml:space="preserve">
+    <value>DynamicBird</value>
+  </data>
+  <data name="Recent_Wechat" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="Recent_Explorer" xml:space="preserve">
+    <value>File Explorer</value>
+  </data>
+  <data name="Recent_Dingtalk" xml:space="preserve">
+    <value>DingTalk</value>
+  </data>
+  <data name="Recent_Feishu" xml:space="preserve">
+    <value>Feishu (Lark)</value>
+  </data>
+  <data name="Recent_WxWork" xml:space="preserve">
+    <value>WeCom</value>
+  </data>
+  <data name="Set_Immediate" xml:space="preserve">
+    <value>0 (immediate)</value>
+  </data>
+  <data name="Set_UpdateSourceMissing" xml:space="preserve">
+    <value>Update source not configured (built-in constants pending)</value>
+  </data>
+  <data name="Set_UpdateSource" xml:space="preserve">
+    <value>Update source: github.com/{0}/{1}</value>
+  </data>
+  <data name="Set_UpdateSourceMissing2" xml:space="preserve">
+    <value>Update source not configured; please ask the developer to fill it in</value>
+  </data>
+  <data name="Set_Checking" xml:space="preserve">
+    <value>Checking for updates…</value>
+  </data>
+  <data name="Set_Latest" xml:space="preserve">
+    <value>Already up to date</value>
+  </data>
+  <data name="Set_NewVersion" xml:space="preserve">
+    <value>New version v{0} ({1}) found; after saving settings you can click to update in the notification dock</value>
+  </data>
+  <data name="Set_CheckFailed" xml:space="preserve">
+    <value>Check failed; verify your network and repo info</value>
+  </data>
+  <data name="Set_HotkeyHintNotSet" xml:space="preserve">
+    <value>Not set: the panel will prompt you to set it. Suggested: Ctrl+Alt+Q.</value>
+  </data>
+  <data name="Set_HotkeyConflict" xml:space="preserve">
+    <value>⚠ Conflicts with the panel toggle Ctrl+Alt+B; please change it.</value>
+  </data>
+  <data name="Set_HotkeySet" xml:space="preserve">
+    <value>Set: select text in any app and press this hotkey to translate.</value>
+  </data>
+  <data name="Set_LangPrefix" xml:space="preserve">
+    <value>Current interface language: </value>
+  </data>
+  <data name="Set_LangFollowSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="Set_AutoSaveHint" xml:space="preserve">
+    <value>Click "Refresh" after changing settings to apply and persist them</value>
+  </data>
+  <data name="Set_AutoSaveRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Set_WidgetMarket" xml:space="preserve">
+    <value>🛒 Widget Market</value>
+  </data>
+
+
+
+  <data name="Set_Testing" xml:space="preserve">
+    <value>Testing…</value>
+  </data>
+  <data name="Set_ConnOk" xml:space="preserve">
+    <value>✅ Connected</value>
+  </data>
+  <data name="Set_Saved" xml:space="preserve">
+    <value>Settings saved</value>
+  </data>
+  <data name="Set_HotkeyConflictMsg" xml:space="preserve">
+    <value>The translate-selection hotkey conflicts with the panel toggle Ctrl+Alt+B; please change it.</value>
+  </data>
+  <data name="Set_HotkeyInvalid" xml:space="preserve">
+    <value>The translate-selection hotkey is invalid; please set it again.</value>
+  </data>
+  <data name="Set_HotkeyOccupied" xml:space="preserve">
+    <value>The translate-selection hotkey {0} is already in use; change it (Settings → Widgets)</value>
+  </data>
+  <data name="Ob_HotkeyNotSet" xml:space="preserve">
+    <value>Not set: translate-selection is disabled. After setting, select text in any app and press the hotkey to translate.</value>
+  </data>
+  <data name="Ob_HotkeyEnabled" xml:space="preserve">
+    <value>Enabled: hotkey {0}.</value>
+  </data>
+  <data name="Widget_GroupName" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Panel_Default" xml:space="preserve">
+    <value>Default layout</value>
+  </data>
+  <data name="Panel_Taskbar" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Panel_Widget" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Panel_AppHelper" xml:space="preserve">
+    <value>App Helper</value>
+  </data>
+  <data name="Panel_Notification" xml:space="preserve">
+    <value>Notification dock</value>
+  </data>
+  <data name="Panel_Recent" xml:space="preserve">
+    <value>Recent items</value>
+  </data>
+  <data name="Panel_QuickSettings" xml:space="preserve">
+    <value>Quick settings</value>
+  </data>
+  <data name="Panel_AI" xml:space="preserve">
+    <value>AI Assistant</value>
+  </data>
+  <data name="Dnd_Dnd" xml:space="preserve">
+    <value>Do Not Disturb</value>
+  </data>
+  <data name="Dnd_Refresh" xml:space="preserve">
+    <value>Refresh taskbar</value>
+  </data>
+  <data name="Dnd_TipHelper" xml:space="preserve">
+    <value>Click to toggle app helper (media controls / PiP / music player)
+Right-click for the quick menu</value>
+  </data>
+  <data name="Dnd_TipAi" xml:space="preserve">
+    <value>Click to toggle DND
+Drop files (image / text / code / Word) to send them to the AI
+Right-click for the quick menu</value>
+  </data>
+  <data name="Dnd_TipTaskbar" xml:space="preserve">
+    <value>Click to toggle DND
+Drag apps/files onto the icon to pin to the taskbar; drag away to remove
+Right-click for the quick menu</value>
+  </data>
+  <data name="Dnd_TipDnd" xml:space="preserve">
+    <value>Click to toggle DND
+Drag apps onto the icon to pin / remove
+Right-click for the quick menu</value>
+  </data>
+  <data name="Main_TitleDnd" xml:space="preserve">
+    <value>DynamicBird (Do Not Disturb)</value>
+  </data>
+  <data name="Status_WeatherClick" xml:space="preserve">
+    <value>Click to view the weather forecast</value>
+  </data>
+  <data name="Set_TriggerSettings" xml:space="preserve">
+    <value>Trigger Distance &amp; Delay (anti-mistouch)</value>
+  </data>
+  <data name="Set_TriggerSettingsHint" xml:space="preserve">
+    <value>A smaller trigger distance requires the mouse to get closer to the edge; the delay requires the mouse to stay at the edge before the panel appears, so just passing by won't trigger it.</value>
+  </data>
+  <data name="Set_TriggerDistance" xml:space="preserve">
+    <value>Trigger distance</value>
+  </data>
+  <data name="Set_TriggerDelayGlobal" xml:space="preserve">
+    <value>Global trigger delay</value>
+  </data>
+  <data name="Set_HideDelayGlobal" xml:space="preserve">
+    <value>Global hide delay</value>
+  </data>
+  <data name="Set_DelayHint" xml:space="preserve">
+    <value>Trigger delay: how long the mouse must stay at the edge before the panel appears. Hide delay: how long after the mouse leaves before the panel hides. 0 = immediate.</value>
+  </data>
+  <data name="Set_RegionFineTune" xml:space="preserve">
+    <value>Per-region fine-tune (trigger / hide delay)</value>
+  </data>
+  <data name="Set_Trig" xml:space="preserve">
+    <value>Trigger</value>
+  </data>
+  <data name="Set_Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="Set_TriggerDistanceTip" xml:space="preserve">
+    <value>How close to the screen edge counts as &quot;at the edge&quot;. Smaller values reduce accidental triggers (e.g. when using the taskbar or resizing windows).</value>
+  </data>
+  <data name="Set_TriggerDelayTip" xml:space="preserve">
+    <value>Stay at the edge for this long before the panel appears; 0 = immediately.</value>
+  </data>
+  <data name="Set_HideDelayTip" xml:space="preserve">
+    <value>Delay before the panel starts hiding after the mouse leaves; 0 = immediately.</value>
+  </data>
+  <data name="Perf_Smooth" xml:space="preserve">
+    <value>⚡ Smooth</value>
+  </data>
+  <data name="Perf_Normal" xml:space="preserve">
+    <value>🎯 Normal</value>
+  </data>
+  <data name="Perf_Saver" xml:space="preserve">
+    <value>🔋 Saver</value>
+  </data>
+  <data name="Perf_SmoothDesc" xml:space="preserve">
+    <value>Full panel animations, longer and smoother, faster response; may slightly increase system load</value>
+  </data>
+  <data name="Perf_NormalDesc" xml:space="preserve">
+    <value>Default: balanced animations and performance</value>
+  </data>
+  <data name="Perf_SaverDesc" xml:space="preserve">
+    <value>Panel animations off, instant switching; most power-efficient (panel less smooth)</value>
+  </data>
+  <data name="Perf_ButtonTip" xml:space="preserve">
+    <value>Bird performance mode: click to switch</value>
+  </data>
+  <data name="Perf_Custom" xml:space="preserve">
+    <value>✏️ Custom</value>
+  </data>
+  <data name="Perf_CustomDesc" xml:space="preserve">
+    <value>Animations/trigger parameters were tweaked manually, presets no longer apply; click the button to return to Normal</value>
+  </data>
+  <data name="WidgetMkt_Tab" xml:space="preserve">
+    <value>🧩 My Widgets</value>
+  </data>
+  <data name="WidgetMkt_Title" xml:space="preserve">
+    <value>Create your own widget</value>
+  </data>
+  <data name="WidgetMkt_Desc" xml:space="preserve">
+    <value>Write widgets in C#: click "New" to code in the built-in editor, or paste AI-generated C# code to import (see docs/WIDGET-SPEC.md). Saved widgets appear automatically in the panel's widget tabs.</value>
+  </data>
+  <data name="WidgetMkt_New" xml:space="preserve">
+    <value>🧩 New widget</value>
+  </data>
+  <data name="WidgetMkt_Import" xml:space="preserve">
+    <value>🤖 AI import</value>
+  </data>
+  <data name="WidgetMkt_Refresh" xml:space="preserve">
+    <value>↻ Refresh</value>
+  </data>
+  <data name="WidgetMkt_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="WidgetMkt_Empty" xml:space="preserve">
+    <value>No widgets installed yet</value>
+  </data>
+  <data name="WidgetMkt_Enabled" xml:space="preserve">
+    <value>Enable</value>
+  </data>
+  <data name="WidgetMkt_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="WidgetMkt_DeleteConfirm" xml:space="preserve">
+    <value>Delete widget "{0}"?</value>
+  </data>
+  <data name="WidgetMkt_Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="WidgetMkt_None" xml:space="preserve">
+    <value>🔒 No permissions</value>
+  </data>
+  <data name="WidgetMkt_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="WidgetMkt_NoSettings" xml:space="preserve">
+    <value>No additional settings</value>
+  </data>
+  <data name="Set_ClipImageMaxWidth" xml:space="preserve">
+    <value>Image width</value>
+  </data>
+  <data name="Set_ClipImageMaxWidthTip" xml:space="preserve">
+    <value>Longest side (px) that clipboard images are scaled to before saving; 0 = keep original. Default 1280, smaller saves more disk.</value>
+  </data>
+  <data name="Set_ClipImageCacheLimit" xml:space="preserve">
+    <value>Cache limit</value>
+  </data>
+  <data name="Set_ClipImageCacheLimitTip" xml:space="preserve">
+    <value>Max total size (MB) of the clipboard image cache. Oldest non-pinned images are removed when exceeded.</value>
+  </data>
+  <data name="Panel_WindowControl" xml:space="preserve">
+    <value>Window Control</value>
+  </data>
+  <data name="WC_Title" xml:space="preserve">
+    <value>Window Control</value>
+  </data>
+  <data name="WC_NoTarget" xml:space="preserve">
+    <value>(No operable window)</value>
+  </data>
+  <data name="WC_Minimize" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="WC_Maximize" xml:space="preserve">
+    <value>Maximize / Restore</value>
+  </data>
+  <data name="WC_Close" xml:space="preserve">
+    <value>Close window</value>
+  </data>
+  <data name="WC_Pin" xml:space="preserve">
+    <value>Always on top</value>
+  </data>
+  <data name="WC_SnapLeft" xml:space="preserve">
+    <value>Snap left half</value>
+  </data>
+  <data name="WC_SnapRight" xml:space="preserve">
+    <value>Snap right half</value>
+  </data>
+  <data name="WC_SnapCenter" xml:space="preserve">
+    <value>Center (50%)</value>
+  </data>
+  <data name="WC_Hint" xml:space="preserve">
+    <value>Applies to the foreground window</value>
+  </data>
+  <data name="Ob_Win_Title" xml:space="preserve">
+    <value>DynamicBird - First-run Guide</value>
+  </data>
+  <data name="Ob_Step_Brand" xml:space="preserve">
+    <value>DynamicBird</value>
+  </data>
+  <data name="Ob_Step_1" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="Ob_Step_2" xml:space="preserve">
+    <value>Screen Map</value>
+  </data>
+  <data name="Ob_Step_3" xml:space="preserve">
+    <value>Edge Taskbar</value>
+  </data>
+  <data name="Ob_Step_4" xml:space="preserve">
+    <value>App Assistant</value>
+  </data>
+  <data name="Ob_Step_5" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Ob_Step_6" xml:space="preserve">
+    <value>Quick Toggles</value>
+  </data>
+  <data name="Ob_Step_7" xml:space="preserve">
+    <value>AI Assistant</value>
+  </data>
+  <data name="Ob_Step_8" xml:space="preserve">
+    <value>Notifications &amp; Recent</value>
+  </data>
+  <data name="Ob_Step_9" xml:space="preserve">
+    <value>Customize</value>
+  </data>
+  <data name="Ob_Step_10" xml:space="preserve">
+    <value>Get Started</value>
+  </data>
+  <data name="Ob_Welcome_Title" xml:space="preserve">
+    <value>🐦 Welcome to DynamicBird</value>
+  </data>
+  <data name="Ob_Welcome_Sub" xml:space="preserve">
+    <value>A Windows desktop edge panel tool — keep frequent actions at the screen edge, use them, then move on.</value>
+  </data>
+  <data name="Ob_Welcome_Card1Title" xml:space="preserve">
+    <value>Core interaction</value>
+  </data>
+  <data name="Ob_Welcome_Card1Text" xml:space="preserve">
+    <value>Move the mouse to a screen edge or corner and the panel slides out; move away and it hides. Four edges + four corners = 16 trigger regions, each independently configurable.</value>
+  </data>
+  <data name="Ob_Welcome_Card2Title" xml:space="preserve">
+    <value>Three zones</value>
+  </data>
+  <data name="Ob_Welcome_Card2Text" xml:space="preserve">
+    <value>Edges: quick actions &amp; taskbar; corners: standalone panels (quick toggles / recent items / notification dock); center areas: AI assistant and app assistant (picture-in-picture).</value>
+  </data>
+  <data name="Ob_Welcome_Tip" xml:space="preserve">
+    <value>💡 Privacy first: all data stays on your machine at %LOCALAPPDATA%\DynamicBird — no account, no ads, no cloud upload.</value>
+  </data>
+  <data name="Ob_Map_Title" xml:space="preserve">
+    <value>🗺️ Screen map: 16 trigger regions</value>
+  </data>
+  <data name="Ob_Map_Desc" xml:space="preserve">
+    <value>This diagram shows the default layout. What each region shows, whether it is enabled, its shape and trigger delay can all be customized in Settings → General.</value>
+  </data>
+  <data name="Ob_Map_TopLeft" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Ob_Map_TopCenter" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Ob_Map_TopRight" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Ob_Map_BottomLeft" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Ob_Map_BottomCenter" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Ob_Map_BottomRight" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Ob_Map_LeftTop" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Ob_Map_LeftBottom" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Ob_Map_RightTop" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Ob_Map_RightBottom" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Ob_Map_Center" xml:space="preserve">
+    <value>AI / App Assistant</value>
+  </data>
+  <data name="Ob_Map_CenterDetail" xml:space="preserve">
+    <value>Left center: AI assistant　Right center: app assistant (PiP)</value>
+  </data>
+  <data name="Ob_Map_CornersTitle" xml:space="preserve">
+    <value>Four corners</value>
+  </data>
+  <data name="Ob_Map_CornersText" xml:space="preserve">
+    <value>Top-left: quick toggles (volume/brightness/Bluetooth/Wi-Fi/hotspot); bottom-left: recent items (files/apps/web); bottom-right: notification dock. Top-right stays hidden by default; you can make it a window control center.</value>
+  </data>
+  <data name="Ob_Map_Tip" xml:space="preserve">
+    <value>💡 The top-right corner is where window close buttons live, so it stays a safe zone by default — configure it as a window control center when you need it.</value>
+  </data>
+  <data name="Ob_Taskbar_Title" xml:space="preserve">
+    <value>📌 Edge taskbar: pin, close, reorder</value>
+  </data>
+  <data name="Ob_Taskbar_Desc" xml:space="preserve">
+    <value>Top and bottom edges show the taskbar by default: your shortcuts on the left, running windows on the right.</value>
+  </data>
+  <data name="Ob_Taskbar_Card1Title" xml:space="preserve">
+    <value>Pin an app</value>
+  </data>
+  <data name="Ob_Taskbar_Card1Text" xml:space="preserve">
+    <value>Drag a running window tab onto the bird icon at the panel's top-left and release to pin it as a shortcut (the icon turns into ＋ while dragging). You can also drop an .exe directly onto the panel.</value>
+  </data>
+  <data name="Ob_Taskbar_Card2Title" xml:space="preserve">
+    <value>Close &amp; remove</value>
+  </data>
+  <data name="Ob_Taskbar_Card2Text" xml:space="preserve">
+    <value>Click ✕ on a window tab to close it; drag a shortcut onto the top-left icon (it becomes a trash can) to remove it.</value>
+  </data>
+  <data name="Ob_Taskbar_Card3Title" xml:space="preserve">
+    <value>Reorder &amp; launch</value>
+  </data>
+  <data name="Ob_Taskbar_Card3Text" xml:space="preserve">
+    <value>Drag tabs to reorder; single-click a shortcut to launch (switches to it if already running). Running apps are highlighted in the taskbar.</value>
+  </data>
+  <data name="Ob_Taskbar_Tip" xml:space="preserve">
+    <value>✅ The window list follows the system in real time (open/close/rename refresh instantly) — no manual refresh needed.</value>
+  </data>
+  <data name="Ob_Pip_Title" xml:space="preserve">
+    <value>🖥️ App assistant: window picture-in-picture</value>
+  </data>
+  <data name="Ob_Pip_Desc" xml:space="preserve">
+    <value>The right edge center hosts the app assistant — bring any window into the panel and keep an eye on it while working.</value>
+  </data>
+  <data name="Ob_Pip_Card1Title" xml:space="preserve">
+    <value>Picture-in-picture (mirror / embed)</value>
+  </data>
+  <data name="Ob_Pip_Card1Text" xml:space="preserve">
+    <value>Pick a window: embed = put the real window into the panel (fully interactive); mirror = high-performance copy (DWM thumbnail first, falls back to frame capture). Watch videos, streams or tutorials while doing other things.</value>
+  </data>
+  <data name="Ob_Pip_Card2Title" xml:space="preserve">
+    <value>Interacting with the mirror</value>
+  </data>
+  <data name="Ob_Pip_Card2Text" xml:space="preserve">
+    <value>Click, drag (left button) and right-click right inside the mirror; Ctrl + wheel forwards scrolling to the original window. Wheel alone zooms the picture.</value>
+  </data>
+  <data name="Ob_Pip_Card3Title" xml:space="preserve">
+    <value>Media control</value>
+  </data>
+  <data name="Ob_Pip_Card3Text" xml:space="preserve">
+    <value>Apps that register a system media session (QQ Music, Spotify, browsers…) appear in the panel — play/pause, previous/next, with title and cover art.</value>
+  </data>
+  <data name="Ob_Pip_Tip" xml:space="preserve">
+    <value>✅ When the source window is minimized, click the status bar to restore or re-embed it without interrupting playback.</value>
+  </data>
+  <data name="Ob_Widgets_Title" xml:space="preserve">
+    <value>🧩 Widgets: clipboard, notes, timer…</value>
+  </data>
+  <data name="Ob_Widgets_Desc" xml:space="preserve">
+    <value>Left/right edges (except center) show widgets by default, switched via tabs on top.</value>
+  </data>
+  <data name="Ob_Widgets_Card1Title" xml:space="preserve">
+    <value>Five built-in widgets</value>
+  </data>
+  <data name="Ob_Widgets_Card1Text" xml:space="preserve">
+    <value>Clipboard history (persists across restarts, pinned items never evicted, search &amp; filters), notes (multi-color), timer (count-up/countdown/alarm), calculator (standard/scientific/programmer), and text selection AI translation.</value>
+  </data>
+  <data name="Ob_Widgets_Card2Title" xml:space="preserve">
+    <value>Selection translation</value>
+  </data>
+  <data name="Ob_Widgets_Card2Text" xml:space="preserve">
+    <value>Select text in any app and press the translation hotkey — the panel reads the selection and translates it with AI (requires configuring an AI service in Settings first). The hotkey is set on the next page or in Settings.</value>
+  </data>
+  <data name="Ob_Widgets_Card3Title" xml:space="preserve">
+    <value>Custom widgets</value>
+  </data>
+  <data name="Ob_Widgets_Card3Text" xml:space="preserve">
+    <value>Settings → Widgets → New widget: write C# (or let AI generate it), the built-in compiler compiles and previews instantly, save to activate. Import/export to share with others.</value>
+  </data>
+  <data name="Ob_Widgets_Tip" xml:space="preserve">
+    <value>✅ Widget visibility and limits are all adjustable in Settings → Widgets.</value>
+  </data>
+  <data name="Ob_Toggles_Title" xml:space="preserve">
+    <value>⚡ Quick toggles &amp; status bar</value>
+  </data>
+  <data name="Ob_Toggles_Desc" xml:space="preserve">
+    <value>Top-left corner is the system quick toggles panel; the panel's top strip is the status bar.</value>
+  </data>
+  <data name="Ob_Toggles_Card1Title" xml:space="preserve">
+    <value>Quick toggles (top-left)</value>
+  </data>
+  <data name="Ob_Toggles_Card1Text" xml:space="preserve">
+    <value>Volume slider &amp; mute, display brightness, Bluetooth, Wi-Fi, mobile hotspot, plus a fast entry to Windows Settings. Performance mode (Smooth/Normal/Power Saver) is one click away.</value>
+  </data>
+  <data name="Ob_Toggles_Card2Title" xml:space="preserve">
+    <value>Status bar</value>
+  </data>
+  <data name="Ob_Toggles_Card2Text" xml:space="preserve">
+    <value>The strip shows time, CPU, memory, FPS, volume, network, battery and weather — enable or disable each item in Settings → Taskbar.</value>
+  </data>
+  <data name="Ob_Toggles_Card3Title" xml:space="preserve">
+    <value>Quick gestures</value>
+  </data>
+  <data name="Ob_Toggles_Card3Text" xml:space="preserve">
+    <value>Hover over the volume percentage in the status bar and scroll the wheel to adjust volume; click the weather to refresh, double-click to open the forecast in your browser.</value>
+  </data>
+  <data name="Ob_Toggles_Tip" xml:space="preserve">
+    <value>✅ Weather uses Open-Meteo (free, no API key); leave the city blank for IP-based location.</value>
+  </data>
+  <data name="Ob_Ai_Title" xml:space="preserve">
+    <value>🤖 AI assistant: your desktop AI</value>
+  </data>
+  <data name="Ob_Ai_Desc" xml:space="preserve">
+    <value>Hover the left edge center to open the AI panel. Any OpenAI-compatible provider works; the API key stays on your machine.</value>
+  </data>
+  <data name="Ob_Ai_Card1Title" xml:space="preserve">
+    <value>First-time setup</value>
+  </data>
+  <data name="Ob_Ai_Card1Text" xml:space="preserve">
+    <value>Settings → AI assistant: pick a provider preset (DeepSeek / OpenAI / SiliconFlow / local Ollama / OpenRouter…), enter the API key and model, then click "Test connection".</value>
+  </data>
+  <data name="Ob_Ai_Card2Title" xml:space="preserve">
+    <value>Chat &amp; files</value>
+  </data>
+  <data name="Ob_Ai_Card2Text" xml:space="preserve">
+    <value>Multiple sessions, streaming output, Markdown rendering; drag in images/text/code/docx for AI analysis; copy, regenerate or export replies.</value>
+  </data>
+  <data name="Ob_Ai_HotkeyTitle" xml:space="preserve">
+    <value>Selection translation hotkey (optional)</value>
+  </data>
+  <data name="Ob_Ai_HotkeyText" xml:space="preserve">
+    <value>Select text in any app and press this hotkey to open the panel and translate. Leave empty to disable.</value>
+  </data>
+  <data name="Ob_Ai_Tip" xml:space="preserve">
+    <value>💡 Pro tip: "Output to cursor" — click the button, click a target window (e.g. Word), and AI replies are typed straight into your document. Requests go directly to your chosen provider, no middleman server.</value>
+  </data>
+  <data name="Ob_Notify_Title" xml:space="preserve">
+    <value>🔔 Notification dock &amp; recent items</value>
+  </data>
+  <data name="Ob_Notify_Desc" xml:space="preserve">
+    <value>Bottom-right aggregates notifications; bottom-left gets you back to recent work.</value>
+  </data>
+  <data name="Ob_Notify_Card1Title" xml:space="preserve">
+    <value>Notification dock (bottom-right)</value>
+  </data>
+  <data name="Ob_Notify_Card1Text" xml:space="preserve">
+    <value>Captures system toasts and custom popups (WeChat/QQ etc.); click a notification to open its app; ✕ clears the list. New version releases also show up here — click to download and install.</value>
+  </data>
+  <data name="Ob_Notify_Card2Title" xml:space="preserve">
+    <value>Recent items (bottom-left)</value>
+  </data>
+  <data name="Ob_Notify_Card2Text" xml:space="preserve">
+    <value>Three tabs: recently opened files, recently used apps (foreground-window tracking), and favorite/recent web pages (reads Edge/Chrome history, with manual favorites).</value>
+  </data>
+  <data name="Ob_Notify_Tip" xml:space="preserve">
+    <value>✅ Notification and recent data stay local — nothing is uploaded.</value>
+  </data>
+  <data name="Ob_Customize_Title" xml:space="preserve">
+    <value>🎨 Customize: make it yours</value>
+  </data>
+  <data name="Ob_Customize_Desc" xml:space="preserve">
+    <value>Every aspect of appearance and behavior is adjustable, applied instantly.</value>
+  </data>
+  <data name="Ob_Customize_Card1Title" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Ob_Customize_Card1Text" xml:space="preserve">
+    <value>Background/text colors, opacity, corner radius and a custom icon — all in Settings → General; Mica backdrop is enabled automatically on Win11 22H2+.</value>
+  </data>
+  <data name="Ob_Customize_Card2Title" xml:space="preserve">
+    <value>Animation &amp; performance</value>
+  </data>
+  <data name="Ob_Customize_Card2Text" xml:space="preserve">
+    <value>Show/hide animation, easing and duration are adjustable; three performance presets (Smooth/Normal/Power Saver) switch in one click — Power Saver disables animation for minimal CPU.</value>
+  </data>
+  <data name="Ob_Customize_Card3Title" xml:space="preserve">
+    <value>Edge behavior &amp; multi-monitor</value>
+  </data>
+  <data name="Ob_Customize_Card3Text" xml:space="preserve">
+    <value>Each edge can follow the mouse or stay fixed; "Cling" mode lets the panel follow your cursor around; on multiple monitors the panel follows the screen the mouse is on.</value>
+  </data>
+  <data name="Ob_Customize_Tip" xml:space="preserve">
+    <value>💡 All 16 regions' panel type, shape and trigger delay are individually configurable — e.g. turn the right edge into the AI assistant, or the top-right corner into a window control center.</value>
+  </data>
+  <data name="Ob_Done_Title" xml:space="preserve">
+    <value>✅ You're all set</value>
+  </data>
+  <data name="Ob_Done_Sub" xml:space="preserve">
+    <value>Move the mouse to a screen edge and give it a try! Everything is adjustable in Settings, and you can reopen this guide anytime.</value>
+  </data>
+  <data name="Ob_Done_HotkeyTitle" xml:space="preserve">
+    <value>Common hotkeys</value>
+  </data>
+  <data name="Ob_Done_Hotkey1" xml:space="preserve">
+    <value>Show / hide the panel anytime</value>
+  </data>
+  <data name="Ob_Done_Hotkey2UnsetKey" xml:space="preserve">
+    <value>(not set)</value>
+  </data>
+  <data name="Ob_Done_Hotkey2UnsetDesc" xml:space="preserve">
+    <value>No selection-translation hotkey yet — configure it in Settings or step 7 of this guide.</value>
+  </data>
+  <data name="Ob_Done_Hotkey2SetDesc" xml:space="preserve">
+    <value>Translate selected text in any app</value>
+  </data>
+  <data name="Ob_Done_Btn" xml:space="preserve">
+    <value>Get Started</value>
+  </data>
+  <data name="Ob_Map_TopRow" xml:space="preserve">
+    <value>Top edge: taskbar (shortcuts + running windows)</value>
+  </data>
+  <data name="Ob_Map_BottomRow" xml:space="preserve">
+    <value>Bottom edge: taskbar (shortcuts + running windows)</value>
+  </data>
+  <data name="Ob_Map_LeftCol" xml:space="preserve">
+    <value>Left edge
+Widgets</value>
+  </data>
+  <data name="Ob_Map_RightCol" xml:space="preserve">
+    <value>Right edge
+Widgets</value>
+  </data>
+  <data name="Ob_Map_CustomTitle" xml:space="preserve">
+    <value>✨ Everything is customizable</value>
+  </data>
+  <data name="Ob_Map_CustomText" xml:space="preserve">
+    <value>All 16 regions — trigger on/off, panel type (taskbar/widgets/AI/PiP/notifications…), shape (square/horizontal/vertical strip), size and trigger delay — can be configured individually in Settings → General. Turn any edge or corner into whatever you want.</value>
+  </data>
+  <data name="Ob_Done_Tip" xml:space="preserve">
+    <value>💡 Tip: just move the mouse to a screen edge or corner to trigger panels — no buttons to click.</value>
+  </data>
+  <data name="Ob_Map_Taskbar" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Ob_Map_Pip" xml:space="preserve">
+    <value>Picture-in-Picture
+Media control</value>
+  </data>
+  <data name="Ob_Map_Widgets" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Ob_Map_CornerTL" xml:space="preserve">
+    <value>🛠 Top-left: quick toggles
+(volume/brightness/Bluetooth/Wi-Fi)</value>
+  </data>
+  <data name="Ob_Map_CornerBL" xml:space="preserve">
+    <value>🕘 Bottom-left: recent items
+(files/apps/web)</value>
+  </data>
+  <data name="Ob_Map_CornerBR" xml:space="preserve">
+    <value>🔔 Bottom-right: notification dock
+(toasts/update alerts)</value>
+  </data>
+  <data name="Ob_Map_CornerTR" xml:space="preserve">
+    <value>🔒 Top-right: safe zone by default
+(no panel, keeps close button clear)</value>
+  </data>
+  <data name="Set_AdvancedTrigger" xml:space="preserve">
+    <value>⚙️ Advanced trigger settings (distance / per-region delay)</value>
+  </data>
+  <data name="Set_AdvancedRegion" xml:space="preserve">
+    <value>📍 Per-region panel configuration</value>
+  </data>
+  <data name="Ob_Map_Screen" xml:space="preserve">
+    <value>Desktop</value>
+  </data>
+  <data name="Ob_Map_Ai" xml:space="preserve">
+    <value>AI</value>
+  </data>
+  <data name="Ob_Map_LegendTaskbar" xml:space="preserve">
+    <value>Taskbar</value>
+  </data>
+  <data name="Ob_Map_LegendWidgets" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Ob_Map_LegendAi" xml:space="preserve">
+    <value>AI assistant</value>
+  </data>
+  <data name="Ob_Map_LegendPip" xml:space="preserve">
+    <value>PiP / Media</value>
+  </data>
+  <data name="Ob_Map_LegendAiPip" xml:space="preserve">
+    <value>AI assistant / PiP</value>
+  </data>
+  <data name="Ob_Map_LegendWidgetsAi" xml:space="preserve">
+    <value>Widgets / AI</value>
+  </data>
+  <data name="Ob_Map_LegendCorners" xml:space="preserve">
+    <value>Corner panels</value>
+  </data>
+  <data name="Set_PassthroughLabel" xml:space="preserve">
+    <value>Click-through modifier key</value>
+  </data>
+  <data name="Set_PassthroughTip" xml:space="preserve">
+    <value>Hold this key while clicking to pass clicks through the panel to content underneath (the panel follows the mouse; use this to interact with content it covers)</value>
+  </data>
+  <data name="Set_PassthroughNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Set_PassthroughCtrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="Set_PassthroughAlt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="Set_PassthroughShift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="Ob_NoMorePrompt" xml:space="preserve">
+    <value>Don't show the tutorial again</value>
+  </data>
+  <data name="Set_StabilizeTitle" xml:space="preserve">
+    <value>Content switch stabilization</value>
+  </data>
+  <data name="Set_StabilizeTip" xml:space="preserve">
+    <value>On content switch the main icon centers and content loads silently; after this hold time without new switches, the icon returns and content fades from ghost to solid. Rapid consecutive switches reset the timer</value>
+  </data>
+  <data name="Set_SnapRange" xml:space="preserve">
+    <value>Edge snap range</value>
+  </data>
+  <data name="Set_SnapRangeTip" xml:space="preserve">
+    <value>Snaps the panel to a screen edge when its edge is within this distance (0 disables). Snap animation duration follows fly duration</value>
   </data>
 </root>

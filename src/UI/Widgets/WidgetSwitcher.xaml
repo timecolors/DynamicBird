@@ -1,7 +1,6 @@
 <UserControl x:Class="DynamicBird.UI.Widgets.WidgetSwitcher"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -13,56 +12,30 @@
             <!-- 固定底部 -->
         </Grid.RowDefinitions>
 
-        <!-- ★★★ 固定头部：切换按钮 ★★★ -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8" x:Name="ButtonPanel">
-            <Button x:Name="BtnClipboard" 
-                    Style="{StaticResource AccentButton}"
-                    Height="28"
-                    Padding="8,0"
-                    Click="BtnClipboard_Click">
-                <StackPanel Orientation="Horizontal">
-                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconClipboard}" Margin="0,0,5,0"/>
-                    <TextBlock Text="{Binding Item[WidgetTabs_Clipboard], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-            <Button x:Name="BtnNote" 
-                    Height="28"
-                    Padding="8,0"
-                    Margin="8,0,0,0"
-                    Click="BtnNote_Click">
-                <StackPanel Orientation="Horizontal">
-                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconNote}" Margin="0,0,5,0"/>
-                    <TextBlock Text="{Binding Item[WidgetTabs_Notes], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-            <Button x:Name="BtnTimer"
-                    Height="28"
-                    Padding="8,0"
-                    Margin="8,0,0,0"
-                    Click="BtnTimer_Click">
-                <StackPanel Orientation="Horizontal">
-                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconTimer}" Margin="0,0,5,0"/>
-                    <TextBlock Text="{Binding Item[WidgetTabs_Timer], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-            <Button x:Name="BtnCalc"
-                    Height="28"
-                    Padding="8,0"
-                    Margin="8,0,0,0"
-                    Click="BtnCalc_Click">
-                <StackPanel Orientation="Horizontal">
-                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconCalc}" Margin="0,0,5,0"/>
-                    <TextBlock Text="{Binding Item[WidgetTabs_Calculator], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-        </StackPanel>
+        <!-- ★★★ 固定头部：切换按钮（按设置中启用的小组件动态生成，超出宽度时鼠标贴边自动滚动） ★★★ -->
+        <ScrollViewer Grid.Row="0" x:Name="TabScroll"
+                      HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Disabled"
+                      CanContentScroll="False"
+                      Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" x:Name="ButtonPanel"/>
+        </ScrollViewer>
 
         <!-- ★★★ 滚动内容区 ★★★ -->
-        <ScrollViewer Grid.Row="1" 
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-            <ContentControl x:Name="ContentContainer" />
-        </ScrollViewer>
+        <Grid Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <ContentControl x:Name="ContentContainer" />
+            </ScrollViewer>
+
+            <!-- 全部小组件被关闭时的空状态 -->
+            <Border x:Name="EmptyHint" Visibility="Collapsed"
+                    Background="#33FFFFFF" CornerRadius="8" Padding="12,16"
+                    VerticalAlignment="Top" Margin="0,10,0,0">
+                <TextBlock Text="{Binding Item[UI_WidgetSwitcher_403], Source={x:Static loc:LocalizationManager.Instance}}"
+                           FontSize="12" Foreground="#999999" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Border>
+        </Grid>
 
         <!-- ★★★ 固定底部：状态/操作按钮占位（由子控件自己提供） ★★★ -->
         <Border Grid.Row="2" Height="32" Margin="0,8,0,0" x:Name="FooterPanel"/>

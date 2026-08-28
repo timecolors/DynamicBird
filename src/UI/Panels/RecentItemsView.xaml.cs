@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using DynamicBird.Infrastructure.WinApi;
+using DynamicBird.UI.Localization;
 
 namespace DynamicBird.UI.Panels
 {
@@ -246,9 +247,9 @@ namespace DynamicBird.UI.Panels
             ItemList.ItemsSource = source;
             HintText.Text = tab switch
             {
-                RecentItemType.File => $"最近打开的文件（{_files.Count}）",
-                RecentItemType.App => $"最近打开的应用（{_apps.Count}）",
-                _ => $"常用与最近打开的网页（{_webs.Count}）"
+                RecentItemType.File => string.Format(LocalizationManager.Instance["Recent_Files"], _files.Count),
+                RecentItemType.App => string.Format(LocalizationManager.Instance["Recent_Apps"], _apps.Count),
+                _ => string.Format(LocalizationManager.Instance["Recent_Webs"], _webs.Count)
             };
 
             WebInputPanel.Visibility = tab == RecentItemType.Web

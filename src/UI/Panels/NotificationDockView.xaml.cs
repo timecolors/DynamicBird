@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using DynamicBird.Infrastructure.WinApi;
+using DynamicBird.UI.Localization;
 
 namespace DynamicBird.UI.Panels
 {
@@ -28,7 +29,9 @@ namespace DynamicBird.UI.Panels
         private void UpdateHeader()
         {
             int count = ToastMonitor.Notifications.Count;
-            TitleText.Text = count > 0 ? $"🔔 通知坞（{count}）" : "🔔 通知坞";
+            TitleText.Text = count > 0
+                    ? string.Format(LocalizationManager.Instance["Notify_Title"], count)
+                    : LocalizationManager.Instance["Notify_TitleEmpty"];
         }
 
         private void Item_Click(object sender, MouseButtonEventArgs e)

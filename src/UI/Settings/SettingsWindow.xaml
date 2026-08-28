@@ -2,13 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:DynamicBird.UI.Settings"
-        Title="🐦 灵动鸟 设置"
+        Title="{Binding Item[UI_SettingsWindow_134], Source={x:Static loc:LocalizationManager.Instance}}"
         Height="600" Width="750"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResizeWithGrip"
         Background="#F9F9F9"
         Foreground="#1E1E1E"
-        MinHeight="500" MinWidth="650">
+        MinHeight="500" MinWidth="650" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
 
     <Window.Resources>
         <Style x:Key="InfoTipStyle" TargetType="TextBlock">
@@ -18,6 +18,113 @@
             <Setter Property="Cursor" Value="Help"/>
             <Setter Property="Margin" Value="4,0,0,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- ★ Win11 浅色下拉框（覆盖全局深色样式，适配浅色设置窗口） -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1E1E1E"/>
+            <Setter Property="BorderBrush" Value="#D0D0D0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="toggle"
+                                          Focusable="False"
+                                          ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="bd"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="4"/>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="BorderBrush" Value="#0078D4"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"
+                                              IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
+                            <Path x:Name="arrow"
+                                  Data="M 0,0 L 3.5,3.5 L 7,0"
+                                  Stroke="#666666"
+                                  StrokeThickness="1.6"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,8,0"
+                                  IsHitTestVisible="False"/>
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="True"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   StaysOpen="False">
+                                <Border Background="White"
+                                        BorderBrush="#D0D0D0"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Margin="0,4,0,0"
+                                        MaxHeight="280">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="arrow" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="180"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Foreground" Value="#1E1E1E"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ComboBoxItem">
+                                    <Border x:Name="bd" Background="Transparent" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="bd" Property="Background" Value="#F0F0F0"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="bd" Property="Background" Value="#E5F1FB"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="InfoTipButtonStyle" TargetType="Button">
             <Setter Property="Content" Value="ⓘ"/>
@@ -69,7 +176,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0"
-                   Text="🐦 灵动鸟 设置"
+                   Text="{Binding Item[UI_SettingsWindow_135], Source={x:Static loc:LocalizationManager.Instance}}"
                    FontSize="20"
                    FontWeight="Bold"
                    Margin="0,0,0,12"/>
@@ -79,74 +186,202 @@
                     BorderBrush="#DDDDDD"
                     FontSize="12.5">
 
-            <!-- ====== 选项卡1：任务栏设置 ====== -->
-            <TabItem Header="⚙️ 任务栏">
+            <!-- ====== 选项卡1：通用设置 ====== -->
+            <TabItem Header="{Binding Item[UI_SettingsWindow_278], Source={x:Static loc:LocalizationManager.Instance}}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
                     <StackPanel>
 
-                        <!-- ========== 分组1：布局与显示 ========== -->
+                        <!-- ========== 分组：语言 ========== -->
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_279], Source={x:Static loc:LocalizationManager.Instance}}"
+                                               FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
+                                               HorizontalAlignment="Right"
+                                               ToolTip="{Binding Item[UI_SettingsWindow_280], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                </Grid>
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_281], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <ComboBox Grid.Column="1" x:Name="cmbLanguage" Width="180" FontSize="12"
+                                              HorizontalAlignment="Left" Height="28" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_282], Source={x:Static loc:LocalizationManager.Instance}}" Tag=""/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_283], Source={x:Static loc:LocalizationManager.Instance}}" Tag="zh-CN"/>
+                                        <ComboBoxItem Content="English" Tag="en-US"/>
+                                    </ComboBox>
+                                </Grid>
+                                <TextBlock x:Name="txtCurrentLanguage" Text="" FontSize="10.5" Foreground="#888888" Margin="0,4,0,0"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ========== 分组：外观 ========== -->
                         <Border Background="#FFFFFF"
                                 CornerRadius="8"
                                 Padding="10,6"
                                 Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="📐 布局与显示"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_284], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
                                            Margin="0,0,0,6"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="60"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="32"/>
                                         <RowDefinition Height="32"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="图标大小" VerticalAlignment="Center" FontSize="12" Width="60"/>
-                                    <Slider Grid.Row="0" Grid.Column="1" x:Name="sldIconSize"
-                                            Minimum="16" Maximum="48" Value="28"
-                                            TickFrequency="2" IsSnapToTickEnabled="True"
-                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="2" x:Name="txtIconSize"
-                                               Text="28px" TextAlignment="Center" Width="40" FontSize="12"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="快捷方式图标的显示大小。范围 16-48px，调整后需要重新触发面板才会生效。"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_285], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtBgColor" Text="#2D2D2D" VerticalAlignment="Center" FontSize="12"/>
+                                    <Button Grid.Row="0" Grid.Column="2" x:Name="btnBgColorPicker" Content="{Binding Item[UI_SettingsWindow_286], Source={x:Static loc:LocalizationManager.Instance}}" Height="22" Style="{StaticResource Win11Button}" Click="BtnBgColorPicker_Click" FontSize="11" Margin="4,0,0,0"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="标签宽度" VerticalAlignment="Center" FontSize="12" Width="60"/>
-                                    <Slider Grid.Row="1" Grid.Column="1" x:Name="sldTagWidth"
-                                            Minimum="40" Maximum="300" Value="120"
-                                            TickFrequency="5" IsSnapToTickEnabled="True"
-                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="2" x:Name="txtTagWidth"
-                                               Text="120px" TextAlignment="Center" Width="40" FontSize="12"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="任务标签文字的最大宽度，超宽部分自动截断显示省略号。"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Item[UI_SettingsWindow_287], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <TextBox Grid.Row="0" Grid.Column="4" x:Name="txtTextColor" Text="#FFFFFF" VerticalAlignment="Center" FontSize="12"/>
+                                    <Button Grid.Row="0" Grid.Column="5" x:Name="btnTextColorPicker" Content="{Binding Item[UI_SettingsWindow_288], Source={x:Static loc:LocalizationManager.Instance}}" Height="22" Style="{StaticResource Win11Button}" Click="BtnTextColorPicker_Click" FontSize="11" Margin="4,0,0,0"/>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="4" Text="圆角" VerticalAlignment="Center" FontSize="12" Width="40" Margin="8,0,0,0"/>
-                                    <Slider Grid.Row="0" Grid.Column="5" x:Name="sldCornerRadius"
-                                            Minimum="0" Maximum="30" Value="16"
-                                            TickFrequency="1" IsSnapToTickEnabled="True"
-                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="txtCornerRadiusValue"
-                                               Text="16" TextAlignment="Center" Width="30" FontSize="12"/>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="4" Text="透明度" VerticalAlignment="Center" FontSize="12" Width="40" Margin="8,0,0,0"/>
-                                    <Slider Grid.Row="1" Grid.Column="5" x:Name="sldOpacity"
-                                            Minimum="0" Maximum="1" Value="0.85"
-                                            TickFrequency="0.01" IsSnapToTickEnabled="True"
-                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="6" x:Name="txtOpacityValue"
-                                               Text="0.85" TextAlignment="Center" Width="30" FontSize="12"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_289], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtCustomIcon" Text="" IsReadOnly="True" VerticalAlignment="Center" FontSize="12" Background="#EEEEEE" Grid.ColumnSpan="2"/>
+                                    <Button Grid.Row="1" Grid.Column="3" x:Name="btnSelectIcon" Content="{Binding Item[UI_SettingsWindow_290], Source={x:Static loc:LocalizationManager.Instance}}" Height="22" Style="{StaticResource Win11Button}" Click="BtnSelectIcon_Click" FontSize="11" Margin="8,0,0,0" Grid.ColumnSpan="2"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="5" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[UI_SettingsWindow_291], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                </Grid>
+                                <Grid Margin="0,4,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox x:Name="chkShowSystemStatus" Content="{Binding Item[UI_SettingsWindow_292], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[UI_SettingsWindow_293], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
+
+                        <Expander Header="{Binding Item[Set_AdvancedTrigger], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,0,8" FontSize="12">
+
+                        <!-- ========== 分组：触发距离与延时（防误触） ========== -->
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,6" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Item[Set_TriggerSettings], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontWeight="SemiBold" FontSize="13" Margin="0,0,0,2"/>
+                                <TextBlock Text="{Binding Item[Set_TriggerSettingsHint], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="11" Foreground="#777777" Margin="0,0,0,8" TextWrapping="Wrap"/>
+
+                                <!-- 全局默认 -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="96"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="56"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Item[Set_TriggerDistance], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
+                                    <Slider Grid.Row="0" Grid.Column="1" x:Name="sldTrigDist"
+                                            Minimum="2" Maximum="20" Value="6" TickFrequency="1" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" x:Name="txtTrigDist" Text="6px" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[Set_TriggerDistanceTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Item[Set_TriggerDelayGlobal], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
+                                    <Slider Grid.Row="1" Grid.Column="1" x:Name="sldGlbTrig"
+                                            Minimum="0" Maximum="1000" Value="150" TickFrequency="25" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" x:Name="txtGlbTrig" Text="150ms" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[Set_TriggerDelayTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Item[Set_HideDelayGlobal], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
+                                    <Slider Grid.Row="2" Grid.Column="1" x:Name="sldGlbHide"
+                                            Minimum="0" Maximum="1000" Value="200" TickFrequency="25" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="2" x:Name="txtGlbHide" Text="200ms" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[Set_HideDelayTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Item[Set_SnapRange], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
+                                    <Slider Grid.Row="3" Grid.Column="1" x:Name="sldSnapRange"
+                                            Minimum="0" Maximum="100" Value="30" TickFrequency="5" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="2" x:Name="txtSnapRange" Text="30px" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[Set_SnapRangeTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                </Grid>
+
+                                <TextBlock Text="{Binding Item[Set_DelayHint], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
+
+                                <!-- 逐区域微调 -->
+                                <Expander Header="{Binding Item[Set_RegionFineTune], Source={x:Static loc:LocalizationManager.Instance}}"
+                                          Margin="0,8,0,0" FontSize="12">
+                                    <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                                        <Grid Margin="0,6,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="46"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="46"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="26"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="" FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Item[Set_Trig], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Item[Set_Hide], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
+
+                                            <!-- 16 个区域的触发/隐藏延时行由代码生成（RegionDelayGrid） -->
+                                            <Grid x:Name="RegionDelayGrid" Grid.Row="1" Grid.ColumnSpan="5"/>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </Expander>
+
+                                <!-- ★★★ 区域防抖 ★★★ -->
+                                <Grid Margin="0,6,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_217], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <Slider Grid.Column="1" x:Name="sldRegionDebounce"
+                                            Minimum="30" Maximum="300" Value="80"
+                                            TickFrequency="10" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Column="2" x:Name="txtRegionDebounce"
+                                               Text="80ms" TextAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[UI_SettingsWindow_218], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                </Grid>
+                            </StackPanel>
+
+                        </Border>
+                        </Expander>
 
                         <!-- ========== 分组2：触发与位置 ========== -->
                         <Border Background="#FFFFFF"
@@ -154,26 +389,26 @@
                                 Padding="10,6"
                                 Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🎯 触发与位置"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_144], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
                                            Margin="0,0,0,6"/>
 
                                 <WrapPanel Margin="0,0,0,6">
-                                    <CheckBox x:Name="chkTop" Content="上边" Margin="0,0,12,3"/>
-                                    <CheckBox x:Name="chkBottom" Content="下边" Margin="0,0,12,3"/>
-                                    <CheckBox x:Name="chkLeft" Content="左边" Margin="0,0,12,3"/>
-                                    <CheckBox x:Name="chkRight" Content="右边" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkTop" Content="{Binding Item[UI_SettingsWindow_145], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkBottom" Content="{Binding Item[UI_SettingsWindow_146], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkLeft" Content="{Binding Item[UI_SettingsWindow_147], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkRight" Content="{Binding Item[UI_SettingsWindow_148], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,12,3"/>
                                     <TextBlock Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="勾选后，鼠标移动到对应屏幕边缘时会弹出面板。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_149], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </WrapPanel>
                                 <WrapPanel Margin="0,0,0,8">
-                                    <CheckBox x:Name="chkTopLeft" Content="左上角" Margin="0,0,12,3"/>
-                                    <CheckBox x:Name="chkTopRight" Content="右上角" Margin="0,0,12,3"/>
-                                    <CheckBox x:Name="chkBottomLeft" Content="左下角" Margin="0,0,12,3"/>
-                                    <CheckBox x:Name="chkBottomRight" Content="右下角" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkTopLeft" Content="{Binding Item[UI_SettingsWindow_150], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkTopRight" Content="{Binding Item[UI_SettingsWindow_151], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkBottomLeft" Content="{Binding Item[UI_SettingsWindow_152], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,12,3"/>
+                                    <CheckBox x:Name="chkBottomRight" Content="{Binding Item[UI_SettingsWindow_153], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,12,3"/>
                                     <TextBlock Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="勾选后，鼠标移动到屏幕角落时会弹出面板（角落触发优先级高于边缘）。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_154], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </WrapPanel>
 
                                 <Grid>
@@ -193,78 +428,79 @@
                                         <RowDefinition Height="28"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="边" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="行为模式" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="形状" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Margin="8,0,0,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_155], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Item[UI_SettingsWindow_156], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Item[UI_SettingsWindow_157], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Margin="8,0,0,0"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="上" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_158], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cmbTopMode" Width="100" FontSize="12">
-                                        <ComboBoxItem Content="跟随鼠标"/>
-                                        <ComboBoxItem Content="固定位置"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_159], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_160], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                     </ComboBox>
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="形状" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_161], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
                                     <ComboBox Grid.Row="1" Grid.Column="3" x:Name="cmbFixedShapeTop" Width="90" FontSize="12">
-                                        <ComboBoxItem Content="方形"/>
-                                        <ComboBoxItem Content="横条"/>
-                                        <ComboBoxItem Content="竖条"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_162], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_163], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_164], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                     </ComboBox>
                                     <TextBlock Grid.Row="1" Grid.Column="4" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="跟随鼠标：面板跟随鼠标在边缘的位置移动。固定位置：面板固定在边缘的特定位置。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_165], Source={x:Static loc:LocalizationManager.Instance}}"/>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="下" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_166], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cmbBottomMode" Width="100" FontSize="12">
-                                        <ComboBoxItem Content="跟随鼠标"/>
-                                        <ComboBoxItem Content="固定位置"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_167], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_168], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                     </ComboBox>
-                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="形状" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_169], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
                                     <ComboBox Grid.Row="2" Grid.Column="3" x:Name="cmbFixedShapeBottom" Width="90" FontSize="12">
-                                        <ComboBoxItem Content="方形"/>
-                                        <ComboBoxItem Content="横条"/>
-                                        <ComboBoxItem Content="竖条"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_170], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_171], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_172], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                     </ComboBox>
 
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="左" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_173], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="3" Grid.Column="1" x:Name="cmbLeftMode" Width="100" FontSize="12">
-                                        <ComboBoxItem Content="跟随鼠标"/>
-                                        <ComboBoxItem Content="固定位置"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_174], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_175], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                     </ComboBox>
-                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="形状" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_176], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
                                     <ComboBox Grid.Row="3" Grid.Column="3" x:Name="cmbFixedShapeLeft" Width="90" FontSize="12">
-                                        <ComboBoxItem Content="方形"/>
-                                        <ComboBoxItem Content="横条"/>
-                                        <ComboBoxItem Content="竖条"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_177], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_178], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_179], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                     </ComboBox>
                                     <TextBlock Grid.Row="3" Grid.Column="4" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="跟随鼠标：面板跟随鼠标在边缘的位置移动。固定位置：面板固定在边缘的特定位置。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_180], Source={x:Static loc:LocalizationManager.Instance}}"/>
 
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="右" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_181], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="4" Grid.Column="1" x:Name="cmbRightMode" Width="100" FontSize="12">
-                                        <ComboBoxItem Content="跟随鼠标"/>
-                                        <ComboBoxItem Content="固定位置"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_182], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_183], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                     </ComboBox>
-                                    <TextBlock Grid.Row="4" Grid.Column="2" Text="形状" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_184], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
                                     <ComboBox Grid.Row="4" Grid.Column="3" x:Name="cmbFixedShapeRight" Width="90" FontSize="12">
-                                        <ComboBoxItem Content="方形"/>
-                                        <ComboBoxItem Content="横条"/>
-                                        <ComboBoxItem Content="竖条"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_185], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_186], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_187], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                     </ComboBox>
                                     <TextBlock Grid.Row="4" Grid.Column="4" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="跟随鼠标：面板跟随鼠标在边缘的位置移动。固定位置：面板固定在边缘的特定位置。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_188], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
 
+                        <Expander Header="{Binding Item[Set_AdvancedRegion], Source={x:Static loc:LocalizationManager.Instance}}" Margin="0,0,0,8" FontSize="12">
                         <!-- ========== 分组：区域面板 ========== -->
                         <Border Background="#FFFFFF"
                                 CornerRadius="8"
                                 Padding="10,6"
                                 Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🗂 区域面板"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_189], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
                                            Margin="0,0,0,6"/>
-                                <TextBlock Text="为每个边缘/角落指定显示的面板。选择“默认布局”则使用现在的默认分配。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_190], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="11"
                                            Foreground="#777777"
                                            Margin="0,0,0,6"
@@ -287,98 +523,49 @@
                                         <RowDefinition Height="30"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="上-左" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_191], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="0" Grid.Column="1" x:Name="cmbPanel_Top_Left" Width="110" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="上-中" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_192], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="0" Grid.Column="3" x:Name="cmbPanel_Top_Center" Width="110" FontSize="11" HorizontalAlignment="Left"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="上-右" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_193], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cmbPanel_Top_Right" Width="110" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="下-左" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_194], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="1" Grid.Column="3" x:Name="cmbPanel_Bottom_Left" Width="110" FontSize="11" HorizontalAlignment="Left"/>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="下-中" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_195], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cmbPanel_Bottom_Center" Width="110" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="下-右" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_196], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="2" Grid.Column="3" x:Name="cmbPanel_Bottom_Right" Width="110" FontSize="11" HorizontalAlignment="Left"/>
 
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="左-上" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_197], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="3" Grid.Column="1" x:Name="cmbPanel_Left_Top" Width="110" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="左-中" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_198], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="3" Grid.Column="3" x:Name="cmbPanel_Left_Center" Width="110" FontSize="11" HorizontalAlignment="Left"/>
 
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="左-下" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_199], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="4" Grid.Column="1" x:Name="cmbPanel_Left_Bottom" Width="110" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock Grid.Row="4" Grid.Column="2" Text="右-上" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_200], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="4" Grid.Column="3" x:Name="cmbPanel_Right_Top" Width="110" FontSize="11" HorizontalAlignment="Left"/>
 
-                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="右-中" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_201], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="5" Grid.Column="1" x:Name="cmbPanel_Right_Center" Width="110" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock Grid.Row="5" Grid.Column="2" Text="右-下" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_202], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="5" Grid.Column="3" x:Name="cmbPanel_Right_Bottom" Width="110" FontSize="11" HorizontalAlignment="Left"/>
 
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="左上角" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_203], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="6" Grid.Column="1" x:Name="cmbPanel_TopLeft" Width="110" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock Grid.Row="6" Grid.Column="2" Text="右上角" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_204], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="6" Grid.Column="3" x:Name="cmbPanel_TopRight" Width="110" FontSize="11" HorizontalAlignment="Left"/>
 
-                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="左下角" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_205], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="7" Grid.Column="1" x:Name="cmbPanel_BottomLeft" Width="110" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock Grid.Row="7" Grid.Column="2" Text="右下角" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="7" Grid.Column="2" Text="{Binding Item[UI_SettingsWindow_206], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Row="7" Grid.Column="3" x:Name="cmbPanel_BottomRight" Width="110" FontSize="11" HorizontalAlignment="Left"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
-
-                        <!-- ========== 分组3：外观 ========== -->
-                        <Border Background="#FFFFFF"
-                                CornerRadius="8"
-                                Padding="10,6"
-                                Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock Text="🎨 外观"
-                                           FontWeight="SemiBold"
-                                           FontSize="13"
-                                           Margin="0,0,0,6"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="60"/>
-                                        <ColumnDefinition Width="140"/>
-                                        <ColumnDefinition Width="60"/>
-                                        <ColumnDefinition Width="60"/>
-                                        <ColumnDefinition Width="140"/>
-                                        <ColumnDefinition Width="60"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="32"/>
-                                        <RowDefinition Height="32"/>
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="背景色" VerticalAlignment="Center" FontSize="12"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtBgColor" Text="#2D2D2D" VerticalAlignment="Center" FontSize="12"/>
-                                    <Button Grid.Row="0" Grid.Column="2" x:Name="btnBgColorPicker" Content="选择" Width="50" Height="22" Style="{StaticResource Win11Button}" Click="BtnBgColorPicker_Click" FontSize="11" Margin="4,0,0,0"/>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="文字色" VerticalAlignment="Center" FontSize="12" Margin="8,0,0,0"/>
-                                    <TextBox Grid.Row="0" Grid.Column="4" x:Name="txtTextColor" Text="#FFFFFF" VerticalAlignment="Center" FontSize="12"/>
-                                    <Button Grid.Row="0" Grid.Column="5" x:Name="btnTextColorPicker" Content="选择" Width="50" Height="22" Style="{StaticResource Win11Button}" Click="BtnTextColorPicker_Click" FontSize="11" Margin="4,0,0,0"/>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="自定义图标" VerticalAlignment="Center" FontSize="12"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtCustomIcon" Text="" IsReadOnly="True" VerticalAlignment="Center" FontSize="12" Background="#EEEEEE" Grid.ColumnSpan="2"/>
-                                    <Button Grid.Row="1" Grid.Column="3" x:Name="btnSelectIcon" Content="选择图片" Width="70" Height="22" Style="{StaticResource Win11Button}" Click="BtnSelectIcon_Click" FontSize="11" Margin="8,0,0,0" Grid.ColumnSpan="2"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="5" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="选择一张图片替换灵动鸟图标（支持 PNG、JPG、ICO 等格式）。"/>
-                                </Grid>
-                                <Grid Margin="0,4,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <CheckBox x:Name="chkShowSystemStatus" Content="显示系统状态" FontSize="12" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="在面板顶部显示时间、CPU、内存、音量、网络、电池、FPS 等信息。"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
+                        </Expander>
 
                         <!-- ========== 分组4：高级设置 ========== -->
                         <Border Background="#FFFFFF"
@@ -386,7 +573,7 @@
                                 Padding="10,6"
                                 Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="⚡ 高级设置"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_207], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
                                            Margin="0,0,0,6"/>
@@ -405,7 +592,7 @@
                                         <RowDefinition Height="30"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="布局阈值" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_208], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <Slider Grid.Row="0" Grid.Column="1" x:Name="sldHorizontalThreshold"
                                             Minimum="0.1" Maximum="0.9" Value="0.43"
                                             TickFrequency="0.01" IsSnapToTickEnabled="True"
@@ -413,7 +600,7 @@
                                     <TextBlock Grid.Row="0" Grid.Column="2" x:Name="txtHorizontalThreshold"
                                                Text="43%" TextAlignment="Center" FontSize="12"/>
                                     <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource InfoTipStyle}" Grid.ColumnSpan="4"
-                                               ToolTip="控制面板在横向/纵向布局之间切换的宽高比阈值。值越大，需要越宽的面板才会切换到横向布局。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_209], Source={x:Static loc:LocalizationManager.Instance}}"/>
 
                                 </Grid>
 
@@ -425,16 +612,16 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <CheckBox Grid.Column="0" x:Name="chkAutoFitOnTrigger"
-                                              Content="每次触发自适应"
+                                              Content="{Binding Item[UI_SettingsWindow_210], Source={x:Static loc:LocalizationManager.Instance}}"
                                               Margin="0,2,0,2" FontSize="12"/>
                                     <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="开启：每次触发边缘时自动适配内容大小。关闭：保持手动拖拽调整的尺寸。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_211], Source={x:Static loc:LocalizationManager.Instance}}"/>
 
                                     <CheckBox Grid.Column="2" x:Name="chkRememberDndMode"
-                                              Content="记住勿扰状态"
+                                              Content="{Binding Item[UI_SettingsWindow_212], Source={x:Static loc:LocalizationManager.Instance}}"
                                               Margin="12,2,0,2" FontSize="12"/>
                                     <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="开启后，勿扰模式状态会保存到配置中，下次启动时自动恢复。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_213], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
 
                                 <!-- ★★★ 小鸟依人模式 ★★★ -->
@@ -445,33 +632,33 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <CheckBox Grid.Column="0" x:Name="chkClingMode"
-                                              Content="🐦 小鸟依人模式"
+                                              Content="{Binding Item[UI_SettingsWindow_214], Source={x:Static loc:LocalizationManager.Instance}}"
                                               Margin="0,2,0,2" FontSize="12"/>
                                     <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="开启后，面板会软绵绵地追着鼠标跑，追上后粘在鼠标上。关闭则移出边缘后面板停在原位。"/>
-                                    <TextBlock Grid.Column="2" Text="推荐开启" FontSize="10" Foreground="#888888" VerticalAlignment="Center"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_215], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
 
-                                <!-- ★★★ 区域防抖 ★★★ -->
-                                <Grid Margin="0,6,0,0">
+                                <!-- ★ 面板点击穿透：按住修饰键 + 点击 → 穿透面板操作下层屏幕内容 -->
+                                <Grid Margin="0,8,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="50"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="区域防抖" VerticalAlignment="Center" FontSize="12" Width="60"/>
-                                    <Slider Grid.Column="1" x:Name="sldRegionDebounce"
-                                            Minimum="30" Maximum="300" Value="80"
-                                            TickFrequency="10" IsSnapToTickEnabled="True"
-                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Grid.Column="2" x:Name="txtRegionDebounce"
-                                               Text="80ms" TextAlignment="Center" FontSize="12"/>
-                                    <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="鼠标在区域边界抖动时，防抖延迟。值越小响应越快，但可能误触发；值越大越稳定，但响应稍慢。推荐 80ms。"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding Item[Set_PassthroughLabel], Source={x:Static loc:LocalizationManager.Instance}}"
+                                               FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <ComboBox Grid.Column="1" x:Name="cmbPassthrough" Width="132" HorizontalAlignment="Left" FontSize="12">
+                                        <ComboBoxItem Content="{Binding Item[Set_PassthroughNone], Source={x:Static loc:LocalizationManager.Instance}}" Tag="None"/>
+                                        <ComboBoxItem Content="{Binding Item[Set_PassthroughCtrl], Source={x:Static loc:LocalizationManager.Instance}}" Tag="Ctrl"/>
+                                        <ComboBoxItem Content="{Binding Item[Set_PassthroughAlt], Source={x:Static loc:LocalizationManager.Instance}}" Tag="Alt"/>
+                                        <ComboBoxItem Content="{Binding Item[Set_PassthroughShift], Source={x:Static loc:LocalizationManager.Instance}}" Tag="Shift"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Column="2" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[Set_PassthroughTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
 
-                                <Expander Header="📍 区域形状（高级）"
+
+                                <Expander Header="{Binding Item[UI_SettingsWindow_219], Source={x:Static loc:LocalizationManager.Instance}}"
                                           Margin="0,6,0,0"
                                           FontSize="12">
                                     <StackPanel Margin="0,6,0,0">
@@ -480,12 +667,12 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="提示：选择'默认'则使用全局逻辑" FontSize="11" Foreground="#888888"/>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_220], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" Foreground="#888888"/>
                                             <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
-                                                       ToolTip="为不同屏幕区域独立设置面板形状：方形/横条/竖条。"/>
+                                                       ToolTip="{Binding Item[UI_SettingsWindow_221], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                         </Grid>
 
-                                        <TextBlock Text="上边" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
+                                        <TextBlock Text="{Binding Item[UI_SettingsWindow_222], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
                                         <Grid Margin="0,0,0,4">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="50"/>
@@ -493,28 +680,28 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="左/中/右" VerticalAlignment="Center" FontSize="10"/>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_223], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="10"/>
                                             <ComboBox Grid.Column="1" x:Name="cmbTopLeft" Width="80" FontSize="11">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_224], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_225], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_226], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_227], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                             <ComboBox Grid.Column="2" x:Name="cmbTopCenter" Width="80" FontSize="11" Margin="6,0,6,0">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_228], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_229], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_230], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_231], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                             <ComboBox Grid.Column="3" x:Name="cmbTopRight" Width="80" FontSize="11">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_232], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_233], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_234], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_235], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                         </Grid>
 
-                                        <TextBlock Text="下边" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
+                                        <TextBlock Text="{Binding Item[UI_SettingsWindow_236], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
                                         <Grid Margin="0,0,0,4">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="50"/>
@@ -522,28 +709,28 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="左/中/右" VerticalAlignment="Center" FontSize="10"/>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_237], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="10"/>
                                             <ComboBox Grid.Column="1" x:Name="cmbBottomLeft" Width="80" FontSize="11">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_238], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_239], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_240], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_241], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                             <ComboBox Grid.Column="2" x:Name="cmbBottomCenter" Width="80" FontSize="11" Margin="6,0,6,0">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_242], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_243], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_244], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_245], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                             <ComboBox Grid.Column="3" x:Name="cmbBottomRight" Width="80" FontSize="11">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_246], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_247], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_248], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_249], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                         </Grid>
 
-                                        <TextBlock Text="左边" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
+                                        <TextBlock Text="{Binding Item[UI_SettingsWindow_250], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
                                         <Grid Margin="0,0,0,4">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="50"/>
@@ -551,28 +738,28 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="上/中/下" VerticalAlignment="Center" FontSize="10"/>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_251], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="10"/>
                                             <ComboBox Grid.Column="1" x:Name="cmbLeftTop" Width="80" FontSize="11">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_252], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_253], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_254], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_255], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                             <ComboBox Grid.Column="2" x:Name="cmbLeftCenter" Width="80" FontSize="11" Margin="6,0,6,0">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_256], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_257], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_258], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_259], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                             <ComboBox Grid.Column="3" x:Name="cmbLeftBottom" Width="80" FontSize="11">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_260], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_261], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_262], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_263], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                         </Grid>
 
-                                        <TextBlock Text="右边" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
+                                        <TextBlock Text="{Binding Item[UI_SettingsWindow_264], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,3"/>
                                         <Grid Margin="0,0,0,0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="50"/>
@@ -580,32 +767,32 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="上/中/下" VerticalAlignment="Center" FontSize="10"/>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_265], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="10"/>
                                             <ComboBox Grid.Column="1" x:Name="cmbRightTop" Width="80" FontSize="11">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_266], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_267], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_268], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_269], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                             <ComboBox Grid.Column="2" x:Name="cmbRightCenter" Width="80" FontSize="11" Margin="6,0,6,0">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_270], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_271], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_272], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_273], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                             <ComboBox Grid.Column="3" x:Name="cmbRightBottom" Width="80" FontSize="11">
-                                                <ComboBoxItem Content="默认"/>
-                                                <ComboBoxItem Content="方形"/>
-                                                <ComboBoxItem Content="横条"/>
-                                                <ComboBoxItem Content="竖条"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_274], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_275], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_276], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_277], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
                                         </Grid>
                                     </StackPanel>
                                 </Expander>
 
+
                             </StackPanel>
                         </Border>
-
                         <!-- ========== 分组：自动更新（商店版隐藏） ========== -->
                         <Border x:Name="UpdateGroup"
                                 Background="#FFFFFF"
@@ -619,14 +806,14 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0"
-                                               Text="🔄 自动更新"
+                                               Text="{Binding Item[UI_SettingsWindow_294], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontWeight="SemiBold"
                                                FontSize="13"
                                                VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1"
                                                Style="{StaticResource InfoTipStyle}"
                                                HorizontalAlignment="Right"
-                                               ToolTip="从 GitHub Releases 检查并下载更新。更新包需为 DynamicBird.exe 或包含它的 zip，并在 Release 说明中附 SHA256。"/>
+                                               ToolTip="{Binding Item[UI_SettingsWindow_295], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
 
                                 <Grid Margin="0,8,0,0">
@@ -635,18 +822,18 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <CheckBox x:Name="chkAutoCheckUpdate"
-                                              Content="启用自动更新（启动时检查 GitHub 最新版本）"
+                                              Content="{Binding Item[UI_SettingsWindow_296], Source={x:Static loc:LocalizationManager.Instance}}"
                                               VerticalAlignment="Center"
                                               FontSize="12"/>
                                     <Button Grid.Column="1" x:Name="btnCheckUpdate"
-                                            Content="立即检查"
+                                            Content="{Binding Item[UI_SettingsWindow_297], Source={x:Static loc:LocalizationManager.Instance}}"
                                             Style="{StaticResource Win11Button}"
                                             Width="90" Height="28"
                                             Click="BtnCheckUpdate_Click"/>
                                 </Grid>
 
                                 <TextBlock x:Name="txtUpdateStatus"
-                                           Text="未配置更新源"
+                                           Text="{Binding Item[UI_SettingsWindow_298], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="11"
                                            Foreground="#888888"
                                            Margin="0,4,0,0"/>
@@ -660,15 +847,15 @@
                                 Margin="0,0,0,10">
                             <StackPanel>
                                 <TextBlock x:Name="txtAbout"
-                                           Text="灵动鸟 DynamicBird"
+                                           Text="{Binding Item[UI_SettingsWindow_299], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontWeight="SemiBold"
                                            FontSize="13"/>
-                                <TextBlock Text="隐私说明：灵动鸟默认不上传任何个人数据。仅在你启用自动更新时，会向 GitHub Releases 请求版本信息（可能包含你的 IP 地址）；常用网页功能会在本机读取浏览器历史用于展示。所有配置、快捷方式与日志只保存在本机 %LOCALAPPDATA%\DynamicBird，卸载即清理（商店版）。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_300], Source={x:Static loc:LocalizationManager.Instance}}"
                                            TextWrapping="Wrap"
                                            FontSize="11"
                                            Foreground="#888888"
                                            Margin="0,6,0,0"/>
-                                <TextBlock Text="第三方组件声明见仓库 THIRD-PARTY-NOTICES.md（MIT 协议）。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_301], Source={x:Static loc:LocalizationManager.Instance}}"
                                            TextWrapping="Wrap"
                                            FontSize="11"
                                            Foreground="#888888"
@@ -679,144 +866,305 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
-
-            <!-- ====== 选项卡2：小工具设置 ====== -->
-            <TabItem Header="🧰 小工具">
+            <!-- ====== 选项卡2：任务栏设置 ====== -->
+            <TabItem Header="{Binding Item[UI_SettingsWindow_136], Source={x:Static loc:LocalizationManager.Instance}}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
                     <StackPanel>
+
+                        <!-- ========== 分组1：布局与显示 ========== -->
+                        <Border Background="#FFFFFF"
+                                CornerRadius="8"
+                                Padding="10,6"
+                                Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_137], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Margin="0,0,0,6"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="32"/>
+                                        <RowDefinition Height="32"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_138], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <Slider Grid.Row="0" Grid.Column="1" x:Name="sldIconSize"
+                                            Minimum="16" Maximum="48" Value="28"
+                                            TickFrequency="2" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" x:Name="txtIconSize"
+                                               Text="28px" TextAlignment="Center" Width="40" FontSize="12"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[UI_SettingsWindow_139], Source={x:Static loc:LocalizationManager.Instance}}"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_140], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <Slider Grid.Row="1" Grid.Column="1" x:Name="sldTagWidth"
+                                            Minimum="40" Maximum="300" Value="120"
+                                            TickFrequency="5" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" x:Name="txtTagWidth"
+                                               Text="120px" TextAlignment="Center" Width="40" FontSize="12"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
+                                               ToolTip="{Binding Item[UI_SettingsWindow_141], Source={x:Static loc:LocalizationManager.Instance}}"/>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding Item[UI_SettingsWindow_142], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="40" Margin="8,0,0,0"/>
+                                    <Slider Grid.Row="0" Grid.Column="5" x:Name="sldCornerRadius"
+                                            Minimum="0" Maximum="30" Value="16"
+                                            TickFrequency="1" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="txtCornerRadiusValue"
+                                               Text="16" TextAlignment="Center" Width="30" FontSize="12"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding Item[UI_SettingsWindow_143], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="40" Margin="8,0,0,0"/>
+                                    <Slider Grid.Row="1" Grid.Column="5" x:Name="sldOpacity"
+                                            Minimum="0" Maximum="1" Value="0.85"
+                                            TickFrequency="0.01" IsSnapToTickEnabled="True"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="6" x:Name="txtOpacityValue"
+                                               Text="0.85" TextAlignment="Center" Width="30" FontSize="12"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
                         <!-- ========== 状态栏与天气 ========== -->
                         <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="📊 状态栏显示项" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
-                                <TextBlock Text="选择面板顶部状态栏要显示的项。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_303], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_304], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="11" Foreground="#777777" Margin="0,0,0,8" TextWrapping="Wrap"/>
                                 <WrapPanel>
-                                    <CheckBox x:Name="chkStatusTime" Content="时间" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusTime" Content="{Binding Item[UI_SettingsWindow_305], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,0,14,6"/>
                                     <CheckBox x:Name="chkStatusCpu" Content="CPU" FontSize="12" Margin="0,0,14,6"/>
-                                    <CheckBox x:Name="chkStatusMemory" Content="内存" FontSize="12" Margin="0,0,14,6"/>
-                                    <CheckBox x:Name="chkStatusFps" Content="帧率" FontSize="12" Margin="0,0,14,6"/>
-                                    <CheckBox x:Name="chkStatusVolume" Content="音量" FontSize="12" Margin="0,0,14,6"/>
-                                    <CheckBox x:Name="chkStatusNetwork" Content="网络" FontSize="12" Margin="0,0,14,6"/>
-                                    <CheckBox x:Name="chkStatusBattery" Content="电量" FontSize="12" Margin="0,0,14,6"/>
-                                    <CheckBox x:Name="chkStatusWeather" Content="天气" FontSize="12" Margin="0,0,0,6"/>
+                                    <CheckBox x:Name="chkStatusMemory" Content="{Binding Item[UI_SettingsWindow_306], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusFps" Content="{Binding Item[UI_SettingsWindow_307], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusVolume" Content="{Binding Item[UI_SettingsWindow_308], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusNetwork" Content="{Binding Item[UI_SettingsWindow_309], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusBattery" Content="{Binding Item[UI_SettingsWindow_310], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,0,14,6"/>
+                                    <CheckBox x:Name="chkStatusWeather" Content="{Binding Item[UI_SettingsWindow_311], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,0,0,6"/>
                                 </WrapPanel>
                                 <Grid Margin="0,8,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="70"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="城市" VerticalAlignment="Center" FontSize="12"/>
-                                    <ComboBox Grid.Column="1" x:Name="cmbWeatherCity" IsEditable="True"
-                                              IsTextSearchEnabled="False" FontSize="12" Height="30"
-                                              VerticalContentAlignment="Center" Padding="4,0"
-                                              SelectionChanged="CmbWeatherCity_SelectionChanged"
-                                              ToolTip="输入城市名会自动联想（如 北京 / Shanghai / New York）；留空则按网络 IP 自动定位。"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_312], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
+                                    <Grid Grid.Column="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0" x:Name="txtWeatherCity" IsReadOnly="True"
+                                                 FontSize="12" Height="30" VerticalContentAlignment="Center" Padding="4,0"
+                                                 Background="#F5F5F5"
+                                                 ToolTip="{Binding Item[UI_SettingsWindow_313], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        <Button Grid.Column="1" x:Name="btnPickWeatherCity" Content="选择…"
+                                                Width="72" Height="26" Style="{StaticResource Win11Button}"
+                                                FontSize="11" Margin="6,0,0,0" Click="BtnPickWeatherCity_Click"/>
+                                    </Grid>
                                 </Grid>
-                                <TextBlock Text="启用天气后，灵动鸟会向 open-meteo.com（天气与城市联想）与 ipwho.is（IP 定位）发起请求，仅在你勾选“天气”时发生。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_314], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
-
-                        <Border Background="#FFFFFF"
-                                CornerRadius="8"
-                                Padding="10,8"
-                                Margin="0,0,0,10">
+                        <!-- ========== 快捷方式（任务栏内容） ========== -->
+                        <Border Background="#FFFFFF" CornerRadius="8" Padding="10,6" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="📋 剪贴板历史"
-                                           FontWeight="SemiBold"
-                                           FontSize="13"
-                                           Margin="0,0,0,6"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="50"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="50"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="32"/>
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="最大条数" VerticalAlignment="Center" FontSize="12" Width="60"/>
-                                    <Slider Grid.Row="0" Grid.Column="1" x:Name="sldClipboardMax"
-                                            Minimum="1" Maximum="50" Value="10"
-                                            TickFrequency="1" IsSnapToTickEnabled="True"
-                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="2" x:Name="txtClipboardMax"
-                                               Text="10" TextAlignment="Center" FontSize="12"/>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="预览字符" VerticalAlignment="Center" FontSize="12" Width="60" Margin="12,0,0,0"/>
-                                    <Slider Grid.Row="0" Grid.Column="4" x:Name="sldClipboardDisplay"
-                                            Minimum="10" Maximum="500" Value="100"
-                                            TickFrequency="10" IsSnapToTickEnabled="True"
-                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="txtClipboardDisplay"
-                                               Text="100" TextAlignment="Center" FontSize="12"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="6" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="剪贴板历史记录的最大保存条数，以及列表中预览显示的字符数量。"/>
-                                </Grid>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_337], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                                <Frame x:Name="ShortcutManagementFrame" NavigationUIVisibility="Hidden" Source="Pages/ShortcutManagementPage.xaml"/>
                             </StackPanel>
                         </Border>
 
-                        <Border Background="#FFFFFF"
-                                CornerRadius="8"
-                                Padding="10,8"
-                                Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock Text="📝 便签"
-                                           FontWeight="SemiBold"
-                                           FontSize="13"
-                                           Margin="0,0,0,6"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="140"/>
-                                        <ColumnDefinition Width="60"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="32"/>
-                                    </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="默认颜色" VerticalAlignment="Center" FontSize="12" Width="60"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtDefaultNoteColor" Text="#FFFF99" VerticalAlignment="Center" FontSize="12"/>
-                                    <Button Grid.Row="0" Grid.Column="2" x:Name="btnNoteColorPicker" Content="选择" Width="50" Height="22" Style="{StaticResource Win11Button}" Click="BtnNoteColorPicker_Click" FontSize="11" Margin="6,0,0,0"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="新建便签时的默认背景颜色。可在便签编辑器中单独修改每个便签的颜色。"/>
-                                </Grid>
-                                <Grid Margin="0,4,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <CheckBox x:Name="chkNoteShowTitle" Content="新建便签默认显示标题" FontSize="12" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
-                                               ToolTip="开启后，新建便签时会显示标题栏，否则只显示内容。"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
 
-                        <TextBlock FontSize="11" Foreground="#888888" Text="💡 便签保存在 Data/notes.json，剪贴板历史在 Data/clipboard_history.json" TextWrapping="Wrap"/>
+
 
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
-            <!-- ====== 选项卡3：快捷方式管理 ====== -->
-            <TabItem Header="📌 快捷方式">
+            
+
+            <TabItem Header="{Binding Item[UI_SettingsWindow_302], Source={x:Static loc:LocalizationManager.Instance}}">
                 <Grid Margin="0,8,0,0">
-                    <Frame x:Name="ShortcutManagementFrame"
-                           NavigationUIVisibility="Hidden"
-                           Source="Pages/ShortcutManagementPage.xaml"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- ========== 我的小组件：创建/导入入口（右上角） ========== -->
+                    <Border Grid.Row="0" Background="#FFFFFF" CornerRadius="8" Padding="10,6" Margin="0,0,0,10">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding Item[WidgetMkt_Title], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <Button x:Name="btnNewWidget" Content="{Binding Item[WidgetMkt_New], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource Win11AccentButton}" Height="28" Click="BtnNewWidget_Click"/>
+                                    <Button x:Name="btnRefreshWidgets" Content="{Binding Item[WidgetMkt_Refresh], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource Win11Button}" Height="28" Margin="8,0,0,0" Click="BtnRefreshWidgets_Click"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="{Binding Item[WidgetMkt_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10.5" Foreground="#888888" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ========== 主体：左侧竖排列表 + 右侧精调 ========== -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="188"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 左：小组件列表（左键选中精调，右击启用/禁用）+ 市场入口 -->
+                        <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="8" Padding="6">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel x:Name="WidgetMarketList"/>
+                                </ScrollViewer>
+                                <Button Grid.Row="1" x:Name="btnOpenMarket" Height="28" Margin="0,6,0,0"
+                                        Content="{Binding Item[Set_WidgetMarket], Source={x:Static loc:LocalizationManager.Instance}}"
+                                        Style="{StaticResource Win11Button}" FontSize="11" Click="BtnOpenMarket_Click"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- 右：精调区（由代码切换可见面板） -->
+                        <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="8" Padding="12,10" Margin="10,0,0,0">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="WidgetDetailPanel">
+
+                                    <!-- 剪贴板历史 -->
+                                    <StackPanel x:Name="DetailClipboard" Visibility="Collapsed">
+                                        <TextBlock Text="{Binding Item[UI_SettingsWindow_326], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                        <!-- 历史条数上限 -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_327], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                            <Slider Grid.Column="1" x:Name="sldClipboardMax" Minimum="1" Maximum="50" Value="10" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Column="2" x:Name="txtClipboardMax" Text="10" TextAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}" ToolTip="{Binding Item[UI_SettingsWindow_329], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        </Grid>
+                                        <!-- 列表显示长度 -->
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_328], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                            <Slider Grid.Column="1" x:Name="sldClipboardDisplay" Minimum="10" Maximum="500" Value="100" TickFrequency="10" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Column="2" x:Name="txtClipboardDisplay" Text="100" TextAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}" ToolTip="{Binding Item[UI_SettingsWindow_329], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        </Grid>
+                                        <!-- 图片保存宽度（缩略化） -->
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[Set_ClipImageMaxWidth], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                            <Slider Grid.Column="1" x:Name="sldClipImageMax" Minimum="0" Maximum="4096" Value="1280" TickFrequency="128" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Column="2" x:Name="txtClipImageMax" Text="1280px" TextAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}" ToolTip="{Binding Item[Set_ClipImageMaxWidthTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        </Grid>
+                                        <!-- 图片缓存上限 -->
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[Set_ClipImageCacheLimit], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                            <Slider Grid.Column="1" x:Name="sldClipImageCacheLimit" Minimum="5" Maximum="1024" Value="50" TickFrequency="16" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Column="2" x:Name="txtClipImageCacheLimit" Text="50MB" TextAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}" ToolTip="{Binding Item[Set_ClipImageCacheLimitTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        </Grid>
+</StackPanel>
+
+                                    <!-- 便签 -->
+                                    <StackPanel x:Name="DetailNote" Visibility="Collapsed">
+                                        <TextBlock Text="{Binding Item[UI_SettingsWindow_330], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="140"/>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_331], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                            <TextBox Grid.Column="1" x:Name="txtDefaultNoteColor" Text="#FFFF99" VerticalAlignment="Center" FontSize="12"/>
+                                            <Button Grid.Column="2" x:Name="btnNoteColorPicker" Content="{Binding Item[UI_SettingsWindow_332], Source={x:Static loc:LocalizationManager.Instance}}" Height="22" Style="{StaticResource Win11Button}" Click="BtnNoteColorPicker_Click" FontSize="11" Margin="6,0,0,0"/>
+                                            <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}" ToolTip="{Binding Item[UI_SettingsWindow_333], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        </Grid>
+                                        <CheckBox x:Name="chkNoteShowTitle" Content="{Binding Item[UI_SettingsWindow_334], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,6,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- 计时器 -->
+                                    <StackPanel x:Name="DetailTimer" Visibility="Collapsed">
+                                        <TextBlock Text="{Binding Item[WidgetMkt_NoSettings], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" Foreground="#888888" TextWrapping="Wrap"/>
+                                    </StackPanel>
+
+                                    <!-- 计算器 -->
+                                    <StackPanel x:Name="DetailCalc" Visibility="Collapsed">
+                                        <TextBlock Text="{Binding Item[WidgetMkt_NoSettings], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" Foreground="#888888" TextWrapping="Wrap"/>
+                                    </StackPanel>
+
+                                    <!-- 划词翻译 -->
+                                    <StackPanel x:Name="DetailTextAi" Visibility="Collapsed">
+                                        <Border Background="#F7F7F7" CornerRadius="6" Padding="8,6">
+                                            <StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_322], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Margin="0,0,10,0"/>
+                                                    <TextBox Grid.Column="1" x:Name="txtTextAiHotkey" IsReadOnly="True" FontSize="12" Height="28" VerticalContentAlignment="Center" Padding="6,0" PreviewKeyDown="TxtTextAiHotkey_PreviewKeyDown" ToolTip="{Binding Item[UI_SettingsWindow_323], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                    <Button Grid.Column="2" Content="{Binding Item[UI_SettingsWindow_324], Source={x:Static loc:LocalizationManager.Instance}}" Width="52" Height="24" Style="{StaticResource Win11Button}" FontSize="11" Margin="6,0,0,0" Click="BtnClearTextAiHotkey_Click"/>
+                                                    <TextBlock Grid.Column="3" Style="{StaticResource InfoTipStyle}" Margin="6,0,0,0" ToolTip="{Binding Item[UI_SettingsWindow_325], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                </Grid>
+                                                <TextBlock x:Name="txtTextAiHotkeyHint" Text="" FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- 用户插件（由代码填充） -->
+                                    <StackPanel x:Name="DetailPlugin" Visibility="Collapsed"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
                 </Grid>
             </TabItem>
 
-            <!-- ====== ★★★ 选项卡4：动画设置 ★★★ ====== -->
-            <TabItem Header="🎬 动画">
+
+
+            <!-- ====== ★★★ 选项卡6：动画设置 ★★★ ====== -->
+            <TabItem Header="{Binding Item[UI_SettingsWindow_338], Source={x:Static loc:LocalizationManager.Instance}}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
                     <StackPanel>
 
@@ -825,89 +1173,168 @@
                                 Padding="10,8"
                                 Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🎬 动画设置"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_339], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
                                            Margin="0,0,0,6"/>
 
                                 <CheckBox x:Name="chkAnimationsEnabled"
-                                          Content="启用动画"
+                                          Content="{Binding Item[UI_SettingsWindow_340], Source={x:Static loc:LocalizationManager.Instance}}"
                                           Margin="0,0,0,12"
                                           FontSize="12"/>
 
-                                <!-- ====== 呼出/隐藏 ====== -->
+                                <!-- ====== 触发动画（呼出） ====== -->
                                 <Border Background="#FFFFFF"
                                         CornerRadius="8"
                                         Padding="8,6"
                                         Margin="0,0,0,8">
                                     <StackPanel>
+                                        <TextBlock Text="触发动画（呼出）"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="12"
+                                                   Margin="0,0,0,6"/>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0"
-                                                       Text="📌 呼出/隐藏"
-                                                       FontWeight="SemiBold"
-                                                       FontSize="12"
-                                                       VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1"
-                                                       Style="{StaticResource InfoTipStyle}"
-                                                       HorizontalAlignment="Right"
-                                                       ToolTip="面板从边缘滑入/滑出时的动画效果"/>
-                                        </Grid>
-
-                                        <Grid Margin="0,6,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="70"/>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="60"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="32"/>
-                                                <RowDefinition Height="32"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
 
-                                            <TextBlock Grid.Row="0" Grid.Column="0"
-                                                       Text="缓动类型"
-                                                       VerticalAlignment="Center"
-                                                       FontSize="12"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="类型"
+                                                       VerticalAlignment="Center" FontSize="12"/>
                                             <ComboBox Grid.Row="0" Grid.Column="1"
-                                                      x:Name="cmbShowHideEasing"
-                                                      Width="120"
-                                                      FontSize="12"
-                                                      HorizontalAlignment="Left"
-                                                      VerticalAlignment="Center">
-                                                <ComboBoxItem Content="线性"/>
-                                                <ComboBoxItem Content="立方缓动"/>
-                                                <ComboBoxItem Content="平方缓动"/>
-                                                <ComboBoxItem Content="四次方缓动"/>
-                                                <ComboBoxItem Content="五次方缓动"/>
-                                                <ComboBoxItem Content="弹性缓动"/>
-                                                <ComboBoxItem Content="回退缓动"/>
-                                                <ComboBoxItem Content="弹跳缓动"/>
+                                                      x:Name="cmbShowAnimType"
+                                                      Width="110" FontSize="12"
+                                                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                      SelectionChanged="cmbShowAnimType_SelectionChanged">
+                                                <ComboBoxItem Content="滑入"/>
+                                                <ComboBoxItem Content="淡入"/>
+                                                <ComboBoxItem Content="缩放"/>
+                                                <ComboBoxItem Content="弹性"/>
                                             </ComboBox>
 
-                                            <TextBlock Grid.Row="1" Grid.Column="0"
-                                                       Text="动画时长"
-                                                       VerticalAlignment="Center"
-                                                       FontSize="12"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="时长"
+                                                       VerticalAlignment="Center" FontSize="12"/>
                                             <Slider Grid.Row="1" Grid.Column="1"
-                                                    x:Name="sldShowHideDuration"
-                                                    Minimum="50" Maximum="800" Value="150"
+                                                    x:Name="sldShowDuration"
+                                                    Minimum="50" Maximum="2000" Value="300"
                                                     TickFrequency="10" IsSnapToTickEnabled="True"
                                                     VerticalAlignment="Center" Margin="0,0,8,0"/>
                                             <TextBlock Grid.Row="1" Grid.Column="2"
-                                                       x:Name="txtShowHideDuration"
-                                                       Text="150ms"
-                                                       TextAlignment="Center"
-                                                       FontSize="12"
-                                                       VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Row="0" Grid.Column="3"
-                                                       Style="{StaticResource InfoTipStyle}"
-                                                       Margin="8,0,0,0"
-                                                       ToolTip="线性：匀速运动，无缓动效果&#x0a;立方缓动：先快后慢，平滑自然（推荐）&#x0a;平方缓动：比立方更柔和，变化更平缓&#x0a;四次方缓动：非常平滑，适合长距离动画&#x0a;五次方缓动：极其平滑，几乎察觉不到加速&#x0a;弹性缓动：带有弹性振荡效果，生动活泼&#x0a;回退缓动：略微过冲再回正，有弹跳感&#x0a;弹跳缓动：落地弹跳效果，适合结束动作"/>
+                                                       x:Name="txtShowDuration"
+                                                       Text="300ms" TextAlignment="Center"
+                                                       FontSize="12" VerticalAlignment="Center"/>
+
+                                            <TextBlock Grid.Row="2" Grid.Column="0" x:Name="lblShowZoom" Text="起始比例"
+                                                       VerticalAlignment="Center" FontSize="12"/>
+                                            <Slider Grid.Row="2" Grid.Column="1" x:Name="sldShowZoomFrom"
+                                                    Minimum="0.1" Maximum="0.9" Value="0.5" TickFrequency="0.05"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="2" x:Name="txtShowZoomFrom"
+                                                       Text="0.5" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+
+                                            <TextBlock Grid.Row="3" Grid.Column="0" x:Name="lblShowOsc" Text="振荡次数"
+                                                       VerticalAlignment="Center" FontSize="12"/>
+                                            <Slider Grid.Row="3" Grid.Column="1" x:Name="sldShowOsc"
+                                                    Minimum="1" Maximum="10" Value="3" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="2" x:Name="txtShowOsc"
+                                                       Text="3" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+
+                                            <TextBlock Grid.Row="4" Grid.Column="0" x:Name="lblShowSpring" Text="弹性强度"
+                                                       VerticalAlignment="Center" FontSize="12"/>
+                                            <Slider Grid.Row="4" Grid.Column="1" x:Name="sldShowSpring"
+                                                    Minimum="1" Maximum="10" Value="3" TickFrequency="0.5"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="2" x:Name="txtShowSpring"
+                                                       Text="3" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- ====== 隐藏动画 ====== -->
+                                <Border Background="#FFFFFF"
+                                        CornerRadius="8"
+                                        Padding="8,6"
+                                        Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="隐藏动画"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="12"
+                                                   Margin="0,0,0,6"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="类型"
+                                                       VerticalAlignment="Center" FontSize="12"/>
+                                            <ComboBox Grid.Row="0" Grid.Column="1"
+                                                      x:Name="cmbHideAnimType"
+                                                      Width="110" FontSize="12"
+                                                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                      SelectionChanged="cmbHideAnimType_SelectionChanged">
+                                                <ComboBoxItem Content="滑出"/>
+                                                <ComboBoxItem Content="淡出"/>
+                                                <ComboBoxItem Content="缩小"/>
+                                                <ComboBoxItem Content="弹性"/>
+                                            </ComboBox>
+
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="时长"
+                                                       VerticalAlignment="Center" FontSize="12"/>
+                                            <Slider Grid.Row="1" Grid.Column="1"
+                                                    x:Name="sldHideDuration"
+                                                    Minimum="50" Maximum="2000" Value="300"
+                                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="2"
+                                                       x:Name="txtHideDuration"
+                                                       Text="300ms" TextAlignment="Center"
+                                                       FontSize="12" VerticalAlignment="Center"/>
+
+                                            <TextBlock Grid.Row="2" Grid.Column="0" x:Name="lblHideZoom" Text="目标比例"
+                                                       VerticalAlignment="Center" FontSize="12"/>
+                                            <Slider Grid.Row="2" Grid.Column="1" x:Name="sldHideZoomTo"
+                                                    Minimum="0.1" Maximum="0.9" Value="0.5" TickFrequency="0.05"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="2" x:Name="txtHideZoomTo"
+                                                       Text="0.5" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+
+                                            <TextBlock Grid.Row="3" Grid.Column="0" x:Name="lblHideOsc" Text="振荡次数"
+                                                       VerticalAlignment="Center" FontSize="12"/>
+                                            <Slider Grid.Row="3" Grid.Column="1" x:Name="sldHideOsc"
+                                                    Minimum="1" Maximum="10" Value="3" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="2" x:Name="txtHideOsc"
+                                                       Text="3" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+
+                                            <TextBlock Grid.Row="4" Grid.Column="0" x:Name="lblHideSpring" Text="弹性强度"
+                                                       VerticalAlignment="Center" FontSize="12"/>
+                                            <Slider Grid.Row="4" Grid.Column="1" x:Name="sldHideSpring"
+                                                    Minimum="1" Maximum="10" Value="3" TickFrequency="0.5"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="2" x:Name="txtHideSpring"
+                                                       Text="3" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
+
                                         </Grid>
                                     </StackPanel>
                                 </Border>
@@ -924,14 +1351,14 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0"
-                                                       Text="🔄 形变/切换"
+                                                       Text="{Binding Item[UI_SettingsWindow_354], Source={x:Static loc:LocalizationManager.Instance}}"
                                                        FontWeight="SemiBold"
                                                        FontSize="12"
                                                        VerticalAlignment="Center"/>
                                             <TextBlock Grid.Column="1"
                                                        Style="{StaticResource InfoTipStyle}"
                                                        HorizontalAlignment="Right"
-                                                       ToolTip="面板尺寸变化/区域切换/跨边飞行时的动画效果"/>
+                                                       ToolTip="{Binding Item[UI_SettingsWindow_355], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                         </Grid>
 
                                         <Grid Margin="0,6,0,0">
@@ -947,7 +1374,7 @@
                                             </Grid.RowDefinitions>
 
                                             <TextBlock Grid.Row="0" Grid.Column="0"
-                                                       Text="缓动类型"
+                                                       Text="{Binding Item[UI_SettingsWindow_356], Source={x:Static loc:LocalizationManager.Instance}}"
                                                        VerticalAlignment="Center"
                                                        FontSize="12"/>
                                             <ComboBox Grid.Row="0" Grid.Column="1"
@@ -956,18 +1383,18 @@
                                                       FontSize="12"
                                                       HorizontalAlignment="Left"
                                                       VerticalAlignment="Center">
-                                                <ComboBoxItem Content="线性"/>
-                                                <ComboBoxItem Content="立方缓动"/>
-                                                <ComboBoxItem Content="平方缓动"/>
-                                                <ComboBoxItem Content="四次方缓动"/>
-                                                <ComboBoxItem Content="五次方缓动"/>
-                                                <ComboBoxItem Content="弹性缓动"/>
-                                                <ComboBoxItem Content="回退缓动"/>
-                                                <ComboBoxItem Content="弹跳缓动"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_357], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_358], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_359], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_360], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_361], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_362], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_363], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                                <ComboBoxItem Content="{Binding Item[UI_SettingsWindow_364], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                             </ComboBox>
 
                                             <TextBlock Grid.Row="1" Grid.Column="0"
-                                                       Text="动画时长"
+                                                       Text="{Binding Item[UI_SettingsWindow_365], Source={x:Static loc:LocalizationManager.Instance}}"
                                                        VerticalAlignment="Center"
                                                        FontSize="12"/>
                                             <Slider Grid.Row="1" Grid.Column="1"
@@ -984,7 +1411,59 @@
                                             <TextBlock Grid.Row="0" Grid.Column="3"
                                                        Style="{StaticResource InfoTipStyle}"
                                                        Margin="8,0,0,0"
-                                                       ToolTip="线性：匀速运动，无缓动效果&#x0a;立方缓动：先快后慢，平滑自然（推荐）&#x0a;平方缓动：比立方更柔和，变化更平缓&#x0a;四次方缓动：非常平滑，适合长距离动画&#x0a;五次方缓动：极其平滑，几乎察觉不到加速&#x0a;弹性缓动：带有弹性振荡效果，生动活泼&#x0a;回退缓动：略微过冲再回正，有弹跳感&#x0a;弹跳缓动：落地弹跳效果，适合结束动作"/>
+                                                       ToolTip="{Binding Item[UI_SettingsWindow_366], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- ====== 内容切换稳定防抖 ====== -->
+                                <Border Background="#FFFFFF"
+                                        CornerRadius="8"
+                                        Padding="8,6"
+                                        Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Item[Set_StabilizeTitle], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Style="{StaticResource InfoTipStyle}"
+                                                       HorizontalAlignment="Right"
+                                                       ToolTip="{Binding Item[Set_StabilizeTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
+                                        </Grid>
+
+                                        <Grid Margin="0,6,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="60"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="32"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                                       Text="200ms"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="11"
+                                                       Foreground="#888888"/>
+                                            <Slider Grid.Row="0" Grid.Column="1"
+                                                    x:Name="sldContentStabilize"
+                                                    Minimum="200" Maximum="800" Value="400"
+                                                    TickFrequency="20" IsSnapToTickEnabled="True"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="2"
+                                                       x:Name="txtContentStabilize"
+                                                       Text="400ms"
+                                                       TextAlignment="Center"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
                                         </Grid>
                                     </StackPanel>
                                 </Border>
@@ -1001,14 +1480,14 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0"
-                                                       Text="🚀 飞行时长"
+                                                       Text="{Binding Item[UI_SettingsWindow_367], Source={x:Static loc:LocalizationManager.Instance}}"
                                                        FontWeight="SemiBold"
                                                        FontSize="12"
                                                        VerticalAlignment="Center"/>
                                             <TextBlock Grid.Column="1"
                                                        Style="{StaticResource InfoTipStyle}"
                                                        HorizontalAlignment="Right"
-                                                       ToolTip="跨边飞行时的移动速度。数值越小飞行越快，数值越大飞行越慢。"/>
+                                                       ToolTip="{Binding Item[UI_SettingsWindow_368], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                         </Grid>
 
                                         <Grid Margin="0,6,0,0">
@@ -1022,13 +1501,13 @@
                                             </Grid.RowDefinitions>
 
                                             <TextBlock Grid.Row="0" Grid.Column="0"
-                                                       Text="100ms"
+                                                       Text="0ms"
                                                        VerticalAlignment="Center"
                                                        FontSize="11"
                                                        Foreground="#888888"/>
                                             <Slider Grid.Row="0" Grid.Column="1"
                                                     x:Name="sldFlyDuration"
-                                                    Minimum="100" Maximum="2000" Value="500"
+                                                    Minimum="0" Maximum="2000" Value="500"
                                                     TickFrequency="50" IsSnapToTickEnabled="True"
                                                     VerticalAlignment="Center" Margin="0,0,8,0"/>
                                             <TextBlock Grid.Row="0" Grid.Column="2"
@@ -1052,14 +1531,14 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0"
-                                                       Text="⏱️ 延时隐藏"
+                                                       Text="{Binding Item[UI_SettingsWindow_369], Source={x:Static loc:LocalizationManager.Instance}}"
                                                        FontWeight="SemiBold"
                                                        FontSize="12"
                                                        VerticalAlignment="Center"/>
                                             <TextBlock Grid.Column="1"
                                                        Style="{StaticResource InfoTipStyle}"
                                                        HorizontalAlignment="Right"
-                                                       ToolTip="鼠标移出面板后，延迟多久开始隐藏动画"/>
+                                                       ToolTip="{Binding Item[UI_SettingsWindow_370], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                         </Grid>
 
                                         <Grid Margin="0,6,0,0">
@@ -1073,7 +1552,7 @@
                                             </Grid.RowDefinitions>
 
                                             <TextBlock Grid.Row="0" Grid.Column="0"
-                                                       Text="等待时间"
+                                                       Text="{Binding Item[UI_SettingsWindow_371], Source={x:Static loc:LocalizationManager.Instance}}"
                                                        VerticalAlignment="Center"
                                                        FontSize="12"/>
                                             <Slider Grid.Row="0" Grid.Column="1"
@@ -1095,7 +1574,7 @@
                         </Border>
 
                         <TextBlock FontSize="11" Foreground="#888888"
-                                   Text="💡 关闭动画后，呼出/隐藏/切换均为瞬间完成。延时隐藏仍会生效（面板会在延迟后瞬间消失）。飞行特性在关闭动画时仍保留（面板不消失，但形变瞬间完成）。"
+                                   Text="{Binding Item[UI_SettingsWindow_372], Source={x:Static loc:LocalizationManager.Instance}}"
                                    TextWrapping="Wrap"/>
 
                     </StackPanel>
@@ -1103,24 +1582,24 @@
             </TabItem>
 
 
-            <!-- ====== ★★★ 选项卡5：AI 助手设置 ★★★ ====== -->
+            <!-- ====== ★★★ 选项卡7：AI 助手设置 ★★★ ====== -->
             <TabItem Header="🤖 AI">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
                     <StackPanel>
 
                         <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🤖 AI 助手" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
-                                <TextBlock Text="灵动鸟内置 AI 助手：对话、翻译、总结、解释代码等。你的 API Key 只保存在本机（ai.json），请求直接发往你选择的模型服务商，不经任何中间服务器。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_373], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_374], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="11" Foreground="#777777" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                                <CheckBox x:Name="chkAiEnabled" Content="启用 AI 助手" FontSize="12"/>
+                                <CheckBox x:Name="chkAiEnabled" Content="{Binding Item[UI_SettingsWindow_375], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12"/>
                             </StackPanel>
                         </Border>
 
                         <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🏢 服务商预设" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
-                                <TextBlock Text="选择后自动填入 API 地址与常见模型，也可手动修改。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_376], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_377], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="11" Foreground="#777777" Margin="0,0,0,6"/>
                                 <ComboBox x:Name="cmbAiProvider" Width="260" FontSize="12" HorizontalAlignment="Left" SelectionChanged="CmbAiProvider_SelectionChanged"/>
                             </StackPanel>
@@ -1128,9 +1607,9 @@
 
                         <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🌐 API 地址" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_378], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
                                 <TextBox x:Name="txtAiBaseUrl" FontSize="12" Padding="6,4"/>
-                                <TextBlock Text="OpenAI 兼容的 Chat Completions 地址，例如 https://api.deepseek.com/v1、http://localhost:11434/v1（Ollama）"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_379], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
@@ -1139,37 +1618,37 @@
                             <StackPanel>
                                 <TextBlock Text="🔑 API Key" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
                                 <PasswordBox x:Name="pwdAiKey" FontSize="12" Padding="6,4"/>
-                                <TextBlock Text="仅保存在本机 %LOCALAPPDATA%\DynamicBird\ai.json，不会上传。留空表示无需鉴权（如本地 Ollama）。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_380], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
 
                         <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🧠 模型" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_381], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
                                 <TextBox x:Name="txtAiModel" FontSize="12" Padding="6,4"/>
-                                <TextBlock Text="填写服务商支持的模型名，例如 deepseek-chat、gpt-4o-mini、llama3.2。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_382], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
 
                         <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="📝 系统提示词" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_383], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
                                 <TextBox x:Name="txtAiSystemPrompt" FontSize="12" Padding="6,4" MinHeight="56" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
                             </StackPanel>
                         </Border>
 
                         <Border Background="#FFFFFF" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="⚙️ 高级" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_384], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
                                 <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="44"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="温度" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_385], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <Slider Grid.Column="1" x:Name="sldAiTemperature" Minimum="0" Maximum="2" Value="0.7"
                                             TickFrequency="0.1" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                     <TextBlock Grid.Column="2" x:Name="txtAiTemperature" Text="0.7" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"/>
@@ -1180,14 +1659,14 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="44"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="上下文窗口" VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding Item[UI_SettingsWindow_386], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
                                     <TextBox Grid.Column="1" x:Name="txtAiContextWindow" Text="32768" FontSize="12" Padding="4,2" VerticalContentAlignment="Center"/>
                                     <TextBlock Grid.Column="2" Text="token" FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" TextAlignment="Right"/>
                                 </Grid>
-                                <TextBlock Text="超过窗口时自动丢弃最早的对话。常见值：DeepSeek 64K、GPT-4o 128K、本地 Ollama 8K。设为 0 不裁剪。"
+                                <TextBlock Text="{Binding Item[UI_SettingsWindow_387], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="10.5" Foreground="#888888" Margin="80,0,0,8" TextWrapping="Wrap"/>
-                                <CheckBox x:Name="chkAiWebSearch" Content="联网搜索（需服务商支持，如 DeepSeek）" FontSize="12" Margin="0,0,0,6"/>
-                                <CheckBox x:Name="chkAiReasoning" Content="深度思考（需模型支持，如 reasoning_effort / reasoner 模型）" FontSize="12"/>
+                                <CheckBox x:Name="chkAiWebSearch" Content="{Binding Item[UI_SettingsWindow_388], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" Margin="0,0,0,6"/>
+                                <CheckBox x:Name="chkAiReasoning" Content="{Binding Item[UI_SettingsWindow_389], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12"/>
                             </StackPanel>
                         </Border>
 
@@ -1198,7 +1677,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Button x:Name="btnAiTest" Grid.Column="0" Content="测试连接" Width="90" Height="30"
+                                    <Button x:Name="btnAiTest" Grid.Column="0" Content="{Binding Item[UI_SettingsWindow_390], Source={x:Static loc:LocalizationManager.Instance}}" Width="90" Height="30"
                                             Style="{StaticResource Win11Button}" FontSize="12" Click="BtnAiTest_Click"/>
                                     <TextBlock x:Name="txtAiTestStatus" Grid.Column="1" FontSize="11.5"
                                                VerticalAlignment="Center" Margin="10,0,0,0" TextWrapping="Wrap"/>
@@ -1207,7 +1686,7 @@
                         </Border>
 
                         <TextBlock FontSize="11" Foreground="#888888"
-                                   Text="🔒 隐私：灵动鸟不收集、不上传任何 AI 对话数据。所有请求由本机直接发送到你选择的模型服务商，受该服务商的隐私政策约束。"
+                                   Text="{Binding Item[UI_SettingsWindow_391], Source={x:Static loc:LocalizationManager.Instance}}"
                                    TextWrapping="Wrap"/>
 
                     </StackPanel>
@@ -1215,26 +1694,34 @@
             </TabItem>
         </TabControl>
 
-        <!-- 底部按钮 -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button x:Name="btnOnboarding"
-                    Content="查看引导"
-                    Style="{StaticResource Win11Button}"
-                    Width="90" Height="30"
-                    Margin="0,0,8,0"
-                    Click="BtnOnboarding_Click"/>
-            <Button x:Name="btnSave"
-                    Content="保存"
-                    Style="{StaticResource Win11AccentButton}"
-                    Width="76" Height="30"
-                    Margin="0,0,8,0"
-                    Click="BtnSave_Click"/>
-            <Button x:Name="btnClose"
-                    Content="关闭"
-                    Style="{StaticResource Win11Button}"
-                    Width="76" Height="30"
-                    Click="BtnClose_Click"/>
-            <TextBlock Style="{StaticResource InfoTipStyle}" ToolTip="保存当前设置到 config.json，关闭后设置生效。"/>
-        </StackPanel>
+        <!-- 底部按钮：更改自动保存 -->
+        <Grid Grid.Row="2" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{Binding Item[Set_AutoSaveHint], Source={x:Static loc:LocalizationManager.Instance}}"
+                       FontSize="11" Foreground="#888888" VerticalAlignment="Center" TextWrapping="Wrap"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="btnOnboarding"
+                        Content="{Binding Item[UI_SettingsWindow_392], Source={x:Static loc:LocalizationManager.Instance}}"
+                        Style="{StaticResource Win11Button}"
+                        Width="90" Height="30"
+                        Margin="0,0,8,0"
+                        Click="BtnOnboarding_Click"/>
+                <Button x:Name="btnRefresh"
+                        Content="{Binding Item[Set_AutoSaveRefresh], Source={x:Static loc:LocalizationManager.Instance}}"
+                        Style="{StaticResource Win11Button}"
+                        Width="76" Height="30"
+                        Margin="0,0,8,0"
+                        Click="BtnRefresh_Click"/>
+                <Button x:Name="btnClose"
+                        Content="{Binding Item[UI_SettingsWindow_394], Source={x:Static loc:LocalizationManager.Instance}}"
+                        Style="{StaticResource Win11Button}"
+                        Width="76" Height="30"
+                        Click="BtnClose_Click"/>
+                <TextBlock Style="{StaticResource InfoTipStyle}" ToolTip="{Binding Item[UI_SettingsWindow_395], Source={x:Static loc:LocalizationManager.Instance}}"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

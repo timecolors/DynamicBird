@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -17,8 +17,8 @@ namespace DynamicBird.UI.Settings
             foreach (ComboBoxItem item in combo.Items)
             {
                 string content = item.Content?.ToString() ?? "";
-                if ((mode == "Follow" && content == "跟随鼠标") ||
-                    (mode == "Fixed" && content == "固定位置"))
+                if ((mode == "Follow" && IsFollowMouse(content)) ||
+                    (mode == "Fixed" && IsFixedPosition(content)))
                 {
                     combo.SelectedItem = item;
                     break;
@@ -28,12 +28,31 @@ namespace DynamicBird.UI.Settings
                 combo.SelectedIndex = 0;
         }
 
+        private static bool IsFollowMouse(string content) =>
+            content == "跟随鼠标" || content == "Follow mouse";
+
+        private static bool IsFixedPosition(string content) =>
+            content == "固定位置" || content == "Fixed position";
+
+        private static bool IsShapeMatch(string content, string shape)
+        {
+            string cn = GetShapeDisplayName(shape);
+            string en = shape switch
+            {
+                "Square" => "Square",
+                "StripH" => "Horizontal strip",
+                "StripV" => "Vertical strip",
+                _ => "Default"
+            };
+            return content == cn || content == en;
+        }
+
         public static void SetShapeComboSelected(ComboBox combo, string shape)
         {
             foreach (ComboBoxItem item in combo.Items)
             {
                 string content = item.Content?.ToString() ?? "";
-                if (content == GetShapeDisplayName(shape))
+                if (IsShapeMatch(content, shape))
                 {
                     combo.SelectedItem = item;
                     break;
@@ -59,13 +78,10 @@ namespace DynamicBird.UI.Settings
             if (combo.SelectedItem is ComboBoxItem item)
             {
                 string content = item.Content?.ToString() ?? "默认";
-                return content switch
-                {
-                    "方形" => "Square",
-                    "横条" => "StripH",
-                    "竖条" => "StripV",
-                    _ => "Default"
-                };
+                if (content is "方形" or "Square") return "Square";
+                if (content is "横条" or "Horizontal strip") return "StripH";
+                if (content is "竖条" or "Vertical strip") return "StripV";
+                return "Default";
             }
             return "Default";
         }
@@ -75,7 +91,7 @@ namespace DynamicBird.UI.Settings
             if (combo.SelectedItem is ComboBoxItem item)
             {
                 string content = item.Content?.ToString() ?? "";
-                return content == "跟随鼠标" ? "Follow" : "Fixed";
+                return IsFollowMouse(content) ? "Follow" : "Fixed";
             }
             return "Follow";
         }
@@ -122,14 +138,14 @@ namespace DynamicBird.UI.Settings
         {
             return displayName switch
             {
-                "线性" => "Linear",
-                "立方缓动" => "CubicEase",
-                "平方缓动" => "QuadraticEase",
-                "四次方缓动" => "QuarticEase",
-                "五次方缓动" => "QuinticEase",
-                "弹性缓动" => "ElasticEase",
-                "回退缓动" => "BackEase",
-                "弹跳缓动" => "BounceEase",
+                "线性" or "Linear" => "Linear",
+                "立方缓动" or "Cubic" => "CubicEase",
+                "平方缓动" or "Quadratic" => "QuadraticEase",
+                "四次方缓动" or "Quartic" => "QuarticEase",
+                "五次方缓动" or "Quintic" => "QuinticEase",
+                "弹性缓动" or "Elastic" => "ElasticEase",
+                "回退缓动" or "Back" => "BackEase",
+                "弹跳缓动" or "Bounce" => "BounceEase",
                 _ => "CubicEase"
             };
         }
@@ -141,15 +157,15 @@ namespace DynamicBird.UI.Settings
         {
             return easingValue switch
             {
-                "Linear" => "线性",
-                "CubicEase" => "立方缓动",
-                "QuadraticEase" => "平方缓动",
-                "QuarticEase" => "四次方缓动",
-                "QuinticEase" => "五次方缓动",
-                "ElasticEase" => "弹性缓动",
-                "BackEase" => "回退缓动",
-                "BounceEase" => "弹跳缓动",
-                _ => "立方缓动"
+                "Linear" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_344"],
+                "CubicEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_345"],
+                "QuadraticEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_346"],
+                "QuarticEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_347"],
+                "QuinticEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_348"],
+                "ElasticEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_349"],
+                "BackEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_350"],
+                "BounceEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_351"],
+                _ => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_345"]
             };
         }
 

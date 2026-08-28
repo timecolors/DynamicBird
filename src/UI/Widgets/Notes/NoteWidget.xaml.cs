@@ -1,6 +1,7 @@
-﻿using DynamicBird.Core.Services;
+using DynamicBird.Core.Services;
 using DynamicBird.Core.Services.Configuration;
 using DynamicBird.src.core.Services.Notes;
+using DynamicBird.UI.Localization;
 using System;
 using System.Linq;
 using System.Windows;
@@ -42,7 +43,7 @@ namespace DynamicBird.UI.Widgets.Notes
             UpdateStatus();
         }
 
-        public new string Name => "便签";
+        public new string Name => LocalizationManager.Instance["WidgetTabs_Notes"];
 
         public UserControl CreateView() => this;
 
@@ -63,7 +64,7 @@ namespace DynamicBird.UI.Widgets.Notes
 
             _btnNewNote = new Button
             {
-                Content = "➕ 新建",
+                Content = LocalizationManager.Instance["Note_New"],
                 Width = 80,
                 Height = 26,
                 FontSize = 11,
@@ -76,7 +77,7 @@ namespace DynamicBird.UI.Widgets.Notes
 
             _btnDeleteNote = new Button
             {
-                Content = "✕ 删除",
+                Content = LocalizationManager.Instance["Note_Delete"],
                 Width = 70,
                 Height = 26,
                 FontSize = 11,
@@ -90,7 +91,7 @@ namespace DynamicBird.UI.Widgets.Notes
 
             _statusText = new TextBlock
             {
-                Text = "就绪",
+                Text = LocalizationManager.Instance["UI_TimerWidget_416"],
                 FontSize = 11,
                 Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102)),
                 VerticalAlignment = VerticalAlignment.Center,
@@ -111,7 +112,9 @@ namespace DynamicBird.UI.Widgets.Notes
             // ★★★ 移除 Count <= 1 的限制 ★★★
             ViewModel.CanDelete = current != null;
             ViewModel.ShowTitle = current?.ShowTitle ?? true;
-            ViewModel.StatusText = current != null ? $"便签 {_noteService.Notes.IndexOf(current) + 1}/{_noteService.Notes.Count}" : "无边签";
+            ViewModel.StatusText = current != null
+                    ? string.Format(LocalizationManager.Instance["Note_Status"], _noteService.Notes.IndexOf(current) + 1, _noteService.Notes.Count)
+                    : LocalizationManager.Instance["Note_NoNote"];
 
             ViewModel.RefreshColorBrush();
 
@@ -129,7 +132,9 @@ namespace DynamicBird.UI.Widgets.Notes
         private void UpdateStatus()
         {
             var current = _noteService.CurrentNote;
-            ViewModel.StatusText = current != null ? $"便签 {_noteService.Notes.IndexOf(current) + 1}/{_noteService.Notes.Count}" : "无边签";
+            ViewModel.StatusText = current != null
+                    ? string.Format(LocalizationManager.Instance["Note_Status"], _noteService.Notes.IndexOf(current) + 1, _noteService.Notes.Count)
+                    : LocalizationManager.Instance["Note_NoNote"];
             if (_statusText != null)
                 _statusText.Text = ViewModel.StatusText;
         }
@@ -147,7 +152,7 @@ namespace DynamicBird.UI.Widgets.Notes
 
         private void NewNote_Click(object sender, RoutedEventArgs e)
         {
-            string defaultTitle = $"便签 {_noteService.Notes.Count + 1}";
+            string defaultTitle = string.Format(LocalizationManager.Instance["Note_DefaultTitle"], _noteService.Notes.Count + 1);
             var note = _noteService.CreateNote(defaultTitle);
             ViewModel.CurrentNote = note;
             _noteService.SetCurrentNote(note);
@@ -165,7 +170,8 @@ namespace DynamicBird.UI.Widgets.Notes
             if (current == null) return;
 
             // ★★★ 移除“至少保留一个”的限制 ★★★
-            var result = MessageBox.Show($"确定要删除便签 \"{current.Title}\" 吗？", "确认", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show(string.Format(LocalizationManager.Instance["Note_DeleteConfirm"], current.Title),
+                    LocalizationManager.Instance["Note_Confirm"], MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
                 _noteService.DeleteNote(current);

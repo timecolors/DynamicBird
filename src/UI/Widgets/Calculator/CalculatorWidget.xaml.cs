@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using DynamicBird.UI.Localization;
 using DynamicBird.UI.Widgets;
 
 namespace DynamicBird.UI.Widgets.Calculator
@@ -27,7 +28,7 @@ namespace DynamicBird.UI.Widgets.Calculator
             PreviewKeyDown += CalculatorWidget_PreviewKeyDown;
         }
 
-        public new string Name => "计算器";
+        public new string Name => LocalizationManager.Instance["WidgetTabs_Calculator"];
 
         public UserControl CreateView() => this;
 
@@ -145,7 +146,7 @@ namespace DynamicBird.UI.Widgets.Calculator
             if (double.IsNaN(result) || double.IsInfinity(result))
             {
                 _error = true;
-                DisplayText.Text = "错误";
+                DisplayText.Text = LocalizationManager.Instance["Calc_Error"];
                 ExprText.Text = "";
                 return;
             }
@@ -308,7 +309,7 @@ namespace DynamicBird.UI.Widgets.Calculator
             if (double.IsNaN(result) || double.IsInfinity(result))
             {
                 _error = true;
-                DisplayText.Text = "错误";
+                DisplayText.Text = LocalizationManager.Instance["Calc_Error"];
                 ExprText.Text = "";
                 _pendingOp = "";
                 return;
@@ -324,7 +325,7 @@ namespace DynamicBird.UI.Widgets.Calculator
 
         private string Format(double v)
         {
-            if (double.IsNaN(v) || double.IsInfinity(v)) return "错误";
+            if (double.IsNaN(v) || double.IsInfinity(v)) return LocalizationManager.Instance["Calc_Error"];
             bool isInteger = Math.Abs(v - Math.Round(v)) < 1e-12 && Math.Abs(v) < 9.2e18;
             return _mode == CalcMode.Programmer && isInteger
                 ? FormatRadix((long)Math.Round(v))

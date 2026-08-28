@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using DynamicBird.Infrastructure.WinApi;
+using DynamicBird.UI.Localization;
 
 namespace DynamicBird.UI.AppHelper
 {
@@ -32,13 +33,13 @@ namespace DynamicBird.UI.AppHelper
                 var sessions = await MediaSessionController.GetSessionsAsync();
                 SessionList.ItemsSource = sessions.Select(s => new MediaSessionItem(s)).ToList();
                 StatusText.Text = sessions.Count > 0
-                    ? $"检测到 {sessions.Count} 个媒体应用"
-                    : "未检测到正在播放的媒体应用";
+                    ? string.Format(LocalizationManager.Instance["Media_Detected"], sessions.Count)
+                    : LocalizationManager.Instance["Media_None"];
                 if (!_refreshTimer.IsEnabled) _refreshTimer.Start();
             }
             catch (Exception ex)
             {
-                StatusText.Text = "媒体控制不可用";
+                StatusText.Text = LocalizationManager.Instance["Media_Unavailable"];
                 System.Diagnostics.Debug.WriteLine($"刷新媒体会话失败: {ex.Message}");
             }
             finally

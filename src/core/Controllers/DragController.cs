@@ -1,3 +1,4 @@
+using DynamicBird.Core.Detection;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -26,6 +27,12 @@ namespace DynamicBird.Core.Controllers
         public bool IsDragging => _isDragging;
         public bool IsRecentlyDragged => (DateTime.Now - _lastDragEndTime).TotalMilliseconds < 500;
 
+        /// <summary>
+        /// 边缘触发带的启用过滤（与主窗口 tick 的 IsRegionEnabledBySettings 一致）。
+        /// 为 null 时不额外过滤，仅以"鼠标位于屏幕边缘触发带内"为准。
+        /// </summary>
+        public Func<EdgeRegion, bool>? RegionEnabledCheck { get; set; }
+
         private const int WM_NCLBUTTONDOWN = 0x00A1;
         private const int HTCAPTION = 2;
 
@@ -52,6 +59,12 @@ namespace DynamicBird.Core.Controllers
         {
             try
             {
+                // ★ 屏幕边缘触发带优先：鼠标在有效边缘触发带内按下时不启动面板拖动，
+                //   避免"想切边缘内容却变成拖动面板"。
+                var pos = e.GetPosition(_window);
+                if (EdgeBandHelper.IsInEdgeTriggerBand(_window, pos, _edgeController.TriggerDistancePx, RegionEnabledCheck))
+                    return;
+
                 string currentEdge = _edgeController.CurrentEdge;
                 if (string.IsNullOrEmpty(currentEdge) || _settings.GetEdgeMode(currentEdge) != "Fixed")
                     return;
@@ -85,8 +98,10 @@ namespace DynamicBird.Core.Controllers
             _edgeController.NotifyDragEnded();
             _lastDragEndTime = DateTime.Now;
 
-            double screenWidth = SystemParameters.PrimaryScreenWidth;
-            double screenHeight = SystemParameters.PrimaryScreenHeight;
+            var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
+                _window.Left, _window.Top, _window.Width, _window.Height);
+            double screenWidth = wa.Width;
+            double screenHeight = wa.Height;
             double offset = 0;
             string edge = _edgeController.CurrentEdge;
 

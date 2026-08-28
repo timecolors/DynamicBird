@@ -48,6 +48,8 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 剪贴板与便签 ==========
         int ClipboardMaxCount { get; set; }
         int ClipboardDisplayLength { get; set; }
+        int ClipboardImageMaxWidth { get; set; }
+        int ClipboardImageCacheLimitMB { get; set; }
         string LastWidgetTab { get; set; }
         string DefaultNoteColor { get; set; }
         bool NoteShowTitleByDefault { get; set; }
@@ -71,6 +73,17 @@ namespace DynamicBird.Core.Services.Configuration
         bool AnimationsEnabled { get; set; }
         string ShowHideEasingType { get; set; }
         int ShowHideDurationMs { get; set; }
+        // ★ 触发/隐藏动画（类型 + 时长 + 特化参数）
+        string ShowAnimationType { get; set; }
+        int ShowAnimationDurationMs { get; set; }
+        double ShowAnimationZoomFrom { get; set; }
+        int ShowAnimationOscillations { get; set; }
+        double ShowAnimationSpringiness { get; set; }
+        string HideAnimationType { get; set; }
+        int HideAnimationDurationMs { get; set; }
+        double HideAnimationZoomTo { get; set; }
+        int HideAnimationOscillations { get; set; }
+        double HideAnimationSpringiness { get; set; }
         string TransformEasingType { get; set; }
         int TransformDurationMs { get; set; }
         int HideDelayMs { get; set; }
@@ -80,6 +93,15 @@ namespace DynamicBird.Core.Services.Configuration
         /// 小鸟依人模式开关
         /// </summary>
         bool ClingModeEnabled { get; set; }
+
+        /// <summary>贴边吸附范围（px）：面板边缘距屏幕边小于该值时磁铁吸附贴边（0=关闭）。</summary>
+        int SnapRangePx { get; set; }
+
+        /// <summary>内容切换稳定防抖（ms）：图标中置期间，无新切换保持该时长后内容归位显示。</summary>
+        int ContentStabilizeMs { get; set; }
+
+        /// <summary>面板点击穿透修饰键（None / Ctrl / Alt / Shift）：按住该键时点击可穿透面板。</summary>
+        string? PassthroughModifier { get; set; }
 
         /// <summary>
         /// ★★★ 区域防抖延迟（毫秒） ★★★
@@ -116,8 +138,35 @@ namespace DynamicBird.Core.Services.Configuration
         bool WeatherEnabled { get; set; }
         string? WeatherCity { get; set; }
 
-        // ========== 重新加载 ==========
+        // ========== 灵动鸟性能模式 ==========
+        string PerformanceMode { get; set; }
+        void SetPerformanceMode(string mode);
+
+        // ========== 边缘触发距离与延时 ==========
+        int TriggerDistancePx { get; set; }
+        int TriggerDelayMs { get; set; }
+        int GetTriggerDelay(string regionKey);
+        void SetTriggerDelay(string regionKey, int ms);
+        int GetHideDelay(string regionKey);
+        void SetHideDelay(string regionKey, int ms);
+
+        // ========== 小组件显示开关 ==========
+        bool IsWidgetEnabled(string widgetKey);
+        void SetWidgetEnabled(string widgetKey, bool enabled);
+
+        // ========== 划词翻译 热键 ==========
+        string TextAiHotkey { get; set; }
+
+        // ========== 重新加载 / 保存 ==========
         void Reload();
+
+        /// <summary>
+        /// 立即保存设置并通知变化（实时保存入口）
+        /// </summary>
+        void SaveSettings();
+
+        /// <summary>用一份完整 SettingsData 替换内部数据并落盘（设置窗口保存入口）。</summary>
+        void Apply(SettingsData data);
 
         // ========== 事件 ==========
         event Action? SettingsChanged;

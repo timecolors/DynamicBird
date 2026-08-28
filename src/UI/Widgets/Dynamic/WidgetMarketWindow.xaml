@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="DynamicBird.UI.Widgets.Dynamic.WidgetMarketWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="组件市场"
+        Width="640" Height="520"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        ShowInTaskbar="False"
+        Background="#F9F9F9"
+        Foreground="#1E1E1E">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="组件市场" FontWeight="SemiBold" FontSize="15"/>
+            <TextBlock Text="在线市场即将上线。当前通过文件分享小组件：导出时自动检测源码所需权限并标注，他人导入后确认权限即可安装。"
+                       FontSize="11" Foreground="#777777" TextWrapping="Wrap" Margin="0,4,0,8"/>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="btnImport" Content="从文件导入" Style="{StaticResource Win11AccentButton}" Width="120" Height="30" Click="BtnImport_Click"/>
+                <Button x:Name="btnExportAll" Content="导出全部" Style="{StaticResource Win11Button}" Width="100" Height="30" Margin="8,0,0,0" Click="BtnExportAll_Click"/>
+                <Button x:Name="btnRefresh" Content="刷新" Style="{StaticResource Win11Button}" Width="70" Height="30" Margin="8,0,0,0" Click="BtnRefresh_Click"/>
+            </StackPanel>
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="8" Padding="10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="PluginListPanel"/>
+            </ScrollViewer>
+        </Border>
+
+        <TextBlock Grid.Row="2" x:Name="txtStatus" FontSize="11" Foreground="#888888"
+                   Margin="0,8,0,0" TextWrapping="Wrap"/>
+    </Grid>
+</Window>

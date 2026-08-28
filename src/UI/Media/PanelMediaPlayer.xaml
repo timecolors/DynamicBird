@@ -1,7 +1,7 @@
 <UserControl x:Class="DynamicBird.UI.Media.PanelMediaPlayer"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:media="clr-namespace:DynamicBird.UI.Media">
+             xmlns:media="clr-namespace:DynamicBird.UI.Media" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -14,6 +14,8 @@
               Background="#1A1A1A"
               ClipToBounds="True"
               MouseWheel="VideoArea_MouseWheel"
+              PreviewMouseRightButtonDown="VideoArea_PreviewMouseRightButtonDown"
+              PreviewMouseRightButtonUp="VideoArea_PreviewMouseRightButtonUp"
               MouseLeftButtonDown="VideoArea_MouseLeftButtonDown"
               MouseLeftButtonUp="VideoArea_MouseLeftButtonUp"
               MouseMove="VideoArea_MouseMove">
@@ -33,7 +35,7 @@
                                    Visibility="Collapsed"/>
 
             <TextBlock x:Name="PlaceholderText"
-                       Text="🖼 镜像窗口　·　📌 嵌入窗口&#x0a;鼠标滚轮可缩放镜像画面"
+                       Text="{Binding Item[UI_PanelMediaPlayer_50], Source={x:Static loc:LocalizationManager.Instance}}"
                        FontSize="11"
                        Foreground="#777777"
                        HorizontalAlignment="Center"
@@ -53,7 +55,7 @@
                     MouseLeftButtonUp="MirrorStatusBar_MouseLeftButtonUp"
                     Visibility="Collapsed">
                 <TextBlock x:Name="MirrorStatusText"
-                           Text="窗口已最小化，点击恢复"
+                           Text="{Binding Item[UI_PanelMediaPlayer_51], Source={x:Static loc:LocalizationManager.Instance}}"
                            FontSize="10"
                            Foreground="#DDDDDD"/>
             </Border>
@@ -66,18 +68,18 @@
                         Content="🖼"
                         Style="{StaticResource IconButton}"
                         Click="MirrorPick_Click"
-                        ToolTip="镜像窗口（画面显示，原窗口位置不变）"/>
+                        ToolTip="{Binding Item[UI_PanelMediaPlayer_52], Source={x:Static loc:LocalizationManager.Instance}}"/>
                 <Button x:Name="BtnEmbedPick"
                         Content="📌"
                         Style="{StaticResource IconButton}"
                         Margin="4,0,0,0"
                         Click="EmbedPick_Click"
-                        ToolTip="嵌入窗口（真实窗口放进面板，第二块显示屏）"/>
+                        ToolTip="{Binding Item[UI_PanelMediaPlayer_53], Source={x:Static loc:LocalizationManager.Instance}}"/>
                 <Button x:Name="BtnStop"
                         Style="{StaticResource IconButton}"
                         Margin="4,0,0,0"
                         Click="Stop_Click"
-                        ToolTip="停止">
+                        ToolTip="{Binding Item[UI_PanelMediaPlayer_54], Source={x:Static loc:LocalizationManager.Instance}}">
                     <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconStop}"/>
                 </Button>
                 <TextBlock x:Name="MirrorTitleText"

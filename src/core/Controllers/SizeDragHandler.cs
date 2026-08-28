@@ -1,3 +1,4 @@
+using DynamicBird.Core.Detection;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -30,6 +31,12 @@ namespace DynamicBird.Core.Controllers
         public event Action<bool>? UserResizeStarted;
         public event Action? ResizeEnded;
         public event Action<bool>? LockRequest;
+
+        /// <summary>
+        /// 边缘触发带的启用过滤（与主窗口 tick 的 IsRegionEnabledBySettings 一致）。
+        /// 为 null 时不额外过滤，仅以"鼠标位于屏幕边缘触发带内"为准。
+        /// </summary>
+        public Func<EdgeRegion, bool>? RegionEnabledCheck { get; set; }
 
         private const int WM_NCLBUTTONDOWN = 0x00A1;
         private const int HTLEFT = 10;
@@ -193,6 +200,10 @@ namespace DynamicBird.Core.Controllers
 
         private ResizeHandle? GetHandleAt(Point pos)
         {
+            // ★ 屏幕边缘触发带优先：鼠标落在有效边缘触发带内时，面板贴边侧的手柄整体让位，
+            //   避免"想切边缘内容却变成拖拽/调整大小"。面板内侧（离屏幕边缘超过触发距离）仍为正常拖拽区。
+            if (IsInEdgeTriggerBand(pos)) return null;
+
             double corner = 42;
             double edgeSize = 8;
             double width = _mainPanel.ActualWidth;
@@ -219,6 +230,12 @@ namespace DynamicBird.Core.Controllers
             if (right) return ResizeHandle.Right;
             return null;
         }
+
+        /// <summary>
+        /// 判定鼠标当前位置是否落在"有效屏幕边缘触发带"内（复用 EdgeStateDetector 的共享判定）。
+        /// </summary>
+        private bool IsInEdgeTriggerBand(Point pos)
+            => EdgeBandHelper.IsInEdgeTriggerBand(_window, pos, _edgeController.TriggerDistancePx, RegionEnabledCheck);
 
         private Cursor GetHandleCursor(ResizeHandle position)
         {

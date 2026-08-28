@@ -61,7 +61,11 @@ namespace DynamicBird.Infrastructure.WinApi
         private const uint WM_MOUSEMOVE = 0x0200;
         private const uint WM_LBUTTONDOWN = 0x0201;
         private const uint WM_LBUTTONUP = 0x0202;
+        private const uint WM_RBUTTONDOWN = 0x0204;
+        private const uint WM_RBUTTONUP = 0x0205;
+        private const uint WM_MOUSEWHEEL = 0x020A;
         private const uint MK_LBUTTON = 0x0001;
+        private const uint MK_RBUTTON = 0x0002;
 
         [StructLayout(LayoutKind.Sequential)]
         private struct RECT { public int Left, Top, Right, Bottom; }
@@ -73,6 +77,8 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             LeftDown,
             LeftUp,
+            RightDown,
+            RightUp,
             Move
         }
 
@@ -198,12 +204,31 @@ namespace DynamicBird.Infrastructure.WinApi
             {
                 MouseMessage.LeftDown => WM_LBUTTONDOWN,
                 MouseMessage.LeftUp => WM_LBUTTONUP,
+                MouseMessage.RightDown => WM_RBUTTONDOWN,
+                MouseMessage.RightUp => WM_RBUTTONUP,
                 _ => WM_MOUSEMOVE
             };
-            IntPtr wParam = message == MouseMessage.LeftUp ? IntPtr.Zero : (IntPtr)MK_LBUTTON;
+            IntPtr wParam = message switch
+            {
+                MouseMessage.LeftDown or MouseMessage.Move => (IntPtr)MK_LBUTTON,
+                MouseMessage.RightDown => (IntPtr)MK_RBUTTON,
+                _ => IntPtr.Zero
+            };
             IntPtr lParam = (IntPtr)((clientY << 16) | (clientX & 0xFFFF));
             // 用 PostMessage 异步投递，避免源窗口消息循环繁忙时阻塞面板 UI
             PostMessage(hwnd, msg, wParam, lParam);
+        }
+
+        /// <summary>
+        /// 转发鼠标滚轮：WM_MOUSEWHEEL 的 lParam 约定为屏幕坐标（不是客户区坐标），
+        /// wParam 高 16 位为滚动增量（120 的倍数）。
+        /// </summary>
+        public static void SendMouseWheel(IntPtr hwnd, int delta, int screenX, int screenY)
+        {
+            if (hwnd == IntPtr.Zero) return;
+            IntPtr wParam = (IntPtr)((delta << 16) & 0xFFFF0000);
+            IntPtr lParam = (IntPtr)((screenY << 16) | (screenX & 0xFFFF));
+            PostMessage(hwnd, WM_MOUSEWHEEL, wParam, lParam);
         }
     }
 }

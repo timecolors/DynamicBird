@@ -1,4 +1,4 @@
-﻿using DynamicBird.Core.Services;
+using DynamicBird.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,6 +49,11 @@ namespace DynamicBird.src.core.Services.Clipboard
         /// 复制到剪贴板
         /// </summary>
         void CopyToClipboard(ClipboardManager.ClipboardItem item);
+
+        /// <summary>
+        /// 收藏/取消收藏（收藏条目不被自动清理）
+        /// </summary>
+        void SetPinned(ClipboardManager.ClipboardItem item, bool pinned);
 
         /// <summary>
         /// 保存拖入的文件

@@ -16,6 +16,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using DynamicBird.Core.Services.Ai;
+using DynamicBird.UI.Localization;
 
 namespace DynamicBird.UI.AI
 {
@@ -122,7 +123,7 @@ namespace DynamicBird.UI.AI
                 _items.Add(new ChatItem
                 {
                     IsError = true,
-                    PlainText = $"⏪ 仅显示最近 {renderLimit} 条对话，完整历史已保存在本机"
+                    PlainText = string.Format(LocalizationManager.Instance["Ai_OnlyRecent"], renderLimit)
                 });
             }
 
@@ -138,8 +139,8 @@ namespace DynamicBird.UI.AI
         {
             var settings = AiSettingsStore.Load();
             ModelText.Text = settings.Enabled && !string.IsNullOrWhiteSpace(settings.Model)
-                ? $"模型：{settings.Model}"
-                : "未配置（请到 设置 → AI 中启用）";
+                ? string.Format(LocalizationManager.Instance["Ai_ModelText"], settings.Model)
+                : LocalizationManager.Instance["Ai_ModelNotConfigured"];
         }
 
         private void BtnNewSession_Click(object sender, RoutedEventArgs e)
@@ -267,7 +268,7 @@ namespace DynamicBird.UI.AI
             if (text.Length == 0) return;
 
             // 新会话：标记等待模型生成标题（回复完成后调用）
-            if (_current.Title == "新对话")
+            if (_current.Title == LocalizationManager.Instance["Ai_NewChatTitle"])
             {
                 _needsTitleGeneration = true;
                 _pendingTitleFirstText = text;
@@ -291,7 +292,7 @@ namespace DynamicBird.UI.AI
             var settings = AiSettingsStore.Load();
             if (!settings.Enabled)
             {
-                var warn = new ChatItem { IsError = true, PlainText = "⚠ AI 未启用：请打开 设置 → AI 选项卡，填写服务商与 API Key 后重试。" };
+                var warn = new ChatItem { IsError = true, PlainText = LocalizationManager.Instance["Ai_NotEnabled"] };
                 _items.Add(warn);
                 ScrollToEnd();
                 return;
@@ -304,16 +305,16 @@ namespace DynamicBird.UI.AI
             string? mime = GetImageMime(imagePath);
             if (mime == null)
             {
-                var warn = new ChatItem { IsError = true, PlainText = "⚠ 不支持的图片格式：请拖入 PNG / JPG / BMP / GIF / WebP 文件。" };
+                var warn = new ChatItem { IsError = true, PlainText = LocalizationManager.Instance["Ai_BadImage"] };
                 _items.Add(warn);
                 ScrollToEnd();
                 return;
             }
 
             // 新会话自动命名
-            if (_current.Title == "新对话")
+            if (_current.Title == LocalizationManager.Instance["Ai_NewChatTitle"])
             {
-                _current.Title = "图片对话";
+                _current.Title = LocalizationManager.Instance["Ai_ImageChatTitle"];
                 SessionCombo.SelectedItem = _current;
             }
 
@@ -351,7 +352,7 @@ namespace DynamicBird.UI.AI
             var settings = AiSettingsStore.Load();
             if (!settings.Enabled)
             {
-                ShowWarning("⚠ AI 未启用：请打开 设置 → AI 选项卡，填写服务商与 API Key 后重试。");
+                ShowWarning(LocalizationManager.Instance["Ai_NotEnabled"]);
                 return;
             }
 
@@ -359,13 +360,13 @@ namespace DynamicBird.UI.AI
             string content = ReadFileAsText(path, out bool isBinary, out bool isDocx);
             if (isBinary)
             {
-                ShowWarning("⚠ 暂不支持该文件类型。目前支持：图片（PNG/JPG/BMP/GIF/WebP）、文本与代码文件（TXT/MD/CS/JSON/LOG 等）、Word 文档（DOCX）。");
+                ShowWarning(LocalizationManager.Instance["Ai_UnsupportedFile"]);
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(content))
             {
-                ShowWarning("⚠ 未能从该文件中读取到文本内容。");
+                ShowWarning(LocalizationManager.Instance["Ai_NoTextInFile"]);
                 return;
             }
 
@@ -374,17 +375,17 @@ namespace DynamicBird.UI.AI
             string display = System.IO.Path.GetFileName(path);
             if (content.Length > maxChars)
             {
-                content = content[..maxChars] + Environment.NewLine + "…（内容过长已截断，以上为前 " + maxChars + " 字符）";
+                content = content[..maxChars] + Environment.NewLine + string.Format(LocalizationManager.Instance["Ai_Truncated"], maxChars);
             }
 
             // 新会话自动命名
-            if (_current.Title == "新对话")
+            if (_current.Title == LocalizationManager.Instance["Ai_NewChatTitle"])
             {
                 _current.Title = display.Length > 20 ? display[..20] + "…" : display;
                 SessionCombo.SelectedItem = _current;
             }
 
-            string label = isDocx ? "📄 Word 文档" : "📄 文件";
+            string label = isDocx ? LocalizationManager.Instance["Ai_FileLabelDocx"] : LocalizationManager.Instance["Ai_FileLabelGeneric"];
             string prompt = $"{label}：{display}\n\n以下是文件内容，请分析：\n\n{content}";
 
             var userMsg = new ChatMessage { Role = ChatRole.User, Content = prompt };
@@ -508,29 +509,41 @@ namespace DynamicBird.UI.AI
             BtnStop.Visibility = Visibility.Visible;
             _cts = new CancellationTokenSource();
 
+            var sb = new System.Text.StringBuilder();
+            // ★ 渲染节流：流式 delta 高频到达（每秒可达几十次），若每个 delta 都全量重建
+            //   FlowDocument 会在长回复时压垮 UI 线程。这里合并 burst：delta 到达时启动
+            //   80ms 定时器，Tick 时把累积文本渲染一次，渲染频率降 80%+；
+            //   渲染走 Background 优先级，不阻塞打字/输入。
+            var renderTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(80) };
+            renderTimer.Tick += (_, _) =>
+            {
+                renderTimer.Stop();
+                string snapshot = sb.ToString();
+                Dispatcher.BeginInvoke(() =>
+                {
+                    aiItem.PlainText = snapshot;
+                    aiItem.Document = MiniMarkdown.ToFlowDocument(snapshot);
+                    ScrollToEnd();
+                }, DispatcherPriority.Background);
+            };
+
             try
             {
                 var history = _current.Messages.Take(_current.Messages.Count - 1).ToList();
                 bool trimmed = TrimToContextWindow(settings, history, fallbackText);
                 UpdateContextUsage(settings, history, fallbackText, trimmed);
 
-                var sb = new System.Text.StringBuilder();
                 string full = await _client.StreamChatAsync(settings, history, fallbackText,
                     delta =>
                     {
                         sb.Append(delta);
                         OnStreamDelta(delta); // ★ 输出到光标模式：累积到缓冲
-                        string snapshot = sb.ToString();
-                        Dispatcher.BeginInvoke(() =>
-                        {
-                            aiItem.PlainText = snapshot;
-                            aiItem.Document = MiniMarkdown.ToFlowDocument(snapshot);
-                            ScrollToEnd();
-                        }, DispatcherPriority.Background);
+                        if (!renderTimer.IsEnabled) renderTimer.Start();
                     },
                     _cts.Token,
                     lastUser);
 
+                // 最后一次完整渲染（流式结束，内容已完整）
                 aiItem.PlainText = full;
                 aiItem.Document = MiniMarkdown.ToFlowDocument(full);
                 _current.Messages.Add(new ChatMessage { Role = ChatRole.Assistant, Content = full });
@@ -538,7 +551,12 @@ namespace DynamicBird.UI.AI
             }
             catch (OperationCanceledException)
             {
-                _current.Messages.Add(new ChatMessage { Role = ChatRole.Assistant, Content = aiItem.PlainText });
+                // 用户点停止：把已生成的文本做一次最终渲染并保留
+                string partial = sb.ToString();
+                aiItem.PlainText = partial;
+                if (partial.Length > 0)
+                    aiItem.Document = MiniMarkdown.ToFlowDocument(partial);
+                _current.Messages.Add(new ChatMessage { Role = ChatRole.Assistant, Content = partial });
                 AiSessionStore.Save(_sessionData);
             }
             catch (Exception ex)
@@ -548,6 +566,7 @@ namespace DynamicBird.UI.AI
             }
             finally
             {
+                renderTimer.Stop();
                 FlushCursorBuffer(); // ★ 流式结束后把剩余内容输出到光标
                 _streaming = false;
                 BtnSend.IsEnabled = true;
@@ -598,7 +617,7 @@ namespace DynamicBird.UI.AI
                 // 取消瞄准
                 _cursorAiming = false;
                 _cursorAimTimer?.Stop();
-                BtnCursorOutput.Content = "⌨ 输出到光标";
+                BtnCursorOutput.Content = LocalizationManager.Instance["Ai_CursorOutputStart"];
                 BtnCursorOutput.ClearValue(Control.BackgroundProperty);
             }
             else
@@ -606,7 +625,7 @@ namespace DynamicBird.UI.AI
                 // 进入瞄准模式：提示用户点击目标窗口
                 _cursorAiming = true;
                 DynamicBird.Core.Infrastructure.Logging.LogManager.Debug("[CursorOutput] aiming started");
-                BtnCursorOutput.Content = "⌨ 点击目标窗口…";
+                BtnCursorOutput.Content = LocalizationManager.Instance["Ai_CursorOutputAiming"];
                 BtnCursorOutput.Background = new System.Windows.Media.SolidColorBrush(
                     System.Windows.Media.Color.FromRgb(38, 79, 120));
                 _cursorAimTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
@@ -628,7 +647,7 @@ namespace DynamicBird.UI.AI
                 _cursorFlushTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
                 _cursorFlushTimer.Tick += (_, _) => FlushCursorBuffer();
                 _cursorFlushTimer.Start();
-                BtnCursorOutput.Content = "⌨ 输出中…";
+                BtnCursorOutput.Content = LocalizationManager.Instance["Ai_CursorOutputActive"];
             }
             // 未锁定（前台还是本应用）：继续等待用户点击目标
         }
@@ -641,7 +660,7 @@ namespace DynamicBird.UI.AI
             _cursorFlushTimer?.Stop();
             FlushCursorBuffer();
             _cursorOutput.Unlock();
-            BtnCursorOutput.Content = "⌨ 输出到光标";
+            BtnCursorOutput.Content = LocalizationManager.Instance["Ai_CursorOutputStart"];
             BtnCursorOutput.ClearValue(Control.BackgroundProperty);
         }
 
@@ -696,14 +715,16 @@ namespace DynamicBird.UI.AI
             int window = settings.ContextWindowTokens;
             if (window <= 0)
             {
-                ModelText.Text = $"模型：{settings.Model}";
+                ModelText.Text = string.Format(LocalizationManager.Instance["Ai_ModelText"], settings.Model);
                 return;
             }
             int used = AiChatClient.EstimateTokens(settings.SystemPrompt)
                        + AiChatClient.EstimateMessagesTokens(history)
                        + AiChatClient.EstimateTokens(userText) + 200;
             int pct = Math.Clamp(used * 100 / window, 0, 100);
-            ModelText.Text = $"模型：{settings.Model} · 上下文 {pct}%" + (trimmed ? "（已按窗口截断）" : "");
+            ModelText.Text = trimmed
+                    ? string.Format(LocalizationManager.Instance["Ai_ModelContext"], settings.Model, pct)
+                    : string.Format(LocalizationManager.Instance["Ai_ModelText"], settings.Model);
         }
 
         // ============ 消息操作 ============
@@ -797,10 +818,10 @@ namespace DynamicBird.UI.AI
 
             var settings = AiSettingsStore.Load();
             bool configured = settings.Enabled;
-            EmptyTitle.Text = configured ? "AI 助手" : "AI 尚未配置";
+            EmptyTitle.Text = configured ? LocalizationManager.Instance["UI_AiChatView_16"] : LocalizationManager.Instance["Ai_EmptyTitleNotConfigured"];
             EmptyHint.Text = configured
-                ? "我可以帮你翻译、总结、解释代码、写文档…试试下面的示例问题"
-                : "在 设置 → AI 中填写 OpenAI 兼容的服务商（DeepSeek、Ollama 本地、SiliconFlow 等）与模型，即可开始对话";
+                ? LocalizationManager.Instance["Ai_EmptyHintConfigured"]
+                : LocalizationManager.Instance["Ai_EmptyHintNotConfigured"];
             ExamplePanel.Visibility = configured ? Visibility.Visible : Visibility.Collapsed;
             BtnEmptySettings.Visibility = configured ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -829,7 +850,7 @@ namespace DynamicBird.UI.AI
                              lower.Contains("multimodal") || lower.Contains("not support")))
             {
                 return raw + Environment.NewLine +
-                       "提示：当前模型可能不支持图片识别。请在 设置 → AI 中更换支持视觉的模型（如 gpt-4o、glm-4v、qwen-vl 等），或用本地 Ollama 的 llava 模型。";
+                       LocalizationManager.Instance["Ai_VisionHint"];
             }
             return raw;
         }

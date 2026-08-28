@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Controls;
+using DynamicBird.Infrastructure.Utils;
 
 namespace DynamicBird.Core.Calculators
 {
@@ -30,30 +31,63 @@ namespace DynamicBird.Core.Calculators
         }
 
         /// <summary>
-        /// 测量内容尺寸
+        /// 测量内容理想尺寸：Measure(Infinity) 取 DesiredSize。
+        /// ★ 注意：测量后绝不能再 UpdateLayout——它会用"当前面板约束"重新测量，
+        ///   把 DesiredSize 覆盖成当前小尺寸下的值，导致"面板越小测越小"（越切越小）。
         /// </summary>
         public (double width, double height) MeasureContent()
         {
-            // 强制更新布局
-            _contentContainer.UpdateLayout();
+            // ★ 以无限空间测量内容，得到真实理想尺寸。
+            //   注意：_contentContainer 是 ScrollViewer，对它 Measure(Infinity) 返回的是视口宽
+            //   （而非内容理想宽度），会导致小组件面板被量窄。应直接测量其内部 Content。
+            try
+            {
+                FrameworkElement? target = null;
+                if (_contentContainer.Content is FrameworkElement inner)
+                {
+                    target = inner;
+                }
+                else
+                {
+                    var cc = _contentContainer as System.Windows.Controls.ContentControl;
+                    target = cc?.Content as FrameworkElement;
+                }
 
+                // ★ 特判小组件切换器：测其内部真实内容（绕开 ScrollViewer 视口限制，
+                //   否则从 AI 面板划到小组件时面板被量窄）
+                if (target is DynamicBird.UI.Widgets.WidgetSwitcher ws)
+                {
+                    // ★ 测量内部已保证布局就绪；未就绪（首次且无历史）返回保底
+                    var m = ws.MeasureContentSize();
+                    if (m.HasValue) return m.Value;
+                    return (280, 200);
+                }
+
+                if (target != null)
+                {
+                    target.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    double cw = target.DesiredSize.Width;
+                    double ch = target.DesiredSize.Height;
+                    if (cw >= 10 && ch >= 10) return (cw, ch);
+                }
+                else
+                {
+                    _contentContainer.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    double cw = _contentContainer.DesiredSize.Width;
+                    double ch = _contentContainer.DesiredSize.Height;
+                    if (cw >= 10 && ch >= 10) return (cw, ch);
+                }
+            }
+            catch { }
+
+            // 回退：ActualWidth / ActualHeight（仅布局已完成的场景）
             double contentWidth = _contentContainer.ActualWidth;
             double contentHeight = _contentContainer.ActualHeight;
 
-            // 如果 ActualWidth 无效，尝试测量
-            if (contentWidth < 10 || contentHeight < 10)
-            {
-                _contentContainer.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                contentWidth = _contentContainer.DesiredSize.Width;
-                contentHeight = _contentContainer.DesiredSize.Height;
-            }
-
-            // 如果还是无效，尝试从子元素获取
             if (contentWidth < 10 || contentHeight < 10)
             {
                 if (_contentContainer.Content is FrameworkElement child)
                 {
-                    child.UpdateLayout();
                     child.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                     if (child.DesiredSize.Width > 10) contentWidth = child.DesiredSize.Width;
                     if (child.DesiredSize.Height > 10) contentHeight = child.DesiredSize.Height;
@@ -80,7 +114,7 @@ namespace DynamicBird.Core.Calculators
             const double paddingX = 40;
             const double paddingY = 30;
             const double minWidth = 340;
-            const double minHeight = 220;
+            const double minHeight = 260;
 
             double rawWidth = contentWidth + paddingX;
             double rawHeight = contentHeight + paddingY;
@@ -88,8 +122,10 @@ namespace DynamicBird.Core.Calculators
             double targetWidth = Math.Max(minWidth, rawWidth);
             double targetHeight = Math.Max(minHeight, rawHeight);
 
-            double screenW = SystemParameters.PrimaryScreenWidth;
-            double screenH = SystemParameters.PrimaryScreenHeight;
+            var wa = ScreenMetrics.GetCachedScreenForWindow(
+                _window.Left, _window.Top, _window.Width, _window.Height);
+            double screenW = wa.Width;
+            double screenH = wa.Height;
 
             if (mode == "Widget")
             {
@@ -97,6 +133,18 @@ namespace DynamicBird.Core.Calculators
                 double maxH = screenH * 2.0 / 3.0;
                 targetWidth = Math.Min(targetWidth, maxW);
                 targetHeight = Math.Min(targetHeight, maxH);
+
+                // ★ WidgetSwitcher 固定开销：头部标签栏(≈34) + 底部 Footer(32+8) + 面板 Padding(12)。
+                //   仅按内容高度计算会导致底部 footer 被窗口截断/覆盖。
+                const double widgetFixedOverhead = 90;
+                targetHeight += widgetFixedOverhead;
+                targetHeight = Math.Min(targetHeight, maxH);
+            }
+            else if (mode == "Placeholder")
+            {
+                // ★ 角落面板（快捷开关/通知/最近）：内容自适应，限幅防过高
+                targetWidth = Math.Min(targetWidth, screenW * 0.4);
+                targetHeight = Math.Min(targetHeight, screenH * 0.6);
             }
             else if (mode == "AppHelper")
             {
@@ -170,8 +218,10 @@ namespace DynamicBird.Core.Calculators
             double targetWidth = contentWidth + paddingX;
             double targetHeight = contentHeight + paddingY;
 
-            double screenW = SystemParameters.PrimaryScreenWidth;
-            double screenH = SystemParameters.PrimaryScreenHeight;
+            var wa = ScreenMetrics.GetCachedScreenForWindow(
+                _window.Left, _window.Top, _window.Width, _window.Height);
+            double screenW = wa.Width;
+            double screenH = wa.Height;
             double maxW = screenW * 2.0 / 5.0;
             double maxH = screenH * 2.0 / 3.0;
 

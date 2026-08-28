@@ -273,7 +273,7 @@ namespace DynamicBird.UI.Main
 
             var dnd = new MenuItem
             {
-                Header = "勿扰模式",
+                Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_Dnd"],
                 IsCheckable = true,
                 IsChecked = _modeService.IsDoNotDisturb
             };
@@ -282,18 +282,18 @@ namespace DynamicBird.UI.Main
 
             if (_contentController?.CurrentRegionType == "Taskbar")
             {
-                var refresh = new MenuItem { Header = "刷新任务栏" };
+                var refresh = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_Refresh"] };
                 refresh.Click += (_, _) => RefreshTaskbarView();
                 menu.Items.Add(refresh);
             }
 
             menu.Items.Add(new Separator());
 
-            var settings = new MenuItem { Header = "设置" };
+            var settings = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Settings"] };
             settings.Click += (_, _) => OpenSettings();
             menu.Items.Add(settings);
 
-            var exit = new MenuItem { Header = "退出" };
+            var exit = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Exit"] };
             exit.Click += (_, _) => ExitApp();
             menu.Items.Add(exit);
 
@@ -308,6 +308,23 @@ namespace DynamicBird.UI.Main
             _appHelperView = ContentContainer.Content as AppHelperView;
             _aiChatView = ContentContainer.Content as DynamicBird.UI.AI.AiChatView;
             UpdateIconTooltip();
+
+            // ★ 小组件内容（含内部切标签）变化后重新测量并自适应面板尺寸：
+            //   内容尽量显示全，剪贴板/便签已内部限高
+            //   （切换动画/图标中置期间跳过 AutoSize：保持"触发的尺寸"不变，
+            //     尺寸由稳定后的形变动画（目标尺寸）统一更新）
+            if (_contentController.CurrentRegionType == "Widget")
+            {
+                // 内容变了 → 目标尺寸缓存始终失效（下次切换重新测量）
+                _edgeController.InvalidateTargetSizeCache("Widget");
+                // ★ 直接加载流程中（内容就位 → 尺寸由切换分支统一测量并形变）跳过
+                //   原子跳变，避免"动画形变 + 原子 SetWindowPos"打架闪烁
+                if (!_shapeAnimator.IsTransformAnimating && !_iconCentered &&
+                    !_edgeController.IsDirectLoadInProgress)
+                {
+                    _sizeController.ApplySizeStrategyForWidget();
+                }
+            }
         }
 
         private void UpdateIconTooltip()
@@ -317,16 +334,16 @@ namespace DynamicBird.UI.Main
             string tooltip = _contentController.CurrentRegionType switch
             {
                 "AppHelper" =>
-                    "点击切换辅助功能（媒体控制 / 画中画 / 音乐播放器）\n右键打开快捷菜单",
+                    DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipHelper"],
 
                 "AI" =>
-                    "点击切换勿扰模式\n拖入文件（图片 / 文本 / 代码 / Word）即可上传给 AI 分析\n右键打开快捷菜单",
+                    DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipAi"],
 
                 "Taskbar" =>
-                    "点击切换勿扰模式\n拖拽应用/文件到图标可固定到任务栏，拖走可删除\n右键打开快捷菜单",
+                    DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipTaskbar"],
 
                 _ =>
-                    "点击切换勿扰模式\n拖拽应用到图标可固定 / 删除\n右键打开快捷菜单"
+                    DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipDnd"]
             };
 
             IconPath.ToolTip = tooltip;

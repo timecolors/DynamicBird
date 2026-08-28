@@ -3,7 +3,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using DynamicBird.Core.Services.Configuration;
 using DynamicBird.Infrastructure.WinApi;
+using DynamicBird.UI.Localization;
 using NAudio.CoreAudioApi;
 using Windows.Devices.Radios;
 
@@ -15,13 +17,15 @@ namespace DynamicBird.UI.Panels
     public partial class QuickSettingsView : UserControl
     {
         private readonly DispatcherTimer _stateTimer;
+        private readonly ISettingsService _settings;
         private MMDevice? _audioDevice;
         private bool _brightnessChanging;
         private bool _volumeChanging;
         private bool _hotspotSupported;
 
-        public QuickSettingsView()
+        public QuickSettingsView(ISettingsService settings)
         {
+            _settings = settings;
             InitializeComponent();
 
             try
@@ -32,6 +36,7 @@ namespace DynamicBird.UI.Panels
 
             _stateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             _stateTimer.Tick += async (_, _) => await RefreshStatesAsync();
+            RefreshBirdModeButton();
 
             Loaded += async (_, _) =>
             {
@@ -126,13 +131,13 @@ namespace DynamicBird.UI.Panels
             if (bt.HasValue)
             {
                 bool on = bt.Value == RadioState.On;
-                BluetoothStateText.Text = on ? "已开启" : "已关闭";
-                BtnBluetooth.Content = on ? "开" : "关";
+                BluetoothStateText.Text = on ? LocalizationManager.Instance["QS_Enabled"] : LocalizationManager.Instance["QS_Disabled"];
+                BtnBluetooth.Content = on ? LocalizationManager.Instance["QS_On"] : LocalizationManager.Instance["QS_Off"];
                 BtnBluetooth.Style = (Style)FindResource(on ? "AccentButton" : "FlatButton");
             }
             else
             {
-                BluetoothStateText.Text = "不可用";
+                BluetoothStateText.Text = LocalizationManager.Instance["QS_Unavailable"];
                 BtnBluetooth.Content = "—";
                 BtnBluetooth.IsEnabled = false;
             }
@@ -142,13 +147,13 @@ namespace DynamicBird.UI.Panels
             if (wifi.HasValue)
             {
                 bool on = wifi.Value == RadioState.On;
-                WifiStateText.Text = on ? "已开启" : "已关闭";
-                BtnWifi.Content = on ? "开" : "关";
+                WifiStateText.Text = on ? LocalizationManager.Instance["QS_Enabled"] : LocalizationManager.Instance["QS_Disabled"];
+                BtnWifi.Content = on ? LocalizationManager.Instance["QS_On"] : LocalizationManager.Instance["QS_Off"];
                 BtnWifi.Style = (Style)FindResource(on ? "AccentButton" : "FlatButton");
             }
             else
             {
-                WifiStateText.Text = "不可用";
+                WifiStateText.Text = LocalizationManager.Instance["QS_Unavailable"];
                 BtnWifi.Content = "—";
                 BtnWifi.IsEnabled = false;
             }
@@ -159,8 +164,8 @@ namespace DynamicBird.UI.Panels
             if (hotspot.Supported)
             {
                 HotspotRow.Visibility = Visibility.Visible;
-                HotspotStateText.Text = hotspot.Enabled ? "已开启" : "已关闭";
-                BtnHotspot.Content = hotspot.Enabled ? "开" : "关";
+                HotspotStateText.Text = hotspot.Enabled ? LocalizationManager.Instance["QS_Enabled"] : LocalizationManager.Instance["QS_Disabled"];
+                BtnHotspot.Content = hotspot.Enabled ? LocalizationManager.Instance["QS_On"] : LocalizationManager.Instance["QS_Off"];
                 BtnHotspot.Style = (Style)FindResource(hotspot.Enabled ? "AccentButton" : "FlatButton");
                 BtnHotspot.IsEnabled = true;
             }
@@ -191,11 +196,37 @@ namespace DynamicBird.UI.Panels
             await RefreshStatesAsync();
         }
 
-        // ================= 系统入口 =================
+        // ================= 灵动鸟性能模式（顺滑 / 正常 / 省电 / 自定义） =================
 
-        private void BatterySaver_Click(object sender, RoutedEventArgs e)
+        private void BirdMode_Click(object sender, RoutedEventArgs e)
         {
-            SystemLauncher.OpenBatterySaverSettings();
+            if (sender is not Button btn || btn.Tag is not string mode) return;
+            // 自定义是状态不是档位：点击预设才生效；当前已是该模式无需重复应用
+            if (mode == PerformancePresets.Custom) return;
+            if (_settings.PerformanceMode == mode) return;
+            _settings.SetPerformanceMode(mode);
+            RefreshBirdModeButton();
+        }
+
+        /// <summary>刷新四个模式按钮的高亮与提示（面板显示时调用）。</summary>
+        public void RefreshBirdModeButton()
+        {
+            if (BtnModeSmooth == null) return;
+            string mode = _settings.PerformanceMode;
+
+            SetModeButtonStyle(BtnModeSmooth, mode == PerformancePresets.Smooth, "Perf_SmoothDesc");
+            SetModeButtonStyle(BtnModeNormal, mode == PerformancePresets.Normal, "Perf_NormalDesc");
+            SetModeButtonStyle(BtnModeSaver, mode == PerformancePresets.PowerSaver, "Perf_SaverDesc");
+            // 自定义按钮：当前为自定义时高亮；否则置灰（自定义是状态，不可点入）
+            BtnModeCustom.Style = (Style)FindResource(mode == PerformancePresets.Custom ? "AccentButton" : "FlatButton");
+            BtnModeCustom.Opacity = mode == PerformancePresets.Custom ? 1.0 : 0.55;
+            BtnModeCustom.ToolTip = LocalizationManager.Instance["Perf_CustomDesc"];
+        }
+
+        private void SetModeButtonStyle(Button btn, bool active, string descKey)
+        {
+            btn.Style = (Style)FindResource(active ? "AccentButton" : "FlatButton");
+            btn.ToolTip = LocalizationManager.Instance[descKey] + " — " + LocalizationManager.Instance["Perf_ButtonTip"];
         }
 
         private void Settings_Click(object sender, RoutedEventArgs e)

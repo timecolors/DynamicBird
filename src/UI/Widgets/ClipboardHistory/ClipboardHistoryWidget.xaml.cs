@@ -1,5 +1,6 @@
 using DynamicBird.Core.Services;
 using DynamicBird.src.core.Services.Clipboard;
+using DynamicBird.UI.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,9 @@ using System.Windows.Media;
 
 namespace DynamicBird.UI.Widgets.ClipboardHistory
 {
+    /// <summary>
+    /// 剪贴板记忆库：跨重启保留 + 收藏（不被清理）+ 实时搜索 + 分类过滤（全部/收藏/文本/链接/图片/文件）。
+    /// </summary>
     public partial class ClipboardHistoryWidget : UserControl, IWidget
     {
         private readonly IClipboardService _clipboardService;
@@ -18,23 +22,25 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
         private Button? _btnDeleteSelected;
         private TextBlock? _statusText;
 
+        private string _filterType = "All";
+        private string _searchQuery = "";
+
         public ClipboardHistoryWidget(IClipboardService clipboardService)
         {
             _clipboardService = clipboardService;
             InitializeComponent();
-            HistoryList.ItemsSource = _clipboardService.History;
-            _clipboardService.HistoryChanged += (s, e) => UpdateUI();
-            UpdateUI();
+            _clipboardService.HistoryChanged += (s, e) => RefreshList();
+            RefreshList();
         }
 
-        public new string Name => "剪贴板历史";
+        public new string Name => LocalizationManager.Instance["WidgetTabs_Clipboard"];
 
         public UserControl CreateView() => this;
 
         public void OnActivated()
         {
             // 剪贴板监听已由主窗口应用级常驻（保证 AI 面板复制等也进入历史）
-            UpdateUI();
+            RefreshList();
         }
 
         public void OnDeactivated()
@@ -48,7 +54,7 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
 
             _btnDeleteSelected = new Button
             {
-                Content = "🗑️ 删除选中",
+                Content = LocalizationManager.Instance["Clip_DeleteSelected"],
                 Width = 110,
                 Height = 26,
                 FontSize = 11,
@@ -62,7 +68,7 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
 
             var btnClearAll = new Button
             {
-                Content = "清空全部",
+                Content = LocalizationManager.Instance["Clip_ClearAll"],
                 Width = 80,
                 Height = 26,
                 FontSize = 11,
@@ -76,7 +82,7 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
 
             _statusText = new TextBlock
             {
-                Text = "就绪",
+                Text = LocalizationManager.Instance["Clip_Ready"],
                 FontSize = 11,
                 Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102)),
                 VerticalAlignment = VerticalAlignment.Center,
@@ -90,12 +96,98 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
             return panel;
         }
 
+        // ========== 记忆库：过滤 / 排序 ==========
+
+        /// <summary>按分类 + 搜索词过滤，收藏优先置顶，重建列表。</summary>
+        private void RefreshList()
+        {
+            if (HistoryList == null) return;
+            var q = _searchQuery?.Trim() ?? "";
+            var list = _clipboardService.History
+                .Where(i => MatchesType(i) && MatchesQuery(i, q))
+                .OrderByDescending(i => i.IsPinned)
+                .ThenByDescending(i => i.Timestamp)
+                .ToList();
+            HistoryList.ItemsSource = list;
+            UpdateUI();
+        }
+
+        private bool MatchesType(ClipboardManager.ClipboardItem item)
+        {
+            switch (_filterType)
+            {
+                case "Pinned": return item.IsPinned;
+                case "Text": return item.Type == "Text" && !IsLink(item);
+                case "Link": return IsLink(item);
+                case "Image": return item.Type == "Image";
+                case "File": return item.Type == "File";
+                default: return true; // All（Html 也归入全部）
+            }
+        }
+
+        private static bool IsLink(ClipboardManager.ClipboardItem item)
+        {
+            if (item.Type != "Text") return false;
+            var t = item.FullText ?? item.DisplayText ?? "";
+            return t.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                || t.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool MatchesQuery(ClipboardManager.ClipboardItem item, string q)
+        {
+            if (q.Length == 0) return true;
+            var hay = (item.FullText ?? "") + " " + (item.DisplayText ?? "");
+            return hay.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _searchQuery = SearchBox.Text;
+            if (SearchPlaceholder != null)
+                SearchPlaceholder.Visibility = string.IsNullOrEmpty(_searchQuery) ? Visibility.Visible : Visibility.Collapsed;
+            RefreshList();
+        }
+
+        private void Filter_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is string t)
+            {
+                _filterType = t;
+                if (FilterPanel != null)
+                {
+                    foreach (var child in FilterPanel.Children)
+                    {
+                        if (child is Button b)
+                        {
+                            bool active = (b.Tag as string) == t;
+                            b.Background = active
+                                ? new SolidColorBrush(Color.FromRgb(0, 120, 212))
+                                : new SolidColorBrush(Color.FromRgb(45, 45, 45));
+                            b.Foreground = active ? Brushes.White : new SolidColorBrush(Color.FromRgb(204, 204, 204));
+                        }
+                    }
+                }
+                RefreshList();
+            }
+        }
+
+        private void Pin_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is ClipboardManager.ClipboardItem item)
+            {
+                _clipboardService.SetPinned(item, !item.IsPinned);
+                // SetPinned 触发 HistoryChanged → RefreshList（收藏优先置顶即时生效）
+            }
+        }
+
+        // ========== 原有交互 ==========
+
         private void UpdateUI()
         {
             if (_btnDeleteSelected != null)
                 _btnDeleteSelected.IsEnabled = _selectedItems.Count > 0;
             if (_statusText != null)
-                _statusText.Text = $"{_clipboardService.History.Count} 条记录";
+                _statusText.Text = string.Format(LocalizationManager.Instance["Clip_Count"], _clipboardService.History.Count);
         }
 
         private void Item_Click(object sender, MouseButtonEventArgs e)
@@ -109,7 +201,7 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
                 _clipboardService.CopyToClipboard(item);
                 if (_statusText != null)
                 {
-                    _statusText.Text = "✅ 已复制";
+                    _statusText.Text = LocalizationManager.Instance["Clip_Copied"];
                     var timer = new System.Windows.Threading.DispatcherTimer();
                     timer.Interval = TimeSpan.FromSeconds(1.5);
                     timer.Tick += (s, args) => { timer.Stop(); UpdateUI(); };
@@ -165,19 +257,20 @@ namespace DynamicBird.UI.Widgets.ClipboardHistory
             _selectedItems.Clear();
             UpdateUI();
             if (_statusText != null)
-                _statusText.Text = $"🗑️ 已删除 {items.Count} 项";
+                _statusText.Text = string.Format(LocalizationManager.Instance["Clip_Deleted"], items.Count);
         }
 
         private void ClearAll_Click(object sender, RoutedEventArgs e)
         {
             if (_clipboardService.History.Count == 0) return;
-            if (MessageBox.Show("清空所有剪贴板历史？", "确认", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show(LocalizationManager.Instance["Clip_ClearConfirm"],
+                    LocalizationManager.Instance["Clip_Confirm"], MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 _clipboardService.ClearAll();
                 _selectedItems.Clear();
                 UpdateUI();
                 if (_statusText != null)
-                    _statusText.Text = "🗑️ 已清空";
+                    _statusText.Text = LocalizationManager.Instance["Clip_Cleared"];
             }
         }
     }

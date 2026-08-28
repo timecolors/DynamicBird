@@ -1,5 +1,6 @@
-﻿using DynamicBird.Animation;
+using DynamicBird.Animation;
 using DynamicBird.Core.Calculators;
+using DynamicBird.Core.Detection;
 using DynamicBird.Core.Services.Configuration;
 using System;
 using System.Windows;
@@ -28,12 +29,30 @@ namespace DynamicBird.Core.Controllers
         private readonly SizePositionCalculator _positionCalculator;
         private readonly SizeDragHandler _dragHandler;
 
+        /// <summary>面板所在显示器工作区尺寸（DIP，替代主屏常量）。</summary>
+        private (double width, double height) PanelScreenSize
+        {
+            get
+            {
+                var wa = ScreenMetrics.GetCachedScreenForWindow(
+                    _window.Left, _window.Top, _window.Width, _window.Height);
+                return (wa.Width, wa.Height);
+            }
+        }
+
         public event Action<bool>? UserResizeStarted;
         public event Action? SizeChanged;
         public event Action? ResizeEnded;
         public event Action<bool>? LockRequest;
 
         public string CurrentMode => _currentMode;
+
+        /// <summary>
+        /// 注入边缘触发带的启用过滤（与主窗口 tick 的 IsRegionEnabledBySettings 一致）。
+        /// 使面板贴屏幕边侧的拖拽手柄在有效边缘触发带内让位。
+        /// </summary>
+        public void SetEdgeBandRegionEnabled(Func<EdgeRegion, bool>? check)
+            => _dragHandler.RegionEnabledCheck = check;
 
         /// <summary>
         /// 更新底部贴边边界（任务栏自动隐藏/升起时由主窗口定时刷新）。
@@ -144,9 +163,36 @@ namespace DynamicBird.Core.Controllers
             ApplySizeForCurrentMode();
         }
 
+        /// <summary>按小组件内容实际尺寸计算目标面板尺寸（内容尽量显示全，已内部限高）。</summary>
+        public (double width, double height) MeasureWidgetTargetSize()
+        {
+            var (cw, ch) = _sizeCalculator.MeasureContent();
+            return _sizeCalculator.CalculateTargetSize(cw, ch, "Widget");
+        }
+
+        /// <summary>应用辅助（画中画/媒体控制）按内容实际尺寸计算目标面板尺寸（限幅 80% 屏）。</summary>
+        public (double width, double height) MeasureAppHelperTargetSize()
+        {
+            var (cw, ch) = _sizeCalculator.MeasureContent();
+            return _sizeCalculator.CalculateTargetSize(cw, ch, "AppHelper");
+        }
+
+        /// <summary>角落面板（快捷开关/通知/最近）按内容自适应尺寸，避免固定方形过高。</summary>
+        public (double width, double height) MeasurePlaceholderTargetSize()
+        {
+            var (cw, ch) = _sizeCalculator.MeasureContent();
+            var (w, h) = _sizeCalculator.CalculateTargetSize(cw, ch, "Placeholder");
+            // 角落面板：宽度不超过屏幕 40%，高度不超过 60%，避免过高
+            var wa = ScreenMetrics.GetCachedScreenForWindow(
+                _window.Left, _window.Top, _window.Width, _window.Height);
+            w = Math.Min(w, wa.Width * 0.4);
+            h = Math.Min(h, wa.Height * 0.6);
+            return (w, h);
+        }
+
         private void ApplyTaskbarSize()
         {
-            double screenWidth = SystemParameters.PrimaryScreenWidth;
+            var (screenWidth, _) = PanelScreenSize;
             double targetWidth = screenWidth * 2.0 / 3.0;
             double targetHeight = Math.Max(_window.MinHeight, Math.Max(60, _taskbarHeight * 1.75));
 
@@ -160,7 +206,7 @@ namespace DynamicBird.Core.Controllers
 
         private void ApplyPlaceholderSize()
         {
-            double screenWidth = SystemParameters.PrimaryScreenWidth;
+            var (screenWidth, _) = PanelScreenSize;
             double targetSize = screenWidth * 2.0 / 7.0;
             targetSize = Math.Max(100, Math.Min(targetSize, screenWidth * 0.4));
 
@@ -183,6 +229,9 @@ namespace DynamicBird.Core.Controllers
 
             if (targetWidth < 100) targetWidth = 100;
             if (targetHeight < 60) targetHeight = 60;
+
+            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                $"AutoSize content={contentWidth:F0}x{contentHeight:F0} → target={targetWidth:F0}x{targetHeight:F0} mode={_currentMode}");
 
             var (newLeft, newTop) = _positionCalculator.CalculatePosition(
                 targetWidth, targetHeight, _currentEdge, _window.Left, _window.Top, _window.Width, _window.Height);
@@ -223,8 +272,7 @@ namespace DynamicBird.Core.Controllers
         /// </summary>
         private (double left, double top) Anchor(string edge, double left, double top, double width, double height)
         {
-            double screenW = SystemParameters.PrimaryScreenWidth;
-            double screenH = SystemParameters.PrimaryScreenHeight;
+            var (screenW, screenH) = PanelScreenSize;
 
             return edge switch
             {

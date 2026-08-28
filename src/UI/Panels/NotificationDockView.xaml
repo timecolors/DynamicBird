@@ -1,6 +1,6 @@
 <UserControl x:Class="DynamicBird.UI.Panels.NotificationDockView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
     <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,7 +15,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
                 <TextBlock x:Name="TitleText"
-                           Text="🔔 通知坞"
+                           Text="{Binding Item[UI_NotificationDockView_111], Source={x:Static loc:LocalizationManager.Instance}}"
                            FontSize="14"
                            FontWeight="SemiBold"
                            Foreground="#EEEEEE"/>
@@ -25,7 +25,7 @@
                     Grid.Column="1"
                     VerticalAlignment="Center"
                     Click="Clear_Click"
-                    ToolTip="清空通知">
+                    ToolTip="{Binding Item[UI_NotificationDockView_112], Source={x:Static loc:LocalizationManager.Instance}}">
                 <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconTrash}"/>
             </Button>
         </Grid>
