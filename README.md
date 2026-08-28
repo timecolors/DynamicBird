@@ -50,6 +50,12 @@
 - 动画顺滑、自适应尺寸、多显示器支持
 - Smooth animations, adaptive sizing, and multi-monitor support.
 
+### 🎞️ 动画设置 / Animation Settings
+- **触发 / 隐藏动画分开设置**：滑入滑出、淡入淡出、缩放、弹性（回弹），每种带独立时长与特化参数（缩放比例 / 振荡次数 / 弹性强度）
+- Trigger and hide animations are configured separately: slide, fade, zoom, and elastic — each with its own duration and specialized parameters (zoom ratio, oscillations, springiness).
+- 面板从**对应边**滑入滑出（左边缘从左侧、底部从下方），动画时长与缓动全部可调
+- Panels slide in/out from their corresponding edge (left edge slides from the left, bottom from below); duration and easing are fully adjustable.
+
 > 所有数据仅保存在本机 `%LOCALAPPDATA%\DynamicBird`，不上传云端；完全免费、无广告。
 > All data stays on your device — no cloud uploads, no ads, completely free.
 
