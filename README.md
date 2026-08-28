@@ -30,6 +30,8 @@
 ### 小组件 / Widgets
 - **剪贴板历史**、**便签**、**计时器 / 倒计时**、**标准 / 科学 / 程序员计算器**
 - Clipboard history, notes, countdown timer, and standard / scientific / programmer calculator.
+- **自定义小组件**：用 C# 编写自己的小组件插件（内置编辑器与插件库），安装后自动出现在小组件面板
+- **Custom widgets**: write your own C# widget plugins (built-in editor & marketplace), they appear in the widget panel automatically.
 
 ### 快捷开关 / Quick Toggles
 - **音量与亮度**、**蓝牙**、**Wi-Fi**、**移动热点**、**省电模式**、快速打开 Windows 设置
@@ -49,6 +51,10 @@
 - Each edge and corner can show a different panel, with follow-mouse or fixed-edge modes.
 - 动画顺滑、自适应尺寸、多显示器支持
 - Smooth animations, adaptive sizing, and multi-monitor support.
+
+### 🎨 风格适配 Windows / Windows-Native Styling
+- **Win11 风格适配**：Mica 毛玻璃背景、原生圆角、深色标题栏，与系统外观融为一体
+- Windows 11 native styling: Mica backdrop, native rounded corners, and dark title bar that blend with the OS.
 
 ### 🎞️ 动画设置 / Animation Settings
 - **触发 / 隐藏动画分开设置**：滑入滑出、淡入淡出、缩放、弹性（回弹），每种带独立时长与特化参数（缩放比例 / 振荡次数 / 弹性强度）
