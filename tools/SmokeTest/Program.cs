@@ -61,7 +61,7 @@ namespace SmokeTest
                     _ = new AppHelperView();
                     _ = new NotificationDockView();
                     _ = new RecentItemsView();
-                    _ = new QuickSettingsView();
+                    _ = new QuickSettingsView(new SettingsManager());
                     Step("widgets-done");
 
                     // 0) 验证系统 Toast 注册：开始菜单快捷方式 + AppUserModelID
