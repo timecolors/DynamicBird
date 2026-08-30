@@ -1,6 +1,6 @@
 {
   "updatedAt": "2026-08-30",
-  "marketBase": "https://cdn.jsdelivr.net/gh/timecolors/DynamicBird@main/market",
+  "marketBase": "https://cdn.jsdelivr.net/gh/timecolors/DynamicBird@master/market",
   "packages": [
     {
       "id": "example-timer",

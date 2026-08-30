@@ -21,8 +21,8 @@ namespace DynamicBird.UI.Birdcage
     /// </summary>
     public sealed class BirdcageMarketWindow : Window
     {
-        /// <summary>在线市场 CDN 根（与 market/index.json 的 marketBase 一致）。</summary>
-        public const string MarketBase = "https://cdn.jsdelivr.net/gh/timecolors/DynamicBird@main/market";
+        /// <summary>在线市场 CDN 根（与 market/index.json 的 marketBase 一致；仓库默认分支为 master）。</summary>
+        public const string MarketBase = "https://cdn.jsdelivr.net/gh/timecolors/DynamicBird@master/market";
 
         private readonly DynamicBird.UI.Settings.Pages.BirdcagePage _page;
         private readonly TextBlock _status = new()
