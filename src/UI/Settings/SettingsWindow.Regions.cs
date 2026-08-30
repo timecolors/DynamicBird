@@ -80,7 +80,7 @@ namespace DynamicBird.UI.Settings
                     Tag = value
                 });
             }
-            // ★ 用户编译注册的区域面板（BaseType 非 Widget/Config）：显示为「🐦 面板名」，Tag = Custom:面板Id
+            // ★ 用户编译注册的区域面板（BaseType 非 Widget/Config）：显示为「面板名」，Tag = Custom:面板Id
             //   小组件变体（BaseType=Widget）进小组件页签，配置代码项（Kind=Config）只留鸟笼
             foreach (var cp in _settings.CustomPanels)
             {
@@ -88,7 +88,7 @@ namespace DynamicBird.UI.Settings
                 if ((cp.BaseType ?? "") == "Widget") continue;
                 combo.Items.Add(new ComboBoxItem
                 {
-                    Content = "🐦 " + cp.Name,
+                    Content = cp.Name,
                     Tag = "Custom:" + cp.Id
                 });
             }

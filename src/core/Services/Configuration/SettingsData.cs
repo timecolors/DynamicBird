@@ -3,6 +3,14 @@ using System.Collections.Generic;
 
 namespace DynamicBird.Core.Services.Configuration
 {
+    /// <summary>网页工具收藏项（设置页添加/删除，小组件地址栏下拉展示）。</summary>
+    public sealed class WebBookmark
+    {
+        public string Name { get; set; } = "";
+        public string Url { get; set; } = "";
+        public string Display => Name + " · " + Url;
+    }
+
     public class SettingsData
     {
         // ========== 语言（zh-CN / en-US，空=跟随系统） ==========
@@ -36,6 +44,10 @@ namespace DynamicBird.Core.Services.Configuration
         public double Opacity { get; set; } = 0.85;
         public int CornerRadius { get; set; } = 16;
         public bool ShowSystemStatus { get; set; } = true;
+        /// <summary>网页小组件默认地址（WebView2，可随时在小组件地址栏换）。</summary>
+        public string WebWidgetUrl { get; set; } = "https://www.bing.com";
+        /// <summary>网页工具收藏列表（地址栏下拉项，设置页管理）。</summary>
+        public List<WebBookmark> WebBookmarks { get; set; } = new();
 
         // ========== 动画与布局 ==========
         public double HorizontalLayoutThreshold { get; set; } = 3.0 / 7.0;
@@ -243,6 +255,8 @@ namespace DynamicBird.Core.Services.Configuration
         public bool WidgetEnabled_Timer { get; set; } = true;
         public bool WidgetEnabled_Calculator { get; set; } = true;
         public bool WidgetEnabled_TextAi { get; set; } = true;
+        // ★ 网页工具（WebView2 联网）默认关闭：保持"开箱不联网"，用户主动启用后才会加载网页
+        public bool WidgetEnabled_Web { get; set; } = false;
 
         /// <summary>用户插件小组件（Widget_&lt;id&gt;）的启用覆盖；缺省视为启用。</summary>
         public Dictionary<string, bool> WidgetPluginOverrides { get; set; } = new();

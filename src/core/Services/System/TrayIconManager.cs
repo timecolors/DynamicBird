@@ -47,7 +47,7 @@ namespace DynamicBird.Core.Services
         public void Create()
         {
             _notifyIcon = new System.Windows.Forms.NotifyIcon();
-            _notifyIcon.Text = "🐦 灵动鸟";
+            _notifyIcon.Text = "灵动鸟";
 
             try
             {

@@ -35,14 +35,14 @@ namespace MarketValidator
             {
                 string source = File.ReadAllText(f);
                 string id = Path.GetFileName(Path.GetDirectoryName(f) ?? "pkg");
-                var sandbox = WidgetCompiler.CheckSandbox(source);
-                if (sandbox.Count > 0)
+                var (_, err) = WidgetCompiler.Compile(id, source);
+                string sandboxErr = WidgetCompiler.SandboxErrors(source);   // 文本预检 + 编译符号检查
+                if (!string.IsNullOrEmpty(sandboxErr))
                 {
-                    Console.WriteLine("FAIL  " + f.Replace(cwd + Path.DirectorySeparatorChar, "") + " [沙箱拦截] " + string.Join("; ", sandbox));
+                    Console.WriteLine("FAIL  " + f.Replace(cwd + Path.DirectorySeparatorChar, "") + " [沙箱拦截] " + sandboxErr.Replace(Environment.NewLine, " "));
                     fail++;
                     continue;
                 }
-                var (_, err) = WidgetCompiler.Compile(id, source);
                 if (string.IsNullOrEmpty(err))
                 {
                     Console.WriteLine("PASS  " + f.Replace(cwd + Path.DirectorySeparatorChar, ""));

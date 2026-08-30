@@ -41,6 +41,7 @@ namespace DynamicBird.UI.Widgets
         private readonly TimerWidget _timerWidget;
         private readonly CalculatorWidget _calculatorWidget;
         private readonly TextAiWidget _textAiWidget;
+        private readonly WebViewWidget _webWidget;
 
         private readonly List<WidgetTab> _tabs = new();
         private readonly TaskbarScrollHandler _tabScrollHandler;
@@ -59,12 +60,14 @@ namespace DynamicBird.UI.Widgets
             _timerWidget = new TimerWidget();
             _calculatorWidget = new CalculatorWidget();
             _textAiWidget = new TextAiWidget();
+            _webWidget = new WebViewWidget(settings);
 
             _tabs.Add(new WidgetTab { Key = "Clipboard", IconKey = "IconClipboard", LocKey = "WidgetTabs_Clipboard", Widget = _clipboardWidget });
             _tabs.Add(new WidgetTab { Key = "Note", IconKey = "IconNote", LocKey = "WidgetTabs_Notes", Widget = _noteWidget });
             _tabs.Add(new WidgetTab { Key = "Timer", IconKey = "IconTimer", LocKey = "WidgetTabs_Timer", Widget = _timerWidget });
             _tabs.Add(new WidgetTab { Key = "Calculator", IconKey = "IconCalc", LocKey = "WidgetTabs_Calculator", Widget = _calculatorWidget });
             _tabs.Add(new WidgetTab { Key = "TextAi", IconKey = "IconAi", LocKey = "WidgetTabs_TextAi", Widget = _textAiWidget });
+            _tabs.Add(new WidgetTab { Key = "Web", IconKey = "IconWeb", LocKey = "WidgetTabs_Web", Widget = _webWidget });
 
             // ★ 用户安装的 C# 插件小组件：每个成为一个标签（编译失败跳过）
             RebuildDynamicTabs();
@@ -198,6 +201,12 @@ namespace DynamicBird.UI.Widgets
         /// </summary>
         public (double width, double height)? MeasureContentSize()
         {
+            // ★ WebView2 标签：独立进程渲染，WPF Measure 无法得到有效内容尺寸（返回 0/异常值导致面板变小/消失）
+            //   → 用固定面板尺寸（网页自适应，用户可手动拖面板大小）
+            if (_currentTab == "Web")
+            {
+                return (480, 360);
+            }
             try
             {
                 if (ContentContainer.Content is System.Windows.FrameworkElement fe)
@@ -359,6 +368,11 @@ namespace DynamicBird.UI.Widgets
                     _textAiWidget.OnActivated();
                     FooterPanel.Child = _textAiWidget.GetFooterControl();
                     break;
+                case "Web":
+                    ContentContainer.Content = _webWidget.CreateView();
+                    _webWidget.OnActivated();
+                    FooterPanel.Child = null;
+                    break;
                 case "Calculator":
                 default:
                     ContentContainer.Content = _calculatorWidget;
@@ -397,6 +411,7 @@ namespace DynamicBird.UI.Widgets
                 case "Timer": _timerWidget.OnActivated(); break;
                 case "Calculator": _calculatorWidget.OnActivated(); break;
                 case "TextAi": _textAiWidget.OnActivated(); break;
+                case "Web": _webWidget.OnActivated(); break;
             }
         }
 

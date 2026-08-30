@@ -27,6 +27,9 @@
   <data name="WidgetTabs_TextAi" xml:space="preserve">
     <value>Translate Selection</value>
   </data>
+  <data name="WidgetTabs_Web" xml:space="preserve">
+    <value>Web Tools</value>
+  </data>
   <data name="Timer_FooterHint" xml:space="preserve">
     <value>Count-up / Count-down / Alarm: each mode keeps its own timing; switching never resets</value>
   </data>
@@ -248,7 +251,7 @@ Mouse wheel zooms the mirrored view</value>
     <value>Get Started</value>
   </data>
   <data name="UI_OnboardingWindow_66" xml:space="preserve">
-    <value>🐦 Welcome to DynamicBird</value>
+    <value>Welcome to DynamicBird</value>
   </data>
   <data name="UI_OnboardingWindow_67" xml:space="preserve">
     <value>A desktop edge-panel tool that fits Windows.</value>
@@ -457,10 +460,10 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Close window</value>
   </data>
   <data name="UI_SettingsWindow_134" xml:space="preserve">
-    <value>🐦 DynamicBird Settings</value>
+    <value>DynamicBird Settings</value>
   </data>
   <data name="UI_SettingsWindow_135" xml:space="preserve">
-    <value>🐦 DynamicBird Settings</value>
+    <value>DynamicBird Settings</value>
   </data>
   <data name="UI_SettingsWindow_136" xml:space="preserve">
     <value>⚙️ Taskbar</value>
@@ -697,7 +700,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>When enabled, the Do Not Disturb state is saved and restored on next launch.</value>
   </data>
   <data name="UI_SettingsWindow_214" xml:space="preserve">
-    <value>🐦 Follow-the-bird mode</value>
+    <value>Follow-the-bird mode</value>
   </data>
   <data name="UI_SettingsWindow_215" xml:space="preserve">
     <value>When enabled, the panel softly follows the mouse and sticks to it; when disabled, the panel stays where it is after leaving the edge.</value>
@@ -2125,7 +2128,7 @@ Right-click for the quick menu</value>
     <value>Get Started</value>
   </data>
   <data name="Ob_Welcome_Title" xml:space="preserve">
-    <value>🐦 Welcome to DynamicBird</value>
+    <value>Welcome to DynamicBird</value>
   </data>
   <data name="Ob_Welcome_Sub" xml:space="preserve">
     <value>A Windows desktop edge panel tool — keep frequent actions at the screen edge, use them, then move on.</value>
@@ -2581,6 +2584,30 @@ Media control</value>
   </data>
   <data name="Set_Sec_Widgets" xml:space="preserve">
     <value>◈ Widgets (widget panel content)</value>
+  </data>
+  <data name="Set_WebTool_Title" xml:space="preserve">
+    <value>🌐 Web Tools</value>
+  </data>
+  <data name="Set_WebTool_Desc" xml:space="preserve">
+    <value>The "Web Tools" tab in the widget panel opens the selected tool page via WebView2. Pick a default, or enter any URL.</value>
+  </data>
+  <data name="Set_WebTool_Preset" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="Set_WebTool_Custom" xml:space="preserve">
+    <value>Custom URL</value>
+  </data>
+  <data name="Set_WebTool_CustomItem" xml:space="preserve">
+    <value>Custom…</value>
+  </data>
+  <data name="Set_WebTool_Bookmarks" xml:space="preserve">
+    <value>Bookmarks (shown in address bar dropdown)</value>
+  </data>
+  <data name="Set_WebTool_AddBookmark" xml:space="preserve">
+    <value>+ Bookmark current URL</value>
+  </data>
+  <data name="Set_WebTool_DelBookmark" xml:space="preserve">
+    <value>Delete selected</value>
   </data>
 
   <data name="Set_Menu_ShowDesktop" xml:space="preserve">

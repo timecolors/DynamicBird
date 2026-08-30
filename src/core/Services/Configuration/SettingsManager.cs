@@ -315,6 +315,18 @@ namespace DynamicBird.Core.Services.Configuration
             set => SetField(v => _data.ShowSystemStatus = v, value);
         }
 
+        public string WebWidgetUrl
+        {
+            get => _data.WebWidgetUrl;
+            set => SetField(v => _data.WebWidgetUrl = v, value);
+        }
+
+        public System.Collections.Generic.List<DynamicBird.Core.Services.Configuration.WebBookmark> WebBookmarks
+        {
+            get => _data.WebBookmarks;
+            set => SetField(v => _data.WebBookmarks = v, value);
+        }
+
 
 
 
@@ -634,6 +646,7 @@ namespace DynamicBird.Core.Services.Configuration
                 "Timer" => _data.WidgetEnabled_Timer,
                 "Calculator" => _data.WidgetEnabled_Calculator,
                 "TextAi" => _data.WidgetEnabled_TextAi,
+                "Web" => _data.WidgetEnabled_Web,
                 _ => true
             };
         }
@@ -655,6 +668,7 @@ namespace DynamicBird.Core.Services.Configuration
                 case "Timer": _data.WidgetEnabled_Timer = enabled; break;
                 case "Calculator": _data.WidgetEnabled_Calculator = enabled; break;
                 case "TextAi": _data.WidgetEnabled_TextAi = enabled; break;
+                case "Web": _data.WidgetEnabled_Web = enabled; break;
                 default: return;
             }
             Save();

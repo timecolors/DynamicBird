@@ -238,6 +238,9 @@ namespace DynamicBird.UI.Settings
             sldCornerRadius.Value = _settingsData.CornerRadius;
             chkShowSystemStatus.IsChecked = _settingsData.ShowSystemStatus;
 
+            // 网页工具（预置下拉 + 自定义地址）
+            LoadWebToolSettings();
+
             // 动画与布局
             sldHorizontalThreshold.Value = _settingsData.HorizontalLayoutThreshold;
             sldTagWidth.Value = _settingsData.TagWidth;
@@ -408,6 +411,120 @@ namespace DynamicBird.UI.Settings
             {
                 txtUpdateStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Set_UpdateSource"], owner, repo);
             }
+        }
+
+        // ==================== 网页工具 ====================
+        private bool _loadingWebTool;
+
+        private void LoadWebToolSettings()
+        {
+            try
+            {
+                _loadingWebTool = true;
+                cmbWebTool.Items.Clear();
+                foreach (var t in DynamicBird.UI.Widgets.WebToolPresets.Presets)
+                {
+                    cmbWebTool.Items.Add(new ComboBoxItem { Tag = t, Content = t.Name });
+                }
+                cmbWebTool.Items.Add(new ComboBoxItem
+                {
+                    Tag = null,
+                    Content = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_WebTool_CustomItem"]
+                });
+
+                string url = _settingsData.WebWidgetUrl ?? "";
+                var match = DynamicBird.UI.Widgets.WebToolPresets.Presets.FirstOrDefault(t =>
+                    string.Equals(t.Url, url, StringComparison.OrdinalIgnoreCase));
+                txtWebToolUrl.Text = url;
+                RefreshWebBookmarkList();
+                if (match != null)
+                {
+                    cmbWebTool.SelectedIndex = DynamicBird.UI.Widgets.WebToolPresets.Presets.ToList().IndexOf(match);
+                }
+                else
+                {
+                    cmbWebTool.SelectedIndex = cmbWebTool.Items.Count - 1; // 自定义…
+                }
+            }
+            finally { _loadingWebTool = false; }
+        }
+
+        private void CmbWebTool_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loadingWebTool || cmbWebTool.SelectedItem is not ComboBoxItem item) return;
+            if (item.Tag is DynamicBird.UI.Widgets.WebToolPresets.Tool t)
+            {
+                txtWebToolUrl.Text = t.Url;
+                _settingsData.WebWidgetUrl = t.Url;
+                HookAutoSave(); // 即时落盘
+            }
+        }
+
+        private void TxtWebToolUrl_LostFocus(object sender, RoutedEventArgs e)
+            => SaveWebToolUrlFromBox();
+
+        private void TxtWebToolUrl_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                SaveWebToolUrlFromBox();
+                Keyboard.ClearFocus();
+            }
+        }
+
+        private void SaveWebToolUrlFromBox()
+        {
+            string url = txtWebToolUrl.Text.Trim();
+            if (url.Length == 0) return;
+            if (!string.Equals(_settingsData.WebWidgetUrl, url, StringComparison.Ordinal))
+            {
+                _settingsData.WebWidgetUrl = url;
+                HookAutoSave();
+            }
+        }
+
+        private void RefreshWebBookmarkList()
+        {
+            lstWebBookmarks.ItemsSource = null;
+            lstWebBookmarks.ItemsSource = _settingsData.WebBookmarks;
+        }
+
+        private void BtnAddWebBookmark_Click(object sender, RoutedEventArgs e)
+        {
+            string url = txtWebToolUrl.Text.Trim();
+            if (url.Length == 0) return;
+            if (!url.Contains("://")) url = "https://" + url;
+            if (_settingsData.WebBookmarks.Any(b =>
+                string.Equals(b.Url, url, StringComparison.OrdinalIgnoreCase)))
+            {
+                MessageBox.Show(this, "该网址已在收藏中", "网页工具", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            string name = GetBookmarkName(url);
+            _settingsData.WebBookmarks.Add(new DynamicBird.Core.Services.Configuration.WebBookmark { Name = name, Url = url });
+            RefreshWebBookmarkList();
+            HookAutoSave();
+            MessageBox.Show(this, "已收藏：" + name, "网页工具", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnDelWebBookmark_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstWebBookmarks.SelectedItem is DynamicBird.Core.Services.Configuration.WebBookmark b)
+            {
+                _settingsData.WebBookmarks.Remove(b);
+                RefreshWebBookmarkList();
+                HookAutoSave();
+            }
+        }
+
+        private static string GetBookmarkName(string url)
+        {
+            try
+            {
+                var uri = new Uri(url);
+                return uri.Host.TrimStart("www.".ToCharArray());
+            }
+            catch { return url; }
         }
 
         /// <summary>卸载灵动鸟（非商店版）：二次确认后启动卸载脚本（删除应用/可选删除数据）。</summary>
@@ -683,6 +800,9 @@ namespace DynamicBird.UI.Settings
             _settingsData.Opacity = sldOpacity.Value;
             _settingsData.CornerRadius = (int)sldCornerRadius.Value;
             _settingsData.ShowSystemStatus = chkShowSystemStatus.IsChecked ?? true;
+
+            // 网页工具
+            _settingsData.WebWidgetUrl = txtWebToolUrl.Text.Trim();
 
             // 动画与布局
             _settingsData.HorizontalLayoutThreshold = sldHorizontalThreshold.Value;

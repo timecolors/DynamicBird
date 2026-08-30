@@ -123,27 +123,11 @@ namespace DynamicBird.UI.Widgets.Dynamic
         {
             var blocked = new List<string>();
             if (string.IsNullOrEmpty(source)) return blocked;
+            // ===== 危险 API（词边界匹配，防子串误伤如 Dispatcher.Invoke） =====
+            // ★ 整命名空间拦截已移除：System.Diagnostics 等含无害类（Stopwatch/Debug），
+            //   精确拦截交给 CheckSandboxSymbols（编译符号级：只拦 Process/反射/Interop 等危险类型）。
             string lower = source.ToLower();
 
-            // ===== 危险 using 命名空间（整包拦截） =====
-            string[] blockedUsings =
-            {
-                "using system.diagnostics;",       // Process
-                "using system.reflection;",        // 反射
-                "using system.runtime.interopservices;", // DllImport/Marshal
-                "using system.management;",        // WMI
-                "using microsoft.win32;",          // Registry
-                "using system.directoryservices;", // AD/LDAP
-            };
-            foreach (var u in blockedUsings)
-            {
-                if (lower.Contains(u))
-                {
-                    blocked.Add("禁止命名空间: " + u.Replace("using ", "").TrimEnd(';'));
-                }
-            }
-
-            // ===== 危险 API（词边界匹配，防子串误伤如 Dispatcher.Invoke） =====
             (string Pattern, string Label)[] blockedApis =
             {
                 (@"\bprocess\b", "进程执行（Process）"),
@@ -194,11 +178,140 @@ namespace DynamicBird.UI.Widgets.Dynamic
             return blocked;
         }
 
-        /// <summary>沙箱校验并汇总为错误文本（非空 = 有被拦截项，编译前应先拒绝）。</summary>
+        // ==================== 编译符号级沙箱检查（补文本扫描的绕过洞） ====================
+
+        /// <summary>
+        /// 编译符号级检查：解析源码每个成员访问/对象创建/类型引用的真实符号（编译器解析，与书写方式无关），
+        /// 命中类型级/成员级黑名单即拦截。文本扫描可被换皮绕过（如 File.Open 写文件、Assembly.GetType 反射），
+        /// 符号级不可绕过——只要引用了危险类型/成员，无论怎么写都会命中。
+        /// </summary>
+        public static List<string> CheckSandboxSymbols(string source)
+        {
+            var blocked = new List<string>();
+            if (string.IsNullOrWhiteSpace(source)) return blocked;
+            try
+            {
+                var tree = CSharpSyntaxTree.ParseText(source);
+                var compilation = CSharpCompilation.Create(
+                    "sandbox_check_" + Guid.NewGuid().ToString("N").Substring(0, 8),
+                    new[] { tree },
+                    BuildReferences(),
+                    new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+                var model = compilation.GetSemanticModel(tree);
+
+                foreach (var node in tree.GetRoot().DescendantNodes())
+                {
+                    try
+                    {
+                        ISymbol? sym = null;
+                        if (node is Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax ma)
+                            sym = model.GetSymbolInfo(ma).Symbol;
+                        else if (node is Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax inv)
+                        {
+                            var info = model.GetSymbolInfo(inv);
+                            sym = info.Symbol ?? info.CandidateSymbols.FirstOrDefault();
+                        }
+                        else if (node is Microsoft.CodeAnalysis.CSharp.Syntax.ObjectCreationExpressionSyntax oc)
+                            sym = model.GetSymbolInfo(oc).Symbol;
+                        else if (node is Microsoft.CodeAnalysis.CSharp.Syntax.IdentifierNameSyntax idn)
+                        {
+                            if (model.GetSymbolInfo(idn).Symbol is ITypeSymbol ts && IsBlockedTypeSymbol(ts))
+                            {
+                                string tn = ts.ToString() ?? "";
+                                if (!blocked.Contains("禁止类型: " + tn)) blocked.Add("禁止类型: " + tn);
+                            }
+                            continue;
+                        }
+                        if (sym == null) continue;
+                        var containing = sym.ContainingType;
+                        if (containing == null) continue;
+                        string typeName = containing.ToString() ?? "";
+                        if (IsBlockedTypeName(typeName))
+                        {
+                            if (!blocked.Contains("禁止类型: " + typeName)) blocked.Add("禁止类型: " + typeName);
+                        }
+                        else if (IsBlockedMember(typeName, sym.Name))
+                        {
+                            string label = "禁止成员: " + typeName + "." + sym.Name;
+                            if (!blocked.Contains(label)) blocked.Add(label);
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { /* 编译失败交给正式编译报错；符号检查静默跳过 */ }
+            return blocked;
+        }
+
+        private static List<MetadataReference> BuildReferences()
+        {
+            var refs = new List<MetadataReference>();
+            var trusted = ((AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string) ?? "")
+                .Split(Path.PathSeparator);
+            foreach (var p in trusted)
+            {
+                try { refs.Add(MetadataReference.CreateFromFile(p)); } catch { }
+            }
+            try { refs.Add(MetadataReference.CreateFromFile(typeof(IWidget).Assembly.Location)); } catch { }
+            return refs;
+        }
+
+        /// <summary>类型级黑名单：命中即整类型拦截（进程/反射/Interop/WMI/注册表/AD/剪贴板/写流/输入注入）。</summary>
+        private static bool IsBlockedTypeName(string typeName)
+        {
+            if (string.IsNullOrEmpty(typeName)) return false;
+            string[] prefixes =
+            {
+                "System.Diagnostics.Process", "System.Reflection", "System.Runtime.InteropServices",
+                "System.Management", "Microsoft.Win32", "System.DirectoryServices",
+                "System.Windows.Clipboard", "System.Windows.Forms.Clipboard",
+                "System.IO.FileStream", "System.IO.StreamWriter", "System.IO.BinaryWriter",
+                "System.Windows.Forms.SendKeys"
+            };
+            foreach (var p in prefixes)
+            {
+                if (typeName.StartsWith(p, StringComparison.Ordinal)) return true;
+            }
+            return false;
+        }
+
+        private static bool IsBlockedTypeSymbol(ITypeSymbol ts)
+        {
+            var t = ts;
+            while (t != null)
+            {
+                if (IsBlockedTypeName(t.ToString() ?? "")) return true;
+                t = t.BaseType;
+            }
+            return false;
+        }
+
+        /// <summary>成员级黑名单：类型允许但特定成员危险（File 读允许、写/删/移拦截；Environment.Exit 拦截）。</summary>
+        private static bool IsBlockedMember(string typeName, string member)
+        {
+            if (typeName == "System.IO.File")
+            {
+                return member.StartsWith("Write", StringComparison.Ordinal) ||
+                       member.StartsWith("Append", StringComparison.Ordinal) ||
+                       member is "Open" or "Create" or "Delete" or "Move" or "Copy" or "Replace" or "SetAttributes";
+            }
+            if (typeName == "System.IO.Directory")
+            {
+                return member is "CreateDirectory" or "Delete" or "Move";
+            }
+            if (typeName == "System.Environment")
+            {
+                return member == "Exit";
+            }
+            return false;
+        }
+
+        /// <summary>沙箱校验并汇总为错误文本（非空 = 有被拦截项，编译前应先拒绝）。文本预检 + 编译符号检查合并。</summary>
         public static string SandboxErrors(string source)
         {
             var blocked = CheckSandbox(source);
-            return blocked.Count == 0 ? "" : "市场来源代码被沙箱拦截，禁止以下能力：" + System.Environment.NewLine + "  - " + string.Join(System.Environment.NewLine + "  - ", blocked);
+            blocked.AddRange(CheckSandboxSymbols(source));
+            return blocked.Count == 0 ? "" : "市场来源代码被沙箱拦截，禁止以下能力：" + System.Environment.NewLine + "  - " + string.Join(System.Environment.NewLine + "  - ", blocked.Distinct());
         }
 
         /// <summary>

@@ -64,7 +64,7 @@ namespace DynamicBird.UI.Main
 
         private void ToggleWindow()
         {
-            // ★ 切换勿扰模式（与点击🐦图标行为一致）
+            // ★ 切换勿扰模式（与点击图标行为一致）
             bool newState = !_modeService.IsDoNotDisturb;
             _modeService.IsDoNotDisturb = newState;
 

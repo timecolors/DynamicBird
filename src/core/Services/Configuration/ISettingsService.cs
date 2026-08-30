@@ -19,6 +19,8 @@ namespace DynamicBird.Core.Services.Configuration
         double Opacity { get; set; }
         int CornerRadius { get; set; }
         bool ShowSystemStatus { get; set; }
+        string WebWidgetUrl { get; set; }
+        System.Collections.Generic.List<DynamicBird.Core.Services.Configuration.WebBookmark> WebBookmarks { get; set; }
 
         // ========== 形状参数 ==========
         double StripLengthRatio { get; set; }

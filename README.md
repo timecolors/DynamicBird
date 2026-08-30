@@ -66,7 +66,7 @@
 - Panels slide in/out from their corresponding edge (left edge slides from the left, bottom from below); duration and easing are fully adjustable.
 - **16 个区域可独立设置触发/隐藏动画**：每个边缘与四角使用自己的动画类型与时长，也可继承全局
 
-### 🐦 编程模式（鸟笼）/ Birdcage (Programming Mode)
+### 编程模式（鸟笼）/ Birdcage (Programming Mode)
 - **配置即代码**：整个设置模型以配置树呈现，每个节点可生成/编辑可执行 C# 配置代码，逐字段带中文注释
 - **单预设闭环**：保存当前节点 → 应用时编译执行写回生效 → 被覆盖的内置设置自动变灰，两击解除单处覆盖
 - **整套预设**：全量配置快照保存/应用/删除；被预设覆盖的设置页、鸟笼树、预设列表三处联动标记

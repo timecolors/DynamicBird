@@ -31,6 +31,7 @@ namespace DynamicBird.UI.Settings
             ["Timer"] = "UI_SettingsWindow_319",
             ["Calculator"] = "UI_SettingsWindow_320",
             ["TextAi"] = "UI_SettingsWindow_321",
+            ["Web"] = "WidgetTabs_Web",
         };
 
         private string _selectedWidgetKey = "";
@@ -46,11 +47,11 @@ namespace DynamicBird.UI.Settings
                 AddMarketItem(kv.Key, LocalizationManager.Instance[kv.Value]);
             foreach (var plugin in WidgetPluginStore.Installed)
                 AddPluginMarketItem(plugin);
-            // ★ 鸟笼保存的小组件变体（BaseType=Widget）：作为启停项列出（🐦 前缀区分）
+            // ★ 鸟笼保存的小组件变体（BaseType=Widget）：作为启停项列出（前缀区分）
             foreach (var cp in _settings.CustomPanels)
             {
                 if (cp.Kind == "Config" || (cp.BaseType ?? "") != "Widget") continue;
-                WidgetMarketList.Children.Add(BuildMarketRow("Birdcage_" + cp.Id, "🐦 " + cp.Name, null));
+                WidgetMarketList.Children.Add(BuildMarketRow("Birdcage_" + cp.Id, cp.Name, null));
             }
 
             if (string.IsNullOrEmpty(_selectedWidgetKey) || !KeyExists(_selectedWidgetKey))
@@ -139,6 +140,7 @@ namespace DynamicBird.UI.Settings
             DetailTimer.Visibility = key == "Timer" ? Visibility.Visible : Visibility.Collapsed;
             DetailCalc.Visibility = key == "Calculator" ? Visibility.Visible : Visibility.Collapsed;
             DetailTextAi.Visibility = key == "TextAi" ? Visibility.Visible : Visibility.Collapsed;
+            DetailWeb.Visibility = key == "Web" ? Visibility.Visible : Visibility.Collapsed;
             if (key.StartsWith("Widget_"))
             {
                 DetailPlugin.Visibility = Visibility.Visible;
@@ -163,7 +165,7 @@ namespace DynamicBird.UI.Settings
             if (cp == null) return;
             DetailPlugin.Children.Add(new TextBlock
             {
-                Text = "🐦 " + cp.Name,
+                Text = cp.Name,
                 FontWeight = FontWeights.SemiBold,
                 FontSize = 13,
                 Margin = new Thickness(0, 0, 0, 4)

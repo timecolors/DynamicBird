@@ -233,7 +233,7 @@
                         <!-- ========== 分组：编程模式（鸟笼） ========== -->
                         <Border Background="{DynamicResource SettingsCardBg}" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🐦 编程模式（鸟笼）" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                                <TextBlock Text="编程模式（鸟笼）" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
                                 <TextBlock Text="开启后，设置支持以代码（JSON）编辑：每个功能可生成 AI 提示词、复制原面板为副本自由改造、将整套或局部配置保存为预设。勾选后将在设置中新增「鸟笼」页签。"
                                            FontSize="11" Foreground="#777777" TextWrapping="Wrap" Margin="0,0,0,8"/>
                                 <CheckBox x:Name="chkProgrammingMode"
@@ -1196,6 +1196,39 @@
                                         </Border>
                                     </StackPanel>
 
+                                    <!-- 网页工具（WebView2） -->
+                                    <StackPanel x:Name="DetailWeb" Visibility="Collapsed">
+                                        <TextBlock Text="{Binding Item[Set_WebTool_Title], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{Binding Item[Set_WebTool_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10.5" Foreground="#888888" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[Set_WebTool_Preset], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                                            <ComboBox Grid.Column="1" x:Name="cmbWebTool" FontSize="12" SelectionChanged="CmbWebTool_SelectionChanged"/>
+                                        </Grid>
+                                        <Grid Margin="0,6,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Item[Set_WebTool_Custom], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                                            <TextBox Grid.Column="1" x:Name="txtWebToolUrl" FontSize="12" VerticalAlignment="Center" LostFocus="TxtWebToolUrl_LostFocus" KeyDown="TxtWebToolUrl_KeyDown"/>
+                                        </Grid>
+                                        <!-- 收藏列表（地址栏下拉项） -->
+                                        <TextBlock Text="{Binding Item[Set_WebTool_Bookmarks], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" FontWeight="SemiBold" Margin="0,10,0,4"/>
+                                        <ListBox x:Name="lstWebBookmarks" MaxHeight="110" FontSize="12" DisplayMemberPath="Display" Margin="0,0,0,6"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Content="{Binding Item[Set_WebTool_AddBookmark], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource Win11Button}" Height="24" FontSize="11" Padding="10,2" Margin="0,0,8,0" Click="BtnAddWebBookmark_Click"/>
+                                            <Button Grid.Column="1" Content="{Binding Item[Set_WebTool_DelBookmark], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource Win11Button}" Height="24" FontSize="11" Padding="10,2" HorizontalAlignment="Left" Click="BtnDelWebBookmark_Click"/>
+                                        </Grid>
+                                    </StackPanel>
+
                                     <!-- 用户插件（由代码填充） -->
                                     <StackPanel x:Name="DetailPlugin" Visibility="Collapsed"/>
                                 </StackPanel>
@@ -1902,7 +1935,7 @@
             </TabItem>
 
             <!-- ====== 选项卡：鸟笼（编程模式，勾选后显示，内容由代码创建） ====== -->
-            <TabItem x:Name="tabBirdcage" Header="🐦 鸟笼" Visibility="Collapsed"/>
+            <TabItem x:Name="tabBirdcage" Header="鸟笼" Visibility="Collapsed"/>
         </TabControl>
 
         <!-- 底部按钮：更改自动保存 -->
