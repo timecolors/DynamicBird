@@ -1,14 +1,74 @@
 {
-  "updatedAt": "2026-08-30",
+  "updatedAt": "2026-08-31",
   "marketBase": "https://cdn.jsdelivr.net/gh/timecolors/DynamicBird@master/market",
   "packages": [
     {
-      "id": "example-timer",
-      "name": "市场示例计时器",
+      "id": "timer",
+      "name": "\u8BA1\u65F6\u5668",
       "kind": "Widget",
+      "category": "\u5C0F\u7EC4\u4EF6",
       "version": "1.0.0",
       "author": "timecolors",
-      "description": "示例：演示市场包结构。",
+      "description": "\u7075\u52A8\u9E1F\u5185\u7F6E\u8BA1\u65F6\u5668\uFF1A\u5012\u8BA1\u65F6 / \u6B63\u8BA1\u65F6 / \u95F9\u949F\u3002",
+      "baseType": "Widget",
+      "parentKey": "panel-widgets",
+      "sourceKey": "widget-timer",
+      "permissions": []
+    },
+    {
+      "id": "calculator",
+      "name": "\u8BA1\u7B97\u5668",
+      "kind": "Widget",
+      "category": "\u5C0F\u7EC4\u4EF6",
+      "version": "1.0.0",
+      "author": "timecolors",
+      "description": "\u7075\u52A8\u9E1F\u5185\u7F6E\u8BA1\u7B97\u5668\uFF1A\u6807\u51C6 / \u79D1\u5B66 / \u7A0B\u5E8F\u5458\u3002",
+      "baseType": "Widget",
+      "parentKey": "panel-widgets",
+      "sourceKey": "widget-calculator",
+      "permissions": []
+    },
+    {
+      "id": "textai",
+      "name": "\u5212\u8BCD\u7FFB\u8BD1",
+      "kind": "Widget",
+      "category": "\u5C0F\u7EC4\u4EF6",
+      "version": "1.0.0",
+      "author": "timecolors",
+      "description": "\u5212\u8BCD\u7FFB\u8BD1\uFF1A\u9009\u4E2D\u6587\u672C\u7FFB\u8BD1 / \u603B\u7ED3 / \u89E3\u91CA\u3002",
+      "baseType": "Widget",
+      "parentKey": "panel-widgets",
+      "sourceKey": "widget-textai",
+      "permissions": [
+        "clipboard"
+      ]
+    },
+    {
+      "id": "clipboard",
+      "name": "\u526A\u8D34\u677F",
+      "kind": "Widget",
+      "category": "\u5C0F\u7EC4\u4EF6",
+      "version": "1.0.0",
+      "author": "timecolors",
+      "description": "\u7075\u52A8\u9E1F\u5185\u7F6E\u526A\u8D34\u677F\u5386\u53F2\uFF1A\u590D\u5236\u8BB0\u5F55 / \u641C\u7D22 / \u56FA\u5B9A\u3002",
+      "baseType": "Widget",
+      "parentKey": "panel-widgets",
+      "sourceKey": "widget-clipboard",
+      "permissions": [
+        "clipboard"
+      ]
+    },
+    {
+      "id": "note",
+      "name": "\u4FBF\u7B7E",
+      "kind": "Widget",
+      "category": "\u5C0F\u7EC4\u4EF6",
+      "version": "1.0.0",
+      "author": "timecolors",
+      "description": "\u7075\u52A8\u9E1F\u5185\u7F6E\u4FBF\u7B7E\uFF1A\u591A\u8272 / \u7F16\u8F91 / \u7F6E\u9876\u3002",
+      "baseType": "Widget",
+      "parentKey": "panel-widgets",
+      "sourceKey": "widget-note",
       "permissions": []
     }
   ]

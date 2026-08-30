@@ -11,6 +11,7 @@ namespace MarketValidator
     /// </summary>
     public static class Program
     {
+        [System.STAThread]
         public static int Main(string[] args)
         {
             string root = args.Length > 0 ? args[0] : Path.Combine(AppContext.BaseDirectory, "market");
@@ -30,13 +31,19 @@ namespace MarketValidator
                 return 0;
             }
 
+            // ★ 模拟真实运行环境：加载主题资源（模板构造函数会 FindResource 按钮样式）
+            var app = new System.Windows.Application();
+            try { app.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary { Source = new Uri("pack://application:,,,/DynamicBird;component/src/UI/Theme/Theme.xaml") }); } catch { }
+            try { app.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary { Source = new Uri("pack://application:,,,/DynamicBird;component/src/UI/Theme/AppIcons.xaml") }); } catch { }
+
             int pass = 0, fail = 0;
             foreach (var f in files.OrderBy(x => x, StringComparer.Ordinal))
             {
                 string source = File.ReadAllText(f);
                 string id = Path.GetFileName(Path.GetDirectoryName(f) ?? "pkg");
                 var (_, err) = WidgetCompiler.Compile(id, source);
-                string sandboxErr = WidgetCompiler.SandboxErrors(source);   // 文本预检 + 编译符号检查
+                // ★ 统一沙箱：所有市场包（含官方内置）都过沙箱；剪贴板等已归入权限声明类（不硬拦，安装时提示）
+                string sandboxErr = WidgetCompiler.SandboxErrors(source);
                 if (!string.IsNullOrEmpty(sandboxErr))
                 {
                     Console.WriteLine("FAIL  " + f.Replace(cwd + Path.DirectorySeparatorChar, "") + " [沙箱拦截] " + sandboxErr.Replace(Environment.NewLine, " "));
@@ -58,6 +65,18 @@ namespace MarketValidator
                 ? "MARKET OK (" + pass + " 包可编译)"
                 : "MARKET FAILED: " + fail + " 包编译失败");
             return fail == 0 ? 0 : 1;
+        }
+
+        /// <summary>读取同目录 manifest.json 的 official 字段（官方内置包豁免沙箱，只验证编译）。</summary>
+        private static bool IsOfficial(string manifestPath)
+        {
+            try
+            {
+                if (!File.Exists(manifestPath)) return false;
+                using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(manifestPath));
+                return doc.RootElement.TryGetProperty("official", out var v) && v.ValueKind == System.Text.Json.JsonValueKind.True;
+            }
+            catch { return false; }
         }
     }
 }

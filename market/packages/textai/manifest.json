@@ -1,0 +1,15 @@
+{
+  "id": "textai",
+  "name": "\u5212\u8BCD\u7FFB\u8BD1",
+  "kind": "Widget",
+  "category": "\u5C0F\u7EC4\u4EF6",
+  "version": "1.0.0",
+  "author": "timecolors",
+  "description": "\u5212\u8BCD\u7FFB\u8BD1\uFF1A\u9009\u4E2D\u6587\u672C\u7FFB\u8BD1 / \u603B\u7ED3 / \u89E3\u91CA\u3002",
+  "baseType": "Widget",
+  "parentKey": "panel-widgets",
+  "sourceKey": "widget-textai",
+  "permissions": [
+    "clipboard"
+  ]
+}

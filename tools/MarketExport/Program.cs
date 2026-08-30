@@ -1,0 +1,59 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using DynamicBird.UI.Birdcage;
+using DynamicBird.UI.Widgets.Dynamic;
+
+// 一次性工具：把内置小组件模板导出为市场包（market/packages/<id>/）
+var names = new Dictionary<string, (string Name, string Desc)>
+{
+    ["widget-timer"] = ("计时器", "灵动鸟内置计时器：倒计时 / 正计时 / 闹钟。"),
+    ["widget-calculator"] = ("计算器", "灵动鸟内置计算器：标准 / 科学 / 程序员。"),
+    ["widget-textai"] = ("划词翻译", "划词翻译：选中文本翻译 / 总结 / 解释。"),
+    ["widget-clipboard"] = ("剪贴板", "灵动鸟内置剪贴板历史：复制记录 / 搜索 / 固定。"),
+    ["widget-note"] = ("便签", "灵动鸟内置便签：多色 / 编辑 / 置顶。"),
+};
+
+string market = Path.Combine(Environment.CurrentDirectory, "market", "packages");
+var packages = new List<object>();
+foreach (var kv in BuiltinFeatureSources.Sources)
+{
+    if (!kv.Key.StartsWith("widget-")) continue;
+    if (!names.TryGetValue(kv.Key, out var meta)) continue;
+    string id = kv.Key.Substring("widget-".Length);
+    string dir = Path.Combine(market, id);
+    Directory.CreateDirectory(dir);
+    File.WriteAllText(Path.Combine(dir, "main.cs"), kv.Value, new System.Text.UTF8Encoding(false));
+    var manifest = new Dictionary<string, object?>
+    {
+        ["id"] = id,
+        ["name"] = meta.Name,
+        ["kind"] = "Widget",
+        ["category"] = "小组件",
+        ["version"] = "1.0.0",
+        ["author"] = "timecolors",
+        ["description"] = meta.Desc,
+        ["baseType"] = "Widget",
+        ["parentKey"] = "panel-widgets",
+        ["sourceKey"] = kv.Key,
+        ["permissions"] = WidgetPermissions.Detect(kv.Value)
+    };
+    File.WriteAllText(Path.Combine(dir, "manifest.json"),
+        JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true }),
+        new System.Text.UTF8Encoding(false));
+    packages.Add(manifest);
+    Console.WriteLine("EXPORTED " + id + " (" + kv.Value.Length + " chars)");
+}
+
+// 生成 index.json
+var index = new Dictionary<string, object?>
+{
+    ["updatedAt"] = DateTime.Now.ToString("yyyy-MM-dd"),
+    ["marketBase"] = "https://cdn.jsdelivr.net/gh/timecolors/DynamicBird@master/market",
+    ["packages"] = packages
+};
+File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "market", "index.json"),
+    JsonSerializer.Serialize(index, new JsonSerializerOptions { WriteIndented = true }),
+    new System.Text.UTF8Encoding(false));
+Console.WriteLine("INDEX updated: " + packages.Count + " packages");

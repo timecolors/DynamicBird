@@ -6,7 +6,7 @@
         Title="{Binding Item[UI_SettingsWindow_134], Source={x:Static loc:LocalizationManager.Instance}}"
         Height="720" Width="960"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="CanResizeWithGrip"
+        ResizeMode="NoResize"
         Background="{DynamicResource SettingsWindowBg}"
         Foreground="{DynamicResource SettingsWindowFg}"
         MinHeight="560" MinWidth="780" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">

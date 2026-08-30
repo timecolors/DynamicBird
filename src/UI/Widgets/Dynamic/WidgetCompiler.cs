@@ -164,8 +164,8 @@ namespace DynamicBird.UI.Widgets.Dynamic
                 ("streamwriter", "文件写入流"),
                 ("directory.create", "目录创建"),
                 ("directory.delete", "目录删除"),
-                (@"\bclipboard\b", "剪贴板"),
-                ("idataobject", "剪贴板数据"),
+                // ★ 剪贴板不硬拦（2026-08 用户修正）：剪贴板读写是常见低危能力，
+                //   归入"权限声明类"——安装时弹窗提示"使用剪贴板"，用户确认后放行（与网络/文件读一致）
             };
 
             foreach (var (pattern, label) in blockedApis)
@@ -264,7 +264,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
             {
                 "System.Diagnostics.Process", "System.Reflection", "System.Runtime.InteropServices",
                 "System.Management", "Microsoft.Win32", "System.DirectoryServices",
-                "System.Windows.Clipboard", "System.Windows.Forms.Clipboard",
+                // ★ Clipboard 不硬拦（权限声明类，见 CheckSandbox 注释）
                 "System.IO.FileStream", "System.IO.StreamWriter", "System.IO.BinaryWriter",
                 "System.Windows.Forms.SendKeys"
             };

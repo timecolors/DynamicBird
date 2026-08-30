@@ -1,0 +1,13 @@
+{
+  "id": "timer",
+  "name": "\u8BA1\u65F6\u5668",
+  "kind": "Widget",
+  "category": "\u5C0F\u7EC4\u4EF6",
+  "version": "1.0.0",
+  "author": "timecolors",
+  "description": "\u7075\u52A8\u9E1F\u5185\u7F6E\u8BA1\u65F6\u5668\uFF1A\u5012\u8BA1\u65F6 / \u6B63\u8BA1\u65F6 / \u95F9\u949F\u3002",
+  "baseType": "Widget",
+  "parentKey": "panel-widgets",
+  "sourceKey": "widget-timer",
+  "permissions": []
+}
