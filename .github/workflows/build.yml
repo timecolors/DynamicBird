@@ -41,12 +41,19 @@ jobs:
           $p = Join-Path $env:RUNNER_TEMP "smoke"
           New-Item -ItemType Directory -Force -Path $p | Out-Null
           dotnet build tools/SmokeTest/SmokeTest.csproj -c Debug -o $p -v minimal
+          if ($LASTEXITCODE -ne 0) { Write-Error "SmokeTest build failed"; exit 1 }
           $proc = Start-Process -FilePath (Join-Path $p "SmokeTest.exe") -WorkingDirectory $p -PassThru
-          Start-Sleep -Seconds 25
-          if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
-          $result = Get-Content (Join-Path $p "smoke-result.txt") -ErrorAction SilentlyContinue
+          # runner 机器可能较慢：最多等 60 秒，轮询结果文件
+          $deadline = (Get-Date).AddSeconds(60)
+          $result = $null
+          while ((Get-Date) -lt $deadline -and -not $proc.HasExited) {
+            Start-Sleep -Seconds 2
+            if (Test-Path (Join-Path $p "smoke-result.txt")) { $result = Get-Content (Join-Path $p "smoke-result.txt") -ErrorAction SilentlyContinue; break }
+          }
+          if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force; Write-Error "SmokeTest timed out (60s), no result" }
+          elseif (-not $result) { $result = Get-Content (Join-Path $p "smoke-result.txt") -ErrorAction SilentlyContinue }
           if (-not $result -or -not $result.StartsWith("SMOKE OK")) {
-            Write-Error "Smoke test failed: $result"
+            Write-Error "Smoke test failed: exit=$($proc.ExitCode) result=$result"
           } else {
             Write-Output $result
           }
