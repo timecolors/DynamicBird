@@ -24,51 +24,22 @@ namespace DynamicBird.UI.Main
 
         private void UpdateIconTextInternal()
         {
+            // ★ 图标已移除（2026-08-30 用户要求）：状态机驱动左侧竖条的 hover 反馈条
             switch (_currentIconState)
             {
                 case IconState.AddMode:
-                    SetIcon("IconPlus", accent: true);
-                    return;
                 case IconState.DeleteMode:
-                    SetIcon("IconTrash", accent: true);
+                    IconHoverBar.Opacity = 1.0;
                     return;
             }
 
-            if (_isHovering && !_modeService.IsDoNotDisturb)
-            {
-                SetIcon("IconLogo", accent: true);
-                return;
-            }
-
-            string iconPath = _settingsService.CustomIconPath;
-            if (!string.IsNullOrEmpty(iconPath) && System.IO.File.Exists(iconPath))
-            {
-                try
-                {
-                    IconImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(iconPath));
-                    IconImage.Visibility = System.Windows.Visibility.Visible;
-                    IconPath.Visibility = System.Windows.Visibility.Collapsed;
-                    return;
-                }
-                catch { }
-            }
-
-            IconImage.Visibility = System.Windows.Visibility.Collapsed;
-            IconPath.Visibility = System.Windows.Visibility.Visible;
-            SetIcon("IconLogo", accent: false);
+            IconHoverBar.Opacity = (_isHovering && !_modeService.IsDoNotDisturb) ? 1.0 : 0.0;
         }
 
         private void SetIcon(string resourceKey, bool accent)
         {
-            if (FindResource(resourceKey) is System.Windows.Media.Geometry g)
-            {
-                IconPath.Data = g;
-            }
-            IconPath.SetResourceReference(
-                System.Windows.Shapes.Path.StrokeProperty,
-                accent ? "AccentBrush" : "TextPrimaryBrush");
-            IconImage.Visibility = System.Windows.Visibility.Collapsed;
-            IconPath.Visibility = System.Windows.Visibility.Visible;
+            // 图标已移除；保留调用点兼容（AppHelper 循环页等），仅点亮反馈条
+            IconHoverBar.Opacity = 1.0;
         }
 
         private void ResetIconToDefault()
@@ -280,14 +251,60 @@ namespace DynamicBird.UI.Main
             dnd.Click += (_, _) => ToggleWindow();
             menu.Items.Add(dnd);
 
-            if (_contentController?.CurrentRegionType == "Taskbar")
+            // ===== 面板专属区（只放面板内做不到的实用操作，不与面板已有按钮重复） =====
+            string? regionType = _contentController?.CurrentRegionType;
+            if (regionType != null && !string.IsNullOrEmpty(regionType))
             {
-                var refresh = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_Refresh"] };
-                refresh.Click += (_, _) => RefreshTaskbarView();
-                menu.Items.Add(refresh);
-            }
+                switch (regionType)
+                {
+                    case "Taskbar":
+                    {
+                        var showDesktop = new MenuItem
+                        {
+                            Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Menu_ShowDesktop"]
+                        };
+                        showDesktop.Click += (_, _) => DynamicBird.Infrastructure.WinApi.WindowAction.ShowDesktop();
+                        menu.Items.Add(showDesktop);
 
-            menu.Items.Add(new Separator());
+                        var closeWindows = new MenuItem
+                        {
+                            Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Menu_CloseRunning"]
+                        };
+                        closeWindows.Click += (_, _) =>
+                        {
+                            if (ContentContainer.Content is DynamicBird.UI.Panels.TaskbarView tv) tv.CloseAllWindows();
+                            else RefreshTaskbarView();
+                        };
+                        menu.Items.Add(closeWindows);
+
+                        var refresh = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_Refresh"] };
+                        refresh.Click += (_, _) => RefreshTaskbarView();
+                        menu.Items.Add(refresh);
+                        break;
+                    }
+                    case "Widget":
+                    {
+                        var editWidget = new MenuItem
+                        {
+                            Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Menu_EditWidget"]
+                        };
+                        editWidget.Click += (_, _) => OpenSettings("tabBirdcage");
+                        menu.Items.Add(editWidget);
+                        break;
+                    }
+                    case "AI":
+                    {
+                        var aiSettings = new MenuItem
+                        {
+                            Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Menu_AiSettings"]
+                        };
+                        aiSettings.Click += (_, _) => OpenSettings("tabAI");
+                        menu.Items.Add(aiSettings);
+                        break;
+                    }
+                }
+                menu.Items.Add(new Separator());
+            }
 
             var settings = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Settings"] };
             settings.Click += (_, _) => OpenSettings();
@@ -297,7 +314,7 @@ namespace DynamicBird.UI.Main
             exit.Click += (_, _) => ExitApp();
             menu.Items.Add(exit);
 
-            menu.PlacementTarget = IconPath;
+            menu.PlacementTarget = IconContainer;
             menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             menu.IsOpen = true;
             e.Handled = true;
@@ -346,7 +363,7 @@ namespace DynamicBird.UI.Main
                     DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipDnd"]
             };
 
-            IconPath.ToolTip = tooltip;
+            IconContainer.ToolTip = tooltip;
         }
 
         private void RefreshTaskbarView()

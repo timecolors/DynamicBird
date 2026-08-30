@@ -1048,6 +1048,16 @@
   <data name="UI_SettingsWindow_395" xml:space="preserve">
     <value>保存当前设置到 config.json，关闭后设置生效。</value>
   </data>
+  <data name="UI_SettingsWindow_396" xml:space="preserve">
+    <value>卸载灵动鸟…</value>
+  </data>
+  <data name="UI_SettingsWindow_397" xml:space="preserve">
+    <value>确定要卸载灵动鸟吗？应用文件将被删除（商店版请从系统设置卸载）。</value>
+  </data>
+  <data name="UI_SettingsWindow_398" xml:space="preserve">
+    <value>是否同时删除本地数据（设置/剪贴板历史/便签/AI 会话等）？
+选「是」全部删除，选「否」保留数据。</value>
+  </data>
   <data name="UI_SettingsWindow_389" xml:space="preserve">
     <value>深度思考（需模型支持，如 reasoning_effort / reasoner 模型）</value>
   </data>
@@ -2508,5 +2518,82 @@
   </data>
   <data name="Set_SnapRangeTip" xml:space="preserve">
     <value>面板边缘距屏幕边小于该值时，磁铁吸附贴边（0 关闭）；吸附动画时长同飞行时长</value>
+  </data>
+  <data name="Jump_OpenSettings" xml:space="preserve">
+    <value>打开设置</value>
+  </data>
+  <data name="Jump_OpenSettingsDesc" xml:space="preserve">
+    <value>打开灵动鸟设置窗口</value>
+  </data>
+  <data name="Jump_ToggleDnd" xml:space="preserve">
+    <value>切换勿扰</value>
+  </data>
+  <data name="Jump_ToggleDndDesc" xml:space="preserve">
+    <value>开启或关闭勿扰模式</value>
+  </data>
+  <data name="Jump_TogglePanel" xml:space="preserve">
+    <value>呼出/隐藏面板</value>
+  </data>
+  <data name="Jump_TogglePanelDesc" xml:space="preserve">
+    <value>立即呼出或隐藏边缘面板</value>
+  </data>
+  <data name="Set_PanelFrameRate" xml:space="preserve">
+    <value>面板运行帧率</value>
+  </data>
+  <data name="Set_PanelFrameRateTip" xml:space="preserve">
+    <value>面板跟随/小鸟依人动画的渲染帧率。越高越顺滑，越低越省 CPU。</value>
+  </data>
+  <data name="Set_PanelFrameRateLabel" xml:space="preserve">
+    <value>帧率</value>
+  </data>
+  <data name="Set_PanelFrameRateSliderTip" xml:space="preserve">
+    <value>0 = 自动（跟随显示器刷新率）。手动档：30 / 60 / 90 / 120 fps。</value>
+  </data>
+  <data name="Set_PanelFrameRateHint" xml:space="preserve">
+    <value>帧率越高，边缘跟随与小鸟依人越顺滑（顺滑模式建议 60-120）；越低越省 CPU（省电模式自动降帧）。</value>
+  </data>
+  <data name="Set_FrameRateAuto" xml:space="preserve">
+    <value>自动</value>
+  </data>
+
+  <data name="Set_Tab_Region" xml:space="preserve">
+    <value>区域</value>
+  </data>
+  <data name="Set_Tab_Panel" xml:space="preserve">
+    <value>面板</value>
+  </data>
+  <data name="Set_Sec_EdgeTrigger" xml:space="preserve">
+    <value>◈ 边缘与触发</value>
+  </data>
+  <data name="Set_Sec_PanelShape" xml:space="preserve">
+    <value>◈ 面板类型与尺寸</value>
+  </data>
+  <data name="Set_Sec_TriggerBehavior" xml:space="preserve">
+    <value>◈ 触发行为（防误触）</value>
+  </data>
+  <data name="Set_Sec_Advanced" xml:space="preserve">
+    <value>◈ 高级</value>
+  </data>
+  <data name="Set_Sec_Appearance" xml:space="preserve">
+    <value>◈ 外观（所有面板通用）</value>
+  </data>
+  <data name="Set_Sec_Taskbar" xml:space="preserve">
+    <value>◈ 任务栏（任务栏面板的内容）</value>
+  </data>
+  <data name="Set_Sec_Widgets" xml:space="preserve">
+    <value>◈ 小组件（小组件面板的内容）</value>
+  </data>
+
+  <data name="Set_Menu_ShowDesktop" xml:space="preserve">
+    <value>显示桌面</value>
+  </data>
+  <data name="Set_Menu_CloseRunning" xml:space="preserve">
+    <value>清空运行中窗口</value>
+  </data>
+  <data name="Set_Menu_EditWidget" xml:space="preserve">
+    <value>编辑当前小组件</value>
+  </data>
+  <data name="Set_Menu_AiSettings" xml:space="preserve">
+    <value>AI 设置</value>
   </data>
 </root>

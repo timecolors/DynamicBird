@@ -19,7 +19,6 @@ namespace DynamicBird.Core.Services.Configuration
         double Opacity { get; set; }
         int CornerRadius { get; set; }
         bool ShowSystemStatus { get; set; }
-        string CustomIconPath { get; set; }
 
         // ========== 形状参数 ==========
         double StripLengthRatio { get; set; }
@@ -88,6 +87,29 @@ namespace DynamicBird.Core.Services.Configuration
         int TransformDurationMs { get; set; }
         int HideDelayMs { get; set; }
         int FlyDurationMs { get; set; }
+        // ========== 逐区域动画覆盖（动画页签「动画应用于」） ==========
+        /// <summary>取某区域的动画覆盖（null = 该区域无覆盖，完全跟随全局）。</summary>
+        DynamicBird.Core.Models.RegionAnimationOverride? GetRegionAnimation(string regionKey);
+
+        /// <summary>设置某区域的动画覆盖（null = 清除覆盖，恢复继承全局）。</summary>
+        void SetRegionAnimation(string regionKey, DynamicBird.Core.Models.RegionAnimationOverride? ov);
+
+        /// <summary>解析后的触发动画类型：区域覆盖优先，缺省用全局。</summary>
+        string GetResolvedShowAnimationType(string regionKey);
+
+        /// <summary>解析后的触发动画时长（ms）：区域覆盖优先，缺省用全局。</summary>
+        int GetResolvedShowAnimationDurationMs(string regionKey);
+
+        /// <summary>解析后的隐藏动画类型：区域覆盖优先，缺省用全局。</summary>
+        string GetResolvedHideAnimationType(string regionKey);
+
+        /// <summary>解析后的隐藏动画时长（ms）：区域覆盖优先，缺省用全局。</summary>
+        int GetResolvedHideAnimationDurationMs(string regionKey);
+
+        // ========== 编程模式（鸟笼） ==========
+        bool ProgrammingModeEnabled { get; set; }
+        System.Collections.Generic.List<DynamicBird.Core.Models.CustomPanelDefinition> CustomPanels { get; set; }
+        System.Collections.Generic.Dictionary<string, string> AppliedPresets { get; set; }
 
         /// <summary>
         /// 小鸟依人模式开关
@@ -141,6 +163,9 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 灵动鸟性能模式 ==========
         string PerformanceMode { get; set; }
         void SetPerformanceMode(string mode);
+
+        // ========== 面板运行帧率（fps，0=自动满帧） ==========
+        int PanelFrameRate { get; set; }
 
         // ========== 边缘触发距离与延时 ==========
         int TriggerDistancePx { get; set; }

@@ -1,0 +1,157 @@
+<UserControl x:Class="DynamicBird.UI.Settings.Pages.BirdcagePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="230" MinWidth="140" MaxWidth="420"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 左侧：配置树（一级/二级/三级，每级可 ⊕ 新增） -->
+        <Border Background="{DynamicResource SettingsCardBg}" CornerRadius="8" Padding="6">
+            <ListBox x:Name="lstConfigTree"
+                     SelectionChanged="LstConfigTree_SelectionChanged"
+                     SelectionMode="Extended"
+                     FontSize="12"
+                     BorderThickness="0"
+                     Background="Transparent">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="26"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <!-- 占位行的 ⊕：在缩进位置（跟随层级），创建同级新功能 -->
+                                <Button Content="⊕"
+                                        Width="18" Height="18"
+                                        Padding="0"
+                                        BorderThickness="0"
+                                        Background="Transparent"
+                                        Foreground="#4A90D9"
+                                        FontSize="13"
+                                        Margin="{Binding IndentMargin}"
+                                        Click="BtnAddNode_Click"
+                                        ToolTip="创建同级新功能">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAdd}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <TextBlock Text="{Binding Display}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="{Binding IndentMargin}" Foreground="{Binding TextBrush}" TextDecorations="{Binding TextDecor}"/>
+                            </StackPanel>
+                            <!-- 用户新建项：行末 ✕ 删除整个项 -->
+                            <Button Grid.Column="1"
+                                    Content="✕"
+                                    Width="20" Height="20"
+                                    Padding="0"
+                                    BorderThickness="0"
+                                    Background="Transparent"
+                                    Foreground="#E06060"
+                                    FontSize="12"
+                                    Click="BtnDeleteNode_Click"
+                                    ToolTip="删除此新建项">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasDelete}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <!-- 可拖动分隔条：调整左侧宽度 -->
+        <GridSplitter Grid.Column="1"
+                      Width="6"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      Background="Transparent"
+                      Cursor="SizeWE"
+                      ResizeBehavior="PreviousAndNext"
+                      ResizeDirection="Columns"/>
+
+        <!-- 右侧：编程框 -->
+        <Grid Grid.Column="2" Margin="12,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="txtNodeTitle" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                <TextBlock x:Name="txtNodeHint" FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            </StackPanel>
+
+            <TextBox x:Name="txtJsonEditor"
+                     Grid.Row="1"
+                     FontFamily="Consolas"
+                     Background="{DynamicResource SettingsCardBg}"
+                     Foreground="{DynamicResource SettingsWindowFg}"
+                     FontSize="12"
+                     AcceptsReturn="True"
+                     TextWrapping="NoWrap"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto"
+                     Padding="8"
+                     Margin="0,8,0,0"/>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+                <Button x:Name="btnCompile" Content="编译" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Click="BtnCompile_Click" ToolTip="校验并写入配置（面板动态编译将基于此扩展）"/>
+                <Button x:Name="btnRestore" Content="恢复" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnRestore_Click"/>
+                <Button x:Name="btnCopyPrompt" Content="复制 AI 提示词" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnCopyPrompt_Click"/>
+                <TextBlock x:Name="txtJsonStatus" VerticalAlignment="Center" Margin="12,0,0,0" FontSize="11" Foreground="#666666"/>
+            </StackPanel>
+
+            <!-- 预设区（整套/局部保存、切换、删除） -->
+            <Border Grid.Row="3" Background="{DynamicResource SettingsCardBg}" CornerRadius="8" Padding="10,8" Margin="0,12,0,0">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="🗂️ 预设（可保存整套，也可保存单个预设）" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" x:Name="btnOtherBirdcage" Content="🕊️ 看看其他鸟笼" Style="{StaticResource Win11Button}" Height="26" FontSize="11" Click="BtnOtherBirdcage_Click"/>
+                    </Grid>
+                    <TextBlock Text="「其他鸟笼」共享平台：导出当前预设为 .dbp 包分享（自动标注权限），导入他人包时提示风险权限。" FontSize="10.5" Foreground="#999999" Margin="0,2,0,6" TextWrapping="Wrap"/>
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="btnSaveFull" Content="保存整套" Style="{StaticResource Win11Button}" Height="28" Click="BtnSaveFull_Click" ToolTip="整套预设：保存全部配置，需命名"/>
+                        <Button Grid.Column="1" x:Name="btnSavePartial" Content="保存当前预设" Style="{StaticResource Win11Button}" Height="28" Margin="8,0,0,0" Click="BtnSavePartial_Click" ToolTip="单预设：以当前选中节点命名保存，可应用并标记冲突"/>
+                    </Grid>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="cmbPresets" FontSize="12" Height="28" VerticalContentAlignment="Center"/>
+                        <Button Grid.Column="1" x:Name="btnApplyPreset" Content="应用预设" Style="{StaticResource Win11Button}" Height="28" Margin="8,0,0,0" Click="BtnApplyPreset_Click"/>
+                        <Button Grid.Column="2" x:Name="btnDeletePreset" Content="删除预设" Style="{StaticResource Win11Button}" Height="28" Margin="8,0,0,0" Click="BtnDeletePreset_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

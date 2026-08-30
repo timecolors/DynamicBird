@@ -10,10 +10,10 @@ namespace DynamicBird.Animation
 {
     /// <summary>
     /// 面板形变动画器（WPF 原生动画 + 渲染帧驱动）：
-    /// - 切换（区域切换/飞行落地）：尺寸一次到位（窗口仅 resize 一次，避免 Mica/内容每帧重绘闪烁），
-    ///   内容用 ScaleTransform 平滑缩放过渡 + 位置 WPF 动画（渲染帧丝滑）；
+    /// - 切换（区域切换/飞行落地）：位置+尺寸同步动画（贴边锚定，无内容等比缩放），
+    ///   内容随窗口真实布局（★ 不做 ScaleTransform 缩放）；
     /// - 滑入/滑出：位置 + 透明度 WPF 动画（尺寸不变，本就丝滑）；
-    /// - 连续跟随（贴边滑动/小鸟依人）：CompositionTarget.Rendering 渲染帧驱动（60fps 跟手）。
+    /// - 连续跟随（贴边滑动/小鸟依人）：CompositionTarget.Rendering 渲染帧驱动（帧率可配）。
     /// 设置中 TransformDurationMs/TransformEasingType、ShowHideDurationMs/ShowHideEasingType 真实映射为动画参数。
     /// </summary>
     public class ShapeAnimator : IDisposable
@@ -40,6 +40,12 @@ namespace DynamicBird.Animation
         private double _clingTargetLeft;
         private double _clingTargetTop;
 
+        // ★ 节能降帧（PowerSaver）：渲染帧每 N 帧才实际处理一次（跳帧）。
+        //   CompositionTarget.Rendering 无法直接调帧率，用计数跳帧等效降频：
+        //   0=每帧（60fps 满帧），1=每 2 帧（~30fps），2=每 3 帧（~20fps）。
+        private int _frameSkip = 0;
+        private int _frameCounter = 0;
+
         // ★ 跟随松紧（由设置 FlyDurationMs 映射）：拉满=1.0 绝对跟手（实时），调小=缓慢飞追
         private double _followLerp = 1.0;
         // ★ 中置状态（乱逛/切换期间）覆盖：强制绝对跟手（图标跟着鼠标逛）
@@ -47,8 +53,51 @@ namespace DynamicBird.Animation
 
         /// <summary>跟随目标提供者：渲染帧每帧调用，返回面板应处的 (left, top)。由业务层设置。</summary>
         public Func<(double left, double top)>? FollowPositionProvider { get; set; }
-        private const double ClingLerp = 0.18;
-        private const double ClingStopDist = 0.5;
+
+        /// <summary>小鸟依人实时目标源：渲染帧每帧调用，返回 (目标位置, 鼠标是否在面板上)。
+        /// 业务层设置为"实时读鼠标 → 钳制目标"，使目标更新频率 = 渲染帧，
+        /// 消除"tick 30ms 才更新一次目标"的滞后卡顿。null = 用 SetClingTarget 设定的目标。
+        /// ★ onPanel：鼠标在面板上（面板内+边）——T≤0 直接设置分支用它判定"追到即停"，
+        ///   追逐中（T>0）只认"中心追到鼠标"，不受 onPanel 影响。</summary>
+        public Func<(double left, double top, bool onPanel)>? ClingTargetProvider { get; set; }
+
+        /// <summary>小鸟依人"追到目标/面板内停止"事件：渲染循环到达目标（含面板内原地停）时触发。
+        /// 业务层据此复位跟随状态（_isClinging=false）——否则渲染循环停后 tick 检测到
+        /// 鼠标在面板内一动（中心偏差>2px）会再次 SetClingTarget 重启追赶（面板内绕圈也追）。</summary>
+        public event Action? ClingArrived;
+
+        // ===== 小鸟依人（匀速飞行，由 FlyDurationMs 管控） =====
+        // 设计（用户确认）：
+        //  - 追的目标 = 面板中心 → 鼠标位置（钳制屏内，由业务层算好传 SetClingTarget）
+        //  - 速度 = 飞行时间 FlyDurationMs 管控：0 = 直接设置（拖动窗口式最跟手）；
+        //    调大 = 匀速慢速飞追（线性进度，无 lerp 指数衰减的"顿一下"）
+        //  - 匀速实现：记录本次飞行起点 + 开始时间，每帧 pos = start + (target-start) × (elapsed/duration)
+        //  - 帧率无关：用真实 elapsed（时间），不受跳帧影响
+        private double _clingFlyDurationMs;      // 小鸟依人飞行时长（来自设置 FlyDurationMs；0=直接设置）
+        private bool _clingMouseOnPanel;         // 渲染帧最近一次 provider 判定：鼠标是否在面板上（T≤0 直接设置分支用）
+        private long _lastFlyTick = Environment.TickCount64; // 跟随/小鸟依人匀速飞行的上帧时刻（算 dt；TickCount64 单调 1ms 精度）
+        private const double ClingStopDist = 0.5;          // 到达阈值（px）
+
+        /// <summary>
+        /// 向目标以**固定距离**移动（匀速，不减速）：每帧走 moveDist 像素，
+        /// 到达目标（≤ moveDist 内）直接落定。moveDist = 速度 × dt（速度恒定 → 匀速）。
+        /// 修复：原"每帧移动剩余距离比例"是指数衰减（临近目标变慢），用户要求匀速。
+        /// </summary>
+        private void MoveTowardFixedSpeed(double targetLeft, double targetTop, double moveDist)
+        {
+            double dx = targetLeft - _window.Left;
+            double dy = targetTop - _window.Top;
+            double dist = Math.Sqrt(dx * dx + dy * dy);
+            if (dist <= moveDist || dist < 0.5)
+            {
+                _window.Left = targetLeft;
+                _window.Top = targetTop;
+                return;
+            }
+            // 匀速：移动固定距离（方向向量 × moveDist）
+            _window.Left += dx / dist * moveDist;
+            _window.Top += dy / dist * moveDist;
+        }
 
         // ===== 切换动画状态 =====
         private bool _switching;
@@ -219,6 +268,14 @@ namespace DynamicBird.Animation
 
         private void OnRendering(object? sender, EventArgs e)
         {
+            // ★ 节能跳帧：PowerSaver 下每 N 帧才处理一次（等效降帧降 CPU）。
+            //   跟随/小鸟依人为匀速飞行（时间驱动），跳帧只降低刷新率，不改变追赶速度。
+            if (_frameSkip > 0)
+            {
+                _frameCounter++;
+                if (_frameCounter % (_frameSkip + 1) != 0) return;
+            }
+
             // ★ 位置/尺寸动画进行中：渲染循环让位，不写窗口位置——
             //   每帧写本地值会干扰 Window.Left/Top 的动画时钟（滑入/滑出动画被"瞬间化"）。
             //   动画完成后（HasAnimatedProperties=false）再接管位置。
@@ -228,9 +285,9 @@ namespace DynamicBird.Animation
             {
                 var (l, t) = FollowPositionProvider();
                 double k = _followLerpOverride ?? _followLerp;
-                if (k >= 0.999)
+                if (k >= 0.999 || _followLerpOverride != null)
                 {
-                    // ★ 绝对跟手（FlyDurationMs 拉满）：每帧直接设置——拖窗口手感
+                    // ★ 绝对跟手（FlyDurationMs 拉满 / 中置强制）：每帧直接设置——拖窗口手感
                     if (Math.Abs(_window.Left - l) > 0.01 || Math.Abs(_window.Top - t) > 0.01)
                     {
                         _window.Left = l;
@@ -239,38 +296,80 @@ namespace DynamicBird.Animation
                 }
                 else
                 {
-                    // ★ 缓慢飞追（FlyDurationMs 调小）：每帧向目标靠近（lerp），面板缓慢追随鼠标
-                    double nl = _window.Left + (l - _window.Left) * k;
-                    double nt = _window.Top + (t - _window.Top) * k;
-                    if (Math.Abs(nl - l) < 0.5 && Math.Abs(nt - t) < 0.5)
+                    // ★ 匀速跟随（由 FlyDurationMs 管控）：每帧移动**固定距离**（速度恒定，不减速）。
+                    //   速度 = 基准 / FlyDurationMs：FlyDurationMs=0 → 直接设置（最跟手）；
+                    //   调大 → 慢速匀速。原"每帧移动剩余距离比例"是指数衰减（临近变慢），已弃用。
+                    double T = _clingFlyDurationMs;
+                    if (T <= 0)
                     {
                         _window.Left = l;
                         _window.Top = t;
                     }
                     else
                     {
-                        _window.Left = nl;
-                        _window.Top = nt;
+                        // ★ 高精度单调计时（TickCount64，1ms）：DateTime.Now 分辨率 ~15.6ms ≈ 60Hz 帧间隔，
+                        //   dt 被严重量化（0/15/30ms 跳变）→ 每帧移动距离忽大忽小 → "卡卡的但有些顺滑"
+                        long now2 = Environment.TickCount64;
+                        double dt2 = Math.Min(now2 - _lastFlyTick, 50);   // 钳制：首帧/卡顿后不跳一大步
+                        _lastFlyTick = now2;
+                        // 固定速度（px/ms）：FlyDurationMs 越大速度越慢；基准 1000px 全程飞行
+                        double speed2 = 1000.0 / Math.Max(1, T);
+                        MoveTowardFixedSpeed(l, t, speed2 * dt2);
                     }
                 }
             }
             else if (_clingMode)
             {
-                // 小鸟依人：每帧 lerp 平滑趋近（慢速追随，无振荡）
-                double nl = _window.Left + (_clingTargetLeft - _window.Left) * ClingLerp;
-                double nt = _window.Top + (_clingTargetTop - _window.Top) * ClingLerp;
-                if (Math.Abs(nl - _clingTargetLeft) < ClingStopDist && Math.Abs(nt - _clingTargetTop) < ClingStopDist)
+                // ★ 小鸟依人：匀速飞行，由 FlyDurationMs 管控（用户确认）
+                //   - FlyDurationMs <= 0 → 直接设置（拖动窗口式最跟手）
+                //   - > 0 → 每帧移动**固定距离**（匀速，不减速，与跟随分支一致）
+                //   - 到达目标（≤ moveDist / ClingStopDist）→ 停
+                // ★ 每帧刷新目标（实时跟手）：目标源 = 业务层读实时鼠标（与跟随分支同频）。
+                //   消除"tick 30ms 才更新一次目标"的滞后 → 面板连续匀速追最新鼠标位置
+                if (ClingTargetProvider != null)
+                {
+                    var (cl, ct, onPanel) = ClingTargetProvider();
+                    _clingTargetLeft = cl;
+                    _clingTargetTop = ct;
+                    _clingMouseOnPanel = onPanel;
+                }
+                double T = _clingFlyDurationMs;
+                if (T <= 0)
+                {
+                    // ★ 直接设置（拖动窗口式）：
+                    //   - 鼠标在面板上（中心追到后鼠标在面板中心 / 面板内绕圈）→ 停并通知业务层复位
+                    //   - 面板外移动 → 每帧瞬移跟手（连续，不触发停）
+                    if (_clingMouseOnPanel)
+                    {
+                        _clingMode = false;
+                        StopRenderingLoop();
+                        ClingArrived?.Invoke();
+                        return;
+                    }
+                    _window.Left = _clingTargetLeft;
+                    _window.Top = _clingTargetTop;
+                    return;
+                }
+                // ★ 高精度单调计时（同跟随分支）：消除 DateTime.Now 分辨率量化导致的步长跳变
+                long now = Environment.TickCount64;
+                double dt = Math.Min(now - _lastFlyTick, 50);
+                _lastFlyTick = now;
+                double speed = 1000.0 / Math.Max(1, T);   // 固定速度（px/ms）
+                double dx = _clingTargetLeft - _window.Left;
+                double dy = _clingTargetTop - _window.Top;
+                double dist = Math.Sqrt(dx * dx + dy * dy);
+                double moveDist = speed * dt;
+                if (dist <= moveDist || dist < ClingStopDist)
                 {
                     _window.Left = _clingTargetLeft;
                     _window.Top = _clingTargetTop;
                     _clingMode = false;
                     StopRenderingLoop();
+                    ClingArrived?.Invoke();
+                    return;
                 }
-                else
-                {
-                    _window.Left = nl;
-                    _window.Top = nt;
-                }
+                _window.Left += dx / dist * moveDist;   // 匀速移动固定距离
+                _window.Top += dy / dist * moveDist;
             }
         }
 
@@ -292,11 +391,51 @@ namespace DynamicBird.Animation
             // ★ 跟随松紧：FlyDurationMs=0（不飞）→ 1.0 绝对跟手（立即到达）；调大 → 缓慢飞追
             //   语义：飞行时长越短越跟手（0 时长 = 立即跟随），越长追得越慢
             _followLerp = Math.Max(0.05, Math.Min(1.0, 1.0 - _settings.FlyDurationMs / 2000.0));
+            // ★ 小鸟依人飞行时长 = 设置 FlyDurationMs（0 = 直接设置/拖动窗口式最跟手）
+            _clingFlyDurationMs = Math.Max(0, _settings.FlyDurationMs);
             _transformEasing = CreateEasing(_settings.TransformEasingType);
             _showHideEasing = CreateEasing(_settings.ShowHideEasingType);
         }
 
         public void SetAnimationsEnabled(bool enabled) => _animationsEnabled = enabled;
+
+        /// <summary>
+        /// 设置渲染帧跳帧（节能降帧）：0=每帧（60fps），1=每 2 帧（~30fps），2=每 3 帧（~20fps）。
+        /// PowerSaver 模式由 MainWindow 调用；Normal/Smooth 恢复 0。
+        /// </summary>
+        public void SetFrameSkip(int skip)
+        {
+            _frameSkip = Math.Max(0, Math.Min(3, skip));
+            _frameCounter = 0;
+        }
+
+        /// <summary>
+        /// 按目标帧率设置渲染帧跳帧（fps：0=自动满帧；30/60/120 手动）。
+        /// CompositionTarget.Rendering 以显示器刷新率触发（多为 60Hz，高刷屏 120/144Hz），
+        /// 无法超刷新率；跳帧 = 降帧。映射：目标帧率 ≥ 刷新率 → 不跳；否则每 (刷新率/目标) 取一帧。
+        /// </summary>
+        public void SetTargetFrameRate(int fps)
+        {
+            int skip;
+            if (fps <= 0)
+            {
+                skip = 0;   // 自动满帧
+            }
+            else
+            {
+                // 估算刷新率（Rendering 触发频率接近显示器刷新率；60 为基准）
+                int refresh = 60;
+                try
+                {
+                    var presentationSource = System.Windows.PresentationSource.FromVisual(_window);
+                    double? rate = presentationSource?.CompositionTarget?.TransformToDevice.M11;
+                    if (rate.HasValue && rate.Value > 0) refresh = Math.Max(60, (int)Math.Round(rate.Value * 60));
+                }
+                catch { }
+                skip = fps >= refresh ? 0 : Math.Max(0, (int)Math.Ceiling((double)refresh / Math.Max(1, fps)) - 1);
+            }
+            SetFrameSkip(skip);
+        }
 
         // ============================================================
         //  飞行
@@ -408,6 +547,9 @@ namespace DynamicBird.Animation
 
         public void SetClingTarget(double left, double top)
         {
+            // ★ 目标更新：直接替换目标（匀速由渲染循环的固定速度实现，无需起点/时间）
+            //   鼠标持续移动时业务层（UpdateClinging）每 tick 更新目标 → 面板持续匀速追最新位置
+            _lastFlyTick = Environment.TickCount64;   // 重置计时：进入/更新目标时首帧不跳一大步
             _clingTargetLeft = left;
             _clingTargetTop = top;
             // ★ 跟随让位给 cling：隐藏滑出/小鸟依人由渲染帧循环接管位置（不可被打断）
@@ -542,8 +684,8 @@ namespace DynamicBird.Animation
 
         // ============================================================
         //  切换（区域切换 / 飞行落地）：
-        //  尺寸一次到位（窗口仅 resize 一次，Mica/内容不每帧重绘 → 不闪烁），
-        //  内容 ScaleTransform 平滑缩放过渡 + 位置 WPF 动画（渲染帧丝滑）
+        //  位置+尺寸同步动画（贴边锚定），内容随窗口真实布局——
+        //  ★ 不做内容 ScaleTransform 等比缩放（用户要求）
         // ============================================================
 
         public bool IsTransformAnimating => _switching;
@@ -634,6 +776,45 @@ namespace DynamicBird.Animation
             });
         }
 
+        /// <summary>
+        /// 尺寸形变 + 位置同步（贴边锚定）：区域切换（任务栏→小组件等）时，
+        /// 位置与尺寸同时动画到目标——贴边边缘（Top 边 top=0 / Left 边 left=0 / 角落角点）保持贴边，
+        /// 另一侧收缩/扩展。★ 修复：原 AnimateSizeTo 只动尺寸、位置由渲染帧在动画完成后跳变，
+        /// 导致"固定左上角缩放→完成后才贴边"的横跳。此方法用 CalculatePosition 的结果作位置目标，
+        /// 动画中间帧即保持贴边。
+        /// </summary>
+        public void AnimateSizeToKeepAnchor(double left, double top, double width, double height, Action? completed = null)
+        {
+            var (screenWidth, screenHeight) = ScreenSize;
+            double cw = Math.Max(10, Math.Min(width, screenWidth));
+            double ch = Math.Max(10, Math.Min(height, screenHeight));
+            if (!_animationsEnabled)
+            {
+                SetDirect(left: left, top: top, width: cw, height: ch);
+                completed?.Invoke();
+                return;
+            }
+            // ★ 形变期间置 _switching（同 AnimateSizeTo 语义）
+            SuspendMicaBackdrop();
+            StopRenderingLoop();
+            StopAllAnimations();
+            _followActive = false;
+            RestorePanelContentLayout();
+            _switching = true;
+            int ms = Math.Max(1, _transformDurationMs);
+            var ease = _transformEasing;
+            // ★ 位置与尺寸同缓动同时长 → 动画中间帧贴边边缘不脱边（滑向新锚点的同时缩放）
+            Animate(_window, Window.LeftProperty, left, ms, ease);
+            Animate(_window, Window.TopProperty, top, ms, ease);
+            Animate(_window, Window.WidthProperty, cw, ms, ease);
+            Animate(_window, Window.HeightProperty, ch, ms, ease, (_, _) =>
+            {
+                _switching = false;
+                RestoreMicaBackdrop();
+                completed?.Invoke();
+            });
+        }
+
         public void SetPositionAndSizeTarget(double left, double top, double width, double height)
         {
             if (!_animationsEnabled)
@@ -646,59 +827,24 @@ namespace DynamicBird.Animation
             _followActive = false;
             RestorePanelContentLayout();
 
-            // ★ 面板与内容解耦的尺寸动画：
-            //   面板层：窗口真实尺寸+位置 WPF 动画（渲染帧 60fps 插值），
-            //           Mica 动画期间背景切不透明（盖住重采样，不动 backdrop）；
-            //   内容层：动画期间固定布局尺寸 + ScaleTransform 缩放跟随窗口比例
-            //           （内容不每帧重排，布局开销不阻塞动画帧率），
-            //           动画结束一次性真实布局——内容不影响面板丝滑。
-            double oldW = Math.Max(1, _window.Width);
-            double oldH = Math.Max(1, _window.Height);
-
+            // ★ 面板与内容同步动画（★ 无内容等比缩放）：
+            //   窗口真实尺寸+位置 WPF 动画（渲染帧 60fps 插值），内容随窗口真实布局——
+            //   不再用 ScaleTransform 缩放内容（用户要求：内容切出不做等比放大动画）。
+            //   内容层保持真实布局（不固定尺寸/不缩放），动画期间内容随窗口 resize 真实重排。
             var (screenWidth, screenHeight) = ScreenSize;
             double cw = Math.Max(10, Math.Min(width, screenWidth));
             double ch = Math.Max(10, Math.Min(height, screenHeight));
 
             SuspendMicaBackdrop();
 
-            // 内容层：固定尺寸 + 居中 + 缩放跟随（ScaleX/ScaleY 与窗口动画同缓动同时长 → 每帧同步）
-            _panel.Width = oldW;
-            _panel.Height = oldH;
-            _panel.HorizontalAlignment = HorizontalAlignment.Center;
-            _panel.VerticalAlignment = VerticalAlignment.Center;
-            var st = new ScaleTransform(1, 1);
-            _panel.RenderTransform = st;
-            _panel.RenderTransformOrigin = new Point(0.5, 0.5);
-
             int ms = Math.Max(1, _transformDurationMs);
             var ease = _transformEasing;
             _switching = true;
-
-            var animSX = new DoubleAnimation(cw / oldW, new Duration(TimeSpan.FromMilliseconds(ms)))
-            {
-                EasingFunction = ease,
-                FillBehavior = FillBehavior.HoldEnd
-            };
-            var animSY = new DoubleAnimation(ch / oldH, new Duration(TimeSpan.FromMilliseconds(ms)))
-            {
-                EasingFunction = ease,
-                FillBehavior = FillBehavior.HoldEnd
-            };
-            animSX.Completed += (_, _) => { };
-            animSY.Completed += (_, _) => { };
-            st.BeginAnimation(ScaleTransform.ScaleXProperty, animSX);
-            st.BeginAnimation(ScaleTransform.ScaleYProperty, animSY);
 
             // ★ 完成判定绑定尺寸动画（Width）：位置动画可能 0 距离瞬间完成（如仅横向切换），
             //   不能作为"切换完成"依据（否则 switching 提前复位、跟随提前恢复、Mica 提前恢复）
             Animate(_window, Window.WidthProperty, cw, ms, ease, (_, _) =>
             {
-                // 动画完成：内容层恢复真实布局（拉伸 + 缩放归零），恢复 Mica 毛玻璃
-                _panel.RenderTransform = null;
-                _panel.Width = double.NaN;
-                _panel.Height = double.NaN;
-                _panel.HorizontalAlignment = HorizontalAlignment.Stretch;
-                _panel.VerticalAlignment = VerticalAlignment.Stretch;
                 RestoreMicaBackdrop();
                 _switching = false;
             });

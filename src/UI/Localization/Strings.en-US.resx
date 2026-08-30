@@ -1256,6 +1256,15 @@ Bounce: bounces at the end, good for endings</value>
   <data name="UI_SettingsWindow_395" xml:space="preserve">
     <value>Saves current settings to config.json; they take effect after closing.</value>
   </data>
+  <data name="UI_SettingsWindow_396" xml:space="preserve">
+    <value>Uninstall DynamicBird…</value>
+  </data>
+  <data name="UI_SettingsWindow_397" xml:space="preserve">
+    <value>Are you sure you want to uninstall DynamicBird? App files will be deleted (Store version: uninstall from system Settings).</value>
+  </data>
+  <data name="UI_SettingsWindow_398" xml:space="preserve">
+    <value>Also delete local data (settings/clipboard history/notes/AI sessions)? Yes = delete all, No = keep data.</value>
+  </data>
   <data name="UI_ShortcutManagementPage_396" xml:space="preserve">
     <value>Shortcut Management</value>
   </data>
@@ -1454,7 +1463,6 @@ Bounce: bounces at the end, good for endings</value>
   <data name="Clip_Pin" xml:space="preserve">
     <value>Pin (never auto-cleared)</value>
   </data>
-
   <data name="Clip_Copied" xml:space="preserve">
     <value>✅ Copied</value>
   </data>
@@ -1845,9 +1853,6 @@ Bounce: bounces at the end, good for endings</value>
   <data name="Set_WidgetMarket" xml:space="preserve">
     <value>🛒 Widget Market</value>
   </data>
-
-
-
   <data name="Set_Testing" xml:space="preserve">
     <value>Testing…</value>
   </data>
@@ -1958,7 +1963,7 @@ Right-click for the quick menu</value>
     <value>Hide</value>
   </data>
   <data name="Set_TriggerDistanceTip" xml:space="preserve">
-    <value>How close to the screen edge counts as &quot;at the edge&quot;. Smaller values reduce accidental triggers (e.g. when using the taskbar or resizing windows).</value>
+    <value>How close to the screen edge counts as "at the edge". Smaller values reduce accidental triggers (e.g. when using the taskbar or resizing windows).</value>
   </data>
   <data name="Set_TriggerDelayTip" xml:space="preserve">
     <value>Stay at the edge for this long before the panel appears; 0 = immediately.</value>
@@ -2512,5 +2517,82 @@ Media control</value>
   </data>
   <data name="Set_SnapRangeTip" xml:space="preserve">
     <value>Snaps the panel to a screen edge when its edge is within this distance (0 disables). Snap animation duration follows fly duration</value>
+  </data>
+  <data name="Jump_OpenSettings" xml:space="preserve">
+    <value>Open Settings</value>
+  </data>
+  <data name="Jump_OpenSettingsDesc" xml:space="preserve">
+    <value>Open DynamicBird settings</value>
+  </data>
+  <data name="Jump_ToggleDnd" xml:space="preserve">
+    <value>Toggle Do Not Disturb</value>
+  </data>
+  <data name="Jump_ToggleDndDesc" xml:space="preserve">
+    <value>Turn Do Not Disturb mode on or off</value>
+  </data>
+  <data name="Jump_TogglePanel" xml:space="preserve">
+    <value>Show/Hide Panel</value>
+  </data>
+  <data name="Jump_TogglePanelDesc" xml:space="preserve">
+    <value>Immediately show or hide the edge panel</value>
+  </data>
+  <data name="Set_PanelFrameRate" xml:space="preserve">
+    <value>Panel Frame Rate</value>
+  </data>
+  <data name="Set_PanelFrameRateTip" xml:space="preserve">
+    <value>Rendering frame rate for panel follow / cling animation. Higher = smoother, lower = less CPU.</value>
+  </data>
+  <data name="Set_PanelFrameRateLabel" xml:space="preserve">
+    <value>Frame rate</value>
+  </data>
+  <data name="Set_PanelFrameRateSliderTip" xml:space="preserve">
+    <value>0 = Auto (follows display refresh rate). Manual options: 30 / 60 / 90 / 120 fps.</value>
+  </data>
+  <data name="Set_PanelFrameRateHint" xml:space="preserve">
+    <value>Higher frame rate makes edge follow and cling mode smoother (Smooth mode recommends 60-120); lower saves CPU (Power Saver auto-lowers).</value>
+  </data>
+  <data name="Set_FrameRateAuto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+
+  <data name="Set_Tab_Region" xml:space="preserve">
+    <value>Region</value>
+  </data>
+  <data name="Set_Tab_Panel" xml:space="preserve">
+    <value>Panel</value>
+  </data>
+  <data name="Set_Sec_EdgeTrigger" xml:space="preserve">
+    <value>◈ Edge &amp; Trigger</value>
+  </data>
+  <data name="Set_Sec_PanelShape" xml:space="preserve">
+    <value>◈ Panel Type &amp; Size</value>
+  </data>
+  <data name="Set_Sec_TriggerBehavior" xml:space="preserve">
+    <value>◈ Trigger Behavior (anti-mistouch)</value>
+  </data>
+  <data name="Set_Sec_Advanced" xml:space="preserve">
+    <value>◈ Advanced</value>
+  </data>
+  <data name="Set_Sec_Appearance" xml:space="preserve">
+    <value>◈ Appearance (all panels)</value>
+  </data>
+  <data name="Set_Sec_Taskbar" xml:space="preserve">
+    <value>◈ Taskbar (taskbar panel content)</value>
+  </data>
+  <data name="Set_Sec_Widgets" xml:space="preserve">
+    <value>◈ Widgets (widget panel content)</value>
+  </data>
+
+  <data name="Set_Menu_ShowDesktop" xml:space="preserve">
+    <value>Show Desktop</value>
+  </data>
+  <data name="Set_Menu_CloseRunning" xml:space="preserve">
+    <value>Close Running Windows</value>
+  </data>
+  <data name="Set_Menu_EditWidget" xml:space="preserve">
+    <value>Edit Current Widget</value>
+  </data>
+  <data name="Set_Menu_AiSettings" xml:space="preserve">
+    <value>AI Settings</value>
   </data>
 </root>

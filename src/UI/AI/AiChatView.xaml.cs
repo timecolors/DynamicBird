@@ -85,8 +85,7 @@ namespace DynamicBird.UI.AI
 
             _sessionData = AiSessionStore.Load();
             foreach (var s in _sessionData.Sessions) _sessions.Add(s);
-            SessionCombo.ItemsSource = _sessions;
-            SessionCombo.DisplayMemberPath = "Title";
+            SessionCombo.ItemsSource = _sessions;   // DisplayMemberPath 已在 XAML 声明（先于 ItemsSource 生效，避免类型名泄漏）
 
             var current = _sessionData.Sessions.FirstOrDefault(s => s.Id == _sessionData.CurrentId)
                             ?? _sessionData.Sessions.FirstOrDefault();

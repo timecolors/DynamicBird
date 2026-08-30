@@ -152,7 +152,7 @@ namespace DynamicBird.Core.Controllers
             RepositionOffscreenForSide(left, top, edge);
             // ★ 呼出动画：用"触发动画"类型与参数
             _shapeAnimator.SetShowHideTarget(left, top, _opacity, allowOffscreen: true,
-                _settings.ShowAnimationType, _settings.ShowAnimationDurationMs,
+                _settings.GetResolvedShowAnimationType(CurrentRegionKey), _settings.GetResolvedShowAnimationDurationMs(CurrentRegionKey),
                 _settings.ShowAnimationZoomFrom, _settings.ShowAnimationOscillations, _settings.ShowAnimationSpringiness);
             PanelShown?.Invoke();
         }
@@ -240,7 +240,7 @@ namespace DynamicBird.Core.Controllers
             //   渲染循环（cling）接管把位置推到屏幕外（到位自动停）→ 永不卡半路（无黑框）。
             var (lx, ly) = GetSlideOutTarget();
             _shapeAnimator.SetShowHideTarget(lx, ly, 0, allowOffscreen: true,
-                _settings.HideAnimationType, _settings.HideAnimationDurationMs,
+                _settings.GetResolvedHideAnimationType(CurrentRegionKey), _settings.GetResolvedHideAnimationDurationMs(CurrentRegionKey),
                 _settings.HideAnimationZoomTo, _settings.HideAnimationOscillations, _settings.HideAnimationSpringiness);
             // ★ 不再加 cling 兜底：渲染循环每帧写本地值会干扰 Window.Left 动画时钟
             //   （800ms 动画被打成瞬间到位）。动画本身由 Animate 完成回调锁定终值，
@@ -264,7 +264,7 @@ namespace DynamicBird.Core.Controllers
             _shapeAnimator.SetOpacityDirect(0);
             var (lx, ly) = GetSlideOutTarget();
             _shapeAnimator.SetShowHideTarget(lx, ly, 0, allowOffscreen: true,
-                _settings.HideAnimationType, _settings.HideAnimationDurationMs,
+                _settings.GetResolvedHideAnimationType(CurrentRegionKey), _settings.GetResolvedHideAnimationDurationMs(CurrentRegionKey),
                 _settings.HideAnimationZoomTo, _settings.HideAnimationOscillations, _settings.HideAnimationSpringiness);
             // ★ 不再加 cling 兜底：渲染循环每帧写本地值会干扰 Window.Left 动画时钟
             //   （800ms 动画被打成瞬间到位）。动画本身由 Animate 完成回调锁定终值，

@@ -25,6 +25,7 @@ namespace DynamicBird.Core.Services.Configuration
         public SettingsManager()
         {
             _data = SettingsFileManager.Load();
+            NormalizePanelKinds();
         }
 
         public void Initialize()
@@ -51,7 +52,36 @@ namespace DynamicBird.Core.Services.Configuration
             lock (_lock)
             {
                 _data = SettingsFileManager.Load();
+                NormalizePanelKinds();
                 SettingsChanged?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// 统一自定义面板种类：BaseType=Widget → Kind=Widget（小组件变体，进小组件标签）；
+        /// BaseType 为面板类型 → Kind=Panel（区域面板，进区域面板下拉）；其余不变。
+        /// 修复旧版本（Kind 为空/Panel 混存）导致的位置错乱。
+        /// </summary>
+        private void NormalizePanelKinds()
+        {
+            if (_data.CustomPanels == null || _data.CustomPanels.Count == 0) return;
+            bool changed = false;
+            foreach (var p in _data.CustomPanels)
+            {
+                if (p.Kind == "Config" || p.Kind == "Category") continue;   // 配置代码项/新分类保持
+                string bt = p.BaseType ?? "";
+                if (bt == "Widget")
+                {
+                    if (p.Kind != "Widget") { p.Kind = "Widget"; changed = true; }
+                }
+                else if (!string.IsNullOrEmpty(bt) && bt != "Category")
+                {
+                    if (p.Kind != "Panel") { p.Kind = "Panel"; changed = true; }
+                }
+            }
+            if (changed)
+            {
+                try { SettingsFileManager.Save(_data); } catch { }
             }
         }
 
@@ -285,11 +315,8 @@ namespace DynamicBird.Core.Services.Configuration
             set => SetField(v => _data.ShowSystemStatus = v, value);
         }
 
-        public string CustomIconPath
-        {
-            get => _data.CustomIconPath ?? "";
-            set => SetField(v => _data.CustomIconPath = v, value);
-        }
+
+
 
         // ========== 形状参数 ==========
         public double StripLengthRatio
@@ -515,6 +542,13 @@ namespace DynamicBird.Core.Services.Configuration
         {
             get => _data.PerformanceMode ?? "Normal";
             set => SetField(v => _data.PerformanceMode = v, value);
+        }
+
+        // ========== 面板运行帧率（fps，0=自动满帧） ==========
+        public int PanelFrameRate
+        {
+            get => _data.PanelFrameRate;
+            set => SetField(v => _data.PanelFrameRate = v, value);
         }
 
         /// <summary>应用性能预设（内部标志保护：不触发自定义检测）。</summary>
@@ -824,6 +858,73 @@ namespace DynamicBird.Core.Services.Configuration
         {
             get => _data.FlyDurationMs;
             set { _data.FlyDurationMs = Math.Max(0, Math.Min(2000, value)); MarkCustomIfPreset(); Save(); }
+        }
+
+        // ========== 逐区域动画覆盖（动画页签「动画应用于」） ==========
+        public DynamicBird.Core.Models.RegionAnimationOverride? GetRegionAnimation(string regionKey)
+        {
+            if (_data.RegionAnimationOverrides != null &&
+                _data.RegionAnimationOverrides.TryGetValue(regionKey, out var ov))
+                return ov;
+            return null;
+        }
+
+        public void SetRegionAnimation(string regionKey, DynamicBird.Core.Models.RegionAnimationOverride? ov)
+        {
+            _data.RegionAnimationOverrides ??= new System.Collections.Generic.Dictionary<string, DynamicBird.Core.Models.RegionAnimationOverride>();
+            if (ov == null || (string.IsNullOrEmpty(ov.ShowAnimationType) && !ov.ShowAnimationDurationMs.HasValue &&
+                               string.IsNullOrEmpty(ov.HideAnimationType) && !ov.HideAnimationDurationMs.HasValue))
+            {
+                _data.RegionAnimationOverrides.Remove(regionKey);
+            }
+            else
+            {
+                _data.RegionAnimationOverrides[regionKey] = ov;
+            }
+            Save();
+        }
+
+        public string GetResolvedShowAnimationType(string regionKey)
+        {
+            var ov = GetRegionAnimation(regionKey);
+            return !string.IsNullOrEmpty(ov?.ShowAnimationType) ? ov!.ShowAnimationType! : ShowAnimationType;
+        }
+
+        public int GetResolvedShowAnimationDurationMs(string regionKey)
+        {
+            var ov = GetRegionAnimation(regionKey);
+            return ov?.ShowAnimationDurationMs.HasValue == true ? ov.ShowAnimationDurationMs.Value : ShowAnimationDurationMs;
+        }
+
+        public string GetResolvedHideAnimationType(string regionKey)
+        {
+            var ov = GetRegionAnimation(regionKey);
+            return !string.IsNullOrEmpty(ov?.HideAnimationType) ? ov!.HideAnimationType! : HideAnimationType;
+        }
+
+        public int GetResolvedHideAnimationDurationMs(string regionKey)
+        {
+            var ov = GetRegionAnimation(regionKey);
+            return ov?.HideAnimationDurationMs.HasValue == true ? ov.HideAnimationDurationMs.Value : HideAnimationDurationMs;
+        }
+
+        // ========== 编程模式（鸟笼） ==========
+        public bool ProgrammingModeEnabled
+        {
+            get => _data.ProgrammingModeEnabled;
+            set { _data.ProgrammingModeEnabled = value; Save(); }
+        }
+
+        public System.Collections.Generic.List<DynamicBird.Core.Models.CustomPanelDefinition> CustomPanels
+        {
+            get => _data.CustomPanels ??= new System.Collections.Generic.List<DynamicBird.Core.Models.CustomPanelDefinition>();
+            set { _data.CustomPanels = value; Save(); }
+        }
+
+        public System.Collections.Generic.Dictionary<string, string> AppliedPresets
+        {
+            get => _data.AppliedPresets ??= new System.Collections.Generic.Dictionary<string, string>();
+            set { _data.AppliedPresets = value; Save(); }
         }
 
         // ========== 小鸟依人模式 ==========

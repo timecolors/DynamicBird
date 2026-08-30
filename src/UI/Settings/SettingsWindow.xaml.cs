@@ -26,61 +26,50 @@ namespace DynamicBird.UI.Settings
         private readonly IShortcutService _shortcutService;
         private SettingsData _settingsData = null!;
 
-        // 区域面板自定义选项与区域键（Display 用本地化键，FillPanelCombo 时取当前语言）
-        private static readonly (string Value, string LocKey)[] PanelOptions =
-        {
-            ("Default", "Panel_Default"),
-            ("Taskbar", "Panel_Taskbar"),
-            ("Widget", "Panel_Widget"),
-            ("AppHelper", "Panel_AppHelper"),
-            ("Notification", "Panel_Notification"),
-            ("Recent", "Panel_Recent"),
-            ("QuickSettings", "Panel_QuickSettings"),
-            ("AI", "Panel_AI"),
-            ("WindowControl", "Panel_WindowControl"),
-        };
-
-        private static readonly string[] RegionPanelKeys =
-        {
-            "Top_Left", "Top_Center", "Top_Right",
-            "Bottom_Left", "Bottom_Center", "Bottom_Right",
-            "Left_Top", "Left_Center", "Left_Bottom",
-            "Right_Top", "Right_Center", "Right_Bottom",
-            "TopLeft", "TopRight", "BottomLeft", "BottomRight"
-        };
-
-        // 逐区域触发/隐藏延时：区域键 + 显示名（复用区域面板标签的本地化键）
-        private static readonly (string Key, string LocKey)[] RegionDelayConfig =
-        {
-            ("Top_Left", "UI_SettingsWindow_191"), ("Top_Center", "UI_SettingsWindow_192"), ("Top_Right", "UI_SettingsWindow_193"),
-            ("Bottom_Left", "UI_SettingsWindow_194"), ("Bottom_Center", "UI_SettingsWindow_195"), ("Bottom_Right", "UI_SettingsWindow_196"),
-            ("Left_Top", "UI_SettingsWindow_197"), ("Left_Center", "UI_SettingsWindow_198"), ("Left_Bottom", "UI_SettingsWindow_199"),
-            ("Right_Top", "UI_SettingsWindow_200"), ("Right_Center", "UI_SettingsWindow_201"), ("Right_Bottom", "UI_SettingsWindow_202"),
-            ("TopLeft", "UI_SettingsWindow_150"), ("TopRight", "UI_SettingsWindow_151"), ("BottomLeft", "UI_SettingsWindow_152"), ("BottomRight", "UI_SettingsWindow_153")
-        };
-
-        private sealed class RegionDelayControls
-        {
-            public Slider Trig = null!;
-            public TextBlock TrigText = null!;
-            public Slider Hide = null!;
-            public TextBlock HideText = null!;
-        }
-
-        private readonly Dictionary<string, RegionDelayControls> _regionDelayControls = new();
-
         public SettingsWindow(ISettingsService settings, IShortcutService shortcutService)
         {
             _settings = settings;
             _shortcutService = shortcutService;
             Icon = AppIconHelper.LoadAppIcon();
             InitializeComponent();
+            // ★ 自适应窗口尺寸：默认 960x720；小屏/高 DPI 时按工作区钳制，避免超出屏幕
+            //   （SystemParameters.WorkArea 为 DIP，与 WPF 坐标一致；留 40px 边距）
+            try
+            {
+                Width = Math.Min(960, SystemParameters.WorkArea.Width - 40);
+                Height = Math.Min(720, SystemParameters.WorkArea.Height - 40);
+            }
+            catch { }
+
+            // ★ 跟随系统浅/深色主题（DynamicResource 即时生效；系统切换时自动刷新）
+            ApplySystemTheme();
+            try
+            {
+                Microsoft.Win32.SystemEvents.UserPreferenceChanged += (_, e) =>
+                {
+                    if (e.Category == Microsoft.Win32.UserPreferenceCategory.General)
+                    {
+                        Dispatcher.BeginInvoke(new Action(ApplySystemTheme));
+                    }
+                };
+            }
+            catch { }
             // ★ 不启用 Mica：Mica 跟随系统主题，深色主题下会把设置页背景变成黑色。
             //   固定用 XAML 浅色背景（#F9F9F9），Win10/Win11 观感一致。
             LoadSettings();
             LoadShortcutPage();
-            // ★ 实时保存：所有设置控件变化自动保存（400ms 防抖）
+            // ★ 实时保存：所有设置控件变化自动保存（400ms 防抖）。
+            //   注意：构造函数时窗口视觉树尚未建立（Show 之前），FindVisualChildren 找不到控件，
+            //   必须在 Loaded（视觉树就绪）后再挂；惰性页签（动画等）内容首次选中才进视觉树，
+            //   选中后以 Loaded 优先级补挂。三者都用 _autoSaveHooked 去重，重复调用安全。
+            // ★ 自动保存钩子自愈：不赌 WPF 视觉树在哪个时机完整——
+            //   窗口打开期间每 500ms 补挂一次（_autoSaveHooked 去重，幂等）。
+            //   解耦了"控件何时呈现"与"钩子何时挂上"的耦合（原实现依赖 Loaded 时机，脆弱）。
             HookAutoSave();
+            var autoSaveMaintenance = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+            autoSaveMaintenance.Tick += (_, _) => HookAutoSave();
+            autoSaveMaintenance.Start();
+            Closed += (_, _) => autoSaveMaintenance.Stop();
 
             // ★ 插件安装/删除时实时刷新（本窗口非模态常驻，可能在别处保存插件）
             DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.Changed += () => Dispatcher.Invoke(() =>
@@ -143,6 +132,15 @@ namespace DynamicBird.UI.Settings
                 if (Math.Abs(sldGlbHide.Value - sldHideDelay.Value) > 0.01)
                     sldGlbHide.Value = sldHideDelay.Value;
             };
+
+            // ★★★ 面板运行帧率滑块（0=自动满帧；30/60/90/120 手动档） ★★★
+            sldPanelFrameRate.ValueChanged += (s, e) =>
+            {
+                int fps = (int)sldPanelFrameRate.Value;
+                txtPanelFrameRate.Text = fps <= 0
+                    ? DynamicBird.UI.Localization.LocalizationManager.Instance["Set_FrameRateAuto"]
+                    : fps + "fps";
+            };
         }
 
         [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
@@ -173,6 +171,24 @@ namespace DynamicBird.UI.Settings
         {
             var page = new ShortcutManagementPage(_shortcutService);
             ShortcutManagementFrame.Navigate(page);
+        }
+
+        /// <summary>按系统浅/深色主题切换设置窗口配色（浅色默认，深色用 Win11 风格暗色变体）。</summary>
+        private void ApplySystemTheme()
+        {
+            try
+            {
+                bool dark = !DynamicBird.Infrastructure.Utils.SystemTheme.IsLightTheme();
+                var bg = dark ? new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20)) : new SolidColorBrush(Color.FromRgb(0xF9, 0xF9, 0xF9));
+                var fg = dark ? new SolidColorBrush(Color.FromRgb(0xE6, 0xE6, 0xE6)) : new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x1E));
+                var card = dark ? new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A)) : new SolidColorBrush(Colors.White);
+                var border = dark ? new SolidColorBrush(Color.FromRgb(0x3F, 0x3F, 0x3F)) : new SolidColorBrush(Color.FromRgb(0xD0, 0xD0, 0xD0));
+                Resources["SettingsWindowBg"] = bg;
+                Resources["SettingsWindowFg"] = fg;
+                Resources["SettingsCardBg"] = card;
+                Resources["SettingsBorder"] = border;
+            }
+            catch { }
         }
 
         private void LoadSettings()
@@ -221,7 +237,6 @@ namespace DynamicBird.UI.Settings
             sldOpacity.Value = _settingsData.Opacity;
             sldCornerRadius.Value = _settingsData.CornerRadius;
             chkShowSystemStatus.IsChecked = _settingsData.ShowSystemStatus;
-            txtCustomIcon.Text = _settingsData.CustomIconPath ?? "";
 
             // 动画与布局
             sldHorizontalThreshold.Value = _settingsData.HorizontalLayoutThreshold;
@@ -250,11 +265,19 @@ namespace DynamicBird.UI.Settings
             // ★★★ 动画设置 ★★★
             chkAnimationsEnabled.IsChecked = _settingsData.AnimationsEnabled;
 
+            // ★★★ 编程模式（鸟笼） ★★★
+            chkProgrammingMode.IsChecked = _settingsData.ProgrammingModeEnabled;
+            UpdateBirdcageTabVisibility();
+
             cmbTransformEasing.SelectedItem = GetComboBoxItemByContent(cmbTransformEasing, SettingsUIHelper.GetEasingDisplayName(_settingsData.TransformEasingType ?? "CubicEase"));
 
             // ★ 触发/隐藏动画（类型 + 时长 + 特化参数）
             cmbShowAnimType.SelectedItem = GetComboBoxItemByContent(cmbShowAnimType, AnimTypeToLabel(_settingsData.ShowAnimationType, isHide: false));
             cmbHideAnimType.SelectedItem = GetComboBoxItemByContent(cmbHideAnimType, AnimTypeToLabel(_settingsData.HideAnimationType, isHide: true));
+
+            // ★★★ 逐区域动画（动画应用于：全局默认 / 16 区域） ★★★
+            PopulateAnimRegionCombo();
+            cmbAnimRegion.SelectedIndex = 0;
             sldShowDuration.Value = _settingsData.ShowAnimationDurationMs;
             txtShowDuration.Text = _settingsData.ShowAnimationDurationMs + "ms";
             sldHideDuration.Value = _settingsData.HideAnimationDurationMs;
@@ -361,43 +384,17 @@ namespace DynamicBird.UI.Settings
 
             // ★★★ AI 助手设置 ★★★
             LoadAiSettings();
+
+            // ★★★ 面板运行帧率（0=自动满帧，30/60/90/120 手动） ★★★
+            sldPanelFrameRate.Value = Math.Clamp(_settingsData.PanelFrameRate, 0, 120);
+            txtPanelFrameRate.Text = _settingsData.PanelFrameRate <= 0
+                ? DynamicBird.UI.Localization.LocalizationManager.Instance["Set_FrameRateAuto"]
+                : _settingsData.PanelFrameRate + "fps";
+
+            // ★★★ 预设覆盖：冲突的内置设置分组变灰（应用预设后刷新生效） ★★★
+            ApplyOverrideDimming();
         }
 
-        private bool _loadingAi;
-
-        private void LoadAiSettings()
-        {
-            var ai = AiSettingsStore.Load();
-            _loadingAi = true;
-            chkAiEnabled.IsChecked = ai.Enabled;
-            txtAiBaseUrl.Text = ai.BaseUrl;
-            pwdAiKey.Password = ai.ApiKey;
-            txtAiModel.Text = ai.Model;
-            txtAiSystemPrompt.Text = ai.SystemPrompt;
-            sldAiTemperature.Value = Math.Clamp(ai.Temperature, 0, 2);
-            txtAiTemperature.Text = ai.Temperature.ToString("F1");
-            txtAiContextWindow.Text = ai.ContextWindowTokens.ToString();
-            chkAiWebSearch.IsChecked = ai.EnableWebSearch;
-            chkAiReasoning.IsChecked = ai.EnableReasoning;
-
-            cmbAiProvider.Items.Clear();
-            foreach (var (name, display, _, _) in AiSettings.Presets)
-            {
-                cmbAiProvider.Items.Add(new ComboBoxItem { Content = display, Tag = name });
-            }
-            int idx = -1;
-            for (int i = 0; i < AiSettings.Presets.Length; i++)
-            {
-                if (string.Equals(ai.BaseUrl.TrimEnd('/'),
-                        AiSettings.Presets[i].Url.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
-                {
-                    idx = i;
-                    break;
-                }
-            }
-            cmbAiProvider.SelectedIndex = idx;
-            _loadingAi = false;
-        }
 
         private void UpdateUpdateStatus()
         {
@@ -410,6 +407,56 @@ namespace DynamicBird.UI.Settings
             else
             {
                 txtUpdateStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Set_UpdateSource"], owner, repo);
+            }
+        }
+
+        /// <summary>卸载灵动鸟（非商店版）：二次确认后启动卸载脚本（删除应用/可选删除数据）。</summary>
+        private void BtnUninstall_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (DynamicBird.Infrastructure.Utils.AppPaths.IsPackaged)
+                {
+                    System.Windows.MessageBox.Show(this,
+                        DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_397"],
+                        "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // ★ 二次确认 1：是否卸载
+                var c1 = System.Windows.MessageBox.Show(this,
+                    DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_397"],
+                    "灵动鸟", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (c1 != MessageBoxResult.OK) return;
+
+                // ★ 二次确认 2：是否删除本地数据
+                var c2 = System.Windows.MessageBox.Show(this,
+                    DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_398"],
+                    "灵动鸟", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                if (c2 == MessageBoxResult.Cancel) return;
+
+                bool ok = DynamicBird.Infrastructure.WinApi.UninstallHelper.LaunchUninstall(c2 == MessageBoxResult.Yes);
+                if (!ok)
+                {
+                    System.Windows.MessageBox.Show(this, "启动卸载脚本失败", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                // 卸载脚本随后会停止并删除应用；这里正常退出
+                Close();
+            }
+            catch (Exception ex)
+            {
+                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("卸载失败", ex);
+                System.Windows.MessageBox.Show(this, "卸载失败：" + ex.Message, "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>切换设置窗口到指定页签（x:Name；找不到时忽略）。供右键菜单直达（如 AI 设置 / 鸟笼）。</summary>
+        public void ActivateTab(string tabName)
+        {
+            if (FindName(tabName) is TabItem tab)
+            {
+                tab.IsSelected = true;
             }
         }
 
@@ -538,151 +585,24 @@ namespace DynamicBird.UI.Settings
             txtCurrentLanguage.Text = lm["Set_LangPrefix"] + lm.CurrentCultureName + suffix;
         }
 
-        // ========== AI 助手设置事件 ==========
+        // ========== 编程模式（鸟笼） ==========
 
-        private void CmbAiProvider_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ChkProgrammingMode_Changed(object sender, RoutedEventArgs e)
         {
-            if (_loadingAi) return;
-            if (cmbAiProvider.SelectedItem is ComboBoxItem item && item.Tag is string name)
+            _settingsData.ProgrammingModeEnabled = chkProgrammingMode.IsChecked ?? false;
+            UpdateBirdcageTabVisibility();
+        }
+
+        private void UpdateBirdcageTabVisibility()
+        {
+            if (tabBirdcage == null) return;
+            bool on = chkProgrammingMode.IsChecked == true;
+            tabBirdcage.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            if (on && tabBirdcage.Content == null)
             {
-                var preset = Array.Find(AiSettings.Presets, p => p.Name == name);
-                if (preset.Name != null)
-                {
-                    txtAiBaseUrl.Text = preset.Url;
-                    txtAiModel.Text = preset.Model;
-                }
+                tabBirdcage.Content = new DynamicBird.UI.Settings.Pages.BirdcagePage(_settings);
             }
         }
-
-        private async void BtnAiTest_Click(object sender, RoutedEventArgs e)
-        {
-            var testSettings = new AiSettings
-            {
-                Enabled = true,
-                BaseUrl = string.IsNullOrWhiteSpace(txtAiBaseUrl.Text) ? "https://api.deepseek.com/v1" : txtAiBaseUrl.Text.Trim(),
-                ApiKey = pwdAiKey.Password ?? "",
-                Model = string.IsNullOrWhiteSpace(txtAiModel.Text) ? "deepseek-chat" : txtAiModel.Text.Trim()
-            };
-
-            btnAiTest.IsEnabled = false;
-            txtAiTestStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Testing"];
-            txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(120, 120, 120));
-            try
-            {
-                using var client = new AiChatClient();
-                string? err = await client.TestConnectionAsync(testSettings);
-                if (err == null)
-                {
-                    txtAiTestStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_ConnOk"];
-                    txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(60, 170, 90));
-                }
-                else
-                {
-                    txtAiTestStatus.Text = "❌ " + err;
-                    txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(200, 80, 70));
-                }
-            }
-            catch (Exception ex)
-            {
-                txtAiTestStatus.Text = "❌ " + ex.Message;
-                txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(200, 80, 70));
-            }
-            finally
-            {
-                btnAiTest.IsEnabled = true;
-            }
-        }
-
-        private static void FillPanelCombo(ComboBox combo)
-        {
-            combo.Items.Clear();
-            foreach (var (value, locKey) in PanelOptions)
-            {
-                combo.Items.Add(new ComboBoxItem
-                {
-                    Content = DynamicBird.UI.Localization.LocalizationManager.Instance[locKey],
-                    Tag = value
-                });
-            }
-        }
-
-        private static void SelectPanelValue(ComboBox combo, string value)
-        {
-            foreach (ComboBoxItem item in combo.Items)
-            {
-                if (item.Tag?.ToString() == value)
-                {
-                    combo.SelectedItem = item;
-                    return;
-                }
-            }
-            combo.SelectedIndex = 0;
-        }
-
-        private static string GetSelectedPanelValue(ComboBox combo)
-        {
-            return (combo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Default";
-        }
-
-        private ComboBoxItem? GetComboBoxItemByContent(ComboBox combo, string content)
-        {
-            foreach (ComboBoxItem item in combo.Items)
-            {
-                if (item.Content?.ToString() == content)
-                    return item;
-            }
-            return null;
-        }
-
-        // ========== 触发/隐藏动画类型 ==========
-
-        private static string AnimTypeToLabel(string type, bool isHide) => type switch
-        {
-            "Fade" => isHide ? "淡出" : "淡入",
-            "Zoom" => isHide ? "缩小" : "缩放",
-            "Elastic" => "弹性",
-            _ => isHide ? "滑出" : "滑入"
-        };
-
-        private static string LabelToAnimType(ComboBox cmb, bool isHide) =>
-            (cmb.SelectedItem as ComboBoxItem)?.Content?.ToString() switch
-            {
-                "淡入" or "淡出" => "Fade",
-                "缩放" or "缩小" => "Zoom",
-                "弹性" => "Elastic",
-                _ => "Slide"
-            };
-
-        private void UpdateShowAnimRows()
-        {
-            string label = (cmbShowAnimType.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "滑入";
-            bool zoom = label == "缩放";
-            bool elastic = label == "弹性";
-            SetAnimRow(lblShowZoom, sldShowZoomFrom, txtShowZoomFrom, zoom);
-            SetAnimRow(lblShowOsc, sldShowOsc, txtShowOsc, elastic);
-            SetAnimRow(lblShowSpring, sldShowSpring, txtShowSpring, elastic);
-        }
-
-        private void UpdateHideAnimRows()
-        {
-            string label = (cmbHideAnimType.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "滑出";
-            bool zoom = label == "缩小";
-            bool elastic = label == "弹性";
-            SetAnimRow(lblHideZoom, sldHideZoomTo, txtHideZoomTo, zoom);
-            SetAnimRow(lblHideOsc, sldHideOsc, txtHideOsc, elastic);
-            SetAnimRow(lblHideSpring, sldHideSpring, txtHideSpring, elastic);
-        }
-
-        private static void SetAnimRow(FrameworkElement lbl, FrameworkElement sld, FrameworkElement txt, bool visible)
-        {
-            var v = visible ? Visibility.Visible : Visibility.Collapsed;
-            lbl.Visibility = v;
-            sld.Visibility = v;
-            txt.Visibility = v;
-        }
-
-        private void cmbShowAnimType_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateShowAnimRows();
-        private void cmbHideAnimType_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateHideAnimRows();
 
         // ========== 颜色选择器 ==========
 
@@ -714,320 +634,6 @@ namespace DynamicBird.UI.Settings
             {
                 txtDefaultNoteColor.Text = SettingsUIHelper.DrawingColorToHex(dialog.Color);
             }
-        }
-
-        private void BtnSelectIcon_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new OpenFileDialog
-            {
-                Filter = "图片文件|*.png;*.jpg;*.jpeg;*.bmp;*.ico|所有文件|*.*",
-                Title = "选择自定义图标"
-            };
-            if (dialog.ShowDialog() == true)
-            {
-                txtCustomIcon.Text = dialog.FileName;
-            }
-        }
-
-        // ========== 小工具市场（左侧竖排列表 + 右侧精调） ==========
-
-        private static readonly Dictionary<string, string> _builtinLocKeys = new()
-        {
-            ["Clipboard"] = "UI_SettingsWindow_317",
-            ["Note"] = "UI_SettingsWindow_318",
-            ["Timer"] = "UI_SettingsWindow_319",
-            ["Calculator"] = "UI_SettingsWindow_320",
-            ["TextAi"] = "UI_SettingsWindow_321",
-        };
-
-        private string _selectedWidgetKey = "";
-
-        /// <summary>刷新左侧小组件列表（内置 + 用户插件），保持当前选中项。</summary>
-        private void RefreshWidgetMarket()
-        {
-            if (WidgetMarketList == null) return;
-            WidgetPluginStore.Reload();
-            WidgetMarketList.Children.Clear();
-
-            foreach (var kv in _builtinLocKeys)
-                AddMarketItem(kv.Key, LocalizationManager.Instance[kv.Value]);
-            foreach (var plugin in WidgetPluginStore.Installed)
-                AddPluginMarketItem(plugin);
-
-            if (string.IsNullOrEmpty(_selectedWidgetKey) || !KeyExists(_selectedWidgetKey))
-                _selectedWidgetKey = "Clipboard";
-            SelectWidget(_selectedWidgetKey);
-        }
-
-        private bool KeyExists(string key)
-        {
-            if (_builtinLocKeys.ContainsKey(key)) return true;
-            return WidgetPluginStore.Installed.Any(p => "Widget_" + p.Id == key);
-        }
-        private void AddMarketItem(string key, string name)
-        {
-            WidgetMarketList.Children.Add(BuildMarketRow(key, name, null));
-        }
-
-        private void AddPluginMarketItem(WidgetPlugin plugin)
-        {
-            WidgetMarketList.Children.Add(BuildMarketRow("Widget_" + plugin.Id, plugin.Name, plugin));
-        }
-
-        /// <summary>构建左侧列表项：勾选框（启用，即时生效）+ 名称按钮（左键选中精调，右键菜单）。</summary>
-        private Grid BuildMarketRow(string key, string name, WidgetPlugin? plugin)
-        {
-            var row = new Grid { Margin = new Thickness(0, 0, 0, 2) };
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            var chk = new CheckBox
-            {
-                IsChecked = _settings.IsWidgetEnabled(key),
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 0, 4, 0)
-            };
-            chk.Checked += (_, _) => _settings.SetWidgetEnabled(key, true);
-            chk.Unchecked += (_, _) => _settings.SetWidgetEnabled(key, false);
-            row.Children.Add(chk);
-
-            var btn = new System.Windows.Controls.Button
-            {
-                Content = name,
-                Tag = key,
-                HorizontalContentAlignment = HorizontalAlignment.Left,
-                Background = System.Windows.Media.Brushes.Transparent,
-                BorderThickness = new Thickness(0),
-                Padding = new Thickness(6, 5, 6, 5),
-                FontSize = 12
-            };
-            btn.Click += (_, _) => SelectWidget(key);
-            btn.ContextMenu = BuildMarketMenu(key, plugin);
-            row.Children.Add(btn);
-            System.Windows.Controls.Grid.SetColumn(btn, 1);
-            return row;
-        }
-
-        /// <summary>右键菜单：仅用户插件提供编辑/删除（启停已由左侧勾选框承担）。</summary>
-        private ContextMenu BuildMarketMenu(string key, WidgetPlugin? plugin)
-        {
-            var menu = new ContextMenu();
-            if (plugin != null)
-            {
-                var miEdit = new MenuItem { Header = LocalizationManager.Instance["WidgetMkt_Edit"] };
-                miEdit.Click += (_, _) => OpenWidgetEditor(plugin);
-                menu.Items.Add(miEdit);
-                var miDelete = new MenuItem { Header = LocalizationManager.Instance["WidgetMkt_Delete"] };
-                miDelete.Click += (_, _) => DeletePlugin(plugin);
-                menu.Items.Add(miDelete);
-            }
-            return menu;
-        }
-
-        /// <summary>左键选中：切换右侧精调面板 + 列表高亮。</summary>
-        private void SelectWidget(string key)
-        {
-            _selectedWidgetKey = key;
-            foreach (var row in WidgetMarketList.Children.OfType<Grid>())
-            {
-                var btn = row.Children.OfType<System.Windows.Controls.Button>().FirstOrDefault();
-                if (btn == null) continue;
-                btn.Background = (btn.Tag as string) == key
-                    ? new SolidColorBrush(Color.FromRgb(229, 241, 255))
-                    : System.Windows.Media.Brushes.Transparent;
-            }
-            DetailClipboard.Visibility = key == "Clipboard" ? Visibility.Visible : Visibility.Collapsed;
-            DetailNote.Visibility = key == "Note" ? Visibility.Visible : Visibility.Collapsed;
-            DetailTimer.Visibility = key == "Timer" ? Visibility.Visible : Visibility.Collapsed;
-            DetailCalc.Visibility = key == "Calculator" ? Visibility.Visible : Visibility.Collapsed;
-            DetailTextAi.Visibility = key == "TextAi" ? Visibility.Visible : Visibility.Collapsed;
-            if (key.StartsWith("Widget_"))
-            {
-                DetailPlugin.Visibility = Visibility.Visible;
-                FillPluginDetail(key.Substring("Widget_".Length));
-            }
-            else
-            {
-                DetailPlugin.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        /// <summary>精调区：用户插件的状态/权限/启用/编辑/删除。</summary>
-        private void FillPluginDetail(string id)
-        {
-            DetailPlugin.Children.Clear();
-            var plugin = WidgetPluginStore.GetById(id);
-            if (plugin == null) return;
-            string key = "Widget_" + plugin.Id;
-
-            DetailPlugin.Children.Add(new TextBlock
-            {
-                Text = plugin.Name,
-                FontWeight = FontWeights.SemiBold,
-                FontSize = 13,
-                Margin = new Thickness(0, 0, 0, 4)
-            });
-
-            bool compileOk = string.IsNullOrEmpty(WidgetCompiler.Validate(plugin.Id, plugin.Source));
-            var permText = plugin.Permissions.Count == 0
-                ? LocalizationManager.Instance["WidgetMkt_None"]
-                : string.Join(" · ", plugin.Permissions.Select(WidgetPluginStore.PermissionLabel));
-            DetailPlugin.Children.Add(new TextBlock
-            {
-                Text = (compileOk ? "✅  " : "⚠ 编译失败  ") + permText,
-                FontSize = 10.5,
-                Foreground = new SolidColorBrush(compileOk
-                    ? (plugin.Permissions.Count > 0 ? Color.FromRgb(255, 170, 90) : Color.FromRgb(136, 136, 136))
-                    : Color.FromRgb(200, 80, 70)),
-                Margin = new Thickness(0, 0, 0, 10),
-                TextWrapping = TextWrapping.Wrap
-            });
-
-            var btnRow = new StackPanel { Orientation = Orientation.Horizontal };
-            var btnEdit = new System.Windows.Controls.Button
-            {
-                Content = LocalizationManager.Instance["WidgetMkt_Edit"],
-                Style = (Style)FindResource("Win11Button"),
-                Width = 76,
-                Height = 26,
-                FontSize = 11
-            };
-            btnEdit.Click += (_, _) => OpenWidgetEditor(plugin);
-            btnRow.Children.Add(btnEdit);
-            var btnDel = new System.Windows.Controls.Button
-            {
-                Content = LocalizationManager.Instance["WidgetMkt_Delete"],
-                Style = (Style)FindResource("Win11Button"),
-                Width = 76,
-                Height = 26,
-                FontSize = 11,
-                Margin = new Thickness(8, 0, 0, 0)
-            };
-            btnDel.Click += (_, _) => DeletePlugin(plugin);
-            btnRow.Children.Add(btnDel);
-            DetailPlugin.Children.Add(btnRow);
-        }
-
-        private void OpenWidgetEditor(WidgetPlugin plugin)
-        {
-            var b = new WidgetEditorWindow(plugin) { Owner = this };
-            if (b.ShowDialog() == true) RefreshWidgetMarket();
-        }
-
-        private void DeletePlugin(WidgetPlugin plugin)
-        {
-            if (MessageBox.Show(string.Format(LocalizationManager.Instance["WidgetMkt_DeleteConfirm"], plugin.Name),
-                    LocalizationManager.Instance["WidgetMkt_Confirm"],
-                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-            {
-                _settings.SetWidgetEnabled("Widget_" + plugin.Id, false);
-                WidgetPluginStore.Delete(plugin.Id);
-                RefreshWidgetMarket();
-            }
-        }
-
-        private void BtnNewWidget_Click(object sender, RoutedEventArgs e)
-        {
-            var b = new WidgetEditorWindow { Owner = this };
-            if (b.ShowDialog() == true) RefreshWidgetMarket();
-        }
-
-
-
-        private void BtnRefreshWidgets_Click(object sender, RoutedEventArgs e) => RefreshWidgetMarket();
-
-        private void BtnOpenMarket_Click(object sender, RoutedEventArgs e)
-        {
-            var w = new DynamicBird.UI.Widgets.Dynamic.WidgetMarketWindow { Owner = this };
-            w.ShowDialog();
-        }
-
-
-        // ========== 逐区域触发/隐藏延时 ==========
-
-        /// <summary>动态生成 16 个区域的 触发延时/隐藏延时 行（排版：区域名 | 触发滑块 | 隐藏滑块）。</summary>
-        private void BuildRegionDelayRows()
-        {
-            if (RegionDelayGrid == null) return;
-            RegionDelayGrid.RowDefinitions.Clear();
-            for (int i = 0; i < RegionDelayConfig.Length; i++)
-            {
-                RegionDelayGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(28) });
-            }
-
-            _regionDelayControls.Clear();
-            for (int i = 0; i < RegionDelayConfig.Length; i++)
-            {
-                var (key, locKey) = RegionDelayConfig[i];
-
-                var name = new TextBlock
-                {
-                    Text = LocalizationManager.Instance[locKey],
-                    FontSize = 11,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    TextTrimming = TextTrimming.CharacterEllipsis,
-                    Margin = new Thickness(0, 0, 4, 0)
-                };
-                Grid.SetRow(name, i);
-                Grid.SetColumn(name, 0);
-
-                var trig = MakeDelaySlider();
-                Grid.SetRow(trig, i);
-                Grid.SetColumn(trig, 1);
-                var trigText = MakeDelayText();
-                Grid.SetRow(trigText, i);
-                Grid.SetColumn(trigText, 2);
-
-                var hide = MakeDelaySlider();
-                Grid.SetRow(hide, i);
-                Grid.SetColumn(hide, 3);
-                var hideText = MakeDelayText();
-                Grid.SetRow(hideText, i);
-                Grid.SetColumn(hideText, 4);
-
-                int trigMs = _settingsData.RegionTriggerDelay != null && _settingsData.RegionTriggerDelay.TryGetValue(key, out int tv)
-                    ? tv : _settingsData.TriggerDelayMs;
-                int hideMs = _settingsData.RegionHideDelay != null && _settingsData.RegionHideDelay.TryGetValue(key, out int hv)
-                    ? hv : _settingsData.HideDelayMs;
-                trig.Value = trigMs;
-                trigText.Text = trigMs + "ms";
-                hide.Value = hideMs;
-                hideText.Text = hideMs + "ms";
-
-                trig.ValueChanged += (_, _) => trigText.Text = ((int)trig.Value) + "ms";
-                hide.ValueChanged += (_, _) => hideText.Text = ((int)hide.Value) + "ms";
-
-                RegionDelayGrid.Children.Add(name);
-                RegionDelayGrid.Children.Add(trig);
-                RegionDelayGrid.Children.Add(trigText);
-                RegionDelayGrid.Children.Add(hide);
-                RegionDelayGrid.Children.Add(hideText);
-
-                _regionDelayControls[key] = new RegionDelayControls { Trig = trig, TrigText = trigText, Hide = hide, HideText = hideText };
-            }
-        }
-
-        private static Slider MakeDelaySlider()
-        {
-            return new Slider
-            {
-                Minimum = 0,
-                Maximum = 1000,
-                TickFrequency = 25,
-                IsSnapToTickEnabled = true,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 0, 6, 0)
-            };
-        }
-
-        private static TextBlock MakeDelayText()
-        {
-            return new TextBlock
-            {
-                FontSize = 11,
-                TextAlignment = TextAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
         }
 
         // ========== 自动保存（实时生效）/ 刷新 ==========
@@ -1077,7 +683,6 @@ namespace DynamicBird.UI.Settings
             _settingsData.Opacity = sldOpacity.Value;
             _settingsData.CornerRadius = (int)sldCornerRadius.Value;
             _settingsData.ShowSystemStatus = chkShowSystemStatus.IsChecked ?? true;
-            _settingsData.CustomIconPath = txtCustomIcon.Text;
 
             // 动画与布局
             _settingsData.HorizontalLayoutThreshold = sldHorizontalThreshold.Value;
@@ -1102,6 +707,7 @@ namespace DynamicBird.UI.Settings
 
             // ★★★ 动画设置 ★★★
             _settingsData.AnimationsEnabled = chkAnimationsEnabled.IsChecked ?? true;
+            _settingsData.ProgrammingModeEnabled = chkProgrammingMode.IsChecked ?? false;
 
             string transformEasing = SettingsUIHelper.GetEasingValue(
                 (cmbTransformEasing.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "立方缓动");
@@ -1203,9 +809,17 @@ namespace DynamicBird.UI.Settings
             {
                 _settingsData.PerformanceMode = PerformancePresets.Custom;
             }
+
+            // ★★★ 面板运行帧率（0=自动满帧） ★★★
+            _settingsData.PanelFrameRate = (int)sldPanelFrameRate.Value;
+            _settings.PanelFrameRate = (int)sldPanelFrameRate.Value;   // ★ 双写：立即生效（帧率即时应用）
         }
 
         private System.Windows.Threading.DispatcherTimer? _saveTimer;
+
+        // ★ 自动保存钩子去重：惰性页签内容首次选中才进视觉树，页签切换时补挂（防重复挂/漏挂）
+        private readonly System.Collections.Generic.HashSet<object> _autoSaveHooked = new();
+        private bool _languageHooked;
 
         /// <summary>防抖自动保存：设置控件变化后 400ms 内未再变化则写入并应用。</summary>
         private void ScheduleSave()
@@ -1230,6 +844,10 @@ namespace DynamicBird.UI.Settings
             try
             {
                 ApplyControlsToData();
+                // ★ 服务端独有的数据（鸟笼新建的预设/冲突标记）不在窗口控件里，保存前同步进副本，
+                //   避免 Apply(_settingsData) 用旧快照把这些数据从配置里抹掉（曾致"新建预设保存后丢失"）
+                _settingsData.CustomPanels = _settings.CustomPanels;
+                _settingsData.AppliedPresets = _settings.AppliedPresets;
                 // ★ 关键修复：把设置副本整体同步进 SettingsManager 再落盘。
                 //   之前 ApplyControlsToData 只写本地 _settingsData，_settings.SaveSettings()
                 //   保存的是 SettingsManager 内部从未更新的旧数据 → 设置改动全部丢失，
@@ -1246,50 +864,35 @@ namespace DynamicBird.UI.Settings
             }
         }
 
-        /// <summary>AI 助手配置（独立存储，随实时保存一起写入）。</summary>
-        private void SaveAiSettings()
-        {
-            try
-            {
-                var ai = new AiSettings
-                {
-                    Enabled = chkAiEnabled.IsChecked ?? false,
-                    BaseUrl = txtAiBaseUrl.Text.Trim(),
-                    ApiKey = pwdAiKey.Password ?? "",
-                    Model = txtAiModel.Text.Trim(),
-                    SystemPrompt = txtAiSystemPrompt.Text,
-                    Temperature = sldAiTemperature.Value,
-                    ContextWindowTokens = int.TryParse(txtAiContextWindow.Text, out var cw) ? cw : 8000,
-                    EnableWebSearch = chkAiWebSearch.IsChecked ?? false,
-                    EnableReasoning = chkAiReasoning.IsChecked ?? false
-                };
-                DynamicBird.Core.Services.Ai.AiSettingsStore.Save(ai);
-            }
-            catch { }
-        }
-
         /// <summary>所有设置控件值变化 → 实时自动保存（滑块/勾选/下拉/文本，防抖）。</summary>
         private void HookAutoSave()
         {
             foreach (var s in FindVisualChildren<Slider>(this))
-                s.ValueChanged += (_, _) => ScheduleSave();
+                if (_autoSaveHooked.Add(s)) s.ValueChanged += (_, _) => ScheduleSave();
             foreach (var c in FindVisualChildren<CheckBox>(this))
             {
-                c.Checked += (_, _) => ScheduleSave();
-                c.Unchecked += (_, _) => ScheduleSave();
+                if (_autoSaveHooked.Add(c))
+                {
+                    c.Checked += (_, _) => ScheduleSave();
+                    c.Unchecked += (_, _) => ScheduleSave();
+                }
             }
             foreach (var c in FindVisualChildren<ComboBox>(this))
-                c.SelectionChanged += (_, _) => ScheduleSave();
+                if (_autoSaveHooked.Add(c)) c.SelectionChanged += (_, _) => ScheduleSave();
             foreach (var t in FindVisualChildren<TextBox>(this))
-                t.TextChanged += (_, _) => ScheduleSave();
+                if (_autoSaveHooked.Add(t)) t.TextChanged += (_, _) => ScheduleSave();
 
             // 语言：选中立即切换界面语言（不等防抖）
-            cmbLanguage.SelectionChanged += (_, _) =>
+            if (!_languageHooked)
             {
-                _settingsData.Language = (cmbLanguage.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "";
-                DynamicBird.UI.Localization.LocalizationManager.Instance.SetCulture(_settingsData.Language);
-                ScheduleSave();
-            };
+                _languageHooked = true;
+                cmbLanguage.SelectionChanged += (_, _) =>
+                {
+                    _settingsData.Language = (cmbLanguage.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "";
+                    DynamicBird.UI.Localization.LocalizationManager.Instance.SetCulture(_settingsData.Language);
+                    ScheduleSave();
+                };
+            }
         }
 
         private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject

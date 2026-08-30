@@ -20,7 +20,7 @@ namespace DynamicBird.Core.Controllers
         private readonly WindowSizeController _controller;
         private readonly EdgeTriggerController _edgeController;
 
-        private enum ResizeHandle
+        internal enum ResizeHandle
         {
             Top, Bottom, Left, Right,
             TopLeft, TopRight, BottomLeft, BottomRight
@@ -154,6 +154,9 @@ namespace DynamicBird.Core.Controllers
                 var pos = e.GetPosition(_mainPanel);
                 var handle = GetHandleAt(pos);
                 _mainPanel.Cursor = handle.HasValue ? GetHandleCursor(handle.Value) : Cursors.Arrow;
+                // ★ 竖条（Hand 光标）贴边后覆盖面板边缘 resize 手柄区，会盖住手柄光标——
+                //   OverrideCursor 优先级最高：手柄区强制 resize 光标，非手柄区恢复 null（竖条 Hand 正常显示）
+                Mouse.OverrideCursor = handle.HasValue ? GetHandleCursor(handle.Value) : null;
             }
             catch { }
         }
@@ -204,11 +207,22 @@ namespace DynamicBird.Core.Controllers
             //   避免"想切边缘内容却变成拖拽/调整大小"。面板内侧（离屏幕边缘超过触发距离）仍为正常拖拽区。
             if (IsInEdgeTriggerBand(pos)) return null;
 
-            double corner = 42;
-            double edgeSize = 8;
-            double width = _mainPanel.ActualWidth;
-            double height = _mainPanel.ActualHeight;
+            return HitTest(_mainPanel.ActualWidth, _mainPanel.ActualHeight, pos);
+        }
+
+        /// <summary>
+        /// 纯函数手柄命中判定（可单测）。
+        /// ★ 手柄区随面板尺寸自适应：矮条/窄条面板（任务栏 / 左右边缘小组件）缩小角区与边带，
+        ///   避免覆盖图标点击区。原固定 corner=42 / edgeSize=8 在 86px 高任务栏面板上
+        ///   角区占 49% 高度，会盖住右侧图标（点击变成调整大小）。
+        /// </summary>
+        internal static ResizeHandle? HitTest(double width, double height, Point pos)
+        {
             if (width < 10 || height < 10) return null;
+
+            double minSide = Math.Min(width, height);
+            double corner = Math.Min(24, minSide * 0.22);   // 常规面板 24px（原 42 过大）；矮条面板更小
+            double edgeSize = Math.Min(6, minSide * 0.10);  // 边带最多 6px（原 8）
 
             bool cLeft = pos.X < corner;
             bool cRight = pos.X > width - corner;

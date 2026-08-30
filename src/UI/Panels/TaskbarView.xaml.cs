@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using DynamicBird.Infrastructure.WinApi;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DynamicBird.UI.Panels
 {
@@ -99,6 +100,20 @@ namespace DynamicBird.UI.Panels
         }
 
         public void RefreshData() => LoadItems();
+
+        /// <summary>
+        /// 菜单入口：关闭所有运行中窗口标签（面板内只能逐个关闭）。
+        /// 只关 Window 类型项，不动用户快捷方式。
+        /// </summary>
+        public void CloseAllWindows()
+        {
+            var list = _windows.Where(i => i.Type == TaskbarItemType.Window && i.Handle.HasValue).ToList();
+            foreach (var item in list)
+            {
+                WindowAction.Close(item.Handle!.Value);
+            }
+            Dispatcher.BeginInvoke(new Action(RefreshWindows));
+        }
 
         /// <summary>窗口事件钩子回调（UI 线程）：窗口列表变化时刷新（节流已由钩子合并）。</summary>
         private void OnWindowEventChanged()

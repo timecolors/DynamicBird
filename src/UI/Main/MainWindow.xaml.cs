@@ -42,19 +42,44 @@ namespace DynamicBird.UI.Main
         private bool _isDragging = false;
         private int _edgeTickCount = 0;
 
+        // ★ WH_MOUSE_LL 鼠标钩子（事件驱动边缘检测）：有事件立即处理，静止零轮询开销
+        private DynamicBird.Infrastructure.WinApi.MouseHookService? _mouseHook;
+
         // ★ 图标中置状态（内容切换期间的视觉锚点：图标居中 + 内容静默，防抖稳定后归位）
         private bool _iconCentered;
         private System.Windows.Threading.DispatcherTimer? _stabilizeTimer;
         private bool _stabilizeSizeHookActive;
         private DateTime _lastFollowMoveTime = DateTime.MinValue;
 
-        // ★ 自适应 tick 频率：鼠标静止时降频省 CPU（30ms → 100ms），移动时恢复
+        // ★ 自适应 tick 频率：鼠标静止时降频省 CPU（30ms → 100ms），移动时恢复。
+        //   PowerSaver 模式进一步降频（60ms 活跃 / 250ms 静止），由 ApplyPerformanceFrameRate 设置。
         private int _lastTickMouseX = int.MinValue;
         private int _lastTickMouseY = int.MinValue;
         private int _idleTickCount = 0;
         private const int IdleThresholdTicks = 10;   // 静止约 300ms 后降频
-        private const int ActiveIntervalMs = 30;
+        // ★ 鼠标检测频率按性能模式三档（Smooth 高频更跟手 / PowerSaver 低频省电）：
+        private const int SmoothActiveIntervalMs = 16;    // Smooth：~60Hz 跟手
+        private const int SmoothIdleIntervalMs = 80;
+        private const int ActiveIntervalMs = 30;          // Normal
         private const int IdleIntervalMs = 100;
+        private const int PowerSaverActiveIntervalMs = 60;
+        private const int PowerSaverIdleIntervalMs = 250;
+
+        /// <summary>当前性能模式下的活跃 tick 间隔（Smooth 16ms / Normal 30ms / PowerSaver 60ms）。</summary>
+        private int CurrentActiveIntervalMs => _settingsService.PerformanceMode switch
+        {
+            DynamicBird.Core.Services.Configuration.PerformancePresets.Smooth => SmoothActiveIntervalMs,
+            DynamicBird.Core.Services.Configuration.PerformancePresets.PowerSaver => PowerSaverActiveIntervalMs,
+            _ => ActiveIntervalMs
+        };
+
+        /// <summary>当前性能模式下的静止 tick 间隔（Smooth 80ms / Normal 100ms / PowerSaver 250ms）。</summary>
+        private int CurrentIdleIntervalMs => _settingsService.PerformanceMode switch
+        {
+            DynamicBird.Core.Services.Configuration.PerformancePresets.Smooth => SmoothIdleIntervalMs,
+            DynamicBird.Core.Services.Configuration.PerformancePresets.PowerSaver => PowerSaverIdleIntervalMs,
+            _ => IdleIntervalMs
+        };
 
         public MainWindow()
         {
@@ -118,6 +143,20 @@ namespace DynamicBird.UI.Main
 
                 InitializeUIComponents();
                 InitializeExtensions();
+
+                // ★ Jump List 启动动作（无已有实例时）：初始化完成后执行
+                try
+                {
+                    var startupActions = DynamicBird.Infrastructure.WinApi.JumpListCommand.TakePendingStartupActions();
+                    if (startupActions.Count > 0)
+                    {
+                        foreach (var action in startupActions)
+                        {
+                            DynamicBird.App.ExecuteJumpListAction(new[] { action });
+                        }
+                    }
+                }
+                catch { }
 
                 Closed += (s, e) => OnWindowClosed();
 
@@ -279,6 +318,7 @@ namespace DynamicBird.UI.Main
                 _shapeAnimator = new ShapeAnimator(this, MainPanel);
                 _shapeAnimator.SetSettings(_settingsService);
                 _shapeAnimator.SetAnimationsEnabled(_settingsService.AnimationsEnabled);
+                ApplyPerformanceFrameRate();   // ★ 按性能模式/用户帧率设置渲染跳帧（PowerSaver 降帧）
                 _currentTaskbarHeight = GetTaskbarHeight();
 
                 _visibilityController = new PanelVisibilityController(
@@ -357,6 +397,47 @@ namespace DynamicBird.UI.Main
 
         private void StartEdgeTimer()
         {
+                // ★ WH_MOUSE_LL 钩子：事件驱动边缘检测（失败自动降级轮询，不影响启动）
+                try
+                {
+                    _mouseHook = new DynamicBird.Infrastructure.WinApi.MouseHookService();
+                    if (_mouseHook.IsActive)
+                        LogManager.Debug("WH_MOUSE_LL 钩子已激活（事件驱动边缘检测）");
+                    else
+                        LogManager.Debug("WH_MOUSE_LL 钩子安装失败，降级 30ms 轮询");
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error("安装鼠标钩子失败", ex);
+                    _mouseHook = null;
+                }
+
+                // ★ 小鸟依人实时目标源：渲染帧每帧读实时鼠标位置（钩子缓存 → DIP → 钳制目标）。
+                //   目标更新频率 = 渲染帧（~16ms），消除"tick 30ms 才更新一次目标"的滞后卡顿，
+                //   与贴边跟随（FollowPositionProvider 每帧读鼠标）同样跟手。
+                //   ★ onPanel = 鼠标是否在面板上（面板内+边）：追逐中（T>0）只认"中心追到鼠标"；
+                //   仅 T≤0 直接设置分支用 onPanel 判定"追到即停"（面板上不追）。
+                _shapeAnimator.ClingTargetProvider = () =>
+                {
+                    int mx, my;
+                    if (_mouseHook != null && _mouseHook.IsActive)
+                    {
+                        (mx, my) = _mouseHook.LastPosition;
+                    }
+                    else
+                    {
+                        var cp = System.Windows.Forms.Cursor.Position;
+                        mx = cp.X;
+                        my = cp.Y;
+                    }
+                    double dpi = GetDpiScale();
+                    double mouseX = mx / dpi;
+                    double mouseY = my / dpi;
+                    bool onPanel = IsMouseInsidePanel(mouseX, mouseY);
+                    var (tl, tt) = _edgeController.ComputeClingTarget(mouseX, mouseY);
+                    return (tl, tt, onPanel);
+                };
+
                 _edgeTimer = new DispatcherTimer();
                 _edgeTimer.Interval = TimeSpan.FromMilliseconds(30);
                 _edgeTimer.Tick += (s, e) =>
@@ -366,7 +447,26 @@ namespace DynamicBird.UI.Main
                     // ★ 自适应频率：鼠标静止时降频（100ms），移动时恢复（30ms）。
                     //   静止判定带迟滞（连续 IdleThresholdTicks 次静止才降频，移动立即恢复），
                     //   避免鼠标微抖（2-4px 抖动）导致 30/100ms 间隔乒乓切换。
-                    var cursorNow = System.Windows.Forms.Cursor.Position;
+                    // ★ WH_MOUSE_LL 钩子优先：有事件用钩子坐标（事件驱动，静止时零轮询）；
+                    //   无事件（鼠标静止）→ 钩子已覆盖，跳过位置读取直接走静止降频分支。
+                    //   钩子未激活（安装失败）→ 回退原有 Cursor.Position 轮询（行为不变）。
+                    System.Drawing.Point cursorNow;
+                    bool hookHasEvent = _mouseHook != null && _mouseHook.IsActive && _mouseHook.HasEvent;
+                    if (hookHasEvent)
+                    {
+                        var (hx, hy) = _mouseHook!.LastPosition;
+                        cursorNow = new System.Drawing.Point(hx, hy);
+                        _mouseHook.ConsumeEvent();
+                    }
+                    else if (_mouseHook != null && _mouseHook.IsActive)
+                    {
+                        // 钩子激活但无事件 = 鼠标静止：直接走静止分支（不轮询 Cursor）
+                        goto HookIdle;
+                    }
+                    else
+                    {
+                        cursorNow = System.Windows.Forms.Cursor.Position;
+                    }
                     // ★ 用 long 计算差值：_lastTickMouseX/Y 初始为 int.MinValue，
                     //   鼠标移到屏幕顶部/左边（坐标 0）时 int 减法会溢出回绕成 int.MinValue，
                     //   再 Math.Abs(int.MinValue) 抛 OverflowException（未处理异常弹窗）。
@@ -376,12 +476,22 @@ namespace DynamicBird.UI.Main
                         Math.Abs((long)cursorNow.Y - _lastTickMouseY) > 4;
                     _lastTickMouseX = cursorNow.X;
                     _lastTickMouseY = cursorNow.Y;
+                    goto AfterMouseMoved;
+                HookIdle:
+                    mouseMoved = false;
+                    // ★ 钩子激活无事件：用钩子缓存的最后位置（保持坐标连续性）
+                    var (hx2, hy2) = _mouseHook!.LastPosition;
+                    cursorNow = new System.Drawing.Point(hx2, hy2);
+                    _lastTickMouseX = hx2;
+                    _lastTickMouseY = hy2;
+                AfterMouseMoved:
 
                     if (mouseMoved)
                     {
                         _idleTickCount = 0;
-                        if (_edgeTimer.Interval.TotalMilliseconds != ActiveIntervalMs)
-                            _edgeTimer.Interval = TimeSpan.FromMilliseconds(ActiveIntervalMs);
+                        int active = CurrentActiveIntervalMs;
+                        if (_edgeTimer.Interval.TotalMilliseconds != active)
+                            _edgeTimer.Interval = TimeSpan.FromMilliseconds(active);
                         // ★ 中置状态：记录"上次移动时间"（绕圈/乱逛持续移动 → 永不判稳）
                         if (_iconCentered) _lastFollowMoveTime = DateTime.Now;
                     }
@@ -391,10 +501,11 @@ namespace DynamicBird.UI.Main
                         // ★ 鼠标真正停下（超过稳定时长无移动）→ 结束中置：加载内容 + 形变 + 归位 + 变实
                         ExitCenteredState();
                     }
-                    else if (_idleTickCount++ > IdleThresholdTicks &&
-                             _edgeTimer.Interval.TotalMilliseconds != IdleIntervalMs)
+                    else if (_idleTickCount++ > IdleThresholdTicks)
                     {
-                        _edgeTimer.Interval = TimeSpan.FromMilliseconds(IdleIntervalMs);
+                        int idle = CurrentIdleIntervalMs;
+                        if (_edgeTimer.Interval.TotalMilliseconds != idle)
+                            _edgeTimer.Interval = TimeSpan.FromMilliseconds(idle);
                     }
 
                     // 每约 150ms 刷新一次任务栏边界（任务栏自动隐藏/升起时跟随）
@@ -410,21 +521,14 @@ namespace DynamicBird.UI.Main
                 {
                     // ★ 按住穿透修饰键（Ctrl/Alt/Shift）时，面板窗口鼠标穿透，可点击面板下方的屏幕内容
                     UpdatePassthroughState();
+                    // ★ 穿透期间窗口已隐藏：跳过面板显示/跟随逻辑（否则 ProcessRegion 会重新显示面板）
+                    if (_passthroughActive) return;
 
-                    var point = System.Windows.Forms.Cursor.Position;
+                    // ★ 用钩子坐标（无钩子时 cursorNow 已含轮询结果）
+                    var point = cursorNow;
 
-                    // DPI 缩放
-                    double dpiScale = 1.0;
-                    var presentationSource = PresentationSource.FromVisual(this);
-                    if (presentationSource?.CompositionTarget != null)
-                    {
-                        dpiScale = presentationSource.CompositionTarget.TransformToDevice.M11;
-                    }
-                    if (dpiScale <= 0 || double.IsNaN(dpiScale) || double.IsInfinity(dpiScale))
-                    {
-                        dpiScale = 1.0;
-                    }
-
+                    // DPI 缩放（GetDpiScale 供 tick 与 ClingTargetProvider 共用）
+                    double dpiScale = GetDpiScale();
                     double mouseX = point.X / dpiScale;
                     double mouseY = point.Y / dpiScale;
 
@@ -462,7 +566,32 @@ namespace DynamicBird.UI.Main
                     //   避免"跟随到屏幕边缘 → 立即被贴边逻辑接管"的打架。
                     if (_edgeController.IsInClinging())
                     {
-                        _edgeController.UpdateClinging(mouseX, mouseY);
+                        // ★ 修复：关闭小鸟依人设置后立即停止跟随（否则已处于 cling 状态会一直追）
+                        if (!_settingsService.ClingModeEnabled)
+                        {
+                            _edgeController.SetClingModeEnabled(false);
+                        }
+                        else
+                        {
+                            // ★ 统一延时隐藏（用户确认：任何模式都遵循——鼠标不在面板内
+                            //   即开始计时，超时（HideDelayMs）隐藏面板）：
+                            //   追逐中鼠标一直在面板外（未追上）→ 按延时隐藏；追到（鼠标进面板）→ 取消
+                            if (isInsidePanel)
+                            {
+                                _visibilityController.CancelHide();
+                            }
+                            else if (!_edgeController.IsDragging && !_edgeController.IsFlying)
+                            {
+                                if (_visibilityController.CheckHideDelayTimeout())
+                                {
+                                    // 超时已隐藏：停止追逐（否则隐藏后面板仍处于 cling 状态）
+                                    _edgeController.SetClingModeEnabled(false);
+                                    return;
+                                }
+                                _visibilityController.HideWithDelay();
+                            }
+                            _edgeController.UpdateClinging(mouseX, mouseY);
+                        }
                         return;
                     }
 
@@ -537,8 +666,8 @@ namespace DynamicBird.UI.Main
                                 _visibilityController.CancelHide();
                             }
                             else if (_settingsService.ClingModeEnabled &&
-                                     _settingsService.PerformanceMode != "PowerSaver" &&
                                      _visibilityController.IsVisible && !_edgeController.IsInClinging())
+                            // ★ 省电模式不省机制：省电也启动小鸟依人（省电只降帧率，见 ApplyPerformanceFrameRate）
                             {
                                 // ★ 尝试启动小鸟依人跟随；若因鼠标贴近边缘等被拒绝（false），
                                 //   回退到正常隐藏延时——否则面板会悬在屏幕中永不隐藏。
@@ -699,6 +828,8 @@ namespace DynamicBird.UI.Main
                 _edgeController?.InvalidateTargetSizeCache();
                 // ★ 划词翻译 热键随设置变化重新注册（保存后立即生效）
                 ReapplyTextAiHotkey();
+                // ★ 性能模式切换（Smooth/Normal/PowerSaver）→ 渲染降帧即时生效
+                ApplyPerformanceFrameRate();
 
                 // ★★★ 同步设置到 ShapeAnimator ★★★
                 _shapeAnimator?.SetSettings(_settingsService);
@@ -707,6 +838,45 @@ namespace DynamicBird.UI.Main
             catch (Exception ex)
             {
                 LogManager.Error("配置变更刷新失败", ex);
+            }
+        }
+
+        /// <summary>
+        /// 按性能模式 + 用户帧率设置渲染策略：
+        ///  - 用户设置了 PanelFrameRate（>0）→ 按其目标帧率（30/60/120）映射跳帧；
+        ///  - 未设置（0=自动）→ PowerSaver 降帧（~20fps）+ tick 静止 250ms；Smooth/Normal 满帧。
+        /// 性能模式切换即时生效（OnSettingsChanged 调用）；启动时也调用。
+        /// </summary>
+        private void ApplyPerformanceFrameRate()
+        {
+            try
+            {
+                bool saver = _settingsService.PerformanceMode ==
+                    DynamicBird.Core.Services.Configuration.PerformancePresets.PowerSaver;
+                int userFps = _settingsService.PanelFrameRate;
+                if (userFps > 0)
+                {
+                    // ★ 用户手动帧率优先（Smooth 提高帧率/省电降低都由此控制）
+                    _shapeAnimator?.SetTargetFrameRate(userFps);
+                    LogManager.Debug($"性能帧率应用: 用户帧率 {userFps}fps");
+                }
+                else
+                {
+                    // ★ 自动：省电 2（每 3 帧 ~20fps），其余 0（满帧，Smooth/Normal）
+                    _shapeAnimator?.SetFrameSkip(saver ? 2 : 0);
+                    LogManager.Debug("性能帧率应用: " + (saver ? "PowerSaver(跳帧2/250ms)" : "Normal/Smooth(满帧/100ms)"));
+                }
+                // ★ 边缘 tick 立即调整到当前模式的间隔（静止时由自适应逻辑保持）
+                if (_edgeTimer != null)
+                {
+                    int active = CurrentActiveIntervalMs;
+                    if (_edgeTimer.Interval.TotalMilliseconds != active)
+                        _edgeTimer.Interval = TimeSpan.FromMilliseconds(active);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error("应用性能帧率失败", ex);
             }
         }
 
@@ -741,6 +911,9 @@ namespace DynamicBird.UI.Main
             _lastFollowMoveTime = DateTime.Now;
             // ★ 中置状态（乱逛/切换期间）：跟随强制绝对跟手（图标实时跟着鼠标逛）
             _shapeAnimator.SetFollowAbsolute(true);
+
+            // ★ 中置模态不显示任何东西：隐藏反馈条
+            IconHoverBar.Opacity = 0;
 
             // 图标中置（面板级动画，150ms 缓动）
             double targetX = GetCenteredIconShift();
@@ -800,6 +973,8 @@ namespace DynamicBird.UI.Main
             _iconCentered = false;
             // ★ 退出中置：恢复设置映射的跟随松紧（拉满=跟手，调小=缓慢飞追）
             _shapeAnimator.SetFollowAbsolute(false);
+            // ★ 恢复反馈条状态（中置期间被隐藏）
+            UpdateIconTextInternal();
 
             if (_stabilizeSizeHookActive)
             {
@@ -938,6 +1113,8 @@ namespace DynamicBird.UI.Main
             LogManager.Info("主窗口关闭");
             _edgeTimer?.Stop();
             _edgeTimer = null;
+            _mouseHook?.Dispose();
+            _mouseHook = null;
             DynamicBird.Infrastructure.WinApi.ToastMonitor.Stop();
             DynamicBird.Infrastructure.WinApi.RecentAppTracker.Stop();
             try { _clipboardService.StopListening(); } catch { }

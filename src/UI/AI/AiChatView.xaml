@@ -45,6 +45,7 @@
             <ComboBox x:Name="SessionCombo" Grid.Column="0"
                       Height="26" FontSize="12"
                       VerticalContentAlignment="Center"
+                      DisplayMemberPath="Title"
                       SelectionChanged="SessionCombo_SelectionChanged"/>
             <Button x:Name="BtnNewSession" Grid.Column="1" Content="{Binding Item[UI_AiChatView_5], Source={x:Static loc:LocalizationManager.Instance}}"
                     Style="{StaticResource FlatButton}" Height="26" Padding="10,0" FontSize="11.5"

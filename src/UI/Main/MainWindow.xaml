@@ -47,19 +47,26 @@
                 <Border Grid.Row="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition x:Name="IconBarColumn" Width="60" MinWidth="0.2cm" MaxWidth="160"/>
+                            <!-- 分隔线列：0 宽不占布局（视觉无宽度），分隔线叠在竖条/内容交界 -->
+                            <ColumnDefinition Width="0"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- ★★★ 图标容器（支持平移） ★★★ -->
+                        <!-- ★★★ 左侧交互竖条：整条为热区（右键菜单/拖放固定），hover/拖放显示反馈条 ★★★ -->
+                        <!-- ★ 竖条列：左扩 6 覆盖 Padding 贴面板左缘；下扩 6 贴面板底；视觉无缝 -->
                         <Grid Grid.Column="0"
                               x:Name="IconContainer"
-                              Width="48" Height="48"
-                              VerticalAlignment="Center"
-                              Margin="0,0,12,0"
+                              HorizontalAlignment="Stretch"
+                              Margin="-6,0,0,-6"
                               Background="Transparent"
                               AllowDrop="True"
-                              AutomationProperties.Name="灵动鸟主图标"
+                              Cursor="Hand"
+                              AutomationProperties.Name="灵动鸟交互区"
+                              MouseEnter="IconText_MouseEnter"
+                              MouseLeave="IconText_MouseLeave"
+                              MouseDown="IconText_MouseDown"
+                              MouseRightButtonUp="IconText_MouseRightButtonUp"
                               DragEnter="IconText_DragEnter"
                               DragOver="IconText_DragOver"
                               DragLeave="IconText_DragLeave"
@@ -68,28 +75,35 @@
                             <Grid.RenderTransform>
                                 <TranslateTransform x:Name="IconShift" X="0" Y="0"/>
                             </Grid.RenderTransform>
-                            <Path x:Name="IconPath"
-                                  Style="{StaticResource LineIcon}"
-                                  Data="{StaticResource IconLogo}"
-                                  Width="24" Height="24"
-                                  Cursor="Hand"
-                                  MouseEnter="IconText_MouseEnter"
-                                  MouseLeave="IconText_MouseLeave"
-                                  MouseDown="IconText_MouseDown"
-                                  MouseRightButtonUp="IconText_MouseRightButtonUp">
-                                <Path.RenderTransform>
-                                    <TranslateTransform x:Name="IconTranslate" X="0" Y="0"/>
-                                </Path.RenderTransform>
-                            </Path>
-                            <Image x:Name="IconImage"
-                                   Width="24" Height="24"
-                                   Stretch="Uniform"
-                                   Visibility="Collapsed"
-                                   Cursor="Hand"
-                                   IsHitTestVisible="False"/>
+                            <!-- hover/拖放反馈条：默认隐藏，鼠标移入或拖放时显示 -->
+                            <Border x:Name="IconHoverBar"
+                                    Background="#26FFFFFF"
+                                    CornerRadius="6"
+                                    Margin="0"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
+                            <!-- 图标图形已按用户要求移除（保留元素，永不显示） -->
+                            <Path x:Name="IconPath" Visibility="Collapsed" IsHitTestVisible="False"/>
+                            <Image x:Name="IconImage" Visibility="Collapsed" IsHitTestVisible="False"/>
                         </Grid>
 
-                        <ContentControl Grid.Column="1"
+                        <!-- ★★★ 隐形分隔线：0 宽列内负 margin 叠在竖条/内容交界，hover 显示淡条+双向箭头，可拖调竖条宽度 ★★★ -->
+                        <GridSplitter Grid.Column="1"
+                                      x:Name="IconBarSplitter"
+                                      Width="8"
+                                      Margin="-4,0,0,-6"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Stretch"
+                                      Background="Transparent"
+                                      Cursor="SizeWE"
+                                      MouseEnter="IconBarSplitter_MouseEnter"
+                                      MouseLeave="IconBarSplitter_MouseLeave"
+                                      PreviewMouseMove="IconBarSplitter_PreviewMouseMove"
+                                      ResizeBehavior="BasedOnAlignment"
+                                      ResizeDirection="Columns"
+                                      ShowsPreview="False"/>
+
+                        <ContentControl Grid.Column="2"
                                         x:Name="ContentContainer"
                                         VerticalContentAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch"/>

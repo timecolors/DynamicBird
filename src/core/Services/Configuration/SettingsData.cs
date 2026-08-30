@@ -36,7 +36,6 @@ namespace DynamicBird.Core.Services.Configuration
         public double Opacity { get; set; } = 0.85;
         public int CornerRadius { get; set; } = 16;
         public bool ShowSystemStatus { get; set; } = true;
-        public string? CustomIconPath { get; set; } = "";
 
         // ========== 动画与布局 ==========
         public double HorizontalLayoutThreshold { get; set; } = 3.0 / 7.0;
@@ -167,6 +166,24 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 灵动鸟性能模式（Smooth / Normal / PowerSaver） ==========
         // 一键预设：Smooth=面板动画全开更柔滑；Normal=平衡；PowerSaver=关动画最省电
         public string? PerformanceMode { get; set; } = "Normal";
+
+        // ========== 面板运行帧率（fps：0=自动满帧，30/60/120 可选手动） ==========
+        // 渲染帧跟随/小鸟依人的目标帧率；0 = 跟随显示器刷新率（CompositionTarget.Rendering 满帧）。
+        // 值越低越省 CPU（配合 PowerSaver 降帧），越高越顺滑（Smooth 建议 60/120）。
+        public int PanelFrameRate { get; set; } = 0;
+
+        // ========== 编程模式（鸟笼） ==========
+        // 勾选后出现"鸟笼"页签：设置以代码（JSON）编辑，可创建面板副本、保存预设、AI 提示词生成
+        public bool ProgrammingModeEnabled { get; set; } = false;
+        // 用户自定义面板定义（编辑副本/新建面板，注册后可被区域选择）
+        public System.Collections.Generic.List<DynamicBird.Core.Models.CustomPanelDefinition>? CustomPanels { get; set; }
+        // 预设覆盖记录：sourceKey（内置节点 Key）→ 当前生效的预设名。应用预设时记录，恢复/应用内置时清除。
+        // 存在覆盖 → 鸟笼左侧对应节点高亮（未启用）、设置页对应分组变灰。
+        public System.Collections.Generic.Dictionary<string, string>? AppliedPresets { get; set; }
+
+        // ========== 逐区域动画覆盖（动画页签「动画应用于」） ==========
+        // regionKey → 覆盖项（只覆盖 触发/隐藏动画 类型+时长）；空值字段 = 继承全局；无条目 = 完全跟随全局。
+        public System.Collections.Generic.Dictionary<string, DynamicBird.Core.Models.RegionAnimationOverride>? RegionAnimationOverrides { get; set; }
 
         // ========== 边缘触发距离与延时（防误触） ==========
         // 触发距离（DIP）：鼠标距屏幕边缘多远判定为贴边；越小越难误触（默认 6，原 12 偏宽）

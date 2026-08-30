@@ -2,6 +2,7 @@ using DynamicBird.Core.Infrastructure.Logging;
 using DynamicBird.UI.Settings;
 using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DynamicBird.UI.Main
 {
@@ -10,7 +11,10 @@ namespace DynamicBird.UI.Main
         // ★ 非模态单实例：设置窗口打开时主面板仍正常工作（可实时看面板效果）
         private SettingsWindow? _settingsWindow;
 
-        private void OpenSettings()
+        /// <summary>无参入口（方法组可转 Action，供托盘/热键/JumpList 使用）。</summary>
+        private void OpenSettings() => OpenSettings(null);
+
+        private void OpenSettings(string? tabName)
         {
             try
             {
@@ -24,12 +28,38 @@ namespace DynamicBird.UI.Main
                     _settingsWindow.Show();
                 }
                 _settingsWindow.Activate();
+                if (!string.IsNullOrEmpty(tabName))
+                {
+                    _settingsWindow.ActivateTab(tabName);
+                }
             }
             catch (Exception ex)
             {
                 LogManager.Error("打开设置窗口失败", ex);
                 MessageBox.Show($"打开设置失败:\n{ex.Message}", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+        /// <summary>隐形分隔线悬停：淡色反馈条 + 双向箭头（竖条 Hand 会盖掉元素 Cursor，用 OverrideCursor 强制）。</summary>
+        private void IconBarSplitter_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Mouse.OverrideCursor = System.Windows.Input.Cursors.SizeWE;
+            IconBarSplitter.Background = new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromArgb(0x26, 0xFF, 0xFF, 0xFF));
+        }
+
+        private void IconBarSplitter_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (Mouse.OverrideCursor == System.Windows.Input.Cursors.SizeWE)
+            {
+                Mouse.OverrideCursor = null;
+            }
+            IconBarSplitter.Background = System.Windows.Media.Brushes.Transparent;
+        }
+
+        /// <summary>鼠标在分隔线区域移动时每帧强制双向箭头。</summary>
+        private void IconBarSplitter_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Mouse.OverrideCursor = System.Windows.Input.Cursors.SizeWE;
         }
 
         private void ToggleWindow()
@@ -116,6 +146,17 @@ namespace DynamicBird.UI.Main
             _trayManager?.Dispose();
             Application.Current.Shutdown();
         }
+
+        // ========== Jump List 动作入口（App 通过反射/内部调用） ==========
+
+        /// <summary>Jump List「打开设置」。</summary>
+        internal void InvokeJumpListOpenSettings() => OpenSettings();
+
+        /// <summary>Jump List「切换勿扰」。</summary>
+        internal void InvokeJumpListToggleDnd() => ToggleWindow();
+
+        /// <summary>Jump List「呼出/隐藏面板」。</summary>
+        internal void InvokeJumpListTogglePanel() => HotkeyTogglePanel();
 
         // ========== 面板鼠标事件（UI 绑定） ==========
 

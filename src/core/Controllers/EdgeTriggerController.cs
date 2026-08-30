@@ -27,6 +27,9 @@ namespace DynamicBird.Core.Controllers
         private EdgeRegion _lastProcessedRegion = EdgeRegion.Unknown;
         private string _currentRegionKey = "";
 
+        // ★ 时序状态机（防抖/触发延时/快速切换）：委托 EdgeTimingState，纯逻辑可单测
+        private readonly EdgeTimingState _timing;
+
         // ========== 拖拽状态 ==========
         private bool _isDragging = false;
         private DateTime _dragEndCooldownUntil = DateTime.MinValue;
@@ -43,16 +46,6 @@ namespace DynamicBird.Core.Controllers
         // ========== 尺寸缓存 ==========
         private double _cachedWidth = 0;
         private double _cachedHeight = 0;
-
-        // ========== 防抖 ==========
-        private DateTime _lastRegionChangeTime = DateTime.MinValue;
-        private EdgeRegion _lastDebounceRegion = EdgeRegion.Unknown;
-
-        // ========== 触发延时（停留才触发，防误触） ==========
-        private string _delayRegionKey = "";
-        private string _delayEdge = "";
-        private DateTime _delayEnterTime = DateTime.MinValue;
-        private bool _triggerDelaying;
 
         // ========== 飞行 ==========
         private bool _isFlying = false;
@@ -74,17 +67,8 @@ namespace DynamicBird.Core.Controllers
         private bool _directLoadInProgress = false;
         private string _pendingSwitchType = "";
         private string _pendingSwitchKey = "";
-        // ★ 快速切换判定：按"切换次数"而非"面板种类数"——
-        //   快速来回扫 A↔B↔A 只有 2 种面板但切换多次，同样应进入图标模态延迟加载。
-        //   时间窗口：两次切换间隔 > 1s 视为新一轮（慢速操作不误触），O(1) 无分配。
-        private const double RapidSwitchWindowMs = 1000;
-        private int _switchCount = 0;
-        private DateTime _lastSwitchTime = DateTime.MinValue;
-
-
         // ========== 小鸟依人 ==========
         private bool _isClinging = false;
-        private DateTime _clingStartTime = DateTime.MinValue;
 
         // ========== IEdgeTriggerController 接口实现 ==========
         public EdgeRegion CurrentRegion => _lastProcessedRegion;
@@ -96,16 +80,10 @@ namespace DynamicBird.Core.Controllers
         public bool IsDirectLoadInProgress => _directLoadInProgress;
 
         /// <summary>触发延时进行中（主窗口据此跳过立即显示，避免延时被绕过）。</summary>
-        public bool IsTriggerDelaying => _triggerDelaying;
+        public bool IsTriggerDelaying => _timing.IsTriggerDelaying;
 
         /// <summary>鼠标离开边缘区域时重置触发延时计时（重新进入需重新停留）。</summary>
-        public void ResetTriggerDelay()
-        {
-            _delayRegionKey = "";
-            _delayEdge = "";
-            _delayEnterTime = DateTime.MinValue;
-            _triggerDelaying = false;
-        }
+        public void ResetTriggerDelay() => _timing.ResetTriggerDelay();
         public string CurrentEdge => _currentEdge;
 
         /// <summary>触发距离（px，DIP）。供 SizeDragHandler 判定"屏幕边缘触发带"以让位拖拽手柄。</summary>
@@ -143,7 +121,12 @@ namespace DynamicBird.Core.Controllers
             _bottomBoundary = bottomBoundary;
             _taskbarHeightDips = taskbarHeightDips;
 
+            // ★ 时序状态机：触发延时按区域实时读取设置
+            _timing = new EdgeTimingState(getTriggerDelay: key => _settings.GetTriggerDelay(key));
+
             _shapeAnimator.FlyCompleted += OnFlyCompleted;
+            // ★ 渲染帧"追到目标/面板内停止"回调：复位 _isClinging，杜绝"停后鼠标一动又重启追"
+            _shapeAnimator.ClingArrived += OnClingArrived;
 
             // ★ 跟随目标提供者：渲染帧每帧调用——每帧自算 region/屏幕（无防抖滞后），
             //   位置实时跟随鼠标（Windows 拖拽式跟手）。切换防抖只影响内容，不影响位置跟手。
@@ -196,8 +179,7 @@ namespace DynamicBird.Core.Controllers
         public void CompletePendingSwitch()
         {
             // ★ 一轮快速切换结束（稳定/隐藏）：重置切换计数，下次重新分级
-            _switchCount = 0;
-            _lastSwitchTime = DateTime.MinValue;
+            _timing.ResetSwitchCount();
             if (string.IsNullOrEmpty(_pendingSwitchType)) return;
             string type = _pendingSwitchType;
             string key = _pendingSwitchKey;
@@ -221,21 +203,8 @@ namespace DynamicBird.Core.Controllers
         }
 
         /// <summary>切换计数：两次切换间隔 ≤ 1s 视为快速连续切换（累计），超过则重新起算。
-        /// 返回是否已累计 ≥3 次（进入图标模态，延迟加载最终面板）。</summary>
-        private bool IsRapidSwitching()
-        {
-            var now = DateTime.Now;
-            if ((now - _lastSwitchTime).TotalMilliseconds > RapidSwitchWindowMs)
-            {
-                _switchCount = 1;
-            }
-            else
-            {
-                _switchCount++;
-            }
-            _lastSwitchTime = now;
-            return _switchCount >= 3;
-        }
+        /// 返回是否已累计 ≥3 次（进入图标模态，延迟加载最终面板）。委托 EdgeTimingState。</summary>
+        private bool IsRapidSwitching() => _timing.IsRapidSwitching();
 
         /// <summary>更新跟随上下文（region/屏幕）并激活渲染帧跟随（幂等）。
         /// DPI 从窗口实时取（鼠标 DIP 转换必须用真实缩放，传参易错）。</summary>
@@ -377,14 +346,8 @@ namespace DynamicBird.Core.Controllers
             // ★ 仅内容类型变化才切换：同边滑动（同 type）只位置跟随，避免频繁切换动画抖动
             if (regionType != _lastRegionType)
             {
-                // 防抖：避免在区域边界来回抖动导致内容反复重建
-                if (_lastDebounceRegion == region &&
-                    (DateTime.Now - _lastRegionChangeTime).TotalMilliseconds < _settings.RegionDebounceMs)
-                {
-                    return;
-                }
-                _lastDebounceRegion = region;
-                _lastRegionChangeTime = DateTime.Now;
+                // 防抖：避免在区域边界来回抖动导致内容反复重建（FollowMouseInPanel 语义：每次变化刷新计时）
+                if (_timing.ShouldDebounceAndRefresh(region, _settings.RegionDebounceMs)) return;
 
                 _lastRegionType = regionType;
                 _currentRegionKey = regionKey;
@@ -419,7 +382,9 @@ namespace DynamicBird.Core.Controllers
                     _cachedHeight = h2;
                     _lastTargetW = w2;
                     _lastTargetH = h2;
-                    _shapeAnimator.AnimateSizeTo(w2, h2, () => _directLoadInProgress = false);
+                    // ★ 尺寸形变 + 位置同步：用新尺寸的贴边锚点，动画中间帧即保持贴边
+                    var (aLeft, aTop) = CalculatePosition(region, mouseX, mouseY, screenWidth, screenHeight, w2, h2);
+                    _shapeAnimator.AnimateSizeToKeepAnchor(aLeft, aTop, w2, h2, () => _directLoadInProgress = false);
                 }
                 StartFollowContext(region, screenWidth, screenHeight, 1.0);
                 return;
@@ -454,7 +419,17 @@ namespace DynamicBird.Core.Controllers
             return _isClinging || _isFlying || _isDragging;
         }
 
-        public void SetClingModeEnabled(bool enabled) { }
+        /// <summary>
+        /// 小鸟依人开关变化：关闭时若正在跟随，立即停止（面板停住，回普通模式）。
+        /// MainWindow 在设置变更时调用。
+        /// </summary>
+        public void SetClingModeEnabled(bool enabled)
+        {
+            if (!enabled && _isClinging)
+            {
+                StopClinging();
+            }
+        }
 
         public void OnFlyCompleted()
         {
@@ -569,7 +544,6 @@ namespace DynamicBird.Core.Controllers
             {
                 if (!TriggerDelayPassed(region)) return;
             }
-            _triggerDelaying = false;
 
             // ========== 2. 角落 ==========
             if (isCorner)
@@ -585,15 +559,7 @@ namespace DynamicBird.Core.Controllers
             _visibilityController.UpdateEdge(_currentEdge);
 
             // 防抖（区域快速抖动过滤）
-            if (_lastDebounceRegion != EdgeRegion.Unknown && _lastDebounceRegion == region)
-            {
-                if ((DateTime.Now - _lastRegionChangeTime).TotalMilliseconds < _settings.RegionDebounceMs) return;
-            }
-            else
-            {
-                _lastDebounceRegion = region;
-                _lastRegionChangeTime = DateTime.Now;
-            }
+            if (_timing.ShouldDebounce(region, _settings.RegionDebounceMs)) return;
 
             string regionType = GetRegionTypeFromEnum(region);
             string regionKey = GetRegionKey(region);
@@ -659,7 +625,10 @@ namespace DynamicBird.Core.Controllers
                         _cachedHeight = h2;
                         _lastTargetW = w2;
                         _lastTargetH = h2;
-                        _shapeAnimator.AnimateSizeTo(w2, h2, () => _directLoadInProgress = false);
+                        // ★ 尺寸形变 + 位置同步：用新尺寸的贴边锚点，动画中间帧即保持贴边
+                        //   （修复：任务栏→小组件等切换时原为"左上角固定缩放→完成才贴边"）
+                        var (aLeft, aTop) = CalculatePosition(region, mouseX, mouseY, screenWidth, screenHeight, w2, h2);
+                        _shapeAnimator.AnimateSizeToKeepAnchor(aLeft, aTop, w2, h2, () => _directLoadInProgress = false);
                     }
                     StartFollowContext(region, screenWidth, screenHeight, 1.0);
                 }
@@ -716,41 +685,9 @@ namespace DynamicBird.Core.Controllers
 
         /// <summary>
         /// 触发延时判定（面板隐藏时）：鼠标进入区域需停留 N ms 才放行（防误触）。
-        /// 区域变化会重新计时；返回 true = 放行显示。
+        /// 区域变化会重新计时；返回 true = 放行显示。委托 EdgeTimingState。
         /// </summary>
-        private bool TriggerDelayPassed(EdgeRegion region)
-        {
-            string key = GetRegionKey(region);
-            string edge = GetEdgeName(region);
-            int delay = _settings.GetTriggerDelay(key);
-
-            if (delay <= 0)
-            {
-                _delayRegionKey = key;
-                _delayEdge = edge;
-                _triggerDelaying = false;
-                return true;
-            }
-
-            if (_delayRegionKey != key || _delayEdge != edge)
-            {
-                // 进入新区域：开始计时，本次不触发
-                _delayRegionKey = key;
-                _delayEdge = edge;
-                _delayEnterTime = DateTime.Now;
-                _triggerDelaying = true;
-                return false;
-            }
-
-            if ((DateTime.Now - _delayEnterTime).TotalMilliseconds < delay)
-            {
-                _triggerDelaying = true;
-                return false;
-            }
-
-            _triggerDelaying = false;
-            return true;
-        }
+        private bool TriggerDelayPassed(EdgeRegion region) => _timing.TriggerDelayPassed(region);
 
         /// <summary>
         /// 拖拽/调整大小结束时调用：短暂抑制边缘触发，避免鼠标仍在屏幕边缘时误切换区域。
@@ -765,13 +702,10 @@ namespace DynamicBird.Core.Controllers
             _currentEdge = "";
             _lastRegionType = "";
             _lastProcessedRegion = EdgeRegion.Unknown;
-            _lastDebounceRegion = EdgeRegion.Unknown;
             _currentRegionKey = "";
             _isClinging = false;
-            _triggerDelaying = false;
-            _delayRegionKey = "";
-            _delayEdge = "";
-            _delayEnterTime = DateTime.MinValue;
+            _timing.ResetTriggerDelay();
+            _timing.ResetDebounce();
             _directLoadInProgress = false;
         }
 
@@ -791,32 +725,22 @@ namespace DynamicBird.Core.Controllers
             if (_isFlying) return false;
             if (!_visibilityController.IsVisible) return false;
 
-            // ★ 防横跳 1：鼠标还在面板（外扩迟滞带）内时不启动跟随。
-            //   面板追上鼠标停住后鼠标在面板中心附近，若没有这条检查，
-            //   鼠标停在面板边缘 1-2px 抖动就会反复 StartClinging/StopClinging 乒乓。
-            const double restartMargin = 20; // 鼠标须离开面板边缘 20px 才重新启动跟随
-            double pcx = _window.Left + _window.Width / 2;
-            double pcy = _window.Top + _window.Height / 2;
-            if (Math.Abs(mouseX - pcx) < _window.Width / 2 + restartMargin &&
-                Math.Abs(mouseY - pcy) < _window.Height / 2 + restartMargin)
-            {
-                return false;
-            }
+            // ★ 防横跳：鼠标还在面板（严格矩形）内时不启动跟随。
+            //   ★ 修复：restartMargin 从 2px 改为 0——原 2px 迟滞会让"追上停住后鼠标刚移出面板"
+            //   被误判为仍在面板内 → StartClinging 返回 false → tick else 走 HideWithDelay → 面板消失。
+            //   现在严格按面板矩形：出了面板就重新追（tick 的 isInsidePanel 分支已处理面板内交互）。
+            const double restartMargin = 0;
+            bool inside = mouseX >= _window.Left - restartMargin &&
+                          mouseX <= _window.Left + _window.Width + restartMargin &&
+                          mouseY >= _window.Top - restartMargin &&
+                          mouseY <= _window.Top + _window.Height + restartMargin;
+            if (inside) return false;
 
-            // ★ 防横跳 2：鼠标贴近屏幕边缘时不启动跟随，交给边缘触发处理；
-            //   否则“边缘锚定 ↔ 跟随鼠标”会在边缘附近来回切换
-            var wa = GetMouseWorkArea(mouseX, mouseY);
-            double screenW = wa.Width;
-            double screenH = wa.Height;
-            const double startMargin = 80; // 启动跟随需要离开边缘更远（与停止阈值形成迟滞）
-            if (mouseX < startMargin || mouseX > screenW - startMargin ||
-                mouseY < startMargin || mouseY > screenH - startMargin)
-            {
-                return false;
-            }
-
+            // ★ 不再用"距屏幕边缘 80px 内拒绝启动"：边缘触发的面板就在屏幕边缘，
+            //   鼠标在边缘带内时若拒绝启动，面板永远不追（用户反馈"边缘触发后不追"）。
+            //   防乒乓已由 tick 的 IsInClinging→UpdateClinging 分支覆盖（cling 中不响应边缘触发），
+            //   cling 目标也有屏幕钳制（UpdateClinging 的 blockedByEdge 处理贴边停止）。
             _isClinging = true;
-            _clingStartTime = DateTime.Now;
 
             // ★ 启动跟随 = 取消任何隐藏意图：避免"鼠标移出面板 → HideWithDelay 已设延时 →
             //   紧接着 StartClinging 启动跟随，却被 200ms 后的延时隐藏秒杀"。
@@ -826,7 +750,11 @@ namespace DynamicBird.Core.Controllers
             _shapeAnimator.SetClingParameters();
             double halfW = _window.Width / 2;
             double halfH = _window.Height / 2;
-            _shapeAnimator.SetClingTarget(mouseX - halfW, mouseY - halfH);
+            // ★ 修复：启动目标同样钳制在屏幕内（否则鼠标在屏幕边缘时面板追出屏幕）
+            var startWa = GetMouseWorkArea(mouseX, mouseY);
+            double startLeft = Math.Max(0, Math.Min(startWa.Width - _window.Width, mouseX - halfW));
+            double startTop = Math.Max(0, Math.Min(startWa.Height - _window.Height, mouseY - halfH));
+            _shapeAnimator.SetClingTarget(startLeft, startTop);
             StartClingingRequested?.Invoke();
             return true;
         }
@@ -835,31 +763,27 @@ namespace DynamicBird.Core.Controllers
         {
             if (!_isClinging) return;
             if (_isFlying) return;
-            // ★ 省电模式自动停止跟随（性能优先，避免低配设备持续渲染）
-            if (_settings.PerformanceMode == PerformancePresets.PowerSaver)
-            {
-                StopClinging();
-                return;
-            }
 
-            // ★ 面板中心始终追鼠标（目标钳制在屏幕内）：
-            //   - 鼠标在面板外 → 持续追（中心对准鼠标，鼠标动面板动）
-            //   - 鼠标进入面板（追上）→ 停（由 tick 的 isInsidePanel 分支接管操作）
-            //   - 面板被屏幕边缘阻挡（贴边且鼠标朝边缘外）→ 停（边缘因阻挡才停下）
-            //   - 追不上超时 → 自动隐藏
+            // ★ 状态机（用户确认：停是默认，移出面板触发跟随；停止 = 面板中心点追到鼠标点）
+            //   - 跟随：面板中心点匀速飞向鼠标点（FlyDurationMs 管控速度，钳制屏内）
+            //   - 停止：面板中心点追到鼠标点（中心距离 ≤ 2px 视为追到）→ 停，鼠标在面板中心可操作
+            //   - 无"追不上超时"：鼠标到哪面板跟到哪；隐藏仅由 tick 的延时隐藏负责。
+            //   - 省电不省机制：跟随照常（省电只降帧率）。
             double halfW = _window.Width / 2;
             double halfH = _window.Height / 2;
-            double cx = _window.Left + halfW;
-            double cy = _window.Top + halfH;
+            double centerX = _window.Left + halfW;
+            double centerY = _window.Top + halfH;
 
-            double dx = mouseX - cx;
-            double dy = mouseY - cy;
-
-            // 停止条件 1：面板中心追到鼠标（中心距离 ≤ 10px）→ 停止跟随。
-            //   追到后鼠标在面板内（中心附近），由 tick 的 isInsidePanel 分支接管：
-            //   鼠标在面板内移动时面板不再追随（保持停住供操作）。
-            const double AlignThreshold = 10;
-            if (Math.Abs(dx) <= AlignThreshold && Math.Abs(dy) <= AlignThreshold)
+            // ★ 停止条件（用户确认）：面板中心点追到鼠标点（中心距离 ≤ 2px 即追到）
+            //   **且** 鼠标在面板上（面板内+边）→ 停。
+            //   追逐中只认"中心追到鼠标"这一个停止条件——中心没追上（哪怕鼠标已在面板矩形内）
+            //   继续追；中心追到后（鼠标在面板中心）再判定"鼠标在面板上"→ 在则停。
+            //   T≤0 直接设置时面板瞬移到鼠标、中心=鼠标，但鼠标在面板外（跟手中）→ 不停，
+            //   面板持续瞬移跟手；鼠标停/进入面板 → 在面板上 → 停。
+            const double CatchThreshold = 2;
+            bool centerCaught = Math.Abs(mouseX - centerX) <= CatchThreshold &&
+                                Math.Abs(mouseY - centerY) <= CatchThreshold;
+            if (centerCaught && IsMouseInsidePanelRect(mouseX, mouseY))
             {
                 _visibilityController.CancelHide();
                 StopClinging();
@@ -869,37 +793,25 @@ namespace DynamicBird.Core.Controllers
                 return;
             }
 
-            // 停止条件 2：边缘阻挡——面板已贴屏幕边缘且鼠标在面板外侧（朝边缘外方向），
-            //   面板中心无法再对准鼠标（被屏幕边缘钳制），只能贴边停下。
-            var wa = GetMouseWorkArea(mouseX, mouseY);
-            double sw = wa.Width;
-            double sh = wa.Height;
-            bool blockedByEdge =
-                (_window.Left <= 1 && mouseX < cx) ||
-                (_window.Left + _window.Width >= sw - 1 && mouseX > cx) ||
-                (_window.Top <= 1 && mouseY < cy) ||
-                (_window.Top + _window.Height >= sh - 1 && mouseY > cy);
-            if (blockedByEdge)
-            {
-                StopClinging();
-                return;
-            }
+            // ★ 跟随：目标 = 鼠标位置（面板中心点对准鼠标点），钳制屏内
+            var (clingLeft, clingTop) = ComputeClingTarget(mouseX, mouseY);
+            _shapeAnimator.SetClingTarget(clingLeft, clingTop);
+        }
 
-            // ★ 追不上超时：面板长时间跟不上鼠标（快速移动/甩动）→ 停止跟随并进入隐藏延时。
-            if ((DateTime.Now - _clingStartTime).TotalMilliseconds > ClingGiveUpMs)
-            {
-                StopClinging();
-                _visibilityController.HideWithDelay();
-                return;
-            }
-
-            // 没追上：继续设跟随目标（面板中心追鼠标，钳制屏幕内）
-            // ★ 磁铁吸附（小鸟依人的设计）：面板边缘距屏幕边 < 吸附范围 → 吸到该边贴边
+        /// <summary>
+        /// 计算小鸟依人目标位置：面板中心对准鼠标点，磁铁吸附 + 屏幕钳制。
+        /// 由 tick 的 UpdateClinging 和渲染帧的 ClingTargetProvider（实时跟手）共用。
+        /// </summary>
+        public (double left, double top) ComputeClingTarget(double mouseX, double mouseY)
+        {
+            double halfW = _window.Width / 2;
+            double halfH = _window.Height / 2;
             double clingLeft = mouseX - halfW;
             double clingTop = mouseY - halfH;
             var clingWa = GetMouseWorkArea(mouseX, mouseY);
             double csw = clingWa.Width;
             double csh = clingWa.Height;
+            // 磁铁吸附（小鸟依人的设计）：面板边缘距屏幕边 < 吸附范围 → 吸到该边贴边
             int snap = _settings.SnapRangePx;
             if (snap > 0)
             {
@@ -927,18 +839,38 @@ namespace DynamicBird.Core.Controllers
                     }
                 }
             }
-            _shapeAnimator.SetClingTarget(clingLeft, clingTop);
+            // ★ 目标始终钳制在屏幕内（吸附只吸附到边，鼠标在边缘附近/快速移动时仍可能越界）
+            clingLeft = Math.Max(0, Math.Min(csw - _window.Width, clingLeft));
+            clingTop = Math.Max(0, Math.Min(csh - _window.Height, clingTop));
+            return (clingLeft, clingTop);
         }
 
-        /// <summary>小鸟依人"追不上"放弃时间（ms）：持续追赶超过此时长仍未追上 → 转入隐藏延时。
-        /// 跟随较慢（stiffness=120），需要更长时间追上，故 1500ms 较合适：正常移动能追上，
-        /// 快速甩动/大幅移动才判定"追不上"并自动隐藏。</summary>
-        private const double ClingGiveUpMs = 1500;
+        /// <summary>
+        /// 渲染帧"追到目标/面板内停止"回调：完整停止跟随（与 tick 停止分支一致）。
+        /// 渲染循环到达目标（含面板内原地停）时触发，立即复位 _isClinging——
+        /// 否则停后鼠标在面板内一动（绕圈），tick 的 UpdateClinging 会重启追赶。
+        /// </summary>
+        private void OnClingArrived()
+        {
+            if (!_isClinging) return;
+            _visibilityController.CancelHide();
+            StopClinging();
+            _visibilityController.Show();
+            StickToMouseRequested?.Invoke();
+            OnStickToMouseSuccess();
+        }
+
+        /// <summary>鼠标是否在面板矩形内（DIP，严格边界）——面板内严格不追的依据。</summary>
+        private bool IsMouseInsidePanelRect(double mouseX, double mouseY)
+        {
+            return mouseX >= _window.Left && mouseX <= _window.Left + _window.Width &&
+                   mouseY >= _window.Top && mouseY <= _window.Top + _window.Height;
+        }
 
         private void StopClinging()
         {
+            if (!_isClinging) return;   // ★ 幂等：渲染帧与 tick 都可能触发停止
             _isClinging = false;
-            _clingStartTime = DateTime.MinValue;
             // ★ 退出跟随：恢复普通动画参数（防止后续边缘/滑入动画仍用慢速 cling 参数）
             _shapeAnimator.ExitClingParameters();
             // ★ 清除残留的边缘状态：面板跟随鼠标停住后不再属于任何触发边。
@@ -947,12 +879,9 @@ namespace DynamicBird.Core.Controllers
             _currentEdge = "";
             _lastRegionType = "";
             _lastProcessedRegion = EdgeRegion.Unknown;
-            _lastDebounceRegion = EdgeRegion.Unknown;
             _currentRegionKey = "";
-            _triggerDelaying = false;
-            _delayRegionKey = "";
-            _delayEdge = "";
-            _delayEnterTime = DateTime.MinValue;
+            _timing.ResetTriggerDelay();
+            _timing.ResetDebounce();
             StopClingingRequested?.Invoke();
         }
 
@@ -1184,6 +1113,8 @@ namespace DynamicBird.Core.Controllers
             //   不用内容自适应：画中画内容随媒体会话变化，各边测得尺寸不一致（上宽下窄）。
             if (type == "AppHelper") return (420, 340);
             if (type == "AI") return (420, 400);
+            // ★ 自定义面板：固定预设尺寸（420×340），内容由用户源码自行适配
+            if (type.StartsWith("Custom:", StringComparison.Ordinal)) return (420, 340);
             return (420, 340);
         }
 private string GetRegionShapeSetting(string key)
@@ -1200,120 +1131,22 @@ private string GetRegionShapeSetting(string key)
             return "Default";
         }
 
-        private static string GetEdgeFromKey(string key)
-        {
-            return key.Contains('_') ? key.Split('_')[0] : "";
-        }
+        private static string GetEdgeFromKey(string key) => EdgeRegionMapping.GetEdgeFromKey(key);
 
         private (double left, double top) CalculatePosition(EdgeRegion region, double mx, double my,
-            double sw, double sh, double w, double h)
-        {
-            string edge = GetEdgeName(region);
-            double left = 0, top = 0;
+            double sw, double sh, double w, double h) =>
+            EdgeRegionMapping.CalculatePosition(region, mx, my, sw, sh, w, h, _bottomBoundary,
+                edge => _settings.GetEdgeMode(edge), edge => _settings.GetFixedOffset(edge));
 
-            // ★ 固定位置模式：面板不跟随鼠标，按保存的偏移量定位（由拖动面板时保存）
-            if (!string.IsNullOrEmpty(edge) && _settings.GetEdgeMode(edge) == "Fixed")
-            {
-                double offset = _settings.GetFixedOffset(edge);
-                switch (edge)
-                {
-                    case "Top":
-                        left = Math.Max(0, Math.Min(sw / 2 - w / 2 + offset, sw - w));
-                        return (left, 0);
-                    case "Bottom":
-                        left = Math.Max(0, Math.Min(sw / 2 - w / 2 + offset, sw - w));
-                        return (left, _bottomBoundary - h);
-                    case "Left":
-                        top = Math.Max(0, Math.Min(sh / 2 - h / 2 + offset, sh - h));
-                        return (0, top);
-                    case "Right":
-                        top = Math.Max(0, Math.Min(sh / 2 - h / 2 + offset, sh - h));
-                        return (sw - w, top);
-                }
-            }
+        private string GetEdgeName(EdgeRegion r) => EdgeRegionMapping.GetEdgeName(r);
 
-            switch (edge)
-            {
-                case "Top":
-                    left = mx - w / 2;
-                    top = 0;
-                    break;
-                case "Bottom":
-                    left = mx - w / 2;
-                    top = _bottomBoundary - h;
-                    break;
-                case "Left":
-                    left = 0;
-                    top = my - h / 2;
-                    break;
-                case "Right":
-                    left = sw - w;
-                    top = my - h / 2;
-                    break;
-                default:
-                    return (0, 0);
-            }
+        private string GetRegionKey(EdgeRegion r) => EdgeRegionMapping.GetRegionKey(r);
 
-            left = Math.Max(0, Math.Min(left, sw - w));
-            top = Math.Max(0, Math.Min(top, sh - h));
-            return (left, top);
-        }
+        private string GetRegionTypeFromEnum(EdgeRegion r) =>
+            EdgeRegionMapping.GetRegionTypeFromEnum(r,
+                key => _settings.GetRegionPanel(key), EdgeRegionMapping.IsValidPanelType);
 
-        private string GetEdgeName(EdgeRegion r) => r switch
-        {
-            EdgeRegion.Top_Left or EdgeRegion.Top_Center or EdgeRegion.Top_Right => "Top",
-            EdgeRegion.Bottom_Left or EdgeRegion.Bottom_Center or EdgeRegion.Bottom_Right => "Bottom",
-            EdgeRegion.Left_Top or EdgeRegion.Left_Center or EdgeRegion.Left_Bottom => "Left",
-            EdgeRegion.Right_Top or EdgeRegion.Right_Center or EdgeRegion.Right_Bottom => "Right",
-            _ => ""
-        };
-
-        private string GetRegionKey(EdgeRegion r)
-        {
-            string edge = GetEdgeName(r);
-            if (string.IsNullOrEmpty(edge)) return r.ToString();
-
-            string sub = r switch
-            {
-                EdgeRegion.Top_Left or EdgeRegion.Bottom_Left => "Left",
-                EdgeRegion.Top_Center or EdgeRegion.Bottom_Center or EdgeRegion.Left_Center or EdgeRegion.Right_Center => "Center",
-                EdgeRegion.Top_Right or EdgeRegion.Bottom_Right => "Right",
-                EdgeRegion.Left_Top or EdgeRegion.Right_Top => "Top",
-                EdgeRegion.Left_Bottom or EdgeRegion.Right_Bottom => "Bottom",
-                _ => r.ToString()
-            };
-            return edge + "_" + sub;
-        }
-
-        private string GetRegionTypeFromEnum(EdgeRegion r)
-        {
-            // ★ 区域面板自定义：设置里非 Default 时覆盖默认布局
-            string custom = _settings.GetRegionPanel(GetRegionKey(r));
-            if (custom != "Default" && IsValidPanelType(custom))
-            {
-                return custom;
-            }
-
-            bool isHorizontal = r == EdgeRegion.Top_Left || r == EdgeRegion.Top_Center || r == EdgeRegion.Top_Right ||
-                                 r == EdgeRegion.Bottom_Left || r == EdgeRegion.Bottom_Center || r == EdgeRegion.Bottom_Right;
-            bool isCenter = r == EdgeRegion.Top_Center || r == EdgeRegion.Bottom_Center ||
-                            r == EdgeRegion.Left_Center || r == EdgeRegion.Right_Center;
-            if (isCenter)
-            {
-                // ★ 左边缘中间默认 AI 助手，其余中心默认应用辅助
-                return r == EdgeRegion.Left_Center ? "AI" : "AppHelper";
-            }
-            bool isVertical = r == EdgeRegion.Left_Top || r == EdgeRegion.Left_Center || r == EdgeRegion.Left_Bottom ||
-                              r == EdgeRegion.Right_Top || r == EdgeRegion.Right_Center || r == EdgeRegion.Right_Bottom;
-            if (isVertical) return "Widget";
-            if (isHorizontal) return "Taskbar";
-            return "Placeholder";
-        }
-
-        private static bool IsValidPanelType(string type)
-        {
-            return type is "Taskbar" or "Widget" or "AppHelper" or "Notification" or "Recent" or "QuickSettings" or "AI" or "WindowControl";
-        }
+        private static bool IsValidPanelType(string type) => EdgeRegionMapping.IsValidPanelType(type);
 
         // ========================================
         //  多显示器：面板所在显示器整屏边界

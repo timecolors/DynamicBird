@@ -14,7 +14,10 @@ namespace DynamicBird.Infrastructure.Utils
     /// </summary>
     public static class AppPaths
     {
-        public static string DataRoot { get; } = BuildDataRoot();
+        /// <summary>测试/探针注入的数据根目录（隔离，不污染真实用户数据）；null = 用默认 %LOCALAPPDATA%\DynamicBird。</summary>
+        internal static string? TestDataRoot;
+
+        public static string DataRoot => TestDataRoot ?? BuildDataRoot();
 
         public static string LogDirectory => Path.Combine(DataRoot, "Logs");
         public static string ConfigPath => Path.Combine(DataRoot, "config.json");
@@ -29,6 +32,7 @@ namespace DynamicBird.Infrastructure.Utils
         public static string AiSettingsPath => Path.Combine(DataRoot, "ai.json");
         public static string AiHistoryPath => Path.Combine(DataRoot, "ai_history.json");
         public static string AiSessionsPath => Path.Combine(DataRoot, "ai_sessions.json");
+        public static string PresetsDir => Path.Combine(DataRoot, "Presets");
 
         /// <summary>是否运行在 MSIX 打包环境（Microsoft Store 版）。</summary>
         public static bool IsPackaged { get; } = DetectPackaged();

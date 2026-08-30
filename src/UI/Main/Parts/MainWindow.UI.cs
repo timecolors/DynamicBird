@@ -131,7 +131,7 @@ namespace DynamicBird.UI.Main
                 if (_cachedTextBrush == null || _cachedTextBrush.Color != textColor)
                 {
                     _cachedTextBrush = new SolidColorBrush(textColor);
-                    IconPath.Stroke = _cachedTextBrush;
+                    // 图标图形已移除，无需设置 IconPath.Stroke
                 }
             }
             catch { }

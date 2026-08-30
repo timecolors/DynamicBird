@@ -179,6 +179,29 @@ namespace DynamicBird.Infrastructure.WinApi
             catch { }
         }
 
+        /// <summary>
+        /// 显示桌面（最小化所有窗口）：模拟 WIN+D。
+        /// 面板自身是 Topmost 且不显示在任务栏，不受影响。
+        /// </summary>
+        public static void ShowDesktop()
+        {
+            try
+            {
+                keybd_event(VK_LWIN, 0, 0, UIntPtr.Zero);
+                keybd_event(VK_D, 0, 0, UIntPtr.Zero);
+                keybd_event(VK_D, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
+            catch { }
+        }
+
+        private const byte VK_LWIN = 0x5B;
+        private const byte VK_D = 0x44;
+        private const uint KEYEVENTF_KEYUP = 0x0002;
+
+        [DllImport("user32.dll")]
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
         private const int GWL_EXSTYLE = -20;
         private const long WS_EX_TOPMOST = 0x00000008;
 

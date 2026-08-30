@@ -8,6 +8,7 @@ using DynamicBird.UI.AppHelper;
 using DynamicBird.UI.Panels;
 using DynamicBird.UI.Widgets;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -30,6 +31,9 @@ namespace DynamicBird.Core.Controllers
         private DynamicBird.UI.AI.AiChatView? _cachedAiChat;
         // ★ 任务栏视图缓存：贴边切换频繁触发 LoadContent，重建快捷方式布局是卡顿主因
         private DynamicBird.UI.Panels.TaskbarView? _cachedTaskbarView;
+        // ★ 自定义面板实例缓存：id → 视图，编译一次复用（源码变化时由设置重载重建）
+        private readonly System.Collections.Generic.Dictionary<string, FrameworkElement> _customPanelCache = new();
+        private string _customPanelsSignature = "";
 
         // ★★★ 新增事件 ★★★
         public event Action? LoadingStarted;
@@ -163,6 +167,11 @@ namespace DynamicBird.Core.Controllers
                     break;
 
                 default:
+                    if (regionType.StartsWith("Custom:", StringComparison.Ordinal))
+                    {
+                        newContent = LoadCustomPanel(regionType);
+                        break;
+                    }
                     newContent = new NotificationDockView();
                     break;
             }
@@ -177,6 +186,63 @@ namespace DynamicBird.Core.Controllers
 
             // ★★★ 通知加载完成 ★★★
             LoadingCompleted?.Invoke();
+        }
+
+        /// <summary>
+        /// 加载用户自定义面板：按 "Custom:面板Id" 从 CustomPanels 取源码，
+        /// 用 WidgetCompiler 动态编译（实现 IWidget → CreateView()），实例缓存复用。
+        /// 编译失败回退默认通知坞并写日志。
+        /// </summary>
+        private FrameworkElement LoadCustomPanel(string regionType)
+        {
+            string panelId = regionType.Substring("Custom:".Length);
+            try
+            {
+                // 源码变化时清缓存（签名对比）
+                string sig = string.Join("|",
+                    _settings.CustomPanels.Select(p => p.Id + ":" + (p.Source ?? "").Length));
+                if (sig != _customPanelsSignature)
+                {
+                    _customPanelsSignature = sig;
+                    _customPanelCache.Clear();
+                }
+
+                if (_customPanelCache.TryGetValue(panelId, out var cached)) return cached;
+
+                var cp = _settings.CustomPanels.FirstOrDefault(p => p.Id == panelId);
+                if (cp == null || string.IsNullOrWhiteSpace(cp.Source))
+                    return new NotificationDockView();
+
+                // ★ 沙箱：市场来源（TrustedSource=false）先拦截危险 API
+                if (!cp.TrustedSource)
+                {
+                    string sandboxErr = DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.SandboxErrors(cp.Source ?? "");
+                    if (sandboxErr.Length > 0)
+                    {
+                        DynamicBird.Core.Infrastructure.Logging.LogManager.Error(
+                            $"自定义面板 [{cp.Name}] 市场来源被沙箱拦截: {sandboxErr}");
+                        return new NotificationDockView();
+                    }
+                }
+                var (widget, err) = DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.Compile(
+                    "panel_" + cp.Id, cp.Source);
+                if (widget == null)
+                {
+                    DynamicBird.Core.Infrastructure.Logging.LogManager.Error(
+                        $"自定义面板 [{cp.Name}] 编译失败: {err}");
+                    return new NotificationDockView();
+                }
+
+                var view = widget.CreateView();
+                _customPanelCache[panelId] = view;
+                return view;
+            }
+            catch (Exception ex)
+            {
+                DynamicBird.Core.Infrastructure.Logging.LogManager.Error(
+                    "自定义面板加载异常", ex);
+                return new NotificationDockView();
+            }
         }
     }
 }

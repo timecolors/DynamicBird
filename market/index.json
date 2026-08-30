@@ -1,0 +1,15 @@
+{
+  "updatedAt": "2026-08-30",
+  "marketBase": "https://cdn.jsdelivr.net/gh/timecolors/DynamicBird@main/market",
+  "packages": [
+    {
+      "id": "example-timer",
+      "name": "市场示例计时器",
+      "kind": "Widget",
+      "version": "1.0.0",
+      "author": "timecolors",
+      "description": "示例：演示市场包结构。",
+      "permissions": []
+    }
+  ]
+}

@@ -9,13 +9,14 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>assets\icon.ico</ApplicationIcon>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AssemblyName>DynamicBird</AssemblyName>
 		<RootNamespace>DynamicBird</RootNamespace>
 
 		<!-- ★★★ 版本与产品信息（显示在文件属性/任务管理器/关于页） ★★★ -->
-		<Version>1.0.3</Version>
-		<FileVersion>1.0.3.0</FileVersion>
-		<AssemblyVersion>1.0.3.0</AssemblyVersion>
+		<Version>1.0.4</Version>
+		<FileVersion>1.0.4.0</FileVersion>
+		<AssemblyVersion>1.0.4.0</AssemblyVersion>
 		<Product>灵动鸟 DynamicBird</Product>
 		<AssemblyTitle>灵动鸟</AssemblyTitle>
 		<Description>Windows 桌面边缘面板工具</Description>
@@ -27,8 +28,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- 供单元测试访问 internal 成员 -->
+		<!-- 供单元测试/开发探针访问 internal 成员 -->
 		<InternalsVisibleTo Include="DynamicBird.Tests" />
+		<InternalsVisibleTo Include="BirdcageProbe" />
+		<InternalsVisibleTo Include="EdgeTriggerProbe" />
+		<InternalsVisibleTo Include="FpsProbe" />
+		<InternalsVisibleTo Include="HookIntegProbe" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -52,6 +57,7 @@
 		<Page Include="src\UI\Main\MainWindow.xaml" />
 		<Page Include="src\UI\Panels\TaskbarView.xaml" />
 		<Page Include="src\UI\Settings\SettingsWindow.xaml" />
+		<Page Include="src\UI\Settings\Pages\BirdcagePage.xaml" />
 		<Page Include="src\UI\Settings\WeatherCityPickerWindow.xaml" />
 		<Page Include="src\UI\Settings\Pages\ShortcutManagementPage.xaml" />
 		<Page Include="src\UI\Status\SystemStatusView.xaml" />
@@ -70,8 +76,6 @@
 		<Page Include="src\UI\Widgets\ClipboardHistory\ClipboardHistoryWidget.xaml" />
 		<Page Include="src\UI\Widgets\Notes\NoteWidget.xaml" />
 		<Page Include="src\UI\Widgets\WidgetSwitcher.xaml" />
-		<Page Include="src\UI\Widgets\Dynamic\WidgetEditorWindow.xaml" />
-		<Page Include="src\UI\Widgets\Dynamic\WidgetMarketWindow.xaml" />
 		<Page Include="src\UI\Widgets\TextAi\TextAiWidget.xaml" />
 		<Page Include="src\UI\Widgets\WindowControlView.xaml" />
 		<Page Include="src\UI\AI\AiChatView.xaml" />

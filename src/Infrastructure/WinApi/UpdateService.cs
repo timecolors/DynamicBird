@@ -149,6 +149,12 @@ namespace DynamicBird.Infrastructure.WinApi
         /// 应用更新：把新 exe 暂存到程序目录，生成 PowerShell 替换脚本并启动。
         /// 主进程退出后脚本完成替换并重启新版本。
         /// </summary>
+        /// <summary>
+        /// 应用更新：把新 exe 暂存到程序目录，生成 PowerShell 替换脚本并启动。
+        /// 主进程退出后脚本完成替换并重启新版本。
+        /// ★ 健壮性：替换失败不再静默——写 update_failed.txt，下次启动提示"仍为旧版本"；
+        ///   成功才重启新 exe；脚本自身最后删除（含残留清理）。
+        /// </summary>
         public static bool ApplyUpdate(string newExePath)
         {
             try
@@ -162,18 +168,29 @@ namespace DynamicBird.Infrastructure.WinApi
                 File.Copy(newExePath, staged, true);
 
                 string ps = Path.Combine(exeDir, "apply_update.ps1");
+                string failMarker = Path.Combine(exeDir, "update_failed.txt");
+                string nl = Environment.NewLine;
                 string script =
-                    "Start-Sleep -Seconds 3`r`n" +
-                    $"$dst = '{EscapePs(currentExe)}'`r`n" +
-                    $"$src = '{EscapePs(staged)}'`r`n" +
-                    "try { Copy-Item $src $dst -Force -ErrorAction Stop } catch { }`r`n" +
-                    "Start-Process $dst`r`n" +
-                    "Remove-Item $src -ErrorAction SilentlyContinue`r`n" +
-                    $"Remove-Item '{EscapePs(ps)}' -ErrorAction SilentlyContinue";
+                    "Start-Sleep -Seconds 2" + nl +
+                    "$exe = '" + EscapePs(currentExe) + "'" + nl +
+                    "$new = '" + EscapePs(staged) + "'" + nl +
+                    "$marker = '" + EscapePs(failMarker) + "'" + nl +
+                    "for ($i = 0; $i -lt 10 -and (Get-Process -Name DynamicBird -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 500 }" + nl +
+                    "$ok = $false" + nl +
+                    "for ($i = 0; $i -lt 5; $i++) { try { Copy-Item $new $exe -Force -ErrorAction Stop; $ok = $true; break } catch { Start-Sleep -Milliseconds 600 } }" + nl +
+                    "if ($ok) {" + nl +
+                    "  Remove-Item $new -ErrorAction SilentlyContinue" + nl +
+                    "  Remove-Item $marker -ErrorAction SilentlyContinue" + nl +
+                    "  Start-Process $exe" + nl +
+                    "} else {" + nl +
+                    "  Remove-Item $new -ErrorAction SilentlyContinue" + nl +
+                    "  try { Set-Content -Path $marker -Value ('UPDATE_FAILED ' + (Get-Date)) -Encoding UTF8 } catch { }" + nl +
+                    "}" + nl +
+                    "Remove-Item '" + EscapePs(ps) + "' -ErrorAction SilentlyContinue";
                 File.WriteAllText(ps, script, new UTF8Encoding(true));
 
                 Process.Start(new ProcessStartInfo("powershell.exe",
-                    $"-NoProfile -ExecutionPolicy Bypass -File \"{ps}\"")
+                    "-NoProfile -ExecutionPolicy Bypass -File \" + ps + \"")
                 {
                     UseShellExecute = true,
                     CreateNoWindow = true
@@ -185,6 +202,30 @@ namespace DynamicBird.Infrastructure.WinApi
                 DynamicBird.Core.Infrastructure.Logging.LogManager.Error("应用更新失败", ex);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 启动时清理更新残留（.new.exe / apply_update.ps1 / update_failed.txt）。
+        /// 返回 true = 上次更新失败（调用方应提示用户仍为旧版本）；同时顺带清理残留文件。
+        /// </summary>
+        public static bool CleanupStaleFiles()
+        {
+            bool failed = false;
+            try
+            {
+                if (AppPaths.IsPackaged) return false;
+                string exeDir = AppContext.BaseDirectory;
+                string marker = Path.Combine(exeDir, "update_failed.txt");
+                failed = File.Exists(marker);
+
+                foreach (var name in new[] { "DynamicBird.new.exe", "apply_update.ps1", "update_failed.txt" })
+                {
+                    string p = Path.Combine(exeDir, name);
+                    try { if (File.Exists(p)) File.Delete(p); } catch { }
+                }
+            }
+            catch { }
+            return failed;
         }
 
         internal static Version? ParseVersion(string tag)

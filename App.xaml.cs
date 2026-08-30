@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -18,14 +19,44 @@ namespace DynamicBird
             // ★ 旧版本数据迁移（安装目录/Data -> %LOCALAPPDATA%\DynamicBird），必须在日志初始化前执行
             AppPaths.MigrateLegacyData();
 
+            // ★ Jump List 命令：带动作参数启动时优先转发给已运行实例
+            //   （无实例 → 返回 true，动作由 MainWindow 初始化后执行）
+            bool startupActions = false;
+            try
+            {
+                startupActions = DynamicBird.Infrastructure.WinApi.JumpListCommand.ForwardOrExecute(e.Args);
+            }
+            catch { }
+
             // ★ 单实例保护：已有实例运行时直接退出，避免托盘出现多个进程/图标
             _singleInstanceMutex = new Mutex(true, "DynamicBird_SingleInstance", out bool createdNew);
             if (!createdNew)
             {
+                // ★ 已转发动作时静默退出（不打扰）；无动作仍提示
+                if (!startupActions && HasJumpListAction(e.Args))
+                {
+                    // 动作已通过命名事件转发给已有实例，本进程静默退出
+                    Current.Shutdown();
+                    return;
+                }
                 MessageBox.Show("灵动鸟已在运行", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Information);
                 Current.Shutdown();
                 return;
             }
+
+            // ★ 本实例为唯一实例：注册 Jump List 动作监听（任务栏点击转发进来）
+            try
+            {
+                DynamicBird.Infrastructure.WinApi.JumpListCommand.Listen(ExecuteJumpListAction);
+            }
+            catch { }
+
+            // ★ 配置任务栏 Jump List（关联开始菜单快捷方式 AUMID）
+            try
+            {
+                DynamicBird.Infrastructure.WinApi.JumpListManager.Configure();
+            }
+            catch { }
 
             // 初始化日志系统（最先执行）
             LogManager.Initialize(LogLevel.Debug);
@@ -35,6 +66,17 @@ namespace DynamicBird
             {
                 var lang = DynamicBird.Core.Services.SettingsFileManager.Load().Language;
                 DynamicBird.UI.Localization.LocalizationManager.Instance.SetCulture(lang);
+            }
+            catch { }
+
+            // ★ 清理更新残留（.new.exe/.ps1）；上次更新失败则提示"仍为旧版本"
+            try
+            {
+                if (DynamicBird.Infrastructure.WinApi.UpdateService.CleanupStaleFiles())
+                {
+                    MessageBox.Show("上次更新未能完成，当前仍为旧版本。请稍后重试更新。",
+                        "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
             catch { }
 
@@ -82,6 +124,40 @@ namespace DynamicBird
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 Current.Shutdown();
+            }
+        }
+
+        /// <summary>命令行参数是否含 Jump List 动作（决定单实例冲突时是否静默退出）。</summary>
+        private static bool HasJumpListAction(string[] args)
+        {
+            return DynamicBird.Infrastructure.WinApi.JumpListManager.ParseActions(args).Count > 0;
+        }
+
+        /// <summary>执行 Jump List 动作（UI 线程，由命令监听/启动 pending 触发；MainWindow 启动动作也调用）。</summary>
+        internal static void ExecuteJumpListAction(IReadOnlyList<string> actions)
+        {
+            try
+            {
+                if (Current?.MainWindow is not DynamicBird.UI.Main.MainWindow main) return;
+                foreach (var action in actions)
+                {
+                    switch (action)
+                    {
+                        case DynamicBird.Infrastructure.WinApi.JumpListManager.ArgOpenSettings:
+                            main.InvokeJumpListOpenSettings();
+                            break;
+                        case DynamicBird.Infrastructure.WinApi.JumpListManager.ArgToggleDnd:
+                            main.InvokeJumpListToggleDnd();
+                            break;
+                        case DynamicBird.Infrastructure.WinApi.JumpListManager.ArgTogglePanel:
+                            main.InvokeJumpListTogglePanel();
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error("执行 Jump List 动作失败", ex);
             }
         }
 

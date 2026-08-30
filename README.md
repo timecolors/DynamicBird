@@ -51,6 +51,9 @@
 - Each edge and corner can show a different panel, with follow-mouse or fixed-edge modes.
 - 动画顺滑、自适应尺寸、多显示器支持
 - Smooth animations, adaptive sizing, and multi-monitor support.
+- **设置页按作用对象分类**：常规 / 区域 / 面板 / 动画 / AI / 鸟笼，任务栏与小组件统一归入面板设置
+- **左侧交互竖条**：主图标区域改为整条热区——右键菜单按当前面板提供专属操作（显示桌面、清空运行中窗口、直达鸟笼/AI 设置等），支持拖入快捷方式/固定窗口/删除；宽度可拖调
+- Settings are grouped by scope (General / Regions / Panels / Animation / AI / Birdcage); the left icon area is now a full-height interaction bar with per-panel right-click actions and drag-to-pin support.
 
 ### 🎨 风格适配 Windows / Windows-Native Styling
 - **Win11 风格适配**：Mica 毛玻璃背景、原生圆角、深色标题栏，与系统外观融为一体
@@ -61,6 +64,22 @@
 - Trigger and hide animations are configured separately: slide, fade, zoom, and elastic — each with its own duration and specialized parameters (zoom ratio, oscillations, springiness).
 - 面板从**对应边**滑入滑出（左边缘从左侧、底部从下方），动画时长与缓动全部可调
 - Panels slide in/out from their corresponding edge (left edge slides from the left, bottom from below); duration and easing are fully adjustable.
+- **16 个区域可独立设置触发/隐藏动画**：每个边缘与四角使用自己的动画类型与时长，也可继承全局
+
+### 🐦 编程模式（鸟笼）/ Birdcage (Programming Mode)
+- **配置即代码**：整个设置模型以配置树呈现，每个节点可生成/编辑可执行 C# 配置代码，逐字段带中文注释
+- **单预设闭环**：保存当前节点 → 应用时编译执行写回生效 → 被覆盖的内置设置自动变灰，两击解除单处覆盖
+- **整套预设**：全量配置快照保存/应用/删除；被预设覆盖的设置页、鸟笼树、预设列表三处联动标记
+- **功能模板**：计时器、计算器、划词翻译、剪贴板、便签等小组件模板 + 通知坞/最近使用/快捷设置等面板模板，保存为变体后分配到任意区域
+- **复制 AI 提示词**：描述需求 → AI 生成 C# → 编译 → 应用
+- Everything is configurable as C# code — a config tree over the full settings model, presets with visual conflict markers, built-in widget & panel templates, and AI-assisted code generation.
+
+### 🛒 在线市场 / Online Marketplace
+- 预设与功能包托管在 **GitHub 仓库 + jsDelivr CDN**：浏览、一键下载安装
+- 安装时**重新检测权限**（联网/剪贴板/文件/进程等，不信任包内声明）→ 风险权限弹窗确认 → **沙箱编译**拦截危险 API；包随主仓库发布，**CI 自动编译验证**每个包
+- Packages are hosted on GitHub (served via jsDelivr CDN): browse and install in one click. Every install re-detects permissions, asks for confirmation, and compiles in a sandbox that blocks dangerous APIs; CI validates every package.
+
+- Each of the 16 regions can use its own show/hide animation type & duration, or inherit the global setting.
 
 > 所有数据仅保存在本机 `%LOCALAPPDATA%\DynamicBird`，不上传云端；完全免费、无广告。
 > All data stays on your device — no cloud uploads, no ads, completely free.

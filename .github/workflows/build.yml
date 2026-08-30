@@ -32,6 +32,9 @@ jobs:
       - name: Unit Tests
         run: dotnet test tests/DynamicBird.Tests/DynamicBird.Tests.csproj -c Debug --no-build -v minimal
 
+      - name: Market Packages Compile Check
+        run: dotnet run --project tools/MarketValidator/MarketValidator.csproj -c Debug
+
       - name: Smoke Test
         shell: pwsh
         run: |

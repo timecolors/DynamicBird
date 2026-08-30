@@ -74,7 +74,9 @@ namespace DynamicBird.UI.Main
         private const int VK_MENU = 0x12;
         private const int VK_SHIFT = 0x10;
 
+
         private bool _passthroughActive;
+        private bool _passthroughWasVisible;   // 穿透前面板是否可见（松开后恢复）
 
         private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
         {
@@ -109,6 +111,7 @@ namespace DynamicBird.UI.Main
             bool down = IsPassthroughModifierDown();
             if (down == _passthroughActive) return;
             _passthroughActive = down;
+            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"[穿透] 状态切换 down={down} modifier={_settingsService.PassthroughModifier}");
             try
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
@@ -122,25 +125,23 @@ namespace DynamicBird.UI.Main
                     SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
                 }
-                // ★ 视觉提示：按住穿透键时窗口半透明（提示鼠标可穿透），松开恢复。
-                //   配合 SuppressOpacityReset 防止 ShowAt 的 EnsureWindowVisible 每 tick 重置透明度
-                _visibilityController.SuppressOpacityReset = down;
-                // ★ 视觉提示：穿透时面板明显变透明（提示可穿透），松开恢复。
-                //   面板主体是窗口背景（MainPanel 透明）→ 降低背景 alpha（Mica 透出更多）
-                //   + 内容略淡（解除动画锁定后设置 MainPanel.Opacity）
-                MainPanel.BeginAnimation(System.Windows.UIElement.OpacityProperty, null);
+                // ★ 穿透：隐藏面板窗口（下层内容 100% 可见可点），松开恢复。
+                //   用 Visibility.Hidden（WPF 立即隐藏，无动画）而非透明度/背景 alpha——
+                //   实测：MainWindow 为 Mica 用 AllowsTransparency=False（非分层窗口），
+                //   Window.Opacity 对 Mica 层不透明、背景 alpha 无效（变黑）、
+                //   WS_EX_TRANSPARENT 非分层不穿透命中测试（LayeredProbe2/HitTestProbe 证实）。
+                //   隐藏窗口是唯一对所有模式都可靠的"让开"方式。
                 if (down)
                 {
-                    // ★ 穿透提示：面板背景变浅灰 + 内容淡出（深色面板下"变透明"不可见，浅色提示才明显）
-                    Background = new System.Windows.Media.SolidColorBrush(
-                        System.Windows.Media.Color.FromArgb(0xE0, 0x5A, 0x5A, 0x5A));
-                    MainPanel.Opacity = 0.3;
+                    _passthroughWasVisible = _visibilityController.IsVisible;
+                    _visibilityController.SuppressOpacityReset = true;   // 防 ShowAt 重置
+                    this.Visibility = Visibility.Hidden;                 // 窗口立即隐藏
                 }
                 else
                 {
-                    Background = new System.Windows.Media.SolidColorBrush(
-                        System.Windows.Media.Color.FromArgb(0xE0, 0x2D, 0x2D, 0x2D));
-                    MainPanel.Opacity = _visibilityController.Opacity;
+                    _visibilityController.SuppressOpacityReset = false;
+                    this.Visibility = Visibility.Visible;                // 恢复窗口显示
+                    MainPanel.Opacity = _visibilityController.Opacity;   // 内容透明度还原
                 }
             }
             catch { }
