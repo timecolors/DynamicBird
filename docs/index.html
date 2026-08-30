@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DynamicBird 灵动鸟</title>
+  <title>DynamicBird 灵动鸟 · Windows 边缘面板工具</title>
   <style>
     body {
       margin: 0;
@@ -21,23 +21,38 @@
       border-radius: 16px;
       padding: 48px 56px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      max-width: 560px;
     }
-    h1 {
-      font-size: 28px;
-      margin: 0 0 12px;
-      color: #0078D4;
-    }
-    p {
-      font-size: 16px;
-      margin: 0;
-      color: #444444;
-    }
+    h1 { font-size: 28px; margin: 0 0 12px; color: #0078D4; }
+    p { font-size: 15px; margin: 6px 0; color: #444444; line-height: 1.6; }
+    .badge { display: inline-block; background: #E8F1FB; color: #0078D4; border-radius: 12px; padding: 2px 12px; font-size: 13px; margin-bottom: 12px; }
+    a { color: #0078D4; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .links { margin-top: 20px; }
+    .links a { display: inline-block; margin: 6px 8px; padding: 8px 18px; border-radius: 8px; background: #0078D4; color: #fff; font-size: 14px; }
+    .links a.secondary { background: #E8F1FB; color: #0078D4; }
+    .features { text-align: left; font-size: 13.5px; color: #555; margin: 18px 0 0; padding: 0; list-style: none; }
+    .features li { margin: 5px 0; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>DynamicBird 灵动鸟</h1>
-    <p>这是一个 <strong>DynamicBird 灵动鸟</strong> 应用图标。</p>
+    <span class="badge">Windows · 免费 · 本地数据</span>
+    <h1>🕊️ DynamicBird 灵动鸟</h1>
+    <p>Dynamic Island 风格的 Windows 边缘面板工具：</p>
+    <p>把常用功能收纳到屏幕边缘，鼠标滑过即呼出，用完自动隐去。</p>
+    <ul class="features">
+      <li>🖥️ 边缘任务栏：快捷方式、运行窗口、拖拽排序</li>
+      <li>🧩 小组件：剪贴板、便签、计时器、计算器、网页工具</li>
+      <li>🤖 AI 助手：自带 API Key，直连你选择的服务商</li>
+      <li>🐦 鸟笼编程模式：C# 编写自己的小组件与面板</li>
+      <li>🎨 Win11 原生风格（Mica 毛玻璃）、中英双语</li>
+    </ul>
+    <div class="links">
+      <a href="https://github.com/timecolors/DynamicBird/releases">下载 Releases</a>
+      <a class="secondary" href="https://github.com/timecolors/DynamicBird">GitHub 仓库</a>
+      <a class="secondary" href="docs/PRIVACY.md">隐私政策</a>
+    </div>
   </div>
 </body>
 </html>

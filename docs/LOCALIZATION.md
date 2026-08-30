@@ -44,4 +44,4 @@ var text = LocalizationManager.Instance["Timer_FooterHint"];
 
 1. 复制 `Strings.resx` 为 `Strings.xx-XX.resx` 并翻译
 2. 在 `DynamicBird.csproj` 的 EmbeddedResource 区追加对应条目（LogicalName 规则同 en-US）
-3. 在设置页提供该语言选项（后续版本）
+3. 在设置页的「语言」下拉中添加该语言选项（设置 → 常规 → 语言）
