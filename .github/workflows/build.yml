@@ -27,7 +27,7 @@ jobs:
         run: dotnet restore DynamicBird.sln
 
       - name: Build Debug
-        run: dotnet build DynamicBird.sln -c Debug --no-restore -v minimal
+        run: dotnet build DynamicBird.sln -c Debug -v minimal
 
       - name: Unit Tests
         run: dotnet test tests/DynamicBird.Tests/DynamicBird.Tests.csproj -c Debug --no-build -v minimal
