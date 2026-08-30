@@ -377,3 +377,8 @@ tools/p2/
 # AI 交接文档（不入库）
 docs/HANDOFF.md
 docs/INTERACTION-MODEL.md
+
+# 在线市场包（market/packages 是市场内容，不是 NuGet）
+!market/
+!market/packages/
+!market/packages/**
