@@ -18,14 +18,15 @@ if (args.Length < 2)
 string content = args[0];
 string output = args[1];
 int size = args.Length > 2 && int.TryParse(args[2], out var s) ? s : 1024;
+bool noQuiet = args.Length > 3 && args[3] == "-noquiet";
 
 using var gen = new QRCodeGenerator();
 // 高纠错等级 H：允许图标中央放 logo 后仍可扫描
 var data = gen.CreateQrCode(content, QRCodeGenerator.ECCLevel.H);
 int modules = data.ModuleMatrix.Count;
-int ppm = Math.Max(4, size / (modules + 8)); // 含静区（quiet zone）
+int ppm = Math.Max(4, noQuiet ? size / modules : size / (modules + 8)); // -noquiet 去掉静区
 using var qr = new QRCode(data);
-using var bmp = qr.GetGraphic(ppm, "#1E1E1E", "#FFFFFF", true);
+using var bmp = qr.GetGraphic(ppm, "#1E1E1E", "#FFFFFF", !noQuiet);
 
 // 校验：ZXing 回读解码
 using var ms = new MemoryStream();
