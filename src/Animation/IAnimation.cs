@@ -1,11 +1,11 @@
 using System;
 using System.Windows;
 
-namespace DynamicBird.Animation
+namespace ShoreHue.Animation
 {
     /// <summary>
     /// 自定义动画接口：用户编写的动画插件实现本接口，
-    /// 放入 birdcage/动画/&lt;名字&gt;/main.cs（manifest kind = "Animation"）后，
+    /// 放入 seabed/动画/&lt;名字&gt;/main.cs（manifest kind = "Animation"）后，
     /// watcher 识别 → 编译 → 注册进 AnimationRegistry → 设置页动画类型可选、
     /// ShapeAnimator 按类型 Id 分发执行。
     /// </summary>

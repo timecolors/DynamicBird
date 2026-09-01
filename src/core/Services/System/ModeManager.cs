@@ -1,10 +1,10 @@
-﻿using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Core.Infrastructure.Service;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.src.core.Services.System;
+﻿using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Service;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.src.core.Services.System;
 using System;
 
-namespace DynamicBird.Core.Services
+namespace ShoreHue.Core.Services
 {
     public class ModeManager : IModeService, IService
     {

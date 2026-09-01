@@ -1,7 +1,7 @@
-﻿using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
+﻿using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     public static class SettingsDataManager
     {

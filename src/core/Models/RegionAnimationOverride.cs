@@ -1,4 +1,4 @@
-namespace DynamicBird.Core.Models
+namespace ShoreHue.Core.Models
 {
     /// <summary>
     /// 逐区域动画覆盖（动画页签「动画应用于」）：只覆盖 触发/隐藏动画的 类型+时长，

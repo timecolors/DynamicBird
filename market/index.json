@@ -1,6 +1,6 @@
 {
   "updatedAt": "2026-08-31",
-  "marketBase": "https://cdn.jsdelivr.net/gh/timecolors/DynamicBird@master/market",
+  "marketBase": "https://cdn.jsdelivr.net/gh/timecolors/ShoreHue@master/market",
   "packages": [
     {
       "id": "timer",

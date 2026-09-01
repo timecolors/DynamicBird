@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public partial class TaskbarView
     {

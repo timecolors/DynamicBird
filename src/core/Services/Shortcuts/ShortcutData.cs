@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DynamicBird.Core.Services
+namespace ShoreHue.Core.Services
 {
     /// <summary>
     /// 快捷方式数据模型（用于序列化/反序列化）

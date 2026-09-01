@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows.Media;
-using DynamicBird.Core.Services;
+using ShoreHue.Core.Services;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     /// <summary>
     /// 任务栏面板项目类型

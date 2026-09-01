@@ -1,4 +1,4 @@
-<Window x:Class="DynamicBird.UI.Media.WindowPickerWindow"
+<Window x:Class="ShoreHue.UI.Media.WindowPickerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding Item[UI_WindowPickerWindow_55], Source={x:Static loc:LocalizationManager.Instance}}"
@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
-        Background="#2D2D2D" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+        Background="#2D2D2D" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

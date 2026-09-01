@@ -2,12 +2,12 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using DynamicBird.Core;
-using DynamicBird.Core.Detection;
-using DynamicBird.Core.Services;
-using DynamicBird.UI.Status;
+using ShoreHue.Core;
+using ShoreHue.Core.Detection;
+using ShoreHue.Core.Services;
+using ShoreHue.UI.Status;
 
-namespace DynamicBird.UI.Main
+namespace ShoreHue.UI.Main
 {
     public partial class MainWindow
     {
@@ -83,7 +83,7 @@ namespace DynamicBird.UI.Main
 
                 double mx = point.X / dpiScale;
                 double my = point.Y / dpiScale;
-                var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForPoint(mx, my);
+                var wa = ShoreHue.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForPoint(mx, my);
                 bool allowTopRight = _settingsService.GetRegionPanel("TopRight") == "WindowControl";
                 var region = EdgeStateDetector.DetectRegion(
                     mx, my, wa.Width, wa.Height, _settingsService.TriggerDistancePx, allowTopRight);
@@ -153,9 +153,9 @@ namespace DynamicBird.UI.Main
             {
                 if (_settingsService.ShowSystemStatus)
                 {
-                    if (SystemStatusContainer.Content is not DynamicBird.UI.Status.SystemStatusView statusView)
+                    if (SystemStatusContainer.Content is not ShoreHue.UI.Status.SystemStatusView statusView)
                     {
-                        statusView = new DynamicBird.UI.Status.SystemStatusView();
+                        statusView = new ShoreHue.UI.Status.SystemStatusView();
                         SystemStatusContainer.Content = statusView;
                     }
                     statusView.ApplySettings(_settingsService);

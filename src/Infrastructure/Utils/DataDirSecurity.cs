@@ -3,10 +3,10 @@ using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
-namespace DynamicBird.Infrastructure.Utils
+namespace ShoreHue.Infrastructure.Utils
 {
     /// <summary>
-    /// 数据目录安全：把 %LOCALAPPDATA%\DynamicBird 的 ACL 收紧为
+    /// 数据目录安全：把 %LOCALAPPDATA%\ShoreHue 的 ACL 收紧为
     /// 仅当前用户 + SYSTEM + Administrators（防同机其他账户读取 token/密钥/剪贴板历史）。
     /// </summary>
     public static class DataDirSecurity

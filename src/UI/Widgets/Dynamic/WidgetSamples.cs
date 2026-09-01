@@ -1,4 +1,4 @@
-namespace DynamicBird.UI.Widgets.Dynamic
+namespace ShoreHue.UI.Widgets.Dynamic
 {
     /// <summary>
     /// 内置示例插件源码（与 docs/WIDGET-SPEC.md 中的示例一致，可持续扩充）。
@@ -9,7 +9,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class ClockWidget : UserControl, IWidget
 {
@@ -52,7 +52,7 @@ public class ClockWidget : UserControl, IWidget
 
         public const string Counter = @"using System.Windows;
 using System.Windows.Controls;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class CounterWidget : UserControl, IWidget
 {
@@ -103,7 +103,7 @@ public class CounterWidget : UserControl, IWidget
 
         public const string Note = @"using System.Windows;
 using System.Windows.Controls;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class NoteWidget : UserControl, IWidget
 {
@@ -142,7 +142,7 @@ public class NoteWidget : UserControl, IWidget
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class ShortcutWidget : UserControl, IWidget
 {
@@ -178,7 +178,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 // 需要联网权限（编辑器里勾选“联网”）
 public class WeatherWidget : UserControl, IWidget

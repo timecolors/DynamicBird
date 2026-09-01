@@ -15,10 +15,10 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
-using DynamicBird.Core.Services.Ai;
-using DynamicBird.UI.Localization;
+using ShoreHue.Core.Services.Ai;
+using ShoreHue.UI.Localization;
 
-namespace DynamicBird.UI.AI
+namespace ShoreHue.UI.AI
 {
     /// <summary>AI 聊天面板：多会话 + 流式对话 + Markdown + 快捷指令。</summary>
     public partial class AiChatView : UserControl
@@ -70,7 +70,7 @@ namespace DynamicBird.UI.AI
         private bool _inputExpanded;
         private bool _needsTitleGeneration;
         private string _pendingTitleFirstText = "";
-        private readonly DynamicBird.Infrastructure.WinApi.CursorOutputService _cursorOutput = new();
+        private readonly ShoreHue.Infrastructure.WinApi.CursorOutputService _cursorOutput = new();
         private readonly System.Text.StringBuilder _cursorBuffer = new();
         private System.Windows.Threading.DispatcherTimer? _cursorFlushTimer;
         private System.Windows.Threading.DispatcherTimer? _cursorAimTimer;
@@ -625,7 +625,7 @@ namespace DynamicBird.UI.AI
             {
                 // 进入瞄准模式：提示用户点击目标窗口
                 _cursorAiming = true;
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Debug("[CursorOutput] aiming started");
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Debug("[CursorOutput] aiming started");
                 BtnCursorOutput.Content = LocalizationManager.Instance["Ai_CursorOutputAiming"];
                 BtnCursorOutput.Background = new System.Windows.Media.SolidColorBrush(
                     System.Windows.Media.Color.FromRgb(38, 79, 120));
@@ -639,7 +639,7 @@ namespace DynamicBird.UI.AI
         private void CheckAimTarget()
         {
             if (!_cursorAiming) { _cursorAimTimer?.Stop(); return; }
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug("[CursorOutput] aim tick");
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug("[CursorOutput] aim tick");
             if (_cursorOutput.TryLockTarget(out string error))
             {
                 _cursorAiming = false;

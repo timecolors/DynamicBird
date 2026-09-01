@@ -1,13 +1,13 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Ai;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.UI.Widgets.Dynamic;
-using DynamicBird.UI.Settings.Pages;
-using DynamicBird.UI.Theme;
-using DynamicBird.UI.Localization;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Ai;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.UI.Widgets.Dynamic;
+using ShoreHue.UI.Settings.Pages;
+using ShoreHue.UI.Theme;
+using ShoreHue.UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -18,11 +18,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     public partial class SettingsWindow
     {
-        /// <summary>预设变化后刷新变灰（鸟笼页应用/删除单预设后调用；SettingsManager.Apply 已同步数据）。</summary>
+        /// <summary>预设变化后刷新变灰（海床页应用/删除单预设后调用；SettingsManager.Apply 已同步数据）。</summary>
         public void RefreshPresetDimming()
         {
             try { ApplyOverrideDimming(); }
@@ -110,9 +110,9 @@ namespace DynamicBird.UI.Settings
             {
                 foreach (var key in overrides.Keys)
                 {
-                    var node = DynamicBird.UI.Birdcage.ConfigTreeBuilder.FindNodeByKey(key);
+                    var node = ShoreHue.UI.Seabed.ConfigTreeBuilder.FindNodeByKey(key);
                     if (node == null) continue;
-                    DynamicBird.UI.Birdcage.ConfigTreeBuilder.CollectFields(node, overriddenFields);
+                    ShoreHue.UI.Seabed.ConfigTreeBuilder.CollectFields(node, overriddenFields);
                 }
             }
 
@@ -137,7 +137,7 @@ namespace DynamicBird.UI.Settings
         private static string FindCoveringPreset(string field, Dictionary<string, string>? overrides)
         {
             if (overrides == null) return "";
-            var chain = DynamicBird.UI.Birdcage.ConfigTreeBuilder.FindNodeChain(field);
+            var chain = ShoreHue.UI.Seabed.ConfigTreeBuilder.FindNodeChain(field);
             for (int i = chain.Count - 1; i >= 0; i--)
             {
                 if (overrides.TryGetValue(chain[i].Key, out var preset)) return preset;
@@ -211,7 +211,7 @@ namespace DynamicBird.UI.Settings
                 var overrides = _settings.AppliedPresets;
                 if (overrides == null || overrides.Count == 0) return;
                 _dimControlPreset.TryGetValue(controlName, out var presetName);
-                var chain = DynamicBird.UI.Birdcage.ConfigTreeBuilder.FindNodeChain(field);
+                var chain = ShoreHue.UI.Seabed.ConfigTreeBuilder.FindNodeChain(field);
                 bool changed = false;
                 foreach (var n in chain)
                 {
@@ -226,18 +226,18 @@ namespace DynamicBird.UI.Settings
                     _settings.AppliedPresets = overrides;
                     _settings.Reload();
                     ApplyOverrideDimming();
-                    RefreshBirdcageIfVisible();
+                    RefreshSeabedIfVisible();
                 }
             }
             catch { }
         }
 
-        /// <summary>设置页解除覆盖后，同步刷新鸟笼页（树高亮/删除线状态）。</summary>
-        private void RefreshBirdcageIfVisible()
+        /// <summary>设置页解除覆盖后，同步刷新海床页（树高亮/删除线状态）。</summary>
+        private void RefreshSeabedIfVisible()
         {
             try
             {
-                if (tabBirdcage?.Content is DynamicBird.UI.Settings.Pages.BirdcagePage bp)
+                if (tabSeabed?.Content is ShoreHue.UI.Settings.Pages.SeabedPage bp)
                 {
                     bp.RefreshAll();
                 }

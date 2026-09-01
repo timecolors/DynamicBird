@@ -4,9 +4,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
-namespace DynamicBird.Builtin
+namespace ShoreHue.Builtin
 {
     public class TimerPanel : UserControl, IWidget
     {
@@ -257,7 +257,7 @@ namespace DynamicBird.Builtin
             _alarm.Running = false; _alarm.AlarmTriggered = true;
             try
             {
-                DynamicBird.Infrastructure.WinApi.SystemToast.Show("灵动鸟", "闹钟时间到：" + _alarm.TargetTime.Value.ToString("HH:mm"));
+                ShoreHue.Infrastructure.WinApi.SystemToast.Show("ShoreHue", "闹钟时间到：" + _alarm.TargetTime.Value.ToString("HH:mm"));
                 System.Media.SystemSounds.Exclamation.Play();
             }
             catch { }

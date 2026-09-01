@@ -1,4 +1,4 @@
-using DynamicBird.Core.Detection;
+using ShoreHue.Core.Detection;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     /// <summary>
     /// 面板调整大小：用 WM_NCLBUTTONDOWN + 命中区域码（HTTOP/HTBOTTOM 等）

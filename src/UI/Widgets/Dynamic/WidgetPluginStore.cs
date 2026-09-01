@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using DynamicBird.Animation;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.UI.Status;
+using ShoreHue.Animation;
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.UI.Status;
 
-namespace DynamicBird.UI.Widgets.Dynamic
+namespace ShoreHue.UI.Widgets.Dynamic
 {
     /// <summary>已安装的 C# 插件小组件（manifest + 源码）。</summary>
     public class WidgetPlugin
@@ -34,7 +34,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
 
     /// <summary>
     /// 本地插件仓库：每个小组件一个目录
-    /// %LOCALAPPDATA%\DynamicBird\widgets\<id>\（main.cs 源码 + manifest.json 元信息）。
+    /// %LOCALAPPDATA%\ShoreHue\widgets\<id>\（main.cs 源码 + manifest.json 元信息）。
     /// </summary>
     public static class WidgetPluginStore
     {
@@ -49,13 +49,13 @@ namespace DynamicBird.UI.Widgets.Dynamic
             return true;
         }
 
-        /// <summary>灵动鸟内置小组件 id（官方随附，删除可能导致运行异常）。</summary>
+        /// <summary>ShoreHue 内置小组件 id（官方随附，删除可能导致运行异常）。</summary>
         private static readonly HashSet<string> _builtinIds = new(System.StringComparer.OrdinalIgnoreCase)
         {
             "timer", "calculator", "clipboard", "note", "textai", "web"
         };
 
-        /// <summary>是否为灵动鸟内置文件（官方 author 或内置 id 清单）。</summary>
+        /// <summary>是否为 ShoreHue 内置文件（官方 author 或内置 id 清单）。</summary>
         public static bool IsBuiltin(WidgetPlugin plugin)
         {
             if (plugin == null) return false;
@@ -66,10 +66,10 @@ namespace DynamicBird.UI.Widgets.Dynamic
         /// <summary>权限 → 显示标签。</summary>
         public static string PermissionLabel(string p) => p switch
         {
-            "network" => "🌐 联网",
-            "clipboard" => "📋 剪贴板",
-            "file" => "📁 本地文件",
-            _ => "🔒 无权限"
+            "network" => "联网",
+            "clipboard" => "剪贴板",
+            "file" => "本地文件",
+            _ => "无权限"
         };
 
         /// <summary>列表变化（安装/删除）时触发，供 WidgetSwitcher 重建标签。</summary>
@@ -82,8 +82,8 @@ namespace DynamicBird.UI.Widgets.Dynamic
 
         /// <summary>开始监听小组件文件夹（应用启动时调用一次；Watcher 生命周期随进程）。
         /// ★ 职责边界（2026-09-01 明确）：**只检测文件/目录的增删**（用户手工放 .dbp 包 / .cs
-        ///   单文件、删除文件夹 → 鸟笼自动识别更新）。**内容修改不归 watcher 管**：应用内保存
-        ///   （Save/SaveNodeToFolder）已显式 Reload+Changed，用户改内容也走鸟笼界面。
+        ///   单文件、删除文件夹 → 海床自动识别更新）。**内容修改不归 watcher 管**：应用内保存
+        ///   （Save/SaveNodeToFolder）已显式 Reload+Changed，用户改内容也走海床界面。
         /// ★ 防死循环关键：NotifyFilter **只留 FileName|DirectoryName，去掉 LastWrite**——
         ///   应用自身覆盖写文件（main.cs/manifest.json）不再触发事件，只有新建/删除/重命名触发；
         ///   配合 800ms 防抖 + Reload 期间暂停 + 应用写盘走 WithWatcherSuspended，切断
@@ -167,10 +167,10 @@ namespace DynamicBird.UI.Widgets.Dynamic
             }
         }
 
-        /// <summary>鸟笼项目文件夹根（= 鸟笼树的物理投影）：小组件/面板设计/动画/... 各分组子文件夹。</summary>
-        public static string RootDir => Path.Combine(AppPaths.DataRoot, "birdcage");
+        /// <summary>海床项目文件夹根（= 海床树的物理投影）：小组件/面板设计/动画/... 各分组子文件夹。</summary>
+        public static string RootDir => Path.Combine(AppPaths.DataRoot, "seabed");
 
-        /// <summary>旧版本 widgets/ 目录 → birdcage/ 迁移（首次运行执行一次）。</summary>
+        /// <summary>旧版本 widgets/ 目录 → seabed/ 迁移（首次运行执行一次）。</summary>
         private static void MigrateLegacyWidgetsDir()
         {
             try
@@ -266,7 +266,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
                                     kind = m.Kind ?? "";
                                 }
                             }
-                            // ★ 跳过灵动鸟内置副本（system 标记）：只作文件夹展示，不当作可安装/可删除的小组件
+                            // ★ 跳过 ShoreHue 内置副本（system 标记）：只作文件夹展示，不当作可安装/可删除的小组件
                             //   （内置功能由代码类提供，文件夹副本是给用户看的镜像）
                             if (isSystem) continue;
                             // ★ 信任判定：manifest 显式标记优先；内置副本/无标记的本地文件默认信任
@@ -286,13 +286,13 @@ namespace DynamicBird.UI.Widgets.Dynamic
             }
             catch { }
             _cache = list.OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"[插件] Installed {_cache.Count} 个: " + string.Join(",", _cache.Select(p => p.Id + "(" + (p.Kind ?? "?") + ")")));
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug($"[插件] Installed {_cache.Count} 个: " + string.Join(",", _cache.Select(p => p.Id + "(" + (p.Kind ?? "?") + ")")));
         }
 
         public static WidgetPlugin? GetById(string id) => Installed.FirstOrDefault(p => p.Id == id);
 
         // ============================================================
-        //  自定义状态栏显示项（birdcage/状态栏/，IStatusProvider）
+        //  自定义状态栏显示项（seabed/状态栏/，IStatusProvider）
         // ============================================================
 
         private static Dictionary<string, IStatusProvider>? _statusProviders;
@@ -326,7 +326,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
                         string sandboxErr = WidgetCompiler.SandboxErrors(plugin.Source);
                         if (sandboxErr.Length > 0)
                         {
-                            DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                            ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
                                 $"状态栏插件 [{plugin.Id}] 被沙箱拦截: {sandboxErr}");
                             continue;
                         }
@@ -335,17 +335,17 @@ namespace DynamicBird.UI.Widgets.Dynamic
                     string cacheId = "status_" + plugin.Id;
                     var (provider, err) = WidgetCompiler.Compile<IStatusProvider>(cacheId, plugin.Source);
                     if (provider != null) map[cacheId] = provider;
-                    else DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                    else ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
                         $"状态栏插件 [{plugin.Id}] 编译失败: {err}");
                 }
             }
             catch { }
             _statusProviders = map;
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"[插件] 状态栏编译成功 {map.Count} 个: " + string.Join(",", map.Keys));
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug($"[插件] 状态栏编译成功 {map.Count} 个: " + string.Join(",", map.Keys));
         }
 
         // ============================================================
-        //  自定义动画（birdcage/动画/，IAnimation）
+        //  自定义动画（seabed/动画/，IAnimation）
         // ============================================================
 
         private static Dictionary<string, IAnimation>? _animations;
@@ -377,7 +377,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
                         string sandboxErr = WidgetCompiler.SandboxErrors(plugin.Source);
                         if (sandboxErr.Length > 0)
                         {
-                            DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                            ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
                                 $"动画插件 [{plugin.Id}] 被沙箱拦截: {sandboxErr}");
                             continue;
                         }
@@ -386,7 +386,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
                     var (anim, err) = WidgetCompiler.Compile<IAnimation>(cacheId, plugin.Source);
                     if (anim == null)
                     {
-                        DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                        ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
                             $"动画插件 [{plugin.Id}] 编译失败: {err}");
                         continue;
                     }
@@ -398,10 +398,10 @@ namespace DynamicBird.UI.Widgets.Dynamic
             }
             catch { }
             _animations = map;
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"[插件] 动画编译成功 {map.Count} 个: " + string.Join(",", map.Keys));
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug($"[插件] 动画编译成功 {map.Count} 个: " + string.Join(",", map.Keys));
             // ★ 注册表与缓存同源：ShapeAnimator 只依赖 AnimationRegistry（动画命名空间），
             //   不反向依赖 UI 层，避免分层耦合。
-            DynamicBird.Animation.AnimationRegistry.ReplaceAll(map);
+            ShoreHue.Animation.AnimationRegistry.ReplaceAll(map);
         }
 
         /// <summary>保存（新建或覆盖）。返回错误信息，成功为空串。</summary>
@@ -539,11 +539,11 @@ namespace DynamicBird.UI.Widgets.Dynamic
         }
 
         /// <summary>
-        /// 把鸟笼树的节点落盘到文件夹（用户保存/创建时调用）：
-        /// 路径 = birdcage/&lt;树路径链&gt;/&lt;节点名&gt;/（与鸟笼树一级/二级/三级结构一致），内含 manifest.json + 内容文件。
-        /// manifest.json 是树↔文件夹的桥梁：文件夹里的文件被灵动鸟扫描时靠它还原节点。
+        /// 把海床树的节点落盘到文件夹（用户保存/创建时调用）：
+        /// 路径 = seabed/&lt;树路径链&gt;/&lt;节点名&gt;/（与海床树一级/二级/三级结构一致），内含 manifest.json + 内容文件。
+        /// manifest.json 是树↔文件夹的桥梁：文件夹里的文件被 ShoreHue 扫描时靠它还原节点。
         /// </summary>
-        public static void SaveNodeToFolder(DynamicBird.Core.Models.CustomPanelDefinition cp)
+        public static void SaveNodeToFolder(ShoreHue.Core.Models.CustomPanelDefinition cp)
         {
             try
             {
@@ -553,14 +553,14 @@ namespace DynamicBird.UI.Widgets.Dynamic
             catch { }
         }
 
-        private static void SaveNodeToFolderCore(DynamicBird.Core.Models.CustomPanelDefinition cp)
+        private static void SaveNodeToFolderCore(ShoreHue.Core.Models.CustomPanelDefinition cp)
         {
             try
             {
                 EnsureSkeleton();
                 // ★ 树路径 = 文件夹路径：按 ParentKey 找到父节点在树里的完整路径链（一级/二级/三级）
                 string nodeDir;
-                var pathChain = DynamicBird.UI.Birdcage.ConfigTreeBuilder.FindPathNames(cp.ParentKey ?? "");
+                var pathChain = ShoreHue.UI.Seabed.ConfigTreeBuilder.FindPathNames(cp.ParentKey ?? "");
                 var parts = new System.Collections.Generic.List<string>();
                 if (pathChain.Count > 0)
                 {
@@ -609,7 +609,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
             catch { }
         }
 
-        /// <summary>删除鸟笼节点的文件夹（按 manifest.json 里的 id 匹配，跨分组查找）。</summary>
+        /// <summary>删除海床节点的文件夹（按 manifest.json 里的 id 匹配，跨分组查找）。</summary>
         public static void DeleteNodeFolder(string customId)
         {
             try
@@ -658,7 +658,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
         /// <summary>在系统文件管理器中打开指定节点的文件夹（按 manifest.id 匹配，跨分组查找；找不到回退根目录）。</summary>
         public static void OpenNodeFolder(string customId, string name, string category)
         {
-            var log = DynamicBird.Core.Infrastructure.Logging.LogManager.Debug;
+            var log = ShoreHue.Core.Infrastructure.Logging.LogManager.Debug;
             log($"[OpenFolder] 调用 customId={customId} name={name} category={category} RootDir={RootDir}");
             try
             {
@@ -746,7 +746,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
             public string? Author { get; set; }
             public string? Description { get; set; }
             public List<string>? Permissions { get; set; }
-            /// <summary>灵动鸟内置副本标记（只展示，不可当作用户小组件安装/删除）。</summary>
+            /// <summary>ShoreHue 内置副本标记（只展示，不可当作用户小组件安装/删除）。</summary>
             public bool System { get; set; }
             /// <summary>信任来源标记：false = 市场来源，加载前过沙箱；缺省/true = 本地代码直接加载。</summary>
             public bool? TrustedSource { get; set; }

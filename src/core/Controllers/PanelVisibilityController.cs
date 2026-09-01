@@ -1,13 +1,13 @@
-using DynamicBird.Animation;
-using DynamicBird.Core.Detection;
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Animation;
+using ShoreHue.Core.Detection;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
 using System;
 using System.Windows;
 using System.Windows.Input;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     public class PanelVisibilityController : IPanelVisibilityController
     {

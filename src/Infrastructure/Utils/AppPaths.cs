@@ -1,20 +1,20 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace DynamicBird.Infrastructure.Utils
+namespace ShoreHue.Infrastructure.Utils
 {
     /// <summary>
     /// 应用数据路径与打包状态。
-    /// - 数据统一放在 %LOCALAPPDATA%\DynamicBird，普通版（zip/单文件）与商店 MSIX 版通用，
+    /// - 数据统一放在 %LOCALAPPDATA%\ShoreHue，普通版（zip/单文件）与商店 MSIX 版通用，
     ///   安装目录只读也不会影响写入；
     /// - IsPackaged 用于区分商店包：商店版禁用 GitHub 自更新、开机自启用 StartupTask、
     ///   Toast 走包身份（无需手工创建快捷方式）。
     /// </summary>
     public static class AppPaths
     {
-        /// <summary>测试/探针注入的数据根目录（隔离，不污染真实用户数据）；null = 用默认 %LOCALAPPDATA%\DynamicBird。</summary>
+        /// <summary>测试/探针注入的数据根目录（隔离，不污染真实用户数据）；null = 用默认 %LOCALAPPDATA%\ShoreHue。</summary>
         internal static string? TestDataRoot;
 
         public static string DataRoot => TestDataRoot ?? BuildDataRoot();
@@ -42,7 +42,7 @@ namespace DynamicBird.Infrastructure.Utils
             string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             return string.IsNullOrWhiteSpace(local)
                 ? Path.Combine(AppContext.BaseDirectory, "Data")
-                : Path.Combine(local, "DynamicBird");
+                : Path.Combine(local, "ShoreHue");
         }
 
         private static bool DetectPackaged()

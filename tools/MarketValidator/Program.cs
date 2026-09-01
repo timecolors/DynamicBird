@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using DynamicBird.UI.Widgets.Dynamic;
+using ShoreHue.UI.Widgets.Dynamic;
 
 namespace MarketValidator
 {
@@ -33,8 +33,8 @@ namespace MarketValidator
 
             // ★ 模拟真实运行环境：加载主题资源（模板构造函数会 FindResource 按钮样式）
             var app = new System.Windows.Application();
-            try { app.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary { Source = new Uri("pack://application:,,,/DynamicBird;component/src/UI/Theme/Theme.xaml") }); } catch { }
-            try { app.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary { Source = new Uri("pack://application:,,,/DynamicBird;component/src/UI/Theme/AppIcons.xaml") }); } catch { }
+            try { app.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary { Source = new Uri("pack://application:,,,/ShoreHue;component/src/UI/Theme/Theme.xaml") }); } catch { }
+            try { app.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary { Source = new Uri("pack://application:,,,/ShoreHue;component/src/UI/Theme/AppIcons.xaml") }); } catch { }
 
             int pass = 0, fail = 0;
             foreach (var f in files.OrderBy(x => x, StringComparer.Ordinal))

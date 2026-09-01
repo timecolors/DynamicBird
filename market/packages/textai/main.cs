@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using DynamicBird.Core.Services.Ai;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Widgets;
+using ShoreHue.Core.Services.Ai;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Widgets;
 
-namespace DynamicBird.Builtin
+namespace ShoreHue.Builtin
 {
     // 划词翻译 · 纯代码版（动态编译运行，与内置风格一致：FlatButton/CardStyle）
     public class TextAiPanel : UserControl, IWidget

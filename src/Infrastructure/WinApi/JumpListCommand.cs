@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// Jump List 命令的单实例转发/执行：
@@ -14,10 +14,10 @@ namespace DynamicBird.Infrastructure.WinApi
     public static class JumpListCommand
     {
         // ★ 命名事件：已运行实例监听；新实例发信号（传参数用共享内存文件，见 ForwardActions）
-        private const string EventName = @"Global\DynamicBird_JumpList_Command";
+        private const string EventName = @"Global\ShoreHue_JumpList_Command";
         // 共享内存文件：写入待执行动作（新实例 → 已运行实例）
         private static readonly string MemFile = System.IO.Path.Combine(
-            System.IO.Path.GetTempPath(), "DynamicBird_jumplist_cmd.txt");
+            System.IO.Path.GetTempPath(), "ShoreHue_jumplist_cmd.txt");
 
         private static EventWaitHandle? _incomingEvent;
 
@@ -42,7 +42,7 @@ namespace DynamicBird.Infrastructure.WinApi
                                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                                 {
                                     try { onActions(actions); }
-                                    catch (Exception ex) { DynamicBird.Core.Infrastructure.Logging.LogManager.Error("执行 Jump List 动作失败", ex); }
+                                    catch (Exception ex) { ShoreHue.Core.Infrastructure.Logging.LogManager.Error("执行 Jump List 动作失败", ex); }
                                 });
                             }
                         }
@@ -52,7 +52,7 @@ namespace DynamicBird.Infrastructure.WinApi
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("注册 Jump List 监听失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("注册 Jump List 监听失败", ex);
             }
         }
 

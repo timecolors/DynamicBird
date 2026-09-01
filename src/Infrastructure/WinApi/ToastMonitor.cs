@@ -9,7 +9,7 @@ using System.Text;
 using System.Windows.Automation;
 using System.Windows.Threading;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     public class ToastNotificationItem
     {
@@ -164,8 +164,8 @@ namespace DynamicBird.Infrastructure.WinApi
             var item = new ToastNotificationItem
             {
                 Id = key,
-                AppName = DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_AppName"],
-                Message = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_NewVersion"], info.Version),
+                AppName = ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_AppName"],
+                Message = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_NewVersion"], info.Version),
                 Time = DateTime.Now,
                 AppId = "dynamicbird-update"
             };
@@ -178,7 +178,7 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             var item = new ToastNotificationItem
             {
-                AppName = DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_AppName"],
+                AppName = ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_AppName"],
                 Message = message,
                 Time = DateTime.Now,
                 AppId = "dynamicbird-update-status"
@@ -190,31 +190,31 @@ namespace DynamicBird.Infrastructure.WinApi
 
         private static async System.Threading.Tasks.Task InstallUpdateAsync(UpdateService.UpdateInfo info)
         {
-            NotifyUpdateStatus(string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Downloading"], info.Version));
+            NotifyUpdateStatus(string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_Downloading"], info.Version));
             string? pkg = await UpdateService.DownloadUpdateAsync(info);
             if (pkg == null)
             {
-                NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_DownloadFailed"]);
+                NotifyUpdateStatus(ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_DownloadFailed"]);
                 return;
             }
 
-            NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Extracting"]);
+            NotifyUpdateStatus(ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_Extracting"]);
             string? exe = await UpdateService.ExtractExeAsync(pkg);
             if (exe == null)
             {
-                NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_ExtractFailed"]);
+                NotifyUpdateStatus(ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_ExtractFailed"]);
                 return;
             }
 
             if (UpdateService.ApplyUpdate(exe))
             {
-                NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Ready"]);
+                NotifyUpdateStatus(ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_Ready"]);
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(
                     new Action(() => System.Windows.Application.Current?.Shutdown()));
             }
             else
             {
-                NotifyUpdateStatus(DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_InstallFailed"]);
+                NotifyUpdateStatus(ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_InstallFailed"]);
             }
         }
 
@@ -344,7 +344,7 @@ namespace DynamicBird.Infrastructure.WinApi
                             return true;
                         }
 
-                        DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                        ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                             $"[ToastMonitor] 捕获候选: class={className} pid={pid} rect=({r.Left},{r.Top},{r.Right},{r.Bottom}) text='{text[..Math.Min(40, text.Length)]}'");
 
                         string signature = pid + "|" + text;
@@ -365,7 +365,7 @@ namespace DynamicBird.Infrastructure.WinApi
                             string appName = GetFriendlyProcessName((int)pid);
                             var item = new ToastNotificationItem
                             {
-                                AppName = string.IsNullOrEmpty(appName) ? DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_UnknownApp"] : appName,
+                                AppName = string.IsNullOrEmpty(appName) ? ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_UnknownApp"] : appName,
                                 Message = text.Length > 240 ? text[..240] + "…" : text,
                                 PopupHwnd = hwnd,
                                 ProcessId = (int)pid,
@@ -497,18 +497,18 @@ namespace DynamicBird.Infrastructure.WinApi
                 string name = proc.ProcessName;
                 string friendly = name.ToLowerInvariant() switch
                 {
-                    "wechat" or "weixin" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Wechat"],
+                    "wechat" or "weixin" => ShoreHue.UI.Localization.LocalizationManager.Instance["Recent_Wechat"],
                     "qq" or "qqnt" => "QQ",
                     "tim" => "TIM",
-                    "dingtalk" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Dingtalk"],
-                    "feishu" or "lark" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Feishu"],
-                    "wechatwork" or "wework" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_WxWork"],
+                    "dingtalk" => ShoreHue.UI.Localization.LocalizationManager.Instance["Recent_Dingtalk"],
+                    "feishu" or "lark" => ShoreHue.UI.Localization.LocalizationManager.Instance["Recent_Feishu"],
+                    "wechatwork" or "wework" => ShoreHue.UI.Localization.LocalizationManager.Instance["Recent_WxWork"],
                     "wps" => "WPS",
                     "chrome" => "Chrome",
                     "msedge" => "Edge",
                     "firefox" => "Firefox",
                     "devenv" => "Visual Studio",
-                    "explorer" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Explorer"],
+                    "explorer" => ShoreHue.UI.Localization.LocalizationManager.Instance["Recent_Explorer"],
                     _ => name
                 };
                 _appNameCache[pid] = friendly;

@@ -1,13 +1,13 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Ai;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.UI.Widgets.Dynamic;
-using DynamicBird.UI.Settings.Pages;
-using DynamicBird.UI.Theme;
-using DynamicBird.UI.Localization;
+﻿using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Ai;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.UI.Widgets.Dynamic;
+using ShoreHue.UI.Settings.Pages;
+using ShoreHue.UI.Theme;
+using ShoreHue.UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     public partial class SettingsWindow
     {
@@ -40,7 +40,7 @@ namespace DynamicBird.UI.Settings
         /// <summary>在系统文件管理器中打开小组件文件夹。</summary>
         private void BtnOpenWidgetFolder_Click(object sender, RoutedEventArgs e)
         {
-            DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.OpenFolder();
+            ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.OpenFolder();
         }
 
         private void RefreshWidgetMarket()
@@ -53,11 +53,11 @@ namespace DynamicBird.UI.Settings
                 AddMarketItem(kv.Key, LocalizationManager.Instance[kv.Value]);
             foreach (var plugin in WidgetPluginStore.Installed)
                 AddPluginMarketItem(plugin);
-            // ★ 鸟笼保存的小组件变体（BaseType=Widget）：作为启停项列出（前缀区分）
+            // ★ 海床保存的小组件变体（BaseType=Widget）：作为启停项列出（前缀区分）
             foreach (var cp in _settings.CustomPanels)
             {
                 if (cp.Kind == "Config" || (cp.BaseType ?? "") != "Widget") continue;
-                WidgetMarketList.Children.Add(BuildMarketRow("Birdcage_" + cp.Id, cp.Name, null));
+                WidgetMarketList.Children.Add(BuildMarketRow("Seabed_" + cp.Id, cp.Name, null));
             }
 
             if (string.IsNullOrEmpty(_selectedWidgetKey) || !KeyExists(_selectedWidgetKey))
@@ -69,7 +69,7 @@ namespace DynamicBird.UI.Settings
         {
             if (_builtinLocKeys.ContainsKey(key)) return true;
             if (WidgetPluginStore.Installed.Any(p => "Widget_" + p.Id == key)) return true;
-            if (_settings.CustomPanels.Any(p => p.Kind != "Config" && (p.BaseType ?? "") == "Widget" && "Birdcage_" + p.Id == key)) return true;
+            if (_settings.CustomPanels.Any(p => p.Kind != "Config" && (p.BaseType ?? "") == "Widget" && "Seabed_" + p.Id == key)) return true;
             return false;
         }
         private void AddMarketItem(string key, string name)
@@ -152,10 +152,10 @@ namespace DynamicBird.UI.Settings
                 DetailPlugin.Visibility = Visibility.Visible;
                 FillPluginDetail(key.Substring("Widget_".Length));
             }
-            else if (key.StartsWith("Birdcage_"))
+            else if (key.StartsWith("Seabed_"))
             {
                 DetailPlugin.Visibility = Visibility.Visible;
-                FillBirdcageDetail(key.Substring("Birdcage_".Length));
+                FillSeabedDetail(key.Substring("Seabed_".Length));
             }
             else
             {
@@ -163,8 +163,8 @@ namespace DynamicBird.UI.Settings
             }
         }
 
-        /// <summary>精调区：鸟笼小组件变体的信息（编辑/删除请到鸟笼页）。</summary>
-        private void FillBirdcageDetail(string id)
+        /// <summary>精调区：海床小组件变体的信息（编辑/删除请到海床页）。</summary>
+        private void FillSeabedDetail(string id)
         {
             DetailPlugin.Children.Clear();
             var cp = _settings.CustomPanels.FirstOrDefault(p => p.Id == id);
@@ -178,7 +178,7 @@ namespace DynamicBird.UI.Settings
             });
             DetailPlugin.Children.Add(new TextBlock
             {
-                Text = "鸟笼小组件变体（动态编译）",
+                Text = "海床小组件变体（动态编译）",
                 FontSize = 10.5,
                 Foreground = new SolidColorBrush(Color.FromRgb(136, 136, 136)),
                 Margin = new Thickness(0, 0, 0, 10),
@@ -186,7 +186,7 @@ namespace DynamicBird.UI.Settings
             });
             DetailPlugin.Children.Add(new TextBlock
             {
-                Text = "编辑源码、编译与删除请在「鸟笼」页操作；此处仅控制启用/停用。",
+                Text = "编辑源码、编译与删除请在「海床」页操作；此处仅控制启用/停用。",
                 FontSize = 11,
                 Foreground = new SolidColorBrush(Color.FromRgb(90, 90, 90)),
                 TextWrapping = TextWrapping.Wrap
@@ -215,7 +215,7 @@ namespace DynamicBird.UI.Settings
                 : string.Join(" · ", plugin.Permissions.Select(WidgetPluginStore.PermissionLabel));
             DetailPlugin.Children.Add(new TextBlock
             {
-                Text = (compileOk ? "✅  " : "⚠ 编译失败  ") + permText,
+                Text = (compileOk ? " " : "⚠ 编译失败  ") + permText,
                 FontSize = 10.5,
                 Foreground = new SolidColorBrush(compileOk
                     ? (plugin.Permissions.Count > 0 ? Color.FromRgb(255, 170, 90) : Color.FromRgb(136, 136, 136))
@@ -242,12 +242,12 @@ namespace DynamicBird.UI.Settings
         /// <summary>卸载已安装的插件小组件。</summary>
         private void DeletePlugin(WidgetPlugin plugin)
         {
-            // ★ 灵动鸟内置文件保护：官方随附的小组件删除前警告（用户自定义/领养的不适用）
-            if (DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.IsBuiltin(plugin))
+            // ★ ShoreHue 内置文件保护：官方随附的小组件删除前警告（用户自定义/拾贝的不适用）
+            if (ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.IsBuiltin(plugin))
             {
-                var warn = new DynamicBird.UI.Birdcage.ConfirmDialog(
-                    "删除灵动鸟内部文件",
-                    "「" + plugin.Name + "」是灵动鸟内部文件，删除可能导致运行异常。\n\n确定要删除吗？（删除自定义功能与卸载灵动鸟不受此提示影响）",
+                var warn = new ShoreHue.UI.Seabed.ConfirmDialog(
+                    "删除 ShoreHue 内部文件",
+                    "「" + plugin.Name + "」是 ShoreHue 内部文件，删除可能导致运行异常。\n\n确定要删除吗？（删除自定义功能与卸载 ShoreHue 不受此提示影响）",
                     "确定删除", "取消")
                 {
                     Owner = this

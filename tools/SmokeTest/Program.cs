@@ -2,16 +2,16 @@ using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.UI.AppHelper;
-using DynamicBird.UI.Media;
-using DynamicBird.UI.Panels;
-using DynamicBird.UI.Widgets.Calculator;
-using DynamicBird.UI.Widgets.Timer;
-using DynamicBird.UI.Theme;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.UI.AppHelper;
+using ShoreHue.UI.Media;
+using ShoreHue.UI.Panels;
+using ShoreHue.UI.Widgets.Calculator;
+using ShoreHue.UI.Widgets.Timer;
+using ShoreHue.UI.Theme;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -43,14 +43,14 @@ namespace SmokeTest
                     LogManager.Initialize(LogLevel.Debug);
                     Step("start");
 
-                    // 加载灵动鸟全局主题（正式运行由 App.xaml 合并）
+                    // 加载ShoreHue全局主题（正式运行由 App.xaml 合并）
                     app.Resources.MergedDictionaries.Add(new ResourceDictionary
                     {
-                        Source = new Uri("pack://application:,,,/DynamicBird;component/src/UI/Theme/Theme.xaml")
+                        Source = new Uri("pack://application:,,,/ShoreHue;component/src/UI/Theme/Theme.xaml")
                     });
                     app.Resources.MergedDictionaries.Add(new ResourceDictionary
                     {
-                        Source = new Uri("pack://application:,,,/DynamicBird;component/src/UI/Theme/AppIcons.xaml")
+                        Source = new Uri("pack://application:,,,/ShoreHue;component/src/UI/Theme/AppIcons.xaml")
                     });
 
                     // 1) 实例化新增控件（触发 XAML 解析与模板构建）
@@ -69,7 +69,7 @@ namespace SmokeTest
                     SystemToast.EnsureRegistered();
                     string toastLnk = Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.Programs),
-                        "灵动鸟.lnk");
+                        "ShoreHue.lnk");
                     string? toastAumid = SystemToast.ReadAumid(toastLnk);
                     if (!File.Exists(toastLnk) || toastAumid != SystemToast.Aumid)
                         throw new InvalidOperationException(
@@ -178,7 +178,7 @@ namespace SmokeTest
             if (closeBtn.DataContext is TaskbarItem item0 && item0.Handle.HasValue)
             {
                 Step($"closebtn itemHandle={item0.Handle} formHandle={targetHwnd} equal={item0.Handle.Value == targetHwnd}");
-                DynamicBird.Infrastructure.WinApi.WindowAction.Close(item0.Handle.Value);
+                ShoreHue.Infrastructure.WinApi.WindowAction.Close(item0.Handle.Value);
                 bool directClosed = WaitUntil(() => form.IsDisposed, 1500);
                 Step($"direct WM_CLOSE closed={directClosed}");
                 if (directClosed)

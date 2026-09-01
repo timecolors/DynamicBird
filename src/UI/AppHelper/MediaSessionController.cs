@@ -6,7 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Windows.Media.Control;
 
-namespace DynamicBird.UI.AppHelper
+namespace ShoreHue.UI.AppHelper
 {
     /// <summary>
     /// 单个正在播放的媒体会话（来自 QQ 音乐、浏览器等注册了系统媒体会话的应用）。
@@ -87,13 +87,13 @@ namespace DynamicBird.UI.AppHelper
                             }
                             catch (Exception ex)
                             {
-                                DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                                ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                                     $"[MediaCover] 读取封面失败: {ex.Message}");
                             }
                         }
                         else
                         {
-                            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                                 $"[MediaCover] {info.AppName} 媒体属性无缩略图");
                         }
                     }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DynamicBird.src.core.Services.System
+namespace ShoreHue.src.core.Services.System
 {
     /// <summary>
     /// 勿扰模式服务接口

@@ -1,14 +1,14 @@
-using DynamicBird.Animation;
-using DynamicBird.Core.Calculators;
-using DynamicBird.Core.Detection;
-using DynamicBird.Core.Services.Configuration;
+using ShoreHue.Animation;
+using ShoreHue.Core.Calculators;
+using ShoreHue.Core.Detection;
+using ShoreHue.Core.Services.Configuration;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     public class WindowSizeController
     {
@@ -230,7 +230,7 @@ namespace DynamicBird.Core.Controllers
             if (targetWidth < 100) targetWidth = 100;
             if (targetHeight < 60) targetHeight = 60;
 
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                 $"AutoSize content={contentWidth:F0}x{contentHeight:F0} → target={targetWidth:F0}x{targetHeight:F0} mode={_currentMode}");
 
             var (newLeft, newTop) = _positionCalculator.CalculatePosition(

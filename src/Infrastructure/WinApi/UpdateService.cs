@@ -8,9 +8,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 自动更新（GitHub Releases）：
@@ -19,10 +19,10 @@ namespace DynamicBird.Infrastructure.WinApi
     /// </summary>
     public static class UpdateService
     {
-        // ★ 更新源（GitHub Releases）写死在这里：发布时把 DynamicBird.exe 或 zip 上传到
+        // ★ 更新源（GitHub Releases）写死在这里：发布时把 ShoreHue.exe 或 zip 上传到
         //   github.com/{GitHubOwner}/{GitHubRepo}/releases，tag 用版本号（如 v1.0.1）。
         public const string GitHubOwner = "timecolors";
-        public const string GitHubRepo = "DynamicBird";
+        public const string GitHubRepo = "ShoreHue";
 
         public sealed class UpdateInfo
         {
@@ -42,7 +42,7 @@ namespace DynamicBird.Infrastructure.WinApi
             try
             {
                 using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-                http.DefaultRequestHeaders.UserAgent.ParseAdd("DynamicBird");
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("ShoreHue");
 
                 string url = $"https://api.github.com/repos/{Uri.EscapeDataString(GitHubOwner)}/{Uri.EscapeDataString(GitHubRepo)}/releases/latest";
                 string json = await http.GetStringAsync(url);
@@ -80,7 +80,7 @@ namespace DynamicBird.Infrastructure.WinApi
                     Version = version,
                     Tag = tag,
                     DownloadUrl = assetUrl,
-                    FileName = assetName ?? "DynamicBird.zip",
+                    FileName = assetName ?? "ShoreHue.zip",
                     Sha256 = ParseSha256(body),
                     Notes = body ?? ""
                 };
@@ -93,12 +93,12 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             try
             {
-                string dir = Path.Combine(Path.GetTempPath(), "DynamicBirdUpdate");
+                string dir = Path.Combine(Path.GetTempPath(), "ShoreHueUpdate");
                 Directory.CreateDirectory(dir);
                 string file = Path.Combine(dir, SanitizeFileName(info.FileName));
 
                 using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
-                http.DefaultRequestHeaders.UserAgent.ParseAdd("DynamicBird");
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("ShoreHue");
                 byte[] bytes = await http.GetByteArrayAsync(info.DownloadUrl);
 
                 if (!string.IsNullOrEmpty(info.Sha256))
@@ -106,7 +106,7 @@ namespace DynamicBird.Infrastructure.WinApi
                     string hash = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
                     if (!string.Equals(hash, info.Sha256, StringComparison.OrdinalIgnoreCase))
                     {
-                        DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                        ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
                             $"[Update] SHA256 校验失败: 期望 {info.Sha256} 实际 {hash}");
                         return null;
                     }
@@ -117,30 +117,30 @@ namespace DynamicBird.Infrastructure.WinApi
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("下载更新失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("下载更新失败", ex);
                 return null;
             }
         }
 
-        /// <summary>从 zip 更新包中解压出 DynamicBird.exe；非 zip 直接返回原路径。</summary>
+        /// <summary>从 zip 更新包中解压出 ShoreHue.exe；非 zip 直接返回原路径。</summary>
         public static async Task<string?> ExtractExeAsync(string packagePath)
         {
             try
             {
                 if (packagePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
                 {
-                    string extractDir = Path.Combine(Path.GetTempPath(), "DynamicBirdUpdate", "extract");
+                    string extractDir = Path.Combine(Path.GetTempPath(), "ShoreHueUpdate", "extract");
                     if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true);
                     Directory.CreateDirectory(extractDir);
                     ZipFile.ExtractToDirectory(packagePath, extractDir);
 
-                    return FindFile(extractDir, "DynamicBird.exe");
+                    return FindFile(extractDir, "ShoreHue.exe");
                 }
                 return packagePath;
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("解压更新包失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("解压更新包失败", ex);
                 return null;
             }
         }
@@ -161,10 +161,10 @@ namespace DynamicBird.Infrastructure.WinApi
             {
                 if (AppPaths.IsPackaged) return false; // 商店版不使用 GitHub 更新
                 string exeDir = AppContext.BaseDirectory;
-                string currentExe = Path.Combine(exeDir, "DynamicBird.exe");
+                string currentExe = Path.Combine(exeDir, "ShoreHue.exe");
                 if (!File.Exists(newExePath) || !File.Exists(currentExe)) return false;
 
-                string staged = Path.Combine(exeDir, "DynamicBird.new.exe");
+                string staged = Path.Combine(exeDir, "ShoreHue.new.exe");
                 File.Copy(newExePath, staged, true);
 
                 string ps = Path.Combine(exeDir, "apply_update.ps1");
@@ -175,7 +175,7 @@ namespace DynamicBird.Infrastructure.WinApi
                     "$exe = '" + EscapePs(currentExe) + "'" + nl +
                     "$new = '" + EscapePs(staged) + "'" + nl +
                     "$marker = '" + EscapePs(failMarker) + "'" + nl +
-                    "for ($i = 0; $i -lt 10 -and (Get-Process -Name DynamicBird -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 500 }" + nl +
+                    "for ($i = 0; $i -lt 10 -and (Get-Process -Name ShoreHue -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 500 }" + nl +
                     "$ok = $false" + nl +
                     "for ($i = 0; $i -lt 5; $i++) { try { Copy-Item $new $exe -Force -ErrorAction Stop; $ok = $true; break } catch { Start-Sleep -Milliseconds 600 } }" + nl +
                     "if ($ok) {" + nl +
@@ -199,7 +199,7 @@ namespace DynamicBird.Infrastructure.WinApi
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("应用更新失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("应用更新失败", ex);
                 return false;
             }
         }
@@ -218,7 +218,7 @@ namespace DynamicBird.Infrastructure.WinApi
                 string marker = Path.Combine(exeDir, "update_failed.txt");
                 failed = File.Exists(marker);
 
-                foreach (var name in new[] { "DynamicBird.new.exe", "apply_update.ps1", "update_failed.txt" })
+                foreach (var name in new[] { "ShoreHue.new.exe", "apply_update.ps1", "update_failed.txt" })
                 {
                     string p = Path.Combine(exeDir, name);
                     try { if (File.Exists(p)) File.Delete(p); } catch { }

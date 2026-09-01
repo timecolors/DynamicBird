@@ -1,5 +1,5 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Infrastructure.WinApi;
+﻿using ShoreHue.Core.Services;
+using ShoreHue.Infrastructure.WinApi;
 using System;
 using System.Linq;
 using System.Windows;
@@ -8,7 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public partial class TaskbarView
     {
@@ -67,7 +67,7 @@ namespace DynamicBird.UI.Panels
                 _pendingClickItem = null;
 
                 // ★★★ 启动系统拖拽流程 ★★★
-                // 这样灵动鸟图标的 DragEnter/DragLeave/Drop 事件会被触发
+                // 这样 ShoreHue 图标的 DragEnter/DragLeave/Drop 事件会被触发
                 var data = new DataObject(typeof(TaskbarItem), _pendingItem);
                 // ★ 允许 Copy|Move：任务栏内排序用 Move，拖到左侧图标固定应用用 Copy
                 DragDrop.DoDragDrop(MainGrid, data, DragDropEffects.Copy | DragDropEffects.Move);

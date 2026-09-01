@@ -7,11 +7,11 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// Windows Defender（Microsoft Defender）扫描封装：
-    /// 导入「其他鸟笼」包前用 MpCmdRun 扫描，捕获嵌入的已知威胁（恶意二进制/脚本特征）。
+    /// 导入「其他海床」包前用 MpCmdRun 扫描，捕获嵌入的已知威胁（恶意二进制/脚本特征）。
     /// 诚实定位：源码类攻击（C# 文本）无特征可匹配，Defender 扫不出恶意意图——
     /// 这只是"已扫描"保证层 + 抓嵌入载荷，真正的安全边界是 WidgetCompiler 编译期沙箱。
     /// </summary>

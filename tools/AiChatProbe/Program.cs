@@ -1,7 +1,7 @@
 using System;
 using System.Windows;
-using DynamicBird.UI.AI;
-using DynamicBird.UI.Theme;
+using ShoreHue.UI.AI;
+using ShoreHue.UI.Theme;
 
 namespace AiChatProbe
 {
@@ -12,8 +12,8 @@ namespace AiChatProbe
         public static void Main()
         {
             var app = new Application();
-            app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/DynamicBird;component/src/UI/Theme/Theme.xaml") });
-            app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/DynamicBird;component/src/UI/Theme/AppIcons.xaml") });
+            app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/ShoreHue;component/src/UI/Theme/Theme.xaml") });
+            app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/ShoreHue;component/src/UI/Theme/AppIcons.xaml") });
             var view = new AiChatView();
             var win = new Window { Title = "AiChatProbe", Width = 420, Height = 560, WindowStartupLocation = WindowStartupLocation.CenterScreen, Content = view, Icon = AppIconHelper.LoadAppIcon() };
             win.Show();

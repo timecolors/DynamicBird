@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public class TaskbarScrollHandler
     {

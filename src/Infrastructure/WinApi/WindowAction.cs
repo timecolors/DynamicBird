@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     public static class WindowAction
     {

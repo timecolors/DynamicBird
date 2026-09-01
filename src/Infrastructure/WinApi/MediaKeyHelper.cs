@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 系统媒体键（对前台应用生效，作为 SMTC 会话不可用时的兜底方案）。

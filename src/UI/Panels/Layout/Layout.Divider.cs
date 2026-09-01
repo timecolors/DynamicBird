@@ -2,9 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using DynamicBird.Core.Services.Configuration;
+using ShoreHue.Core.Services.Configuration;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public partial class TaskbarView
     {

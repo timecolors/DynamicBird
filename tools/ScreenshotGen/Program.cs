@@ -9,15 +9,15 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.src.core.Services.Clipboard;
-using DynamicBird.src.core.Services.Notes;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.UI.AppHelper;
-using DynamicBird.UI.Panels;
-using DynamicBird.UI.Widgets;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.src.core.Services.Clipboard;
+using ShoreHue.src.core.Services.Notes;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.UI.AppHelper;
+using ShoreHue.UI.Panels;
+using ShoreHue.UI.Widgets;
 
 namespace ScreenshotGen
 {
@@ -63,25 +63,25 @@ namespace ScreenshotGen
                 360, 260, new Point(24, 700), outDir);
 
             // 5) AI 助手面板（截图模式：不读真实会话数据）
-            DynamicBird.UI.AI.AiChatView.UseEmptyForScreenshot = true;
-            Render("05-AI.png", new DynamicBird.UI.AI.AiChatView(), 420, 400, new Point(730, 240), outDir);
+            ShoreHue.UI.AI.AiChatView.UseEmptyForScreenshot = true;
+            Render("05-AI.png", new ShoreHue.UI.AI.AiChatView(), 420, 400, new Point(730, 240), outDir);
 
-            // 6) 鸟笼（AI 编程）界面
+            // 6) 海床（AI 编程）界面
             var birdSettings = new FakeSettings();
-            Render("06-Birdcage.png", new DynamicBird.UI.Settings.Pages.BirdcagePage(birdSettings), 880, 600, new Point(520, 150), outDir);
+            Render("06-Seabed.png", new ShoreHue.UI.Settings.Pages.SeabedPage(birdSettings), 880, 600, new Point(520, 150), outDir);
         }
 
 
         private static ResourceDictionary LoadResource(string relativePath)
         {
-            var uri = new Uri($"pack://application:,,,/DynamicBird;component/{relativePath.Replace('\\', '/')}");
+            var uri = new Uri($"pack://application:,,,/ShoreHue;component/{relativePath.Replace('\\', '/')}");
             return new ResourceDictionary { Source = uri };
         }
 
         private static string FindRepoRoot()
         {
             var dir = new DirectoryInfo(AppContext.BaseDirectory);
-            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "DynamicBird.csproj")))
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "ShoreHue.csproj")))
                 dir = dir.Parent;
             return dir?.FullName ?? AppContext.BaseDirectory;
         }
@@ -186,7 +186,7 @@ namespace ScreenshotGen
 
     /// <summary>测试用快捷方式服务：通用 Windows 应用。</summary>
     /// <summary>测试用设置：继承真实 SettingsManager（自动实现全部接口成员），仅覆盖截图所需字段。</summary>
-    internal sealed class FakeSettings : DynamicBird.Core.Services.Configuration.SettingsManager
+    internal sealed class FakeSettings : ShoreHue.Core.Services.Configuration.SettingsManager
     {
         public FakeSettings()
         {
@@ -282,8 +282,8 @@ namespace ScreenshotGen
     {
         public ObservableCollection<ClipboardManager.ClipboardItem> History { get; } = new()
         {
-            new ClipboardManager.ClipboardItem { Type = "Text", DisplayText = "示例文本：欢迎使用灵动鸟", Timestamp = DateTime.Now },
-            new ClipboardManager.ClipboardItem { Type = "Text", DisplayText = "https://github.com/timecolors/DynamicBird", Timestamp = DateTime.Now }
+            new ClipboardManager.ClipboardItem { Type = "Text", DisplayText = "示例文本：欢迎使用ShoreHue", Timestamp = DateTime.Now },
+            new ClipboardManager.ClipboardItem { Type = "Text", DisplayText = "https://github.com/timecolors/ShoreHue", Timestamp = DateTime.Now }
         };
 
         public event EventHandler? HistoryChanged;

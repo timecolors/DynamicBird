@@ -4,10 +4,10 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using DynamicBird.Infrastructure.WinApi;
+using ShoreHue.Infrastructure.WinApi;
 using Microsoft.Win32;
 
-namespace DynamicBird.UI.Media
+namespace ShoreHue.UI.Media
 {
     /// <summary>
     /// 面板窗口镜像/嵌入：
@@ -62,7 +62,7 @@ namespace DynamicBird.UI.Media
             if (hwnd.HasValue)
             {
                 var title = WindowTitleProvider.GetWindowTitle(hwnd.Value);
-                StartMirror(hwnd.Value, string.IsNullOrEmpty(title) ? DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Window"] : title, embed);
+                StartMirror(hwnd.Value, string.IsNullOrEmpty(title) ? ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_Window"] : title, embed);
             }
         }
 
@@ -74,7 +74,7 @@ namespace DynamicBird.UI.Media
             _thumbnailHost.Detach();
             UnhookWindowEvents();
 
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                 $"[Embed] StartMirror: hwnd={hwnd} title={title} embed={embed}");
 
             _captureHwnd = hwnd;
@@ -82,7 +82,7 @@ namespace DynamicBird.UI.Media
             _mirroring = true;
             _mirrorZoom = 1.0;
             PlaceholderText.Visibility = Visibility.Collapsed;
-            MirrorTitleText.Text = embed ? string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_EmbedTitle"], title) : string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_MirrorTitle"], title);
+            MirrorTitleText.Text = embed ? string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_EmbedTitle"], title) : string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_MirrorTitle"], title);
             MirrorStatusBar.Visibility = Visibility.Collapsed;
             MirrorImage.Visibility = Visibility.Collapsed;
 
@@ -114,7 +114,7 @@ namespace DynamicBird.UI.Media
                     _mirroring = false;
                     _captureHwnd = IntPtr.Zero;
                     MirrorTitleText.Text = "";
-                    MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Minimized"];
+                    MirrorStatusText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_Minimized"];
                     MirrorStatusBar.Visibility = Visibility.Visible;
                     return;
                 }
@@ -127,7 +127,7 @@ namespace DynamicBird.UI.Media
         /// <summary>DWM 缩略图镜像（GPU 合成），失败回退后台抓帧。</summary>
         private void StartThumbnailMirror(string title)
         {
-            MirrorTitleText.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_MirrorTitle"], title);
+            MirrorTitleText.Text = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_MirrorTitle"], title);
             MirrorImage.Visibility = Visibility.Collapsed;
             int gen = ++_embedGeneration;
             Dispatcher.BeginInvoke(new Action(() =>
@@ -158,7 +158,7 @@ namespace DynamicBird.UI.Media
         public void StopAll()
         {
             StopMirror();
-            PlaceholderText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["UI_PanelMediaPlayer_50"].Replace("\n", Environment.NewLine);
+            PlaceholderText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["UI_PanelMediaPlayer_50"].Replace("\n", Environment.NewLine);
             PlaceholderText.Visibility = Visibility.Visible;
         }
 
@@ -200,7 +200,7 @@ namespace DynamicBird.UI.Media
                     UnhookWindowEvents();
                     _captureHwnd = IntPtr.Zero;
                     _mirroring = false;
-                    MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
+                    MirrorStatusText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
                     MirrorStatusBar.Visibility = Visibility.Visible;
                 }
                 else if (WindowCaptureService.IsMinimized(_captureHwnd))
@@ -208,7 +208,7 @@ namespace DynamicBird.UI.Media
                     // 缩略图对最小化窗口空白：解除并提示，恢复后点击提示条继续
                     _thumbnailHost.Detach();
                     UnhookWindowEvents();
-                    MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_MinimizedClick"];
+                    MirrorStatusText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_MinimizedClick"];
                     MirrorStatusBar.Visibility = Visibility.Visible;
                 }
                 else
@@ -226,7 +226,7 @@ namespace DynamicBird.UI.Media
                 EmbedHost.Detach();
                 _returnedHwnd = IntPtr.Zero;
                 _returnedTitle = "";
-                MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
+                MirrorStatusText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
                 MirrorStatusBar.Visibility = Visibility.Visible;
                 return;
             }
@@ -241,7 +241,7 @@ namespace DynamicBird.UI.Media
                 _captureHwnd = IntPtr.Zero;
                 _mirroring = false;
                 MirrorTitleText.Text = "";
-                MirrorStatusText.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Returned"], _returnedTitle);
+                MirrorStatusText.Text = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_Returned"], _returnedTitle);
                 MirrorStatusBar.Visibility = Visibility.Visible;
             }
             else
@@ -292,7 +292,7 @@ namespace DynamicBird.UI.Media
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             MirrorImage.Source = null;
-                            MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
+                            MirrorStatusText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_Closed"];
                             MirrorStatusBar.Visibility = Visibility.Visible;
                         }));
                         break;
@@ -303,7 +303,7 @@ namespace DynamicBird.UI.Media
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             MirrorImage.Source = null;
-                            MirrorStatusText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_MinimizedContinue"];
+                            MirrorStatusText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_MinimizedContinue"];
                             MirrorStatusBar.Visibility = Visibility.Visible;
                         }));
                         break;
@@ -404,7 +404,7 @@ namespace DynamicBird.UI.Media
                     return;
                 }
 
-                StartMirror(hwnd, string.IsNullOrEmpty(title) ? DynamicBird.UI.Localization.LocalizationManager.Instance["Pip_Window"] : title, embed: true);
+                StartMirror(hwnd, string.IsNullOrEmpty(title) ? ShoreHue.UI.Localization.LocalizationManager.Instance["Pip_Window"] : title, embed: true);
                 MirrorStatusBar.Visibility = Visibility.Collapsed;
             }
         }

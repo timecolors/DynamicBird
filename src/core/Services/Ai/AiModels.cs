@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace DynamicBird.Core.Services.Ai
+namespace ShoreHue.Core.Services.Ai
 {
     public enum ChatRole
     {
@@ -60,7 +60,7 @@ namespace DynamicBird.Core.Services.Ai
         /// <summary>深度思考（需模型/服务商支持，如 reasoning_effort 或 reasoner 模型）。</summary>
         public bool EnableReasoning { get; set; } = false;
 
-        public string SystemPrompt { get; set; } = "你是灵动鸟 AI 助手，一个运行在 Windows 桌面的智能助手。回答简洁、准确、友好。";
+        public string SystemPrompt { get; set; } = "你是 ShoreHue AI 助手，一个运行在 Windows 桌面的智能助手。回答简洁、准确、友好。";
 
         /// <summary>服务商预设（name → 显示名）。</summary>
         public static readonly (string Name, string Display, string Url, string Model)[] Presets =

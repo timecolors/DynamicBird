@@ -1,13 +1,13 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Ai;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.UI.Widgets.Dynamic;
-using DynamicBird.UI.Settings.Pages;
-using DynamicBird.UI.Theme;
-using DynamicBird.UI.Localization;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Ai;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.UI.Widgets.Dynamic;
+using ShoreHue.UI.Settings.Pages;
+using ShoreHue.UI.Theme;
+using ShoreHue.UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     public partial class SettingsWindow
     {
@@ -76,12 +76,12 @@ namespace DynamicBird.UI.Settings
             {
                 combo.Items.Add(new ComboBoxItem
                 {
-                    Content = DynamicBird.UI.Localization.LocalizationManager.Instance[locKey],
+                    Content = ShoreHue.UI.Localization.LocalizationManager.Instance[locKey],
                     Tag = value
                 });
             }
             // ★ 用户编译注册的区域面板（BaseType 非 Widget/Config）：显示为「面板名」，Tag = Custom:面板Id
-            //   小组件变体（BaseType=Widget）进小组件页签，配置代码项（Kind=Config）只留鸟笼
+            //   小组件变体（BaseType=Widget）进小组件页签，配置代码项（Kind=Config）只留海床
             foreach (var cp in _settings.CustomPanels)
             {
                 if (cp.Kind == "Config") continue;
@@ -216,8 +216,8 @@ namespace DynamicBird.UI.Settings
         {
             if (string.IsNullOrEmpty(_animRegionKey)) return;
             if (chkRegionAnimCustom.IsChecked != true) return;
-            _settingsData.RegionAnimationOverrides ??= new System.Collections.Generic.Dictionary<string, DynamicBird.Core.Models.RegionAnimationOverride>();
-            _settingsData.RegionAnimationOverrides[_animRegionKey] = new DynamicBird.Core.Models.RegionAnimationOverride
+            _settingsData.RegionAnimationOverrides ??= new System.Collections.Generic.Dictionary<string, ShoreHue.Core.Models.RegionAnimationOverride>();
+            _settingsData.RegionAnimationOverrides[_animRegionKey] = new ShoreHue.Core.Models.RegionAnimationOverride
             {
                 ShowAnimationType = LabelToAnimType(cmbRegionShowType, isHide: false),
                 ShowAnimationDurationMs = (int)sldRegionShowDuration.Value,
@@ -235,7 +235,7 @@ namespace DynamicBird.UI.Settings
             UpdateAnimRegionMode();
         }
 
-        private static bool IsEmptyOverride(DynamicBird.Core.Models.RegionAnimationOverride ov) =>
+        private static bool IsEmptyOverride(ShoreHue.Core.Models.RegionAnimationOverride ov) =>
             string.IsNullOrEmpty(ov.ShowAnimationType) && !ov.ShowAnimationDurationMs.HasValue &&
             string.IsNullOrEmpty(ov.HideAnimationType) && !ov.HideAnimationDurationMs.HasValue;
 

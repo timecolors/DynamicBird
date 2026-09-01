@@ -1,10 +1,10 @@
 using System;
 using System.IO;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 using Serilog;
 using Serilog.Events;
 
-namespace DynamicBird.Core.Infrastructure.Logging
+namespace ShoreHue.Core.Infrastructure.Logging
 {
     /// <summary>
     /// 日志管理器（全局入口），后端基于 Serilog：

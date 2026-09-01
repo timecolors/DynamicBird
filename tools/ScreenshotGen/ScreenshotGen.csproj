@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DynamicBird.csproj" />
+    <ProjectReference Include="..\..\ShoreHue.csproj" />
   </ItemGroup>
 
 </Project>

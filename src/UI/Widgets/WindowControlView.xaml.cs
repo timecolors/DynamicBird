@@ -4,11 +4,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Threading;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Localization;
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Localization;
 
-namespace DynamicBird.UI.Widgets
+namespace ShoreHue.UI.Widgets
 {
     /// <summary>
     /// 右上角"窗口操作中心"：对当前前台窗口执行最小化/最大化/关闭/置顶/贴靠布局。

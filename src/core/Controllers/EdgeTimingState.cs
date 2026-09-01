@@ -1,6 +1,6 @@
 using System;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     /// <summary>
     /// 边缘触发时序状态机（防抖 / 触发延时 / 快速切换计数）。

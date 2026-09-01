@@ -2,15 +2,15 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 卸载助手（非商店版）：生成并启动 PowerShell 卸载脚本——
     /// 停止应用 → 删除开机启动项 → 删除开始菜单快捷方式 → 删除安装目录 →
-    /// 按选择删除本地数据（%LOCALAPPDATA%\DynamicBird）→ 清理更新临时目录 → 删除脚本自身。
+    /// 按选择删除本地数据（%LOCALAPPDATA%\ShoreHue）→ 清理更新临时目录 → 删除脚本自身。
     /// 脚本放 %TEMP%（不在安装目录），应用退出后由独立进程执行。
     /// 商店（MSIX）版由系统负责卸载，不提供此入口。
     /// </summary>
@@ -25,17 +25,17 @@ namespace DynamicBird.Infrastructure.WinApi
 
                 string exeDir = AppContext.BaseDirectory;
                 string dataDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DynamicBird");
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ShoreHue");
                 string lnk = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.Programs), "灵动鸟.lnk");
-                string tempUpdate = Path.Combine(Path.GetTempPath(), "DynamicBirdUpdate");
+                    Environment.GetFolderPath(Environment.SpecialFolder.Programs), "ShoreHue.lnk");
+                string tempUpdate = Path.Combine(Path.GetTempPath(), "ShoreHueUpdate");
                 string ps = Path.Combine(Path.GetTempPath(), "uninstall_dynamicbird.ps1");
                 string nl = Environment.NewLine;
 
                 string script =
-                    "Stop-Process -Name DynamicBird -Force -ErrorAction SilentlyContinue" + nl +
+                    "Stop-Process -Name ShoreHue -Force -ErrorAction SilentlyContinue" + nl +
                     "Start-Sleep -Milliseconds 800" + nl +
-                    "Remove-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name 'DynamicBird' -ErrorAction SilentlyContinue" + nl +
+                    "Remove-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name 'ShoreHue' -ErrorAction SilentlyContinue" + nl +
                     "Remove-Item '" + Escape(lnk) + "' -Force -ErrorAction SilentlyContinue" + nl +
                     "Remove-Item '" + Escape(exeDir) + "' -Recurse -Force -ErrorAction SilentlyContinue" + nl +
                     (deleteData

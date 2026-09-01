@@ -1,6 +1,6 @@
-<UserControl x:Class="DynamicBird.UI.Panels.QuickSettingsView"
+﻿<UserControl x:Class="ShoreHue.UI.Panels.QuickSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
     <Grid Margin="4" MinHeight="360">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -45,7 +45,7 @@
                             ValueChanged="Volume_Changed"/>
                     <TextBlock Grid.Column="2" x:Name="VolumeText" Text="75%" FontSize="11" Foreground="#AAAAAA" VerticalAlignment="Center"/>
                     <Button Grid.Column="3" x:Name="BtnMute"
-                            Content="🔇"
+                            Content="音"
                             Style="{StaticResource IconButton}"
                             Margin="6,0,0,0"
                             Click="Mute_Click"
@@ -142,7 +142,7 @@
                 </Grid>
             </Border>
 
-            <!-- 灵动鸟性能模式：四个选项直摆，点哪个切哪个 -->
+            <!-- ShoreHue 性能模式：四个选项直摆，点哪个切哪个 -->
             <StackPanel Orientation="Horizontal" Margin="2,6,0,0">
                 <Button x:Name="BtnModeSmooth" Style="{StaticResource FlatButton}" Height="26" Padding="8,0"
                         Click="BirdMode_Click" Tag="Smooth">

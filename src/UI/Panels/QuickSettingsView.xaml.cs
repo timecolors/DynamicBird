@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Localization;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Localization;
 using NAudio.CoreAudioApi;
 using Windows.Devices.Radios;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     /// <summary>
     /// 左上角“快捷开关”：音量 / 亮度 / 蓝牙 / Wi-Fi / 移动热点 / 系统设置入口。
@@ -60,7 +60,7 @@ namespace DynamicBird.UI.Panels
                 _volumeChanging = true;
                 VolumeSlider.Value = vol;
                 VolumeText.Text = $"{vol * 100:F0}%";
-                BtnMute.Content = _audioDevice.AudioEndpointVolume.Mute ? "🔇" : "🔊";
+                BtnMute.Content = _audioDevice.AudioEndpointVolume.Mute ? "静" : "音";
                 _volumeChanging = false;
             }
             catch { }
@@ -83,7 +83,7 @@ namespace DynamicBird.UI.Panels
             {
                 if (_audioDevice == null) return;
                 _audioDevice.AudioEndpointVolume.Mute = !_audioDevice.AudioEndpointVolume.Mute;
-                BtnMute.Content = _audioDevice.AudioEndpointVolume.Mute ? "🔇" : "🔊";
+                BtnMute.Content = _audioDevice.AudioEndpointVolume.Mute ? "静" : "音";
             }
             catch { }
         }
@@ -196,7 +196,7 @@ namespace DynamicBird.UI.Panels
             await RefreshStatesAsync();
         }
 
-        // ================= 灵动鸟性能模式（顺滑 / 正常 / 省电 / 自定义） =================
+        // ================= ShoreHue 性能模式（顺滑 / 正常 / 省电 / 自定义） =================
 
         private void BirdMode_Click(object sender, RoutedEventArgs e)
         {

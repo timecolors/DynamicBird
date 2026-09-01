@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Core.Services.Ai
+namespace ShoreHue.Core.Services.Ai
 {
     /// <summary>
     /// AI 配置与对话历史存储（本地 JSON，无任何上传）。

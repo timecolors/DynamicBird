@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Windows;
-using DynamicBird.Core.Services;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.AppHelper;
-using DynamicBird.UI.Panels;
+using ShoreHue.Core.Services;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.AppHelper;
+using ShoreHue.UI.Panels;
 using System.Windows.Controls;
 
-namespace DynamicBird.UI.Main
+namespace ShoreHue.UI.Main
 {
     public partial class MainWindow
     {
@@ -20,7 +20,7 @@ namespace DynamicBird.UI.Main
         private IconState _currentIconState = IconState.Default;
         private bool _isHovering = false;
         private AppHelperView? _appHelperView;
-        private DynamicBird.UI.AI.AiChatView? _aiChatView;
+        private ShoreHue.UI.AI.AiChatView? _aiChatView;
 
         private void UpdateIconTextInternal()
         {
@@ -205,7 +205,7 @@ namespace DynamicBird.UI.Main
                 // 右键只用于弹出快捷菜单
                 if (e.ChangedButton == System.Windows.Input.MouseButton.Right) return;
 
-                // ★ 应用辅助模式：点击灵动鸟循环切换辅助功能页 ★
+                // ★ 应用辅助模式：点击 ShoreHue 循环切换辅助功能页 ★
                 if (_contentController?.CurrentRegionType == "AppHelper" && _appHelperView != null)
                 {
                     _appHelperView.CyclePage();
@@ -234,7 +234,7 @@ namespace DynamicBird.UI.Main
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ 勿扰切换失败: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"勿扰切换失败: {ex.Message}");
             }
         }
 
@@ -244,7 +244,7 @@ namespace DynamicBird.UI.Main
 
             var dnd = new MenuItem
             {
-                Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_Dnd"],
+                Header = ShoreHue.UI.Localization.LocalizationManager.Instance["Dnd_Dnd"],
                 IsCheckable = true,
                 IsChecked = _modeService.IsDoNotDisturb
             };
@@ -261,23 +261,23 @@ namespace DynamicBird.UI.Main
                     {
                         var showDesktop = new MenuItem
                         {
-                            Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Menu_ShowDesktop"]
+                            Header = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Menu_ShowDesktop"]
                         };
-                        showDesktop.Click += (_, _) => DynamicBird.Infrastructure.WinApi.WindowAction.ShowDesktop();
+                        showDesktop.Click += (_, _) => ShoreHue.Infrastructure.WinApi.WindowAction.ShowDesktop();
                         menu.Items.Add(showDesktop);
 
                         var closeWindows = new MenuItem
                         {
-                            Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Menu_CloseRunning"]
+                            Header = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Menu_CloseRunning"]
                         };
                         closeWindows.Click += (_, _) =>
                         {
-                            if (ContentContainer.Content is DynamicBird.UI.Panels.TaskbarView tv) tv.CloseAllWindows();
+                            if (ContentContainer.Content is ShoreHue.UI.Panels.TaskbarView tv) tv.CloseAllWindows();
                             else RefreshTaskbarView();
                         };
                         menu.Items.Add(closeWindows);
 
-                        var refresh = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_Refresh"] };
+                        var refresh = new MenuItem { Header = ShoreHue.UI.Localization.LocalizationManager.Instance["Dnd_Refresh"] };
                         refresh.Click += (_, _) => RefreshTaskbarView();
                         menu.Items.Add(refresh);
                         break;
@@ -286,9 +286,9 @@ namespace DynamicBird.UI.Main
                     {
                         var editWidget = new MenuItem
                         {
-                            Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Menu_EditWidget"]
+                            Header = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Menu_EditWidget"]
                         };
-                        editWidget.Click += (_, _) => OpenSettings("tabBirdcage");
+                        editWidget.Click += (_, _) => OpenSettings("tabSeabed");
                         menu.Items.Add(editWidget);
                         break;
                     }
@@ -296,7 +296,7 @@ namespace DynamicBird.UI.Main
                     {
                         var aiSettings = new MenuItem
                         {
-                            Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Menu_AiSettings"]
+                            Header = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Menu_AiSettings"]
                         };
                         aiSettings.Click += (_, _) => OpenSettings("tabAI");
                         menu.Items.Add(aiSettings);
@@ -306,11 +306,11 @@ namespace DynamicBird.UI.Main
                 menu.Items.Add(new Separator());
             }
 
-            var settings = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Settings"] };
+            var settings = new MenuItem { Header = ShoreHue.UI.Localization.LocalizationManager.Instance["Tray_Settings"] };
             settings.Click += (_, _) => OpenSettings();
             menu.Items.Add(settings);
 
-            var exit = new MenuItem { Header = DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Exit"] };
+            var exit = new MenuItem { Header = ShoreHue.UI.Localization.LocalizationManager.Instance["Tray_Exit"] };
             exit.Click += (_, _) => ExitApp();
             menu.Items.Add(exit);
 
@@ -323,9 +323,9 @@ namespace DynamicBird.UI.Main
         internal void OnPanelContentChanged()
         {
             // ★ 全局字号缩放：面板内容切换（新控件进视觉树）后补应用一次
-            DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
+            ShoreHue.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
             _appHelperView = ContentContainer.Content as AppHelperView;
-            _aiChatView = ContentContainer.Content as DynamicBird.UI.AI.AiChatView;
+            _aiChatView = ContentContainer.Content as ShoreHue.UI.AI.AiChatView;
             UpdateIconTooltip();
 
             // ★ 小组件内容（含内部切标签）变化后重新测量并自适应面板尺寸：
@@ -353,16 +353,16 @@ namespace DynamicBird.UI.Main
             string tooltip = _contentController.CurrentRegionType switch
             {
                 "AppHelper" =>
-                    DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipHelper"],
+                    ShoreHue.UI.Localization.LocalizationManager.Instance["Dnd_TipHelper"],
 
                 "AI" =>
-                    DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipAi"],
+                    ShoreHue.UI.Localization.LocalizationManager.Instance["Dnd_TipAi"],
 
                 "Taskbar" =>
-                    DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipTaskbar"],
+                    ShoreHue.UI.Localization.LocalizationManager.Instance["Dnd_TipTaskbar"],
 
                 _ =>
-                    DynamicBird.UI.Localization.LocalizationManager.Instance["Dnd_TipDnd"]
+                    ShoreHue.UI.Localization.LocalizationManager.Instance["Dnd_TipDnd"]
             };
 
             IconContainer.ToolTip = tooltip;

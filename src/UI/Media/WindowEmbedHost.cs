@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace DynamicBird.UI.Media
+namespace ShoreHue.UI.Media
 {
     /// <summary>
     /// 窗口嵌入宿主（“第二块显示屏”）：
@@ -48,7 +48,7 @@ namespace DynamicBird.UI.Media
         /// </summary>
         public bool Attach(IntPtr targetHwnd)
         {
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                 $"[Embed] Attach: target={targetHwnd} host={_hostHwnd}");
             if (targetHwnd == IntPtr.Zero || _hostHwnd == IntPtr.Zero) return false;
 
@@ -73,7 +73,7 @@ namespace DynamicBird.UI.Media
                 _originalExStyle = GetWindowLong(targetHwnd, GWL_EXSTYLE);
 
                 IntPtr result = SetParent(targetHwnd, _hostHwnd);
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                     $"[Embed] SetParent ret={result} host={_hostHwnd}");
                 if (result == IntPtr.Zero)
                 {
@@ -97,12 +97,12 @@ namespace DynamicBird.UI.Media
                 Dispatcher.BeginInvoke(new Action(() => ResizeTarget()), System.Windows.Threading.DispatcherPriority.Loaded);
                 Dispatcher.BeginInvoke(new Action(() => ResizeTarget()), System.Windows.Threading.DispatcherPriority.Background);
                 ShowWindow(targetHwnd, SW_SHOW);
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Debug("[Embed] 嵌入成功");
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Debug("[Embed] 嵌入成功");
                 return true;
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Debug("[Embed] 嵌入失败: " + ex.Message);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Debug("[Embed] 嵌入失败: " + ex.Message);
                 return false;
             }
         }

@@ -4,13 +4,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using DynamicBird.Core.Infrastructure.Service;
-using DynamicBird.src.core.Services.Notes;
-using DynamicBird.Core.Services;
-using DynamicBird.UI.Widgets;
+using ShoreHue.Core.Infrastructure.Service;
+using ShoreHue.src.core.Services.Notes;
+using ShoreHue.Core.Services;
+using ShoreHue.UI.Widgets;
 using WinForms = System.Windows.Forms;
 
-namespace DynamicBird.Builtin
+namespace ShoreHue.Builtin
 {
     // 便签 · 纯代码版（动态编译运行，风格与内置一致：便签条+颜色+标题/内容编辑）
     public class NotePanel : UserControl, IWidget
@@ -45,9 +45,9 @@ namespace DynamicBird.Builtin
             _tabPanel = new StackPanel { Orientation = Orientation.Horizontal };
             tabScroll.Content = _tabPanel;
 
-            _btnToggleTitle = new Button { Content = "📝", Width = 24, Height = 24, FontSize = 14, Background = Brushes.Transparent, Foreground = new SolidColorBrush(Color.FromRgb(136, 136, 136)), BorderThickness = new Thickness(0), Cursor = Cursors.Hand, ToolTip = "显示/隐藏标题" };
+            _btnToggleTitle = new Button { Content = "标", Width = 24, Height = 24, FontSize = 14, Background = Brushes.Transparent, Foreground = new SolidColorBrush(Color.FromRgb(136, 136, 136)), BorderThickness = new Thickness(0), Cursor = Cursors.Hand, ToolTip = "显示/隐藏标题" };
             _btnToggleTitle.Click += (_, _) => { if (_noteService?.CurrentNote != null) { _noteService.CurrentNote.ShowTitle = !_noteService.CurrentNote.ShowTitle; RefreshAll(); } };
-            _btnColor = new Button { Content = "🎨", Width = 24, Height = 24, FontSize = 14, Background = Brushes.Transparent, Foreground = new SolidColorBrush(Color.FromRgb(136, 136, 136)), BorderThickness = new Thickness(0), Cursor = Cursors.Hand, ToolTip = "颜色" };
+            _btnColor = new Button { Content = "色", Width = 24, Height = 24, FontSize = 14, Background = Brushes.Transparent, Foreground = new SolidColorBrush(Color.FromRgb(136, 136, 136)), BorderThickness = new Thickness(0), Cursor = Cursors.Hand, ToolTip = "颜色" };
             _btnColor.Click += (_, _) => ColorPicker();
             var headRight = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(8, 0, 0, 0) };
             headRight.Children.Add(_btnToggleTitle); headRight.Children.Add(_btnColor);

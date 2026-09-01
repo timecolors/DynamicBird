@@ -1,11 +1,11 @@
-using DynamicBird.Animation;
-using DynamicBird.Core.Detection;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Animation;
+using ShoreHue.Core.Detection;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
 using System;
 using System.Windows;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     public class EdgeTriggerController : IEdgeTriggerController
     {
@@ -138,11 +138,11 @@ namespace DynamicBird.Core.Controllers
                     double dpi = _followDpi > 0 ? _followDpi : GetDpiScale();
                     double mx = p.X / dpi;
                     double my = p.Y / dpi;
-                    var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForPoint(mx, my);
+                    var wa = ShoreHue.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForPoint(mx, my);
                     double sw = wa.Width;
                     double sh = wa.Height;
                     bool allowTopRight = _settings.GetRegionPanel("TopRight") == "WindowControl";
-                    var region = DynamicBird.Core.Detection.EdgeStateDetector.DetectRegion(
+                    var region = ShoreHue.Core.Detection.EdgeStateDetector.DetectRegion(
                         mx, my, sw, sh, _settings.TriggerDistancePx, allowTopRight);
                     if (region == EdgeRegion.Unknown)
                     {

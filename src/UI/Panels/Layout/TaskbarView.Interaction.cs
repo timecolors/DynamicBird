@@ -1,11 +1,11 @@
-using DynamicBird.Infrastructure.WinApi;
+using ShoreHue.Infrastructure.WinApi;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public partial class TaskbarView
     {
@@ -51,10 +51,10 @@ namespace DynamicBird.UI.Panels
                 try
                 {
                     IntPtr hwnd = item.Handle.Value;
-                    DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                    ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                         $"[TaskbarClose] 点击关闭: hwnd={hwnd} title='{item.DisplayName}' isWindow={WindowAction.IsWindowAlive(hwnd)}");
                     WindowAction.Close(hwnd);
-                    DynamicBird.Core.Infrastructure.Logging.LogManager.Debug(
+                    ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
                         $"[TaskbarClose] WM_CLOSE 已发送: hwnd={hwnd}");
 
                     // 立即从列表中移除

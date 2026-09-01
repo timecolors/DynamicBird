@@ -1,16 +1,16 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.src.core.Services.Clipboard;
-using DynamicBird.src.core.Services.Notes;
-using DynamicBird.UI.Localization;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.src.core.Services.Clipboard;
+using ShoreHue.src.core.Services.Notes;
+using ShoreHue.UI.Localization;
 using System;
-using DynamicBird.UI.Panels;
-using DynamicBird.UI.Widgets.Calculator;
-using DynamicBird.UI.Widgets.ClipboardHistory;
-using DynamicBird.UI.Widgets.Notes;
-using DynamicBird.UI.Widgets.Dynamic;
-using DynamicBird.UI.Widgets.TextAi;
-using DynamicBird.UI.Widgets.Timer;
+using ShoreHue.UI.Panels;
+using ShoreHue.UI.Widgets.Calculator;
+using ShoreHue.UI.Widgets.ClipboardHistory;
+using ShoreHue.UI.Widgets.Notes;
+using ShoreHue.UI.Widgets.Dynamic;
+using ShoreHue.UI.Widgets.TextAi;
+using ShoreHue.UI.Widgets.Timer;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -19,7 +19,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace DynamicBird.UI.Widgets
+namespace ShoreHue.UI.Widgets
 {
     /// <summary>
     /// 小组件切换器：标签按设置中启用的小组件动态生成，
@@ -84,7 +84,7 @@ namespace DynamicBird.UI.Widgets
                 if (!RebuildIfSignatureChanged()) RebuildTabs();
             });
 
-            // 设置变化（含小组件开关/鸟笼保存小组件变体）时重建标签栏，不丢失各小组件内部状态。
+            // 设置变化（含小组件开关/海床保存小组件变体）时重建标签栏，不丢失各小组件内部状态。
             // ★ 性能：设置窗口任何控件变化都会触发 SettingsChanged，必须先比签名——
             //   旧实现无条件全量重建 = 每次对全部插件跑 Roslyn 沙箱编译（实测 2-4s UI 冻结）。
             //   签名未变（颜色/动画/帧率等无关设置）→ 只重建标签按钮（反映启停开关），不碰编译。
@@ -124,7 +124,7 @@ namespace DynamicBird.UI.Widgets
                     string sandboxErr = WidgetCompiler.SandboxErrors(plugin.Source);
                     if (sandboxErr.Length > 0)
                     {
-                        DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                        ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
                             $"小组件 [{plugin.Id}] 被沙箱拦截: {sandboxErr}");
                         continue;
                     }
@@ -139,16 +139,16 @@ namespace DynamicBird.UI.Widgets
                         LocKey = "",
                         Widget = widget
                     });
-                      DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"[插件] 小组件编译成功: " + plugin.Id);
+                      ShoreHue.Core.Infrastructure.Logging.LogManager.Debug($"[插件] 小组件编译成功: " + plugin.Id);
                 }
                 else
                 {
-                    DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                    ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
                         $"小组件 [{plugin.Id}] 编译失败: {err}");
                 }
             }
-            // ★ 鸟笼保存的小组件变体（BaseType=Widget）：编译后作为标签加入
-            _tabs.RemoveAll(t => t.Key.StartsWith("Birdcage_", StringComparison.Ordinal));
+            // ★ 海床保存的小组件变体（BaseType=Widget）：编译后作为标签加入
+            _tabs.RemoveAll(t => t.Key.StartsWith("Seabed_", StringComparison.Ordinal));
             foreach (var cp in _settings.CustomPanels)
             {
                 if (cp.Kind == "Config" || (cp.BaseType ?? "") != "Widget") continue;
@@ -161,17 +161,17 @@ namespace DynamicBird.UI.Widgets
                     string sandboxErr = WidgetCompiler.SandboxErrors(src);
                     if (sandboxErr.Length > 0)
                     {
-                        DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
-                            $"鸟笼小组件 [{cp.Name}] 市场来源被沙箱拦截: {sandboxErr}");
+                        ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
+                            $"海床小组件 [{cp.Name}] 市场来源被沙箱拦截: {sandboxErr}");
                         continue;
                     }
                 }
-                var (widget, err) = WidgetCompiler.Compile("birdcage_" + cp.Id, src);
+                var (widget, err) = WidgetCompiler.Compile("seabed_" + cp.Id, src);
                 if (widget != null)
                 {
                     _tabs.Add(new WidgetTab
                     {
-                        Key = "Birdcage_" + cp.Id,
+                        Key = "Seabed_" + cp.Id,
                         IconKey = "IconApp",
                         LocKey = "",
                         Widget = widget
@@ -179,23 +179,23 @@ namespace DynamicBird.UI.Widgets
                 }
                 else
                 {
-                    DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
-                        $"鸟笼小组件 [{cp.Name}] 编译失败: {err}");
+                    ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
+                        $"海床小组件 [{cp.Name}] 编译失败: {err}");
                 }
             }
         }
 
         /// <summary>插件签名：id + 源码哈希（源码编辑保存后也会触发重建）。带缓存，插件变化时失效。
-        /// ★ 包含鸟笼小组件变体（CustomPanels Kind=Widget），保证保存后激活时重建标签。</summary>
+        /// ★ 包含海床小组件变体（CustomPanels Kind=Widget），保证保存后激活时重建标签。</summary>
         private string BuildPluginSignature()
         {
             _cachedPluginSignature ??= string.Join(",",
                 WidgetPluginStore.Installed
-                    .Select(p => "W:" + p.Id + ":" + DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.SourceHash(p.Source))
+                    .Select(p => "W:" + p.Id + ":" + ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.SourceHash(p.Source))
                     .Concat(
                         _settings.CustomPanels
                             .Where(cp => cp.Kind != "Config" && (cp.BaseType ?? "") == "Widget")
-                            .Select(cp => "B:" + cp.Id + ":" + DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.SourceHash(cp.Source))));
+                            .Select(cp => "B:" + cp.Id + ":" + ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.SourceHash(cp.Source))));
             return _cachedPluginSignature;
         }
 
@@ -370,9 +370,9 @@ namespace DynamicBird.UI.Widgets
 
         private void ShowContent()
         {
-            // ★ 动态小组件标签：Widget_<id>（插件）与 Birdcage_<id>（鸟笼变体）
+            // ★ 动态小组件标签：Widget_<id>（插件）与 Seabed_<id>（海床变体）
             if (_currentTab.StartsWith("Widget_", StringComparison.Ordinal) ||
-                _currentTab.StartsWith("Birdcage_", StringComparison.Ordinal))
+                _currentTab.StartsWith("Seabed_", StringComparison.Ordinal))
             {
                 var tab = _tabs.FirstOrDefault(t => t.Key == _currentTab);
                 if (tab != null)
@@ -426,7 +426,7 @@ namespace DynamicBird.UI.Widgets
                 System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
-        public new string Name => DynamicBird.UI.Localization.LocalizationManager.Instance["Widget_GroupName"];
+        public new string Name => ShoreHue.UI.Localization.LocalizationManager.Instance["Widget_GroupName"];
 
         public UserControl CreateView() => this;
 
@@ -455,7 +455,7 @@ namespace DynamicBird.UI.Widgets
         private void DeactivateCurrent()
         {
             if (_currentTab.StartsWith("Widget_", StringComparison.Ordinal) ||
-                _currentTab.StartsWith("Birdcage_", StringComparison.Ordinal))
+                _currentTab.StartsWith("Seabed_", StringComparison.Ordinal))
             {
                 var tab = _tabs.FirstOrDefault(t => t.Key == _currentTab);
                 tab?.Widget.OnDeactivated();

@@ -1,6 +1,6 @@
-<UserControl x:Class="DynamicBird.UI.Widgets.WidgetSwitcher"
+<UserControl x:Class="ShoreHue.UI.Widgets.WidgetSwitcher"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
 
     <Grid>
         <Grid.RowDefinitions>

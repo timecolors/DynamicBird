@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace DynamicBird.Core.Services.Configuration
+namespace ShoreHue.Core.Services.Configuration
 {
     /// <summary>网页工具收藏项（设置页添加/删除，小组件地址栏下拉展示）。</summary>
     public sealed class WebBookmark
@@ -179,7 +179,7 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 区域防抖延迟 ==========
         public int RegionDebounceMs { get; set; } = 80;
 
-        // ========== 灵动鸟性能模式（Smooth / Normal / PowerSaver） ==========
+        // ========== ShoreHue 性能模式（Smooth / Normal / PowerSaver） ==========
         // 一键预设：Smooth=面板动画全开更柔滑；Normal=平衡；PowerSaver=关动画最省电
         public string? PerformanceMode { get; set; } = "Normal";
 
@@ -188,18 +188,18 @@ namespace DynamicBird.Core.Services.Configuration
         // 值越低越省 CPU（配合 PowerSaver 降帧），越高越顺滑（Smooth 建议 60/120）。
         public int PanelFrameRate { get; set; } = 0;
 
-        // ========== 编程模式（鸟笼） ==========
-        // 勾选后出现"鸟笼"页签：设置以代码（JSON）编辑，可创建面板副本、保存预设、AI 提示词生成
+        // ========== 编程模式（海床） ==========
+        // 勾选后出现"海床"页签：设置以代码（JSON）编辑，可创建面板副本、保存预设、AI 提示词生成
         public bool ProgrammingModeEnabled { get; set; } = false;
         // 用户自定义面板定义（编辑副本/新建面板，注册后可被区域选择）
-        public System.Collections.Generic.List<DynamicBird.Core.Models.CustomPanelDefinition>? CustomPanels { get; set; }
+        public System.Collections.Generic.List<ShoreHue.Core.Models.CustomPanelDefinition>? CustomPanels { get; set; }
         // 预设覆盖记录：sourceKey（内置节点 Key）→ 当前生效的预设名。应用预设时记录，恢复/应用内置时清除。
-        // 存在覆盖 → 鸟笼左侧对应节点高亮（未启用）、设置页对应分组变灰。
+        // 存在覆盖 → 海床左侧对应节点高亮（未启用）、设置页对应分组变灰。
         public System.Collections.Generic.Dictionary<string, string>? AppliedPresets { get; set; }
 
         // ========== 逐区域动画覆盖（动画页签「动画应用于」） ==========
         // regionKey → 覆盖项（只覆盖 触发/隐藏动画 类型+时长）；空值字段 = 继承全局；无条目 = 完全跟随全局。
-        public System.Collections.Generic.Dictionary<string, DynamicBird.Core.Models.RegionAnimationOverride>? RegionAnimationOverrides { get; set; }
+        public System.Collections.Generic.Dictionary<string, ShoreHue.Core.Models.RegionAnimationOverride>? RegionAnimationOverrides { get; set; }
 
         // ========== 边缘触发距离与延时（防误触） ==========
         // 触发距离（DIP）：鼠标距屏幕边缘多远判定为贴边；越小越难误触（默认 6，原 12 偏宽）

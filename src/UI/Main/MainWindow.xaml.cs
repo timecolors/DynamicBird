@@ -1,17 +1,17 @@
-using DynamicBird.Animation;
-using DynamicBird.Core;
-using DynamicBird.Core.Controllers;
-using DynamicBird.Core.Detection;
-using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Core.Infrastructure.Service;
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.src.core.Services.Clipboard;
-using DynamicBird.src.core.Services.Notes;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.src.core.Services.System;
-using DynamicBird.UI.Theme;
-using DynamicBird.UI.Panels;
+﻿using ShoreHue.Animation;
+using ShoreHue.Core;
+using ShoreHue.Core.Controllers;
+using ShoreHue.Core.Detection;
+using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Service;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.src.core.Services.Clipboard;
+using ShoreHue.src.core.Services.Notes;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.src.core.Services.System;
+using ShoreHue.UI.Theme;
+using ShoreHue.UI.Panels;
 using System;
 using System.Linq;
 using System.Windows;
@@ -19,7 +19,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace DynamicBird.UI.Main
+namespace ShoreHue.UI.Main
 {
     public partial class MainWindow : Window
     {
@@ -43,7 +43,7 @@ namespace DynamicBird.UI.Main
         private int _edgeTickCount = 0;
 
         // ★ WH_MOUSE_LL 鼠标钩子（事件驱动边缘检测）：有事件立即处理，静止零轮询开销
-        private DynamicBird.Infrastructure.WinApi.MouseHookService? _mouseHook;
+        private ShoreHue.Infrastructure.WinApi.MouseHookService? _mouseHook;
 
         // ★ 图标中置状态（内容切换期间的视觉锚点：图标居中 + 内容静默，防抖稳定后归位）
         private bool _iconCentered;
@@ -68,16 +68,16 @@ namespace DynamicBird.UI.Main
         /// <summary>当前性能模式下的活跃 tick 间隔（Smooth 16ms / Normal 30ms / PowerSaver 60ms）。</summary>
         private int CurrentActiveIntervalMs => _settingsService.PerformanceMode switch
         {
-            DynamicBird.Core.Services.Configuration.PerformancePresets.Smooth => SmoothActiveIntervalMs,
-            DynamicBird.Core.Services.Configuration.PerformancePresets.PowerSaver => PowerSaverActiveIntervalMs,
+            ShoreHue.Core.Services.Configuration.PerformancePresets.Smooth => SmoothActiveIntervalMs,
+            ShoreHue.Core.Services.Configuration.PerformancePresets.PowerSaver => PowerSaverActiveIntervalMs,
             _ => ActiveIntervalMs
         };
 
         /// <summary>当前性能模式下的静止 tick 间隔（Smooth 80ms / Normal 100ms / PowerSaver 250ms）。</summary>
         private int CurrentIdleIntervalMs => _settingsService.PerformanceMode switch
         {
-            DynamicBird.Core.Services.Configuration.PerformancePresets.Smooth => SmoothIdleIntervalMs,
-            DynamicBird.Core.Services.Configuration.PerformancePresets.PowerSaver => PowerSaverIdleIntervalMs,
+            ShoreHue.Core.Services.Configuration.PerformancePresets.Smooth => SmoothIdleIntervalMs,
+            ShoreHue.Core.Services.Configuration.PerformancePresets.PowerSaver => PowerSaverIdleIntervalMs,
             _ => IdleIntervalMs
         };
 
@@ -132,11 +132,11 @@ namespace DynamicBird.UI.Main
                     }
                 };
 
-                LogManager.Info("=== 灵动鸟启动 ===");
+                LogManager.Info("=== ShoreHue 启动 ===");
 
                 if (!InitializeCoreServices())
                 {
-                    MessageBox.Show("核心服务初始化失败，请查看日志文件", "灵动鸟启动失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("核心服务初始化失败，请查看日志文件", "ShoreHue 启动失败", MessageBoxButton.OK, MessageBoxImage.Error);
                     Application.Current.Shutdown();
                     return;
                 }
@@ -147,12 +147,12 @@ namespace DynamicBird.UI.Main
                 // ★ Jump List 启动动作（无已有实例时）：初始化完成后执行
                 try
                 {
-                    var startupActions = DynamicBird.Infrastructure.WinApi.JumpListCommand.TakePendingStartupActions();
+                    var startupActions = ShoreHue.Infrastructure.WinApi.JumpListCommand.TakePendingStartupActions();
                     if (startupActions.Count > 0)
                     {
                         foreach (var action in startupActions)
                         {
-                            DynamicBird.App.ExecuteJumpListAction(new[] { action });
+                            ShoreHue.App.ExecuteJumpListAction(new[] { action });
                         }
                     }
                 }
@@ -165,7 +165,7 @@ namespace DynamicBird.UI.Main
             catch (Exception ex)
             {
                 LogManager.Fatal("窗口启动失败", ex);
-                MessageBox.Show($"启动失败:\n{ex.Message}", "灵动鸟错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"启动失败:\n{ex.Message}", "ShoreHue 错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 Application.Current.Shutdown();
             }
         }
@@ -234,9 +234,9 @@ namespace DynamicBird.UI.Main
                 _edgeController.SwitchStarted += (_, _) => EnterCenteredState();
 
                 // ★ AI 面板内的“打开设置”按钮
-                DynamicBird.UI.AI.AiChatView.OpenSettingsRequested += OpenSettings;
+                ShoreHue.UI.AI.AiChatView.OpenSettingsRequested += OpenSettings;
                 // ★ 划词翻译 小组件内的“打开设置”按钮
-                DynamicBird.UI.Widgets.TextAi.TextAiWidget.OpenSettingsRequested += OpenSettings;
+                ShoreHue.UI.Widgets.TextAi.TextAiWidget.OpenSettingsRequested += OpenSettings;
 
                 // ★ 划词翻译 热键注册（SourceInitialized 时服务尚未初始化，这里补一次）
                 ReapplyTextAiHotkey();
@@ -253,13 +253,13 @@ namespace DynamicBird.UI.Main
                 };
 
                 StartEdgeTimer();
-                DynamicBird.Infrastructure.WinApi.ToastMonitor.Start();
-                DynamicBird.Infrastructure.WinApi.RecentAppTracker.Start();
+                ShoreHue.Infrastructure.WinApi.ToastMonitor.Start();
+                ShoreHue.Infrastructure.WinApi.RecentAppTracker.Start();
                 // ★ 剪贴板监听应用级常驻：任何来源的复制（含 AI 面板“复制”按钮）都会进入历史
                 _clipboardService.StartListening();
                 CheckForUpdatesAsync();
                 // ★ 全局字号缩放：面板主体应用当前缩放（设置变化时由 OnSettingsChanged 重新应用）
-                DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
+                ShoreHue.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
                 // 首次启动：等界面就绪后弹出引导窗口
                 Dispatcher.BeginInvoke(new Action(ShowOnboardingIfNeeded),
                     System.Windows.Threading.DispatcherPriority.ApplicationIdle);
@@ -278,16 +278,16 @@ namespace DynamicBird.UI.Main
             {
                 LogManager.Info("=== 第三阶段：初始化扩展功能 ===");
 
-                // ★ 方案B：内置模板落盘（首次/重装把内置功能写入 birdcage/，文件夹=鸟笼真相源）
+                // ★ 方案B：内置模板落盘（首次/重装把内置功能写入 seabed/，文件夹=海床真相源）
                 try
                 {
-                    DynamicBird.UI.Birdcage.BuiltinTemplateSeeder.Seed();
+                    ShoreHue.UI.Seabed.BuiltinTemplateSeeder.Seed();
                 }
                 catch { }
-                // ★ 监听鸟笼文件夹（birdcage/）：用户在系统文件夹增删小组件时自动同步
+                // ★ 监听海床文件夹（seabed/）：用户在系统文件夹增删小组件时自动同步
                 try
                 {
-                    DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.StartWatching();
+                    ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.StartWatching();
                 }
                 catch { }
 
@@ -415,7 +415,7 @@ namespace DynamicBird.UI.Main
                 // ★ WH_MOUSE_LL 钩子：事件驱动边缘检测（失败自动降级轮询，不影响启动）
                 try
                 {
-                    _mouseHook = new DynamicBird.Infrastructure.WinApi.MouseHookService();
+                    _mouseHook = new ShoreHue.Infrastructure.WinApi.MouseHookService();
                     if (_mouseHook.IsActive)
                         LogManager.Debug("WH_MOUSE_LL 钩子已激活（事件驱动边缘检测）");
                     else
@@ -549,7 +549,7 @@ namespace DynamicBird.UI.Main
 
                     // ★ 多显示器：屏幕边界取"鼠标所在显示器"的工作区，而非主屏常量。
                     //   面板跟随鼠标时跨屏触发正确落在对应显示器边缘。
-                    var workArea = DynamicBird.Infrastructure.Utils.ScreenMetrics
+                    var workArea = ShoreHue.Infrastructure.Utils.ScreenMetrics
                         .GetCachedScreenForPoint(mouseX, mouseY);
                     double screenW = workArea.Width;
                     double screenH = workArea.Height;
@@ -646,8 +646,8 @@ namespace DynamicBird.UI.Main
                         //   不触发隐藏；鼠标离开安全区后由 ProcessRegion 恢复正常跟随。
                         bool allowTopRightPanel = _settingsService.GetRegionPanel("TopRight") == "WindowControl";
                         if (!allowTopRightPanel &&
-                            mouseX >= screenW - DynamicBird.Core.Detection.EdgeStateDetector.TOP_RIGHT_SAFE_ZONE_X &&
-                            mouseY <= DynamicBird.Core.Detection.EdgeStateDetector.TOP_RIGHT_SAFE_ZONE_Y)
+                            mouseX >= screenW - ShoreHue.Core.Detection.EdgeStateDetector.TOP_RIGHT_SAFE_ZONE_X &&
+                            mouseY <= ShoreHue.Core.Detection.EdgeStateDetector.TOP_RIGHT_SAFE_ZONE_Y)
                         {
                             _edgeController.StopFollowPosition();
                             _visibilityController.CancelHide();
@@ -707,7 +707,7 @@ namespace DynamicBird.UI.Main
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Timer error: {ex.Message}");
-                    DynamicBird.Core.Infrastructure.Logging.LogManager.Error("边缘定时器异常", ex);
+                    ShoreHue.Core.Infrastructure.Logging.LogManager.Error("边缘定时器异常", ex);
                 }
             };
             _edgeTimer.Start();
@@ -734,7 +734,7 @@ namespace DynamicBird.UI.Main
             {
                 if (_settingsService.OnboardingCompleted) return;
 
-                var onboarding = new DynamicBird.UI.Onboarding.OnboardingWindow(
+                var onboarding = new ShoreHue.UI.Onboarding.OnboardingWindow(
                     noMore => _settingsService.OnboardingCompleted = noMore,
                     _settingsService);
                 // ★ 非模态显示：引导期间面板功能保持可用（边缘触发等不受影响）
@@ -752,11 +752,11 @@ namespace DynamicBird.UI.Main
 
                 var current = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
                               ?? new Version(1, 0, 0);
-                var info = await DynamicBird.Infrastructure.WinApi.UpdateService
+                var info = await ShoreHue.Infrastructure.WinApi.UpdateService
                     .CheckForUpdateAsync(current);
                 if (info != null)
                 {
-                    DynamicBird.Infrastructure.WinApi.ToastMonitor.NotifyUpdateAvailable(info);
+                    ShoreHue.Infrastructure.WinApi.ToastMonitor.NotifyUpdateAvailable(info);
                 }
             }
             catch { }
@@ -822,7 +822,7 @@ namespace DynamicBird.UI.Main
             {
                 if (isDndMode && _visibilityController.IsVisible)
                     _visibilityController.ForceHide();
-                Title = isDndMode ? DynamicBird.UI.Localization.LocalizationManager.Instance["Main_TitleDnd"] : DynamicBird.UI.Localization.LocalizationManager.Instance["UI_MainWindow_49"];
+                Title = isDndMode ? ShoreHue.UI.Localization.LocalizationManager.Instance["Main_TitleDnd"] : ShoreHue.UI.Localization.LocalizationManager.Instance["UI_MainWindow_49"];
                 UpdateIconTextInternal();
             }
             catch (Exception ex)
@@ -846,7 +846,7 @@ namespace DynamicBird.UI.Main
                 // ★ 性能模式切换（Smooth/Normal/PowerSaver）→ 渲染降帧即时生效
                 ApplyPerformanceFrameRate();
                   // ★ 全局字号缩放：设置变化即时重算（FontScaleManager 内部用原始值×新比例，不累积）
-                  DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
+                  ShoreHue.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
 
                 // ★★★ 同步设置到 ShapeAnimator ★★★
                 _shapeAnimator?.SetSettings(_settingsService);
@@ -869,7 +869,7 @@ namespace DynamicBird.UI.Main
             try
             {
                 bool saver = _settingsService.PerformanceMode ==
-                    DynamicBird.Core.Services.Configuration.PerformancePresets.PowerSaver;
+                    ShoreHue.Core.Services.Configuration.PerformancePresets.PowerSaver;
                 int userFps = _settingsService.PanelFrameRate;
                 if (userFps > 0)
                 {
@@ -1006,7 +1006,7 @@ namespace DynamicBird.UI.Main
             //     内容加载交给 Dispatcher 紧随其后（内容在完全不可见状态下替换，无感知），
             //     总时延 ≈ 形变时长，内容加载被动画时间掩盖；
             //   - PowerSaver（省电）：串行——先加载内容再形变，避免同时执行两件事的峰值负载。
-            bool parallel = _settingsService.PerformanceMode != DynamicBird.Core.Services.Configuration.PerformancePresets.PowerSaver;
+            bool parallel = _settingsService.PerformanceMode != ShoreHue.Core.Services.Configuration.PerformancePresets.PowerSaver;
 
             if (parallel)
             {
@@ -1096,7 +1096,7 @@ namespace DynamicBird.UI.Main
         private void OnPanelShown()
         {
             // 面板显示时清理残留状态
-            DynamicBird.Infrastructure.WinApi.ToastMonitor.SetPanelVisible(true);
+            ShoreHue.Infrastructure.WinApi.ToastMonitor.SetPanelVisible(true);
         }
 
         private void OnPanelHidden()
@@ -1104,7 +1104,7 @@ namespace DynamicBird.UI.Main
             // ★ 面板隐藏：立即结束"图标中置 + 内容虚化"状态（防止内容残留虚化/图标中置）
             ExitCenteredState();
             _edgeController.ClearEdge();
-            DynamicBird.Infrastructure.WinApi.ToastMonitor.SetPanelVisible(false);
+            ShoreHue.Infrastructure.WinApi.ToastMonitor.SetPanelVisible(false);
 
             // 滑出动画期间保留内容，动画结束后（或再次显示前）再释放
             Dispatcher.BeginInvoke(new Action(() =>
@@ -1132,8 +1132,8 @@ namespace DynamicBird.UI.Main
             _edgeTimer = null;
             _mouseHook?.Dispose();
             _mouseHook = null;
-            DynamicBird.Infrastructure.WinApi.ToastMonitor.Stop();
-            DynamicBird.Infrastructure.WinApi.RecentAppTracker.Stop();
+            ShoreHue.Infrastructure.WinApi.ToastMonitor.Stop();
+            ShoreHue.Infrastructure.WinApi.RecentAppTracker.Stop();
             try { _clipboardService.StopListening(); } catch { }
 
             try { _dragController?.Detach(); } catch { }

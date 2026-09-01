@@ -5,13 +5,13 @@
          xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
          IgnorableNamespaces="uap desktop rescap">
   <!-- ★ 产品身份（来自合作伙伴中心 Product identity，勿手改） -->
-  <Identity Name="TideHue.DynamicBird"
+  <Identity Name="TideHue.ShoreHue"
             Publisher="CN=FAFCE538-611A-4FA6-9046-8E37F31B8034"
             Version="1.0.2.0"
             ProcessorArchitecture="x64"/>
 
   <Properties>
-    <DisplayName>DynamicBird 灵动鸟</DisplayName>
+    <DisplayName>ShoreHue 海岸线</DisplayName>
     <PublisherDisplayName>TideHue</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -27,9 +27,9 @@
 
   <Applications>
     <Application Id="App"
-                 Executable="DynamicBird.exe"
+                 Executable="ShoreHue.exe"
                  EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements DisplayName="DynamicBird 灵动鸟"
+      <uap:VisualElements DisplayName="ShoreHue 海岸线"
                           Description="Windows 桌面边缘面板工具"
                           BackgroundColor="transparent"
                           Square150x150Logo="Assets\Square150x150Logo.png"
@@ -39,12 +39,12 @@
                          Square310x310Logo="Assets\Square310x310Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png"/>
       </uap:VisualElements>
-      <!-- 开机自启任务（对应 TrayIconManager 的 DynamicBirdStartupTask） -->
+      <!-- 开机自启任务（对应 TrayIconManager 的 ShoreHueStartupTask） -->
       <Extensions>
         <desktop:Extension Category="windows.startupTask">
-          <desktop:StartupTask TaskId="DynamicBirdStartupTask"
+          <desktop:StartupTask TaskId="ShoreHueStartupTask"
                                Enabled="false"
-                               DisplayName="灵动鸟"/>
+                               DisplayName="ShoreHue"/>
         </desktop:Extension>
       </Extensions>
     </Application>

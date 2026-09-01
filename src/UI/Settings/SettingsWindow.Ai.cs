@@ -1,13 +1,13 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Ai;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.UI.Widgets.Dynamic;
-using DynamicBird.UI.Settings.Pages;
-using DynamicBird.UI.Theme;
-using DynamicBird.UI.Localization;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Ai;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.UI.Widgets.Dynamic;
+using ShoreHue.UI.Settings.Pages;
+using ShoreHue.UI.Theme;
+using ShoreHue.UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     public partial class SettingsWindow
     {
@@ -85,7 +85,7 @@ namespace DynamicBird.UI.Settings
             };
 
             btnAiTest.IsEnabled = false;
-            txtAiTestStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Testing"];
+            txtAiTestStatus.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Testing"];
             txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(120, 120, 120));
             try
             {
@@ -93,18 +93,18 @@ namespace DynamicBird.UI.Settings
                 string? err = await client.TestConnectionAsync(testSettings);
                 if (err == null)
                 {
-                    txtAiTestStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_ConnOk"];
+                    txtAiTestStatus.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_ConnOk"];
                     txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(60, 170, 90));
                 }
                 else
                 {
-                    txtAiTestStatus.Text = "❌ " + err;
+                    txtAiTestStatus.Text = err;
                     txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(200, 80, 70));
                 }
             }
             catch (Exception ex)
             {
-                txtAiTestStatus.Text = "❌ " + ex.Message;
+                txtAiTestStatus.Text = ex.Message;
                 txtAiTestStatus.Foreground = new SolidColorBrush(Color.FromRgb(200, 80, 70));
             }
             finally
@@ -130,7 +130,7 @@ namespace DynamicBird.UI.Settings
                     EnableWebSearch = chkAiWebSearch.IsChecked ?? false,
                     EnableReasoning = chkAiReasoning.IsChecked ?? false
                 };
-                DynamicBird.Core.Services.Ai.AiSettingsStore.Save(ai);
+                ShoreHue.Core.Services.Ai.AiSettingsStore.Save(ai);
             }
             catch { }
         }

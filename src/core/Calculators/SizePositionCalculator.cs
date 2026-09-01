@@ -1,8 +1,8 @@
 using System;
 using System.Windows;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Core.Calculators
+namespace ShoreHue.Core.Calculators
 {
     /// <summary>
     /// 位置计算器：根据边缘和窗口尺寸计算窗口位置

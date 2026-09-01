@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace DynamicBird.Infrastructure.Utils
+namespace ShoreHue.Infrastructure.Utils
 {
     /// <summary>
     /// 窗口矩形工具：以单次 SetWindowPos 原子地同时应用位置和尺寸。

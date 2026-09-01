@@ -6,7 +6,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Media;
 
-namespace DynamicBird.UI.Theme
+namespace ShoreHue.UI.Theme
 {
     /// <summary>
     /// 全局字号缩放（省事方案）：不改任何 XAML——在根元素挂一次 ApplyFontScale(root, scale)，

@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace DynamicBird.Core.Services.Configuration
+namespace ShoreHue.Core.Services.Configuration
 {
     public interface ISettingsService
     {
@@ -20,7 +20,7 @@ namespace DynamicBird.Core.Services.Configuration
         int CornerRadius { get; set; }
         bool ShowSystemStatus { get; set; }
         string WebWidgetUrl { get; set; }
-        System.Collections.Generic.List<DynamicBird.Core.Services.Configuration.WebBookmark> WebBookmarks { get; set; }
+        System.Collections.Generic.List<ShoreHue.Core.Services.Configuration.WebBookmark> WebBookmarks { get; set; }
 
         // ========== 形状参数 ==========
         double StripLengthRatio { get; set; }
@@ -91,10 +91,10 @@ namespace DynamicBird.Core.Services.Configuration
         int FlyDurationMs { get; set; }
         // ========== 逐区域动画覆盖（动画页签「动画应用于」） ==========
         /// <summary>取某区域的动画覆盖（null = 该区域无覆盖，完全跟随全局）。</summary>
-        DynamicBird.Core.Models.RegionAnimationOverride? GetRegionAnimation(string regionKey);
+        ShoreHue.Core.Models.RegionAnimationOverride? GetRegionAnimation(string regionKey);
 
         /// <summary>设置某区域的动画覆盖（null = 清除覆盖，恢复继承全局）。</summary>
-        void SetRegionAnimation(string regionKey, DynamicBird.Core.Models.RegionAnimationOverride? ov);
+        void SetRegionAnimation(string regionKey, ShoreHue.Core.Models.RegionAnimationOverride? ov);
 
         /// <summary>解析后的触发动画类型：区域覆盖优先，缺省用全局。</summary>
         string GetResolvedShowAnimationType(string regionKey);
@@ -108,9 +108,9 @@ namespace DynamicBird.Core.Services.Configuration
         /// <summary>解析后的隐藏动画时长（ms）：区域覆盖优先，缺省用全局。</summary>
         int GetResolvedHideAnimationDurationMs(string regionKey);
 
-        // ========== 编程模式（鸟笼） ==========
+        // ========== 编程模式（海床） ==========
         bool ProgrammingModeEnabled { get; set; }
-        System.Collections.Generic.List<DynamicBird.Core.Models.CustomPanelDefinition> CustomPanels { get; set; }
+        System.Collections.Generic.List<ShoreHue.Core.Models.CustomPanelDefinition> CustomPanels { get; set; }
         System.Collections.Generic.Dictionary<string, string> AppliedPresets { get; set; }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace DynamicBird.Core.Services.Configuration
         bool WeatherEnabled { get; set; }
         string? WeatherCity { get; set; }
 
-        // ========== 灵动鸟性能模式 ==========
+        // ========== ShoreHue 性能模式 ==========
         string PerformanceMode { get; set; }
         void SetPerformanceMode(string mode);
 

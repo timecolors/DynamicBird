@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows.Threading;
 using Microsoft.Win32;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 最近打开的应用追踪：
@@ -127,11 +127,11 @@ namespace DynamicBird.Infrastructure.WinApi
             return baseName.ToLowerInvariant() switch
             {
                 "qq" or "qqnt" => "QQ",
-                "wechat" or "weixin" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Wechat"],
+                "wechat" or "weixin" => ShoreHue.UI.Localization.LocalizationManager.Instance["Recent_Wechat"],
                 "chrome" => "Chrome",
                 "msedge" => "Edge",
                 "devenv" => "Visual Studio",
-                "explorer" => DynamicBird.UI.Localization.LocalizationManager.Instance["Recent_Explorer"],
+                "explorer" => ShoreHue.UI.Localization.LocalizationManager.Instance["Recent_Explorer"],
                 _ => baseName
             };
         }

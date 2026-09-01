@@ -1,4 +1,4 @@
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public partial class TaskbarView
     {

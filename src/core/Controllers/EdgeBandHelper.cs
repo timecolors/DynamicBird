@@ -1,9 +1,9 @@
-using DynamicBird.Core.Detection;
+using ShoreHue.Core.Detection;
 using System;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     /// <summary>
     /// 拖拽/调整大小手柄在“有效屏幕边缘触发带”内的让位判定。
@@ -29,7 +29,7 @@ namespace DynamicBird.Core.Controllers
 
                 double mouseX = screenPt.X / dpi;
                 double mouseY = screenPt.Y / dpi;
-                var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForPoint(mouseX, mouseY);
+                var wa = ShoreHue.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForPoint(mouseX, mouseY);
                 double screenW = wa.Width;
                 double screenH = wa.Height;
 

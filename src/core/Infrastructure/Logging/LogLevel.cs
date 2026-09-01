@@ -1,4 +1,4 @@
-﻿namespace DynamicBird.Core.Infrastructure.Logging
+﻿namespace ShoreHue.Core.Infrastructure.Logging
 {
     /// <summary>
     /// 日志级别

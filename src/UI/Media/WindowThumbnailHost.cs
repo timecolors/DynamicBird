@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 
-namespace DynamicBird.UI.Media
+namespace ShoreHue.UI.Media
 {
     /// <summary>
     /// DWM 缩略图管理（镜像窗口的高性能方案）：

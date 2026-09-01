@@ -1,9 +1,9 @@
-using DynamicBird.Core.Services;
+using ShoreHue.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace DynamicBird.src.core.Services.Clipboard
+namespace ShoreHue.src.core.Services.Clipboard
 {
     /// <summary>
     /// 剪贴板服务接口

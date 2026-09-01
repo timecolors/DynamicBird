@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
-namespace DynamicBird.UI.AI
+namespace ShoreHue.UI.AI
 {
     /// <summary>
     /// 极简 Markdown → FlowDocument 渲染器（聊天用）：

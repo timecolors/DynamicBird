@@ -1,6 +1,6 @@
 using System;
 
-namespace DynamicBird.Core.Detection
+namespace ShoreHue.Core.Detection
 {
     public static class EdgeStateDetector
     {

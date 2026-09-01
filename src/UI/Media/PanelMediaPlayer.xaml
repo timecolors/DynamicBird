@@ -1,7 +1,7 @@
-<UserControl x:Class="DynamicBird.UI.Media.PanelMediaPlayer"
+<UserControl x:Class="ShoreHue.UI.Media.PanelMediaPlayer"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:media="clr-namespace:DynamicBird.UI.Media" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+             xmlns:media="clr-namespace:ShoreHue.UI.Media" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -65,12 +65,12 @@
         <Border Grid.Row="1" Background="#1E1E1E" Padding="6,4">
             <StackPanel Orientation="Horizontal">
                 <Button x:Name="BtnMirrorPick"
-                        Content="🖼"
+                        Content="镜"
                         Style="{StaticResource IconButton}"
                         Click="MirrorPick_Click"
                         ToolTip="{Binding Item[UI_PanelMediaPlayer_52], Source={x:Static loc:LocalizationManager.Instance}}"/>
                 <Button x:Name="BtnEmbedPick"
-                        Content="📌"
+                        Content="嵌"
                         Style="{StaticResource IconButton}"
                         Margin="4,0,0,0"
                         Click="EmbedPick_Click"

@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Threading;
-using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Core.Infrastructure.Service;
+using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Service;
 
-namespace DynamicBird.Core.Services.Configuration
+namespace ShoreHue.Core.Services.Configuration
 {
     public class SettingsManager : ISettingsService, IService
     {
@@ -321,7 +321,7 @@ namespace DynamicBird.Core.Services.Configuration
             set => SetField(v => _data.WebWidgetUrl = v, value);
         }
 
-        public System.Collections.Generic.List<DynamicBird.Core.Services.Configuration.WebBookmark> WebBookmarks
+        public System.Collections.Generic.List<ShoreHue.Core.Services.Configuration.WebBookmark> WebBookmarks
         {
             get => _data.WebBookmarks;
             set => SetField(v => _data.WebBookmarks = v, value);
@@ -549,7 +549,7 @@ namespace DynamicBird.Core.Services.Configuration
         public bool WeatherEnabled { get => _data.WeatherEnabled; set => SetField(v => _data.WeatherEnabled = v, value); }
         public string? WeatherCity { get => _data.WeatherCity; set => SetField(v => _data.WeatherCity = v, value); }
 
-        // ========== 灵动鸟性能模式 ==========
+        // ========== ShoreHue 性能模式 ==========
         public string PerformanceMode
         {
             get => _data.PerformanceMode ?? "Normal";
@@ -898,7 +898,7 @@ namespace DynamicBird.Core.Services.Configuration
         }
 
         // ========== 逐区域动画覆盖（动画页签「动画应用于」） ==========
-        public DynamicBird.Core.Models.RegionAnimationOverride? GetRegionAnimation(string regionKey)
+        public ShoreHue.Core.Models.RegionAnimationOverride? GetRegionAnimation(string regionKey)
         {
             if (_data.RegionAnimationOverrides != null &&
                 _data.RegionAnimationOverrides.TryGetValue(regionKey, out var ov))
@@ -906,9 +906,9 @@ namespace DynamicBird.Core.Services.Configuration
             return null;
         }
 
-        public void SetRegionAnimation(string regionKey, DynamicBird.Core.Models.RegionAnimationOverride? ov)
+        public void SetRegionAnimation(string regionKey, ShoreHue.Core.Models.RegionAnimationOverride? ov)
         {
-            _data.RegionAnimationOverrides ??= new System.Collections.Generic.Dictionary<string, DynamicBird.Core.Models.RegionAnimationOverride>();
+            _data.RegionAnimationOverrides ??= new System.Collections.Generic.Dictionary<string, ShoreHue.Core.Models.RegionAnimationOverride>();
             if (ov == null || (string.IsNullOrEmpty(ov.ShowAnimationType) && !ov.ShowAnimationDurationMs.HasValue &&
                                string.IsNullOrEmpty(ov.HideAnimationType) && !ov.HideAnimationDurationMs.HasValue))
             {
@@ -945,16 +945,16 @@ namespace DynamicBird.Core.Services.Configuration
             return ov?.HideAnimationDurationMs.HasValue == true ? ov.HideAnimationDurationMs.Value : HideAnimationDurationMs;
         }
 
-        // ========== 编程模式（鸟笼） ==========
+        // ========== 编程模式（海床） ==========
         public bool ProgrammingModeEnabled
         {
             get => _data.ProgrammingModeEnabled;
             set { _data.ProgrammingModeEnabled = value; Save(); }
         }
 
-        public System.Collections.Generic.List<DynamicBird.Core.Models.CustomPanelDefinition> CustomPanels
+        public System.Collections.Generic.List<ShoreHue.Core.Models.CustomPanelDefinition> CustomPanels
         {
-            get => _data.CustomPanels ??= new System.Collections.Generic.List<DynamicBird.Core.Models.CustomPanelDefinition>();
+            get => _data.CustomPanels ??= new System.Collections.Generic.List<ShoreHue.Core.Models.CustomPanelDefinition>();
             set { _data.CustomPanels = value; Save(); }
         }
 

@@ -1,7 +1,7 @@
 using System;
 using System.Windows;
 
-namespace DynamicBird.Infrastructure.Utils
+namespace ShoreHue.Infrastructure.Utils
 {
     /// <summary>
     /// 多显示器屏幕边界提供器：

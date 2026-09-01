@@ -1,6 +1,6 @@
 using System;
 
-namespace DynamicBird.Animation
+namespace ShoreHue.Animation
 {
     public interface IShapeAnimator : IDisposable
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DynamicBird.Core.Infrastructure.Service
+namespace ShoreHue.Core.Infrastructure.Service
 {
     /// <summary>
     /// 服务接口，所有服务必须实现

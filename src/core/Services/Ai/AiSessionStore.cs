@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Core.Services.Ai
+namespace ShoreHue.Core.Services.Ai
 {
     public sealed class AiSession
     {
@@ -93,7 +93,7 @@ namespace DynamicBird.Core.Services.Ai
         private static string BuildTitle(List<ChatMessage> messages)
         {
             var firstUser = messages.FirstOrDefault(m => m.Role == ChatRole.User);
-            if (firstUser == null) return DynamicBird.UI.Localization.LocalizationManager.Instance["Session_Old"];
+            if (firstUser == null) return ShoreHue.UI.Localization.LocalizationManager.Instance["Session_Old"];
             string t = firstUser.Content.Trim();
             return t.Length > 20 ? t[..20] + "…" : t;
         }

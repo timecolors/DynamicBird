@@ -4,7 +4,7 @@
     [string]$SourceImage = ""
 )
 
-# 灵动鸟应用图标生成脚本
+# ShoreHue应用图标生成脚本
 # 依据 AppIcons.xaml 中 IconLogo 几何（Feather "layout"）矢量重绘：
 #   M3,3 L21,3 L21,21 L3,21 Z  窗口外框
 #   M3,9 L21,9                 标题栏分栏

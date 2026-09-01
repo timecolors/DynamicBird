@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 系统 Toast 通知（Windows 通知中心）。
@@ -31,7 +31,7 @@ namespace DynamicBird.Infrastructure.WinApi
                     }
                     catch { }
                 }
-                return "DynamicBird";
+                return "ShoreHue";
             }
         }
         private static readonly Guid PKEY_AppUserModelID = new("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3");
@@ -84,7 +84,7 @@ namespace DynamicBird.Infrastructure.WinApi
 
                 string lnk = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.Programs),
-                    "灵动鸟.lnk");
+                    "ShoreHue.lnk");
 
                 if (File.Exists(lnk) && string.Equals(ReadAumid(lnk), Aumid, StringComparison.Ordinal))
                 {
@@ -107,7 +107,7 @@ namespace DynamicBird.Infrastructure.WinApi
             var link = (IShellLinkW)new ShellLink();
             link.SetPath(exe);
             link.SetWorkingDirectory(Path.GetDirectoryName(exe) ?? "");
-            link.SetDescription("灵动鸟 边缘面板");
+            link.SetDescription("ShoreHue 边缘面板");
 
             var persist = (IPersistFile)link;
             persist.Save(lnk, true);

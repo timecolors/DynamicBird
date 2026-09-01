@@ -1,10 +1,10 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace DynamicBird.UI.Settings.Pages
+namespace ShoreHue.UI.Settings.Pages
 {
     /// <summary>
-    /// 简单输入对话框（鸟笼新增功能命名用）。避免 WinForms InputBox 在 WPF 环境弹多次的问题。
+    /// 简单输入对话框（海床新增功能命名用）。避免 WinForms InputBox 在 WPF 环境弹多次的问题。
     /// </summary>
     public sealed class InputDialog : Window
     {

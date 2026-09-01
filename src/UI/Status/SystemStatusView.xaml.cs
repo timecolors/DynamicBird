@@ -6,13 +6,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.UI.Localization;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Widgets.Dynamic;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.UI.Localization;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Widgets.Dynamic;
 using NAudio.CoreAudioApi;
 
-namespace DynamicBird.UI.Status
+namespace ShoreHue.UI.Status
 {
     public partial class SystemStatusView : UserControl
     {
@@ -68,7 +68,7 @@ namespace DynamicBird.UI.Status
             _timer.Tick += (s, e) => UpdateStatus();
             _timer.Start();
 
-            // ★ 鸟笼文件夹增删（用户放/删状态栏插件）：自动重新挂载自定义项
+            // ★ 海床文件夹增删（用户放/删状态栏插件）：自动重新挂载自定义项
             _pluginChangedHandler = () =>
             {
                 if (_settings == null || !IsLoaded) return;
@@ -211,7 +211,7 @@ namespace DynamicBird.UI.Status
             {
                 if (w.HasValue)
                 {
-                    // 显示生效城市名 + 天气，如 保定 · ☀️ 25° 晴；IP 定位无城市名时只显示天气
+                    // 显示生效城市名 + 天气，如 保定 · ☀25° 晴；IP 定位无城市名时只显示天气
                     WeatherText.Text = string.IsNullOrEmpty(w.Value.City)
                         ? w.Value.Text
                         : w.Value.City + " · " + w.Value.Text;

@@ -3,12 +3,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Localization;
-using DynamicBird.UI.Theme;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Localization;
+using ShoreHue.UI.Theme;
 
-namespace DynamicBird.UI.Onboarding
+namespace ShoreHue.UI.Onboarding
 {
     /// <summary>
     /// 新手引导（完整教程）：10 页结构化教学——

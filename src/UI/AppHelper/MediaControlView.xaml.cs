@@ -5,10 +5,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Localization;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Localization;
 
-namespace DynamicBird.UI.AppHelper
+namespace ShoreHue.UI.AppHelper
 {
     public partial class MediaControlView : UserControl
     {

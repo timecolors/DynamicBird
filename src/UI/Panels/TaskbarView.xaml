@@ -1,8 +1,8 @@
-<UserControl x:Class="DynamicBird.UI.Panels.TaskbarView"
+<UserControl x:Class="ShoreHue.UI.Panels.TaskbarView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="RootControl"
-             Background="Transparent" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+             Background="Transparent" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
 
     <UserControl.Resources>
         <DataTemplate x:Key="ShortcutTemplate">

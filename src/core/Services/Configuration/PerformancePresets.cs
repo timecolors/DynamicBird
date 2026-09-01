@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 
-namespace DynamicBird.Core.Services.Configuration
+namespace ShoreHue.Core.Services.Configuration
 {
     /// <summary>
-    /// 灵动鸟性能模式预设：
+    /// ShoreHue 性能模式预设：
     ///  - Smooth / Normal / PowerSaver 是预设档（一键应用一组动画/触发参数）
     ///  - Custom 不是档位：用户手动修改任一相关参数后自动进入（SettingsManager 属性 / 设置保存时检测）
     /// </summary>

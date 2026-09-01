@@ -4,10 +4,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public partial class TaskbarView
     {

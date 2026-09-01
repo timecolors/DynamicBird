@@ -1,9 +1,9 @@
 using System;
 using System.Windows;
 using System.Windows.Media;
-using DynamicBird.Core.Services.Configuration;
+using ShoreHue.Core.Services.Configuration;
 
-namespace DynamicBird.Core.Detection
+namespace ShoreHue.Core.Detection
 {
     /// <summary>
     /// 检测鼠标是否离开面板区域（实例类）
@@ -61,7 +61,7 @@ namespace DynamicBird.Core.Detection
 
                 // ★★★ 底部额外扩展任务栏高度 ★★★
                 // 当面板在底部边缘时，任务栏区域也应该算作"附近"
-                var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
+                var wa = ShoreHue.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
                     _window.Left, _window.Top, _window.Width, _window.Height);
                 bool isOnBottom = Math.Abs(_window.Top + _window.Height - wa.Height + _taskbarHeight) < 50;
                 double bottomExtension = isOnBottom ? _taskbarHeight + SafetyMargin : 0;

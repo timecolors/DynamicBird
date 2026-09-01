@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DynamicBird.Core.Services
+namespace ShoreHue.Core.Services
 {
     /// <summary>
     /// 便签数据模型

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Microsoft.Win32;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 常用网页与最近打开的网页：

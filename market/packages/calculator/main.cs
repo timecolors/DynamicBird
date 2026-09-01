@@ -3,9 +3,9 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
-namespace DynamicBird.Builtin
+namespace ShoreHue.Builtin
 {
     // 计算器 · 纯代码版（动态编译运行，与内置风格一致：AccentButton/FlatButton/CardStyle）
     public class CalcPanel : UserControl, IWidget

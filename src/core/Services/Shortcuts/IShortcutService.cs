@@ -1,9 +1,9 @@
-﻿using DynamicBird.Core.Services;
+﻿using ShoreHue.Core.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 
-namespace DynamicBird.src.core.Services.Shortcuts
+namespace ShoreHue.src.core.Services.Shortcuts
 {
     /// <summary>
     /// 快捷方式服务接口

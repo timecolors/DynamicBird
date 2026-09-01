@@ -1,4 +1,4 @@
-﻿namespace DynamicBird.Core
+﻿namespace ShoreHue.Core
 {
     public enum EdgeRegion
     {

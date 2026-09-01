@@ -1,12 +1,12 @@
-﻿using DynamicBird.Core.Services;
-using DynamicBird.src.core.Services.Shortcuts;
+﻿using ShoreHue.Core.Services;
+using ShoreHue.src.core.Services.Shortcuts;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Media;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public class TaskbarShortcutManager
     {

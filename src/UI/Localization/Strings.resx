@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -49,7 +49,7 @@
     <value>默认布局</value>
   </data>
   <data name="Notify_TitleEmpty" xml:space="preserve">
-    <value>🔔 通知坞</value>
+    <value>通知坞</value>
   </data>
   <data name="Recent_Feishu" xml:space="preserve">
     <value>飞书</value>
@@ -63,7 +63,7 @@
     <value>清空通知</value>
   </data>
   <data name="UI_NotificationDockView_111" xml:space="preserve">
-    <value>🔔 通知坞</value>
+    <value>通知坞</value>
   </data>
   <data name="Set_Immediate" xml:space="preserve">
     <value>0（立即）</value>
@@ -84,7 +84,7 @@
     <value>退出</value>
   </data>
   <data name="Clip_ImageSaveFailed" xml:space="preserve">
-    <value>🖼️ 图片 (保存失败)</value>
+    <value>图片 (保存失败)</value>
   </data>
   <data name="Timer_InputUnit" xml:space="preserve">
     <value>目标时间</value>
@@ -96,7 +96,7 @@
     <value>发现新版本 v{0}，点击下载更新</value>
   </data>
   <data name="Clip_Copied" xml:space="preserve">
-    <value>✅ 已复制</value>
+    <value>已复制</value>
   </data>
   <data name="Set_NewVersion" xml:space="preserve">
     <value>发现新版本 v{0}（{1}），保存设置后可在通知坞点击更新</value>
@@ -168,7 +168,7 @@
     <value>打开 AI 设置</value>
   </data>
   <data name="UI_AiChatView_3" xml:space="preserve">
-    <value>🧹 清空</value>
+    <value>清空</value>
   </data>
   <data name="UI_AiChatView_1" xml:space="preserve">
     <value>AI 助手</value>
@@ -177,13 +177,13 @@
     <value>新建对话</value>
   </data>
   <data name="UI_AiChatView_7" xml:space="preserve">
-    <value>🗑 删除</value>
+    <value>删除</value>
   </data>
   <data name="UI_AiChatView_4" xml:space="preserve">
     <value>清空当前对话消息</value>
   </data>
   <data name="UI_AiChatView_5" xml:space="preserve">
-    <value>➕ 新建</value>
+    <value>新建</value>
   </data>
   <data name="UI_AiChatView_8" xml:space="preserve">
     <value>删除当前对话</value>
@@ -204,7 +204,7 @@
     <value>鼠标移出面板后延迟该时长开始隐藏；设为 0 立即隐藏。</value>
   </data>
   <data name="Perf_Smooth" xml:space="preserve">
-    <value>⚡ 顺滑</value>
+    <value>顺滑</value>
   </data>
   <data name="WidgetMkt_Edit" xml:space="preserve">
     <value>编辑</value>
@@ -213,7 +213,7 @@
     <value>用 C# 编写的小组件：点“新建”用内置编辑器编写，或把 AI 生成的 C# 代码粘贴导入（参考 docs/WIDGET-SPEC.md）。保存后自动出现在面板的小组件标签里。</value>
   </data>
   <data name="WidgetMkt_None" xml:space="preserve">
-    <value>🔒 无权限</value>
+    <value>无权限</value>
   </data>
   <data name="Ai_BadImage" xml:space="preserve">
     <value>⚠ 不支持的图片格式：请拖入 PNG / JPG / BMP / GIF / WebP 文件。</value>
@@ -273,10 +273,10 @@
     <value>窗口</value>
   </data>
   <data name="Note_New" xml:space="preserve">
-    <value>➕ 新建</value>
+    <value>新建</value>
   </data>
   <data name="Timer_SetAlarm" xml:space="preserve">
-    <value>⏰ 设定闹钟</value>
+    <value>设定闹钟</value>
   </data>
   <data name="UI_SettingsWindow_231" xml:space="preserve">
     <value>竖条</value>
@@ -363,7 +363,7 @@
     <value>小鸟依人模式</value>
   </data>
   <data name="UI_SettingsWindow_219" xml:space="preserve">
-    <value>📍 区域形状（高级）</value>
+    <value>区域形状（高级）</value>
   </data>
   <data name="UI_SettingsWindow_218" xml:space="preserve">
     <value>鼠标在区域边界抖动时，防抖延迟。值越小响应越快，但可能误触发；值越大越稳定，但响应稍慢。推荐 80ms。</value>
@@ -384,7 +384,7 @@
     <value>右下角</value>
   </data>
   <data name="UI_SettingsWindow_207" xml:space="preserve">
-    <value>⚡ 高级设置</value>
+    <value>高级设置</value>
   </data>
   <data name="UI_SettingsWindow_204" xml:space="preserve">
     <value>右上角</value>
@@ -423,10 +423,10 @@
     <value>横条</value>
   </data>
   <data name="UI_SettingsWindow_279" xml:space="preserve">
-    <value>🌐 界面语言</value>
+    <value>界面语言</value>
   </data>
   <data name="UI_SettingsWindow_278" xml:space="preserve">
-    <value>🌐 通用</value>
+    <value>通用</value>
   </data>
   <data name="UI_SettingsWindow_264" xml:space="preserve">
     <value>右边</value>
@@ -519,7 +519,7 @@
     <value>竖条</value>
   </data>
   <data name="UI_SettingsWindow_299" xml:space="preserve">
-    <value>灵动鸟 DynamicBird</value>
+    <value>ShoreHue 海岸线</value>
   </data>
   <data name="UI_SettingsWindow_298" xml:space="preserve">
     <value>未配置更新源</value>
@@ -531,7 +531,7 @@
     <value>显示系统状态</value>
   </data>
   <data name="UI_SettingsWindow_291" xml:space="preserve">
-    <value>选择一张图片替换灵动鸟图标（支持 PNG、JPG、ICO 等格式）。</value>
+    <value>选择一张图片替换海岸线图标（支持 PNG、JPG、ICO 等格式）。</value>
   </data>
   <data name="UI_SettingsWindow_290" xml:space="preserve">
     <value>选择图片</value>
@@ -543,10 +543,10 @@
     <value>启用自动更新（启动时检查 GitHub 最新版本）</value>
   </data>
   <data name="UI_SettingsWindow_295" xml:space="preserve">
-    <value>从 GitHub Releases 检查并下载更新。更新包需为 DynamicBird.exe 或包含它的 zip，并在 Release 说明中附 SHA256。</value>
+    <value>从 GitHub Releases 检查并下载更新。更新包需为 ShoreHue.exe 或包含它的 zip，并在 Release 说明中附 SHA256。</value>
   </data>
   <data name="UI_SettingsWindow_294" xml:space="preserve">
-    <value>🔄 自动更新</value>
+    <value>自动更新</value>
   </data>
   <data name="UI_SettingsWindow_288" xml:space="preserve">
     <value>选择</value>
@@ -573,22 +573,22 @@
     <value>文字色</value>
   </data>
   <data name="UI_SettingsWindow_284" xml:space="preserve">
-    <value>🎨 外观</value>
+    <value>外观</value>
   </data>
   <data name="UI_SettingsWindow_285" xml:space="preserve">
     <value>背景色</value>
   </data>
   <data name="UI_SettingsWindow_136" xml:space="preserve">
-    <value>⚙️ 任务栏</value>
+    <value>⚙任务栏</value>
   </data>
   <data name="UI_SettingsWindow_137" xml:space="preserve">
-    <value>📐 布局与显示</value>
+    <value>布局与显示</value>
   </data>
   <data name="UI_SettingsWindow_134" xml:space="preserve">
-    <value>灵动鸟 设置</value>
+    <value>ShoreHue 海岸线 设置</value>
   </data>
   <data name="UI_SettingsWindow_135" xml:space="preserve">
-    <value>灵动鸟 设置</value>
+    <value>ShoreHue 海岸线 设置</value>
   </data>
   <data name="UI_SettingsWindow_138" xml:space="preserve">
     <value>图标大小</value>
@@ -660,7 +660,7 @@
     <value>上边</value>
   </data>
   <data name="UI_SettingsWindow_144" xml:space="preserve">
-    <value>🎯 触发与位置</value>
+    <value>触发与位置</value>
   </data>
   <data name="UI_SettingsWindow_147" xml:space="preserve">
     <value>左边</value>
@@ -747,7 +747,7 @@
     <value>固定位置</value>
   </data>
   <data name="UI_SettingsWindow_189" xml:space="preserve">
-    <value>🗂 区域面板</value>
+    <value>区域面板</value>
   </data>
   <data name="UI_SettingsWindow_188" xml:space="preserve">
     <value>跟随鼠标：面板跟随鼠标在边缘的位置移动。固定位置：面板固定在边缘的特定位置。</value>
@@ -777,7 +777,7 @@
     <value>横条</value>
   </data>
   <data name="UI_SettingsWindow_330" xml:space="preserve">
-    <value>📝 便签</value>
+    <value>便签</value>
   </data>
   <data name="UI_SettingsWindow_331" xml:space="preserve">
     <value>默认颜色</value>
@@ -795,16 +795,16 @@
     <value>开启后，新建便签时会显示标题栏，否则只显示内容。</value>
   </data>
   <data name="UI_SettingsWindow_336" xml:space="preserve">
-    <value>💡 便签保存在 Data/notes.json，剪贴板历史在 Data/clipboard_history.json</value>
+    <value>便签保存在 Data/notes.json，剪贴板历史在 Data/clipboard_history.json</value>
   </data>
   <data name="UI_SettingsWindow_337" xml:space="preserve">
-    <value>📌 快捷方式</value>
+    <value>快捷方式</value>
   </data>
   <data name="UI_SettingsWindow_338" xml:space="preserve">
-    <value>🎬 动画</value>
+    <value>动画</value>
   </data>
   <data name="UI_SettingsWindow_339" xml:space="preserve">
-    <value>🎬 动画设置</value>
+    <value>动画设置</value>
   </data>
   <data name="UI_SettingsWindow_312" xml:space="preserve">
     <value>城市</value>
@@ -825,10 +825,10 @@
     <value>剪贴板</value>
   </data>
   <data name="UI_SettingsWindow_314" xml:space="preserve">
-    <value>启用天气后，灵动鸟会向 open-meteo.com（天气与城市联想）与 ipwho.is（IP 定位）发起请求，仅在你勾选“天气”时发生。</value>
+    <value>启用天气后，海岸线会向 open-meteo.com（天气与城市联想）与 ipwho.is（IP 定位）发起请求，仅在你勾选“天气”时发生。</value>
   </data>
   <data name="UI_SettingsWindow_315" xml:space="preserve">
-    <value>🧩 面板小组件</value>
+    <value>面板小组件</value>
   </data>
   <data name="UI_SettingsWindow_318" xml:space="preserve">
     <value>便签</value>
@@ -858,7 +858,7 @@
     <value>最大条数</value>
   </data>
   <data name="UI_SettingsWindow_326" xml:space="preserve">
-    <value>📋 剪贴板历史</value>
+    <value>剪贴板历史</value>
   </data>
   <data name="UI_SettingsWindow_329" xml:space="preserve">
     <value>剪贴板历史记录的最大保存条数，以及列表中预览显示的字符数量。</value>
@@ -867,13 +867,13 @@
     <value>预览字符</value>
   </data>
   <data name="UI_SettingsWindow_374" xml:space="preserve">
-    <value>灵动鸟内置 AI 助手：对话、翻译、总结、解释代码等。你的 API Key 只保存在本机（ai.json），请求直接发往你选择的模型服务商，不经任何中间服务器。</value>
+    <value>海岸线内置 AI 助手：对话、翻译、总结、解释代码等。你的 API Key 只保存在本机（ai.json），请求直接发往你选择的模型服务商，不经任何中间服务器。</value>
   </data>
   <data name="UI_SettingsWindow_375" xml:space="preserve">
     <value>启用 AI 助手</value>
   </data>
   <data name="UI_SettingsWindow_376" xml:space="preserve">
-    <value>🏢 服务商预设</value>
+    <value>服务商预设</value>
   </data>
   <data name="UI_SettingsWindow_377" xml:space="preserve">
     <value>选择后自动填入 API 地址与常见模型，也可手动修改。</value>
@@ -885,28 +885,28 @@
     <value>等待时间</value>
   </data>
   <data name="UI_SettingsWindow_372" xml:space="preserve">
-    <value>💡 关闭动画后，呼出/隐藏/切换均为瞬间完成。延时隐藏仍会生效（面板会在延迟后瞬间消失）。飞行特性在关闭动画时仍保留（面板不消失，但形变瞬间完成）。</value>
+    <value>关闭动画后，呼出/隐藏/切换均为瞬间完成。延时隐藏仍会生效（面板会在延迟后瞬间消失）。飞行特性在关闭动画时仍保留（面板不消失，但形变瞬间完成）。</value>
   </data>
   <data name="UI_SettingsWindow_373" xml:space="preserve">
-    <value>🤖 AI 助手</value>
+    <value>AI 助手</value>
   </data>
   <data name="UI_SettingsWindow_378" xml:space="preserve">
-    <value>🌐 API 地址</value>
+    <value>API 地址</value>
   </data>
   <data name="UI_SettingsWindow_379" xml:space="preserve">
     <value>OpenAI 兼容的 Chat Completions 地址，例如 https://api.deepseek.com/v1、http://localhost:11434/v1（Ollama）</value>
   </data>
   <data name="UI_SettingsWindow_303" xml:space="preserve">
-    <value>📊 状态栏显示项</value>
+    <value>状态栏显示项</value>
   </data>
   <data name="UI_SettingsWindow_302" xml:space="preserve">
-    <value>🧰 小工具</value>
+    <value>小工具</value>
   </data>
   <data name="UI_SettingsWindow_301" xml:space="preserve">
     <value>第三方组件声明见仓库 THIRD-PARTY-NOTICES.md（MIT 协议）。</value>
   </data>
   <data name="UI_SettingsWindow_300" xml:space="preserve">
-    <value>隐私说明：灵动鸟默认不上传任何个人数据。仅在你启用自动更新时，会向 GitHub Releases 请求版本信息（可能包含你的 IP 地址）；常用网页功能会在本机读取浏览器历史用于展示。所有配置、快捷方式与日志只保存在本机 %LOCALAPPDATA%\DynamicBird，卸载即清理（商店版）。</value>
+    <value>隐私说明：海岸线默认不上传任何个人数据。仅在你启用自动更新时，会向 GitHub Releases 请求版本信息（可能包含你的 IP 地址）；常用网页功能会在本机读取浏览器历史用于展示。所有配置、快捷方式与日志只保存在本机 %LOCALAPPDATA%\ShoreHue，卸载即清理（商店版）。</value>
   </data>
   <data name="UI_SettingsWindow_307" xml:space="preserve">
     <value>帧率</value>
@@ -933,7 +933,7 @@
     <value>线性</value>
   </data>
   <data name="UI_SettingsWindow_354" xml:space="preserve">
-    <value>🔄 形变/切换</value>
+    <value>形变/切换</value>
   </data>
   <data name="UI_SettingsWindow_355" xml:space="preserve">
     <value>面板尺寸变化/区域切换/跨边飞行时的动画效果</value>
@@ -970,7 +970,7 @@
     <value>弹跳缓动</value>
   </data>
   <data name="UI_SettingsWindow_367" xml:space="preserve">
-    <value>🚀 飞行时长</value>
+    <value>飞行时长</value>
   </data>
   <data name="UI_SettingsWindow_366" xml:space="preserve">
     <value>线性：匀速运动，无缓动效果
@@ -995,7 +995,7 @@
     <value>弹性缓动</value>
   </data>
   <data name="UI_SettingsWindow_369" xml:space="preserve">
-    <value>⏱️ 延时隐藏</value>
+    <value>⏱延时隐藏</value>
   </data>
   <data name="UI_SettingsWindow_368" xml:space="preserve">
     <value>跨边飞行时的移动速度。数值越小飞行越快，数值越大飞行越慢。</value>
@@ -1019,7 +1019,7 @@
     <value>面板从边缘滑入/滑出时的动画效果</value>
   </data>
   <data name="UI_SettingsWindow_341" xml:space="preserve">
-    <value>📌 呼出/隐藏</value>
+    <value>呼出/隐藏</value>
   </data>
   <data name="UI_SettingsWindow_340" xml:space="preserve">
     <value>启用动画</value>
@@ -1040,7 +1040,7 @@
     <value>测试连接</value>
   </data>
   <data name="UI_SettingsWindow_391" xml:space="preserve">
-    <value>🔒 隐私：灵动鸟不收集、不上传任何 AI 对话数据。所有请求由本机直接发送到你选择的模型服务商，受该服务商的隐私政策约束。</value>
+    <value>隐私：海岸线不收集、不上传任何 AI 对话数据。所有请求由本机直接发送到你选择的模型服务商，受该服务商的隐私政策约束。</value>
   </data>
   <data name="UI_SettingsWindow_394" xml:space="preserve">
     <value>关闭</value>
@@ -1049,10 +1049,10 @@
     <value>保存当前设置到 config.json，关闭后设置生效。</value>
   </data>
   <data name="UI_SettingsWindow_396" xml:space="preserve">
-    <value>卸载灵动鸟…</value>
+    <value>卸载 ShoreHue 海岸线…</value>
   </data>
   <data name="UI_SettingsWindow_397" xml:space="preserve">
-    <value>确定要卸载灵动鸟吗？应用文件将被删除（商店版请从系统设置卸载）。</value>
+    <value>确定要卸载 ShoreHue 海岸线吗？应用文件将被删除（商店版请从系统设置卸载）。</value>
   </data>
   <data name="UI_SettingsWindow_398" xml:space="preserve">
     <value>是否同时删除本地数据（设置/剪贴板历史/便签/AI 会话等）？
@@ -1065,16 +1065,16 @@
     <value>联网搜索（需服务商支持，如 DeepSeek）</value>
   </data>
   <data name="UI_SettingsWindow_383" xml:space="preserve">
-    <value>📝 系统提示词</value>
+    <value>系统提示词</value>
   </data>
   <data name="UI_SettingsWindow_382" xml:space="preserve">
     <value>填写服务商支持的模型名，例如 deepseek-chat、gpt-4o-mini、llama3.2。</value>
   </data>
   <data name="UI_SettingsWindow_381" xml:space="preserve">
-    <value>🧠 模型</value>
+    <value>模型</value>
   </data>
   <data name="UI_SettingsWindow_380" xml:space="preserve">
-    <value>仅保存在本机 %LOCALAPPDATA%\DynamicBird\ai.json，不会上传。留空表示无需鉴权（如本地 Ollama）。</value>
+    <value>仅保存在本机 %LOCALAPPDATA%\ShoreHue\ai.json，不会上传。留空表示无需鉴权（如本地 Ollama）。</value>
   </data>
   <data name="UI_SettingsWindow_387" xml:space="preserve">
     <value>超过窗口时自动丢弃最早的对话。常见值：DeepSeek 64K、GPT-4o 128K、本地 Ollama 8K。设为 0 不裁剪。</value>
@@ -1086,31 +1086,31 @@
     <value>温度</value>
   </data>
   <data name="UI_SettingsWindow_384" xml:space="preserve">
-    <value>⚙️ 高级</value>
+    <value>⚙高级</value>
   </data>
   <data name="UI_WidgetSwitcher_403" xml:space="preserve">
     <value>未启用任何小组件：请在设置 → 小工具 中勾选要保留的功能</value>
   </data>
   <data name="Clip_Deleted" xml:space="preserve">
-    <value>🗑️ 已删除 {0} 项</value>
+    <value>已删除 {0} 项</value>
   </data>
   <data name="Toast_DownloadFailed" xml:space="preserve">
     <value>下载失败，请检查网络后重试</value>
   </data>
   <data name="UI_MainWindow_49" xml:space="preserve">
-    <value>灵动鸟</value>
+    <value>ShoreHue 海岸线</value>
   </data>
   <data name="Note_Delete" xml:space="preserve">
     <value>✕ 删除</value>
   </data>
   <data name="Notify_Title" xml:space="preserve">
-    <value>🔔 通知坞（{0}）</value>
+    <value>通知坞（{0}）</value>
   </data>
   <data name="Tray_Toggle" xml:space="preserve">
     <value>显示 / 隐藏</value>
   </data>
   <data name="Toast_AppName" xml:space="preserve">
-    <value>灵动鸟</value>
+    <value>ShoreHue 海岸线</value>
   </data>
   <data name="Dnd_TipTaskbar" xml:space="preserve">
     <value>点击切换勿扰模式
@@ -1145,7 +1145,7 @@
     <value>已安装</value>
   </data>
   <data name="Perf_Normal" xml:space="preserve">
-    <value>🎯 正常</value>
+    <value>正常</value>
   </data>
   <data name="Status_WeatherUnavailable" xml:space="preserve">
     <value>天气不可用</value>
@@ -1157,7 +1157,7 @@
     <value>无法获取前台窗口</value>
   </data>
   <data name="Scm_AddFailed" xml:space="preserve">
-    <value>⚠️ 已存在或添加失败</value>
+    <value>⚠已存在或添加失败</value>
   </data>
   <data name="Wp_EmbedBtn" xml:space="preserve">
     <value>开始嵌入</value>
@@ -1178,7 +1178,7 @@
     <value>在 设置 → AI 中填写 OpenAI 兼容的服务商（DeepSeek、Ollama 本地、SiliconFlow 等）与模型，即可开始对话</value>
   </data>
   <data name="Perf_Custom" xml:space="preserve">
-    <value>✏️ 自定义</value>
+    <value>✏自定义</value>
   </data>
   <data name="Weather_Desc3" xml:space="preserve">
     <value>阴</value>
@@ -1211,7 +1211,7 @@
     <value>{0} 个快捷方式</value>
   </data>
   <data name="Scm_Added" xml:space="preserve">
-    <value>✅ 已添加: {0}</value>
+    <value>已添加: {0}</value>
   </data>
   <data name="UI_OnboardingWindow_97" xml:space="preserve">
     <value>每次触发自适应：面板按内容自动调整大小；取消后可用拖动面板边缘自由调整，尺寸会被记住。</value>
@@ -1226,7 +1226,7 @@
     <value>小鸟依人模式</value>
   </data>
   <data name="UI_OnboardingWindow_93" xml:space="preserve">
-    <value>✨ 值得了解的设置特性</value>
+    <value>值得了解的设置特性</value>
   </data>
   <data name="UI_OnboardingWindow_92" xml:space="preserve">
     <value>设置里配置 GitHub 仓库后，新版本会在通知坞提醒，点击即可下载更新。</value>
@@ -1256,10 +1256,10 @@
     <value>全局热键 Ctrl + Alt + B</value>
   </data>
   <data name="UI_OnboardingWindow_82" xml:space="preserve">
-    <value>⚙️ 设置、勿扰与更新</value>
+    <value>⚙设置、勿扰与更新</value>
   </data>
   <data name="UI_OnboardingWindow_83" xml:space="preserve">
-    <value>灵动鸟图标</value>
+    <value>ShoreHue 海岸线图标</value>
   </data>
   <data name="UI_OnboardingWindow_80" xml:space="preserve">
     <value>关闭与排序</value>
@@ -1283,7 +1283,7 @@
     <value>上 / 下 / 左 / 右边缘</value>
   </data>
   <data name="UI_OnboardingWindow_70" xml:space="preserve">
-    <value>🎯 边缘触发与四角分工</value>
+    <value>边缘触发与四角分工</value>
   </data>
   <data name="UI_OnboardingWindow_73" xml:space="preserve">
     <value>每个区域显示什么面板都能在设置里自由指定（包括 AI 助手）。</value>
@@ -1301,7 +1301,7 @@
     <value>四个角落</value>
   </data>
   <data name="UI_OnboardingWindow_77" xml:space="preserve">
-    <value>📌 任务栏：固定、关闭、排序</value>
+    <value>任务栏：固定、关闭、排序</value>
   </data>
   <data name="UI_OnboardingWindow_76" xml:space="preserve">
     <value>所有区域的显示内容和触发开关都能在设置里自定义。</value>
@@ -1310,7 +1310,7 @@
     <value>把鼠标移到屏幕边缘，面板自动滑出；快捷操作、通知、小组件都在手边。</value>
   </data>
   <data name="UI_OnboardingWindow_69" xml:space="preserve">
-    <value>💡 全程无需安装额外依赖：边缘触发、窗口固定、系统通知都基于 Windows 原生能力。</value>
+    <value>全程无需安装额外依赖：边缘触发、窗口固定、系统通知都基于 Windows 原生能力。</value>
   </data>
   <data name="UI_OnboardingWindow_60" xml:space="preserve">
     <value>欢迎</value>
@@ -1331,16 +1331,16 @@
     <value>开始使用</value>
   </data>
   <data name="UI_OnboardingWindow_66" xml:space="preserve">
-    <value>欢迎使用灵动鸟</value>
+    <value>欢迎使用 ShoreHue 海岸线</value>
   </data>
   <data name="UI_OnboardingWindow_67" xml:space="preserve">
     <value>一个贴合 Windows 的桌面边缘面板工具。</value>
   </data>
   <data name="UI_OnboardingWindow_59" xml:space="preserve">
-    <value>灵动鸟</value>
+    <value>ShoreHue 海岸线</value>
   </data>
   <data name="UI_OnboardingWindow_58" xml:space="preserve">
-    <value>灵动鸟 - 欢迎</value>
+    <value>ShoreHue 海岸线 - 欢迎</value>
   </data>
   <data name="TextAi_NotConfigured" xml:space="preserve">
     <value>尚未配置 AI 服务：请先在 设置 → AI 助手 中启用并填写 API Key。</value>
@@ -1352,7 +1352,7 @@
     <value>图片</value>
   </data>
   <data name="Clip_Cleared" xml:space="preserve">
-    <value>🗑️ 已清空</value>
+    <value>已清空</value>
   </data>
   <data name="Clip_Ready" xml:space="preserve">
     <value>剪贴板就绪</value>
@@ -1382,7 +1382,7 @@
     <value>雷暴</value>
   </data>
   <data name="Timer_TimeUp" xml:space="preserve">
-    <value>⏰ 时间到！</value>
+    <value>时间到！</value>
   </data>
   <data name="Tray_AutoStartFailStore" xml:space="preserve">
     <value>设置开机自启失败（商店版）: {0}</value>
@@ -1448,7 +1448,7 @@
     <value>支持键盘输入</value>
   </data>
   <data name="Set_ConnOk" xml:space="preserve">
-    <value>✅ 连接成功</value>
+    <value>连接成功</value>
   </data>
   <data name="Toast_Downloading" xml:space="preserve">
     <value>正在下载 v{0}…</value>
@@ -1457,7 +1457,7 @@
     <value>更新源未配置，请联系开发者填写</value>
   </data>
   <data name="Ai_FileLabelGeneric" xml:space="preserve">
-    <value>📄 文件</value>
+    <value>文件</value>
   </data>
   <data name="Set_Checking" xml:space="preserve">
     <value>正在检查更新…</value>
@@ -1538,19 +1538,19 @@
     <value>未读取到选中文本：请先在应用中选中文字再按快捷键</value>
   </data>
   <data name="Clip_DeleteSelected" xml:space="preserve">
-    <value>🗑️ 删除选中</value>
+    <value>删除选中</value>
   </data>
   <data name="Set_AutoSaveHint" xml:space="preserve">
     <value>修改设置后建议点击"刷新"使其立即生效并持久化</value>
   </data>
   <data name="Perf_Saver" xml:space="preserve">
-    <value>🔋 省电</value>
+    <value>省电</value>
   </data>
   <data name="Cursor_LockFailed" xml:space="preserve">
     <value>锁定失败：{0}</value>
   </data>
   <data name="TextAi_Copy" xml:space="preserve">
-    <value>📋 复制</value>
+    <value>复制</value>
   </data>
   <data name="Status_NoBattery" xml:space="preserve">
     <value>无电池</value>
@@ -1589,7 +1589,7 @@
     <value>检测中…</value>
   </data>
   <data name="UI_QuickSettingsView_113" xml:space="preserve">
-    <value>⚡ 快捷开关</value>
+    <value>快捷开关</value>
   </data>
   <data name="UI_QuickSettingsView_118" xml:space="preserve">
     <value>检测中…</value>
@@ -1619,7 +1619,7 @@
     <value>⚠ 未能从该文件中读取到文本内容。</value>
   </data>
   <data name="Perf_ButtonTip" xml:space="preserve">
-    <value>灵动鸟模式：点击切换</value>
+    <value>海岸线模式：点击切换</value>
   </data>
   <data name="Capture_Failed" xml:space="preserve">
     <value>读取选中文本失败：{0}</value>
@@ -1631,10 +1631,10 @@
     <value>刷新任务栏</value>
   </data>
   <data name="Clip_ImageMissing" xml:space="preserve">
-    <value>🖼️ 图片 (文件丢失)</value>
+    <value>图片 (文件丢失)</value>
   </data>
   <data name="Ai_OnlyRecent" xml:space="preserve">
-    <value>⏪ 仅显示最近 {0} 条对话，完整历史已保存在本机</value>
+    <value>仅显示最近 {0} 条对话，完整历史已保存在本机</value>
   </data>
   <data name="Set_Trig" xml:space="preserve">
     <value>触发</value>
@@ -1664,7 +1664,7 @@
     <value>提示：当前模型可能不支持图片识别。请在 设置 → AI 中更换支持视觉的模型（如 gpt-4o、glm-4v、qwen-vl 等），或用本地 Ollama 的 llava 模型。</value>
   </data>
   <data name="Timer_StopAlarm" xml:space="preserve">
-    <value>⏰ 停止提醒</value>
+    <value>停止提醒</value>
   </data>
   <data name="Set_HotkeySet" xml:space="preserve">
     <value>已设置：在任何应用中选中文字，按此快捷键即可翻译。</value>
@@ -1673,7 +1673,7 @@
     <value>窗口已最小化，请恢复后再镜像</value>
   </data>
   <data name="Scm_Cleared" xml:space="preserve">
-    <value>🗑️ 已清空</value>
+    <value>已清空</value>
   </data>
   <data name="Dnd_TipDnd" xml:space="preserve">
     <value>点击切换勿扰模式
@@ -1708,10 +1708,10 @@
     <value>闹钟 · {0:00}:{1:00}:{2:00} 后提醒</value>
   </data>
   <data name="Ai_FileLabelDocx" xml:space="preserve">
-    <value>📄 Word 文档</value>
+    <value>Word 文档</value>
   </data>
   <data name="UI_ShortcutManagementPage_397" xml:space="preserve">
-    <value>➕ 添加快捷方式</value>
+    <value>添加快捷方式</value>
   </data>
   <data name="UI_ShortcutManagementPage_396" xml:space="preserve">
     <value>快捷方式管理</value>
@@ -1720,22 +1720,22 @@
     <value>就绪</value>
   </data>
   <data name="UI_ShortcutManagementPage_398" xml:space="preserve">
-    <value>🗑️ 清空全部</value>
+    <value>清空全部</value>
   </data>
   <data name="UI_ShortcutManagementPage_400" xml:space="preserve">
-    <value>💡 也可在任务栏面板上直接拖拽排序、拖入固定、拖出删除</value>
+    <value>也可在任务栏面板上直接拖拽排序、拖入固定、拖出删除</value>
   </data>
   <data name="Timer_SetAlarmHint" xml:space="preserve">
     <value>设定目标时间，到点系统提醒</value>
   </data>
   <data name="WidgetMkt_New" xml:space="preserve">
-    <value>🧩 新建小组件</value>
+    <value>新建小组件</value>
   </data>
   <data name="WidgetMkt_Tab" xml:space="preserve">
-    <value>🧩 我的小组件</value>
+    <value>我的小组件</value>
   </data>
   <data name="Clip_ImageSize" xml:space="preserve">
-    <value>🖼️ 图片 ({0}×{1})</value>
+    <value>图片 ({0}×{1})</value>
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>设置</value>
@@ -1762,7 +1762,7 @@
     <value>设置已保存</value>
   </data>
   <data name="TextAi_Copied" xml:space="preserve">
-    <value>✅ 已复制</value>
+    <value>已复制</value>
   </data>
   <data name="Dnd_TipHelper" xml:space="preserve">
     <value>点击切换辅助功能（媒体控制 / 画中画 / 音乐播放器）
@@ -1814,7 +1814,7 @@
     <value>关闭面板动画、瞬时切换，最省电（面板不顺滑）</value>
   </data>
   <data name="WidgetMkt_Import" xml:space="preserve">
-    <value>🤖 AI 生成导入</value>
+    <value>AI 生成导入</value>
   </data>
   <data name="Pip_MirrorTitle" xml:space="preserve">
     <value>镜像：{0}</value>
@@ -1835,7 +1835,7 @@
     <value>刷新</value>
   </data>
   <data name="UI_RecentItemsView_125" xml:space="preserve">
-    <value>🧭 最近使用</value>
+    <value>最近使用</value>
   </data>
   <data name="UI_RecentItemsView_132" xml:space="preserve">
     <value>＋ 保存常用</value>
@@ -1853,7 +1853,7 @@
     <value>默认：动画与性能平衡</value>
   </data>
   <data name="Main_TitleDnd" xml:space="preserve">
-    <value>灵动鸟 (勿扰模式)</value>
+    <value>ShoreHue 海岸线 (勿扰模式)</value>
   </data>
   <data name="Panel_Notification" xml:space="preserve">
     <value>通知坞</value>
@@ -1883,13 +1883,13 @@
     <value>小时</value>
   </data>
   <data name="Scm_Deleted" xml:space="preserve">
-    <value>🗑️ 已删除: {0}</value>
+    <value>已删除: {0}</value>
   </data>
   <data name="Set_TriggerDelayGlobal" xml:space="preserve">
     <value>全局触发延时</value>
   </data>
   <data name="Set_WidgetMarket" xml:space="preserve">
-    <value>🛒 组件市场</value>
+    <value>组件市场</value>
   </data>
   <data name="Toast_ExtractFailed" xml:space="preserve">
     <value>更新包解析失败</value>
@@ -1952,13 +1952,13 @@
     <value>换一个回答</value>
   </data>
   <data name="UI_AiChatView_12" xml:space="preserve">
-    <value>🔄 重新生成</value>
+    <value>重新生成</value>
   </data>
   <data name="UI_AiChatView_11" xml:space="preserve">
     <value>复制回复原文（Markdown）</value>
   </data>
   <data name="UI_AiChatView_10" xml:space="preserve">
-    <value>📋 复制</value>
+    <value>复制</value>
   </data>
   <data name="UI_AiChatView_17" xml:space="preserve">
     <value>我可以帮你翻译、总结、解释代码、写文档…</value>
@@ -1970,7 +1970,7 @@
     <value>保存为 Markdown 文件</value>
   </data>
   <data name="UI_AiChatView_14" xml:space="preserve">
-    <value>💾 保存</value>
+    <value>保存</value>
   </data>
   <data name="UI_AiChatView_19" xml:space="preserve">
     <value>总结一篇文章</value>
@@ -2003,7 +2003,7 @@
     <value>把鼠标移到屏幕边缘试试吧。所有操作都能在设置里调整，也可以随时重新查看本引导。</value>
   </data>
   <data name="UI_OnboardingWindow_106" xml:space="preserve">
-    <value>✅ 都准备好了</value>
+    <value>都准备好了</value>
   </data>
   <data name="UI_OnboardingWindow_105" xml:space="preserve">
     <value>呼出/隐藏动画、缓动类型、圆角、透明度、图标大小都可以调；Win11 下还支持 Mica 毛玻璃背景。</value>
@@ -2013,7 +2013,7 @@
   </data>
   <data name="UI_OnboardingWindow_103" xml:space="preserve">
     <value>左边缘中间呼出 AI 对话面板：流式回复、快捷指令（翻译 / 总结 / 解释代码 / 润色）、多会话管理。
-把图片文件拖到面板左侧的灵动鸟图标，即可把图片发给 AI 分析（需模型支持识图，如 gpt-4o、glm-4v、qwen-vl 等）。
+把图片文件拖到面板左侧的海岸线图标，即可把图片发给 AI 分析（需模型支持识图，如 gpt-4o、glm-4v、qwen-vl 等）。
 在 设置 → AI 中填一个 OpenAI 兼容的服务商（DeepSeek、Ollama 本地、SiliconFlow 等）与模型即可使用；API Key 只保存在本机，请求直连你选择的服务商。</value>
   </data>
   <data name="UI_OnboardingWindow_102" xml:space="preserve">
@@ -2035,7 +2035,7 @@
     <value>窗口已最小化，点击恢复</value>
   </data>
   <data name="UI_PanelMediaPlayer_50" xml:space="preserve">
-    <value>🖼 镜像窗口　·　📌 嵌入窗口
+    <value>镜像窗口　·　嵌入窗口
 鼠标滚轮可缩放镜像画面</value>
   </data>
   <data name="UI_PanelMediaPlayer_53" xml:space="preserve">
@@ -2096,10 +2096,10 @@
     <value>作用于当前前台窗口 · 点击图标操作</value>
   </data>
   <data name="Ob_Win_Title" xml:space="preserve">
-    <value>灵动鸟 - 新手引导</value>
+    <value>ShoreHue 海岸线 - 新手引导</value>
   </data>
   <data name="Ob_Step_Brand" xml:space="preserve">
-    <value>灵动鸟</value>
+    <value>ShoreHue 海岸线</value>
   </data>
   <data name="Ob_Step_1" xml:space="preserve">
     <value>欢迎</value>
@@ -2132,7 +2132,7 @@
     <value>开始使用</value>
   </data>
   <data name="Ob_Welcome_Title" xml:space="preserve">
-    <value>欢迎使用灵动鸟</value>
+    <value>欢迎使用 ShoreHue 海岸线</value>
   </data>
   <data name="Ob_Welcome_Sub" xml:space="preserve">
     <value>一个贴合 Windows 的桌面边缘面板工具——把常用功能收纳到屏幕边缘，用完即走。</value>
@@ -2150,13 +2150,13 @@
     <value>边缘：快捷操作与任务栏；角落：独立功能（快捷开关 / 最近使用 / 通知坞）；中间区域：AI 助手与应用辅助（画中画）。</value>
   </data>
   <data name="Ob_Welcome_Tip" xml:space="preserve">
-    <value>💡 隐私优先：所有数据只保存在本机 %LOCALAPPDATA%\DynamicBird，无账号、无广告、无云上传。</value>
+    <value>隐私优先：所有数据只保存在本机 %LOCALAPPDATA%\ShoreHue，无账号、无广告、无云上传。</value>
   </data>
   <data name="Ob_Map_Title" xml:space="preserve">
-    <value>🗺️ 屏幕地图：16 个触发区</value>
+    <value>屏幕地图：16 个触发区</value>
   </data>
   <data name="Ob_Map_Desc" xml:space="preserve">
-    <value>下面这张图是灵动鸟的默认布局。每个区域显示什么、是否启用、形状与触发延时，都能在 设置 → 通用 中单独定制。</value>
+    <value>下面这张图是海岸线的默认布局。每个区域显示什么、是否启用、形状与触发延时，都能在 设置 → 通用 中单独定制。</value>
   </data>
   <data name="Ob_Map_TopLeft" xml:space="preserve">
     <value>任务栏</value>
@@ -2201,10 +2201,10 @@
     <value>左上角：快捷开关（音量/亮度/蓝牙/Wi-Fi/热点）；左下角：最近使用（文件/应用/网页）；右下角：通知坞。右上角默认不呼出，可在设置中改为窗口操作中心。</value>
   </data>
   <data name="Ob_Map_Tip" xml:space="preserve">
-    <value>💡 右上角是窗口关闭按钮区，默认保持安全区不呼出，避免影响关闭窗口——需要时可配置为窗口操作中心。</value>
+    <value>右上角是窗口关闭按钮区，默认保持安全区不呼出，避免影响关闭窗口——需要时可配置为窗口操作中心。</value>
   </data>
   <data name="Ob_Taskbar_Title" xml:space="preserve">
-    <value>📌 边缘任务栏：固定、关闭、排序</value>
+    <value>边缘任务栏：固定、关闭、排序</value>
   </data>
   <data name="Ob_Taskbar_Desc" xml:space="preserve">
     <value>上下边缘默认是任务栏：左边是你的快捷方式，右边是正在运行的窗口。</value>
@@ -2213,7 +2213,7 @@
     <value>固定应用</value>
   </data>
   <data name="Ob_Taskbar_Card1Text" xml:space="preserve">
-    <value>把正在运行的窗口标签拖到面板左上角的灵动鸟图标上，松开即固定为快捷方式（拖放时图标会变成 ＋）。也可以直接把 .exe 拖到面板。</value>
+    <value>把正在运行的窗口标签拖到面板左上角的海岸线图标上，松开即固定为快捷方式（拖放时图标会变成 ＋）。也可以直接把 .exe 拖到面板。</value>
   </data>
   <data name="Ob_Taskbar_Card2Title" xml:space="preserve">
     <value>关闭与移除</value>
@@ -2228,10 +2228,10 @@
     <value>拖动标签调整顺序；单击快捷方式启动应用（已在运行则切换到它）。运行中的应用在任务栏中有高亮标识。</value>
   </data>
   <data name="Ob_Taskbar_Tip" xml:space="preserve">
-    <value>✅ 窗口列表实时跟随系统（窗口打开/关闭/改名即时刷新），无需手动刷新。</value>
+    <value>窗口列表实时跟随系统（窗口打开/关闭/改名即时刷新），无需手动刷新。</value>
   </data>
   <data name="Ob_Pip_Title" xml:space="preserve">
-    <value>🖥️ 应用辅助：窗口画中画</value>
+    <value>应用辅助：窗口画中画</value>
   </data>
   <data name="Ob_Pip_Desc" xml:space="preserve">
     <value>右边缘中间是应用辅助面板，把任意窗口「带进」面板，边工作边看。</value>
@@ -2255,10 +2255,10 @@
     <value>QQ 音乐、Spotify、浏览器等注册了系统媒体会话的应用，会在面板里列出，可直接播放/暂停/上一首/下一首，还能看到标题与封面。</value>
   </data>
   <data name="Ob_Pip_Tip" xml:space="preserve">
-    <value>✅ 窗口最小化时点击提示条即可恢复或重新嵌入，不打断播放。</value>
+    <value>窗口最小化时点击提示条即可恢复或重新嵌入，不打断播放。</value>
   </data>
   <data name="Ob_Widgets_Title" xml:space="preserve">
-    <value>🧩 小组件：剪贴板、便签、计时器…</value>
+    <value>小组件：剪贴板、便签、计时器…</value>
   </data>
   <data name="Ob_Widgets_Desc" xml:space="preserve">
     <value>左右边缘除中间外默认是小组件面板，顶部标签切换。</value>
@@ -2282,10 +2282,10 @@
     <value>设置 → 小工具 → 新建小组件：用 C# 编写（可让 AI 生成代码），内置编译器即时编译预览，保存即生效。也可以从文件导入/导出分享。</value>
   </data>
   <data name="Ob_Widgets_Tip" xml:space="preserve">
-    <value>✅ 小组件显示/隐藏、数量限制都可在 设置 → 小工具 中调整。</value>
+    <value>小组件显示/隐藏、数量限制都可在 设置 → 小工具 中调整。</value>
   </data>
   <data name="Ob_Toggles_Title" xml:space="preserve">
-    <value>⚡ 快捷开关与状态栏</value>
+    <value>快捷开关与状态栏</value>
   </data>
   <data name="Ob_Toggles_Desc" xml:space="preserve">
     <value>左上角是系统快捷开关；面板顶部是状态栏，一眼看到系统状态。</value>
@@ -2309,10 +2309,10 @@
     <value>把鼠标悬停在状态栏音量上滚动滚轮，直接调音量；点击天气立即刷新，双击用浏览器打开该城市预报。</value>
   </data>
   <data name="Ob_Toggles_Tip" xml:space="preserve">
-    <value>✅ 天气使用 Open-Meteo 免费服务，无需 API Key；城市留空按 IP 自动定位。</value>
+    <value>天气使用 Open-Meteo 免费服务，无需 API Key；城市留空按 IP 自动定位。</value>
   </data>
   <data name="Ob_Ai_Title" xml:space="preserve">
-    <value>🤖 AI 助手：你的桌面 AI</value>
+    <value>AI 助手：你的桌面 AI</value>
   </data>
   <data name="Ob_Ai_Desc" xml:space="preserve">
     <value>左边缘中间呼出 AI 面板。支持任意 OpenAI 兼容服务商，API Key 只存本机。</value>
@@ -2336,10 +2336,10 @@
     <value>在任何应用中选中文字，按此快捷键即可呼出面板翻译。留空 = 不启用。</value>
   </data>
   <data name="Ob_Ai_Tip" xml:space="preserve">
-    <value>💡 高级玩法：AI 面板的「输出到光标」——点按钮 → 点目标窗口（如 Word）→ AI 回复直接写进文档。请求直连你选择的服务商，无中间服务器。</value>
+    <value>高级玩法：AI 面板的「输出到光标」——点按钮 → 点目标窗口（如 Word）→ AI 回复直接写进文档。请求直连你选择的服务商，无中间服务器。</value>
   </data>
   <data name="Ob_Notify_Title" xml:space="preserve">
-    <value>🔔 通知坞与最近使用</value>
+    <value>通知坞与最近使用</value>
   </data>
   <data name="Ob_Notify_Desc" xml:space="preserve">
     <value>右下角聚合通知，左下角快速回到最近的工作。</value>
@@ -2357,10 +2357,10 @@
     <value>三个标签：最近打开的文件、最近使用的应用（自动追踪前台窗口）、常用与最近网页（读取 Edge/Chrome 历史，也可手动收藏常用网址）。</value>
   </data>
   <data name="Ob_Notify_Tip" xml:space="preserve">
-    <value>✅ 通知与最近数据只保存在本机，不联网上传。</value>
+    <value>通知与最近数据只保存在本机，不联网上传。</value>
   </data>
   <data name="Ob_Customize_Title" xml:space="preserve">
-    <value>🎨 个性化：让它更像你的</value>
+    <value>个性化：让它更像你的</value>
   </data>
   <data name="Ob_Customize_Desc" xml:space="preserve">
     <value>所有外观与行为都能调整，改完即时生效。</value>
@@ -2384,10 +2384,10 @@
     <value>每个边缘可选择跟随鼠标或固定位置；「小鸟依人」模式让面板跟着鼠标走；多显示器下自动跟随鼠标所在的屏幕，副屏也能正常使用。</value>
   </data>
   <data name="Ob_Customize_Tip" xml:space="preserve">
-    <value>💡 16 个区域的面板类型、形状、触发延时全部可单独配置——比如把右边缘改成 AI 助手，或把右上角改成窗口操作中心。</value>
+    <value>16 个区域的面板类型、形状、触发延时全部可单独配置——比如把右边缘改成 AI 助手，或把右上角改成窗口操作中心。</value>
   </data>
   <data name="Ob_Done_Title" xml:space="preserve">
-    <value>✅ 都准备好了</value>
+    <value>都准备好了</value>
   </data>
   <data name="Ob_Done_Sub" xml:space="preserve">
     <value>把鼠标移到屏幕边缘试试吧！所有操作都能在设置里调整，也可以随时重新查看本引导。</value>
@@ -2425,13 +2425,13 @@
 小组件</value>
   </data>
   <data name="Ob_Map_CustomTitle" xml:space="preserve">
-    <value>✨ 一切皆可自定义</value>
+    <value>一切皆可自定义</value>
   </data>
   <data name="Ob_Map_CustomText" xml:space="preserve">
     <value>16 个区域的触发开关、面板类型（任务栏/小组件/AI/画中画/通知等）、形状（方形/横条/竖条）、尺寸与触发延时都能在 设置 → 通用 中单独配置——把每个边缘/角落改成你想要的任何功能。</value>
   </data>
   <data name="Ob_Done_Tip" xml:space="preserve">
-    <value>💡 提示：鼠标移到屏幕边缘/角落即可触发，不需要点击任何按钮。</value>
+    <value>提示：鼠标移到屏幕边缘/角落即可触发，不需要点击任何按钮。</value>
   </data>
   <data name="Ob_Map_Taskbar" xml:space="preserve">
     <value>任务栏</value>
@@ -2444,26 +2444,26 @@
     <value>小组件</value>
   </data>
   <data name="Ob_Map_CornerTL" xml:space="preserve">
-    <value>🛠 左上：快捷开关
+    <value>左上：快捷开关
 （音量/亮度/蓝牙/Wi-Fi/热点）</value>
   </data>
   <data name="Ob_Map_CornerBL" xml:space="preserve">
-    <value>🕘 左下：最近使用
+    <value>左下：最近使用
 （文件/应用/网页）</value>
   </data>
   <data name="Ob_Map_CornerBR" xml:space="preserve">
-    <value>🔔 右下：通知坞
+    <value>右下：通知坞
 （通知聚合/更新提醒）</value>
   </data>
   <data name="Ob_Map_CornerTR" xml:space="preserve">
-    <value>🔒 右上：默认安全区
+    <value>右上：默认安全区
 （不呼出，避免挡关闭按钮）</value>
   </data>
   <data name="Set_AdvancedTrigger" xml:space="preserve">
-    <value>⚙️ 高级触发设置（触发距离 / 逐区域延时）</value>
+    <value>⚙高级触发设置（触发距离 / 逐区域延时）</value>
   </data>
   <data name="Set_AdvancedRegion" xml:space="preserve">
-    <value>📍 区域面板配置（每个区域显示什么）</value>
+    <value>区域面板配置（每个区域显示什么）</value>
   </data>
   <data name="Ob_Map_Screen" xml:space="preserve">
     <value>屏幕工作区</value>
@@ -2529,7 +2529,7 @@
     <value>打开设置</value>
   </data>
   <data name="Jump_OpenSettingsDesc" xml:space="preserve">
-    <value>打开灵动鸟设置窗口</value>
+    <value>打开 ShoreHue 海岸线 设置窗口</value>
   </data>
   <data name="Jump_ToggleDnd" xml:space="preserve">
     <value>切换勿扰</value>
@@ -2563,10 +2563,10 @@
   </data>
 
   <data name="Set_Tab_Region" xml:space="preserve">
-    <value>🗺️ 区域</value>
+    <value>区域</value>
   </data>
   <data name="Set_Tab_Panel" xml:space="preserve">
-    <value>🧰 面板</value>
+    <value>面板</value>
   </data>
 
   <data name="Set_UiFontScale" xml:space="preserve">
@@ -2594,7 +2594,7 @@
     <value>◈ 小组件（小组件面板的内容）</value>
   </data>
   <data name="Set_WebTool_Title" xml:space="preserve">
-    <value>🌐 网页工具</value>
+    <value>网页工具</value>
   </data>
   <data name="Set_WebTool_Desc" xml:space="preserve">
     <value>小组件面板的「网页工具」标签用 WebView2 打开所选工具页，选一个作为默认页；也可以填任意网址。</value>

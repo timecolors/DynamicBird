@@ -1,9 +1,9 @@
-<Page x:Class="DynamicBird.UI.Settings.Pages.ShortcutManagementPage"
+<Page x:Class="ShoreHue.UI.Settings.Pages.ShortcutManagementPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="{Binding Item[UI_ShortcutManagementPage_396], Source={x:Static loc:LocalizationManager.Instance}}"
       Background="Transparent"
-      Foreground="#1E1E1E" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+      Foreground="#1E1E1E" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
 
     <Page.Resources>
         <Style x:Key="LightButton" TargetType="Button">

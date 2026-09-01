@@ -1,16 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using DynamicBird.UI.Media;
+using ShoreHue.UI.Media;
 
-namespace DynamicBird.UI.AppHelper
+namespace ShoreHue.UI.AppHelper
 {
     /// <summary>
     /// 应用辅助模式主页：画中画（始终显示）+ 媒体控制（有媒体会话时显示）。
-    /// 点击面板中的灵动鸟图标循环切换页面。
+    /// 点击面板中的 ShoreHue 图标循环切换页面。
     /// </summary>
     public partial class AppHelperView : UserControl
     {
@@ -70,10 +70,10 @@ namespace DynamicBird.UI.AppHelper
         private void RebuildPages()
         {
             _pages.Clear();
-            _pages.Add(new PageInfo(DynamicBird.UI.Localization.LocalizationManager.Instance["AppHelper_Pip"], DynamicBird.UI.Localization.LocalizationManager.Instance["AppHelper_PipDesc"], _player));
+            _pages.Add(new PageInfo(ShoreHue.UI.Localization.LocalizationManager.Instance["AppHelper_Pip"], ShoreHue.UI.Localization.LocalizationManager.Instance["AppHelper_PipDesc"], _player));
             if (_hasMediaSessions)
             {
-                _pages.Add(new PageInfo(DynamicBird.UI.Localization.LocalizationManager.Instance["AppHelper_Media"], DynamicBird.UI.Localization.LocalizationManager.Instance["AppHelper_MediaDesc"], _mediaControl));
+                _pages.Add(new PageInfo(ShoreHue.UI.Localization.LocalizationManager.Instance["AppHelper_Media"], ShoreHue.UI.Localization.LocalizationManager.Instance["AppHelper_MediaDesc"], _mediaControl));
             }
 
             if (_pageIndex >= _pages.Count) _pageIndex = 0;

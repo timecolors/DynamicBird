@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Resources;
 using System.Runtime.InteropServices;
 
-namespace DynamicBird.UI.Localization
+namespace ShoreHue.UI.Localization
 {
     /// <summary>
     /// 本地化管理器（运行时切换语言）：
@@ -27,7 +27,7 @@ namespace DynamicBird.UI.Localization
         private LocalizationManager()
         {
             _resources = new ResourceManager(
-                "DynamicBird.UI.Localization.Strings", typeof(LocalizationManager).Assembly);
+                "ShoreHue.UI.Localization.Strings", typeof(LocalizationManager).Assembly);
         }
 
         /// <summary>按 key 取当前语言的字符串；缺失时返回 key 本身（便于发现漏译）。</summary>

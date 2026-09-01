@@ -12,10 +12,10 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Localization;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Localization;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public enum RecentItemType { File, App, Web }
 

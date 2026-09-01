@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Shell;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 任务栏 Jump List（右键任务栏/开始菜单快捷方式 → 常用操作）。
@@ -39,8 +39,8 @@ namespace DynamicBird.Infrastructure.WinApi
                 // ★ 任务：指向本进程 exe + 参数（单实例下参数由主窗口解析执行）
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = DynamicBird.UI.Localization.LocalizationManager.Instance["Jump_OpenSettings"],
-                    Description = DynamicBird.UI.Localization.LocalizationManager.Instance["Jump_OpenSettingsDesc"],
+                    Title = ShoreHue.UI.Localization.LocalizationManager.Instance["Jump_OpenSettings"],
+                    Description = ShoreHue.UI.Localization.LocalizationManager.Instance["Jump_OpenSettingsDesc"],
                     ApplicationPath = exe,
                     Arguments = ArgOpenSettings,
                     IconResourcePath = exe,
@@ -48,8 +48,8 @@ namespace DynamicBird.Infrastructure.WinApi
                 });
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = DynamicBird.UI.Localization.LocalizationManager.Instance["Jump_ToggleDnd"],
-                    Description = DynamicBird.UI.Localization.LocalizationManager.Instance["Jump_ToggleDndDesc"],
+                    Title = ShoreHue.UI.Localization.LocalizationManager.Instance["Jump_ToggleDnd"],
+                    Description = ShoreHue.UI.Localization.LocalizationManager.Instance["Jump_ToggleDndDesc"],
                     ApplicationPath = exe,
                     Arguments = ArgToggleDnd,
                     IconResourcePath = exe,
@@ -57,8 +57,8 @@ namespace DynamicBird.Infrastructure.WinApi
                 });
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = DynamicBird.UI.Localization.LocalizationManager.Instance["Jump_TogglePanel"],
-                    Description = DynamicBird.UI.Localization.LocalizationManager.Instance["Jump_TogglePanelDesc"],
+                    Title = ShoreHue.UI.Localization.LocalizationManager.Instance["Jump_TogglePanel"],
+                    Description = ShoreHue.UI.Localization.LocalizationManager.Instance["Jump_TogglePanelDesc"],
                     ApplicationPath = exe,
                     Arguments = ArgTogglePanel,
                     IconResourcePath = exe,
@@ -70,7 +70,7 @@ namespace DynamicBird.Infrastructure.WinApi
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("配置 Jump List 失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("配置 Jump List 失败", ex);
             }
         }
 

@@ -1,8 +1,8 @@
 using System;
 using System.Windows;
-using DynamicBird.Core.Services.Configuration;
+using ShoreHue.Core.Services.Configuration;
 
-namespace DynamicBird.Core.Detection
+namespace ShoreHue.Core.Detection
 {
     /// <summary>
     /// 形状计算器（实例类）
@@ -135,7 +135,7 @@ namespace DynamicBird.Core.Detection
 
         public ShapeResult GetFixedShapeResult(string position, string shapeType, double taskbarHeight)
         {
-            var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
+            var wa = ShoreHue.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
                 System.Windows.Application.Current?.MainWindow?.Left ?? 0,
                 System.Windows.Application.Current?.MainWindow?.Top ?? 0,
                 System.Windows.Application.Current?.MainWindow?.Width ?? 1920,

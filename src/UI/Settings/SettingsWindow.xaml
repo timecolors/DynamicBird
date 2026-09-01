@@ -1,15 +1,15 @@
-<Window x:Class="DynamicBird.UI.Settings.SettingsWindow"
+<Window x:Class="ShoreHue.UI.Settings.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:DynamicBird.UI.Settings"
-        xmlns:pages="clr-namespace:DynamicBird.UI.Settings.Pages"
+        xmlns:local="clr-namespace:ShoreHue.UI.Settings"
+        xmlns:pages="clr-namespace:ShoreHue.UI.Settings.Pages"
         Title="{Binding Item[UI_SettingsWindow_134], Source={x:Static loc:LocalizationManager.Instance}}"
         Height="720" Width="960"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{DynamicResource SettingsWindowBg}"
         Foreground="{DynamicResource SettingsWindowFg}"
-        MinHeight="560" MinWidth="780" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+        MinHeight="560" MinWidth="780" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
 
     <Window.Resources>
         <Style x:Key="InfoTipStyle" TargetType="TextBlock">
@@ -230,14 +230,14 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- ========== 分组：编程模式（鸟笼） ========== -->
+                        <!-- ========== 分组：编程模式（海床） ========== -->
                         <Border Background="{DynamicResource SettingsCardBg}" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="编程模式（鸟笼）" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
-                                <TextBlock Text="开启后，设置支持以代码（JSON）编辑：每个功能可生成 AI 提示词、复制原面板为副本自由改造、将整套或局部配置保存为预设。勾选后将在设置中新增「鸟笼」页签。"
+                                <TextBlock Text="编程模式（海床）" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                                <TextBlock Text="开启后，设置支持以代码（JSON）编辑：每个功能可生成 AI 提示词、复制原面板为副本自由改造、将整套或局部配置保存为预设。勾选后将在设置中新增「海床」页签。"
                                            FontSize="11" Foreground="#777777" TextWrapping="Wrap" Margin="0,0,0,8"/>
                                 <CheckBox x:Name="chkProgrammingMode"
-                                          Content="启用编程模式（鸟笼）"
+                                          Content="启用编程模式（海床）"
                                           FontSize="12"
                                           Checked="ChkProgrammingMode_Changed"
                                           Unchecked="ChkProgrammingMode_Changed"/>
@@ -1087,7 +1087,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding Item[WidgetMkt_Title], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
                             </Grid>
-                            <TextBlock Text="小组件启停与设置。创建/编辑自定义小组件请到「鸟笼」页。" FontSize="10.5" Foreground="#888888" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                            <TextBlock Text="小组件启停与设置。创建/编辑自定义小组件请到「海床」页。" FontSize="10.5" Foreground="#888888" Margin="0,6,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
                         <Grid>
@@ -1838,7 +1838,7 @@
 
 
             <!-- ====== ★★★ 选项卡7：AI 助手设置 ★★★ ====== -->
-            <TabItem x:Name="tabAI" Header="🤖 AI">
+            <TabItem x:Name="tabAI" Header="AI">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
                     <StackPanel>
 
@@ -1871,7 +1871,7 @@
 
                         <Border Background="{DynamicResource SettingsCardBg}" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="🔑 API Key" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                <TextBlock Text="API Key" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
                                 <PasswordBox x:Name="pwdAiKey" FontSize="12" Padding="6,4"/>
                                 <TextBlock Text="{Binding Item[UI_SettingsWindow_380], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="10.5" Foreground="#888888" Margin="0,4,0,0" TextWrapping="Wrap"/>
@@ -1948,8 +1948,8 @@
                 </ScrollViewer>
             </TabItem>
 
-            <!-- ====== 选项卡：鸟笼（编程模式，勾选后显示，内容由代码创建） ====== -->
-            <TabItem x:Name="tabBirdcage" Header="鸟笼" Visibility="Collapsed"/>
+            <!-- ====== 选项卡：海床（编程模式，勾选后显示，内容由代码创建） ====== -->
+            <TabItem x:Name="tabSeabed" Header="海床" Visibility="Collapsed"/>
         </TabControl>
 
         <!-- 底部按钮：更改自动保存 -->

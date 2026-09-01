@@ -6,9 +6,9 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using DynamicBird.Core.Services.Configuration;
+using ShoreHue.Core.Services.Configuration;
 
-namespace DynamicBird.Animation
+namespace ShoreHue.Animation
 {
     /// <summary>
     /// 面板形变动画器（WPF 原生动画 + 渲染帧驱动）：
@@ -670,7 +670,7 @@ namespace DynamicBird.Animation
             //   否则 ShowAt→StartFollowContext 连发会让跟随分支提前直达目标 → 动画瞬间化
             _followSuppressUntilTick = Environment.TickCount64 + ms + 100;
 
-            // ★ 自定义动画（鸟笼「动画」分组）：按类型 Id 查注册表，命中则走
+            // ★ 自定义动画（海床「动画」分组）：按类型 Id 查注册表，命中则走
             //   沙箱/超时/异常隔离保护的执行路径（见 RunCustomShowHide）
             if (AnimationRegistry.TryGet(animType, out var customAnim) && customAnim != null)
             {
@@ -762,7 +762,7 @@ namespace DynamicBird.Animation
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Warning(
                     "自定义动画异常，回退内置动画: " + ex.Message);
                 FallbackSlideShowHide(left, top, opacity, ms);
                 return;
@@ -1060,7 +1060,7 @@ namespace DynamicBird.Animation
             {
                 try
                 {
-                    var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
+                    var wa = ShoreHue.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
                         _window.Left, _window.Top, _window.Width, _window.Height);
                     return (wa.Width, wa.Height);
                 }

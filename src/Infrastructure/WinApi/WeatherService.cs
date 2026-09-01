@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 天气服务（Open-Meteo，完全免费、无需 API Key）：
@@ -23,14 +23,14 @@ namespace DynamicBird.Infrastructure.WinApi
         private static (string City, string Text, string Emoji)? _cached;
         private static DateTime _cacheTime = DateTime.MinValue;
 
-        /// <summary>获取天气文本（如 “☀️ 25° 晴”）；失败返回 null。城市留空 = IP 自动定位。</summary>
+        /// <summary>获取天气文本（如 “☀25° 晴”）；失败返回 null。城市留空 = IP 自动定位。</summary>
         public static async Task<(string Text, string Emoji)?> GetWeatherAsync(string city)
         {
             var full = await GetWeatherWithCityAsync(city);
             return full.HasValue ? (full.Value.Text, full.Value.Emoji) : null;
         }
 
-        /// <summary>获取天气（含生效城市名，如 保定 · ☀️ 25° 晴）；失败返回 null。</summary>
+        /// <summary>获取天气（含生效城市名，如 保定 · ☀25° 晴）；失败返回 null。</summary>
         public static async Task<(string City, string Text, string Emoji)?> GetWeatherWithCityAsync(string city)
         {
             string key = city?.Trim() ?? "";
@@ -237,19 +237,19 @@ namespace DynamicBird.Infrastructure.WinApi
 
         private static (string Emoji, string Desc) WeatherCode(int code) => code switch
         {
-            0 => ("☀️", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc0"]),
-            1 => ("🌤", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc1"]),
-            2 => ("⛅", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc2"]),
-            3 => ("☁️", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc3"]),
-            45 or 48 => ("🌫", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc45"]),
-            51 or 53 or 55 or 56 or 57 => ("🌦", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc51"]),
-            61 or 63 or 65 or 66 or 67 => ("🌧", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc61"]),
-            71 or 73 or 75 or 77 => ("🌨", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc71"]),
-            80 or 81 or 82 => ("🌦", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc80"]),
-            85 or 86 => ("🌨", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc85"]),
-            95 => ("⛈", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc95"]),
-            96 or 99 => ("⛈", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_Desc96"]),
-            _ => ("🌡", DynamicBird.UI.Localization.LocalizationManager.Instance["Weather_DescUnknown"])
+            0 => ("☀", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc0"]),
+            1 => ("☀", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc1"]),
+            2 => ("☁", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc2"]),
+            3 => ("☁", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc3"]),
+            45 or 48 => ("☁", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc45"]),
+            51 or 53 or 55 or 56 or 57 => ("☂", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc51"]),
+            61 or 63 or 65 or 66 or 67 => ("☂", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc61"]),
+            71 or 73 or 75 or 77 => ("❄", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc71"]),
+            80 or 81 or 82 => ("☂", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc80"]),
+            85 or 86 => ("❄", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc85"]),
+            95 => ("⛈", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc95"]),
+            96 or 99 => ("⛈", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_Desc96"]),
+            _ => ("☇", ShoreHue.UI.Localization.LocalizationManager.Instance["Weather_DescUnknown"])
         };
     }
 }

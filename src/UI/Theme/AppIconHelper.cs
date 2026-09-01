@@ -4,7 +4,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace DynamicBird.UI.Theme
+namespace ShoreHue.UI.Theme
 {
     /// <summary>
     /// 应用窗口图标：从可执行文件内置图标提取（单文件发布下也有效）。

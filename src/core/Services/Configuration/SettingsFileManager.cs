@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-namespace DynamicBird.Core.Services
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+namespace ShoreHue.Core.Services
 {
     /// <summary>
     /// 配置文件读写专用
@@ -41,7 +41,7 @@ namespace DynamicBird.Core.Services
                 {
                     string backup = ConfigPath + ".bak";
                     File.Copy(ConfigPath, backup, true);
-                    DynamicBird.Core.Infrastructure.Logging.LogManager.Error(
+                    ShoreHue.Core.Infrastructure.Logging.LogManager.Error(
                         "config.json 解析失败，已备份为 " + backup + ": " + ex.Message);
                 }
                 catch { }

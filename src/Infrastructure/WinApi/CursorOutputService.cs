@@ -5,7 +5,7 @@ using System.Windows.Automation;
 using System.Windows.Automation.Text;
 using System.Windows.Threading;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 把文本输出到用户指定的光标位置（如直接写进 Word / 记事本）：
@@ -36,7 +36,7 @@ namespace DynamicBird.Infrastructure.WinApi
                 Log($"TryLockTarget fg={hwnd} own={IsOwnWindow(hwnd)}");
                 if (hwnd == IntPtr.Zero || IsOwnWindow(hwnd))
                 {
-                    error = DynamicBird.UI.Localization.LocalizationManager.Instance["Cursor_ClickTarget"];
+                    error = ShoreHue.UI.Localization.LocalizationManager.Instance["Cursor_ClickTarget"];
                     return false;
                 }
 
@@ -79,7 +79,7 @@ namespace DynamicBird.Infrastructure.WinApi
             }
             catch (Exception ex)
             {
-                error = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Cursor_LockFailed"], ex.Message);
+                error = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Cursor_LockFailed"], ex.Message);
                 Log("lock fail: " + ex.Message);
                 return false;
             }
@@ -89,7 +89,7 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             try
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Debug("[CursorOutput] " + msg);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Debug("[CursorOutput] " + msg);
             }
             catch { }
         }

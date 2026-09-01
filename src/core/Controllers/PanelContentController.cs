@@ -1,18 +1,18 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.src.core.Services.Clipboard;
-using DynamicBird.src.core.Services.Notes;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.src.core.Services.System;
-using DynamicBird.UI.AppHelper;
-using DynamicBird.UI.Panels;
-using DynamicBird.UI.Widgets;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.src.core.Services.Clipboard;
+using ShoreHue.src.core.Services.Notes;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.src.core.Services.System;
+using ShoreHue.UI.AppHelper;
+using ShoreHue.UI.Panels;
+using ShoreHue.UI.Widgets;
 using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     public class PanelContentController
     {
@@ -26,11 +26,11 @@ namespace DynamicBird.Core.Controllers
         private IWidget? _currentWidget;
         private string _currentRegionType = "Taskbar";
         // ★ 画中画实例缓存：呼出面板时复用，避免镜像/播放状态被重置
-        private DynamicBird.UI.AppHelper.AppHelperView? _cachedAppHelper;
-        private DynamicBird.UI.Widgets.WidgetSwitcher? _cachedWidgetSwitcher;
-        private DynamicBird.UI.AI.AiChatView? _cachedAiChat;
+        private ShoreHue.UI.AppHelper.AppHelperView? _cachedAppHelper;
+        private ShoreHue.UI.Widgets.WidgetSwitcher? _cachedWidgetSwitcher;
+        private ShoreHue.UI.AI.AiChatView? _cachedAiChat;
         // ★ 任务栏视图缓存：贴边切换频繁触发 LoadContent，重建快捷方式布局是卡顿主因
-        private DynamicBird.UI.Panels.TaskbarView? _cachedTaskbarView;
+        private ShoreHue.UI.Panels.TaskbarView? _cachedTaskbarView;
         // ★ 自定义面板实例缓存：id → 视图，编译一次复用（源码变化时由设置重载重建）
         private readonly System.Collections.Generic.Dictionary<string, FrameworkElement> _customPanelCache = new();
         private string _customPanelsSignature = "";
@@ -44,7 +44,7 @@ namespace DynamicBird.Core.Controllers
         public string CurrentRegionType => _currentRegionType;
 
         /// <summary>当前缓存的小组件切换器（可能为 null，尚未创建）。</summary>
-        public DynamicBird.UI.Widgets.WidgetSwitcher? WidgetSwitcher => _cachedWidgetSwitcher;
+        public ShoreHue.UI.Widgets.WidgetSwitcher? WidgetSwitcher => _cachedWidgetSwitcher;
 
         /// <summary>
         /// 显示小组件面板并切换到指定标签（如划词热键跳转到 TextAi）。
@@ -74,7 +74,7 @@ namespace DynamicBird.Core.Controllers
 
         public void LoadContentForRegion(string regionType, string regionKey = "")
         {
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"LoadContent type={regionType} key={regionKey}");
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug($"LoadContent type={regionType} key={regionKey}");
 
             // ★ 同类型不重建：同一边内滑动（如 Left_Top → Left_Center）内容相同，
             //   直接复用当前实例，避免每次 new TaskbarView 导致的贴边切换卡顿
@@ -108,7 +108,7 @@ namespace DynamicBird.Core.Controllers
             {
                 case "Taskbar":
                     // ★ 缓存任务栏视图：切走再切回不重建（快捷方式布局/窗口列表保持）
-                    _cachedTaskbarView ??= new DynamicBird.UI.Panels.TaskbarView(_shortcutService, _settings);
+                    _cachedTaskbarView ??= new ShoreHue.UI.Panels.TaskbarView(_shortcutService, _settings);
                     newContent = _cachedTaskbarView;
                     break;
 
@@ -134,14 +134,14 @@ namespace DynamicBird.Core.Controllers
 
                 case "AI":
                     // ★ AI 助手面板缓存：保持对话状态
-                    _cachedAiChat ??= new DynamicBird.UI.AI.AiChatView();
+                    _cachedAiChat ??= new ShoreHue.UI.AI.AiChatView();
                     _cachedAiChat.RefreshSettings();
                     newContent = _cachedAiChat;
                     break;
 
                 case "WindowControl":
                     // ★ 右上角窗口操作中心（不缓存：每次显示都刷新前台窗口信息）
-                    newContent = new DynamicBird.UI.Widgets.WindowControlView();
+                    newContent = new ShoreHue.UI.Widgets.WindowControlView();
                     break;
 
                 case "Notification":
@@ -201,7 +201,7 @@ namespace DynamicBird.Core.Controllers
                 // 源码变化时清缓存（签名对比；★ 用哈希而非长度——同长不同内容会漏判导致陈旧缓存）
                 string sig = string.Join("|",
                     _settings.CustomPanels.Select(p =>
-                        p.Id + ":" + DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.SourceHash(p.Source ?? "")));
+                        p.Id + ":" + ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.SourceHash(p.Source ?? "")));
                 if (sig != _customPanelsSignature)
                 {
                     _customPanelsSignature = sig;
@@ -217,19 +217,19 @@ namespace DynamicBird.Core.Controllers
                 // ★ 沙箱：市场来源（TrustedSource=false）先拦截危险 API
                 if (!cp.TrustedSource)
                 {
-                    string sandboxErr = DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.SandboxErrors(cp.Source ?? "");
+                    string sandboxErr = ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.SandboxErrors(cp.Source ?? "");
                     if (sandboxErr.Length > 0)
                     {
-                        DynamicBird.Core.Infrastructure.Logging.LogManager.Error(
+                        ShoreHue.Core.Infrastructure.Logging.LogManager.Error(
                             $"自定义面板 [{cp.Name}] 市场来源被沙箱拦截: {sandboxErr}");
                         return new NotificationDockView();
                     }
                 }
-                var (widget, err) = DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.Compile(
+                var (widget, err) = ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.Compile(
                     "panel_" + cp.Id, cp.Source);
                 if (widget == null)
                 {
-                    DynamicBird.Core.Infrastructure.Logging.LogManager.Error(
+                    ShoreHue.Core.Infrastructure.Logging.LogManager.Error(
                         $"自定义面板 [{cp.Name}] 编译失败: {err}");
                     return new NotificationDockView();
                 }
@@ -240,7 +240,7 @@ namespace DynamicBird.Core.Controllers
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error(
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error(
                     "自定义面板加载异常", ex);
                 return new NotificationDockView();
             }

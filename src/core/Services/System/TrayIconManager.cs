@@ -1,12 +1,12 @@
 using System;
 using System.Reflection;
 using System.Windows;
-using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Core.Infrastructure.Service;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Service;
+using ShoreHue.Infrastructure.Utils;
 using Microsoft.Win32;
 
-namespace DynamicBird.Core.Services
+namespace ShoreHue.Core.Services
 {
     public class TrayIconManager : IService, IDisposable
     {
@@ -47,7 +47,7 @@ namespace DynamicBird.Core.Services
         public void Create()
         {
             _notifyIcon = new System.Windows.Forms.NotifyIcon();
-            _notifyIcon.Text = "灵动鸟";
+            _notifyIcon.Text = "ShoreHue";
 
             try
             {
@@ -64,12 +64,12 @@ namespace DynamicBird.Core.Services
             _notifyIcon.Visible = true;
 
             var menu = new System.Windows.Forms.ContextMenuStrip();
-            menu.Items.Add(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Settings"], null, (s, e) => _onOpenSettings());
+            menu.Items.Add(ShoreHue.UI.Localization.LocalizationManager.Instance["Tray_Settings"], null, (s, e) => _onOpenSettings());
             menu.Items.Add("-");
-            menu.Items.Add(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Toggle"], null, (s, e) => _onToggleWindow());
+            menu.Items.Add(ShoreHue.UI.Localization.LocalizationManager.Instance["Tray_Toggle"], null, (s, e) => _onToggleWindow());
             menu.Items.Add("-");
 
-            var autoStartItem = new System.Windows.Forms.ToolStripMenuItem(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_AutoStart"])
+            var autoStartItem = new System.Windows.Forms.ToolStripMenuItem(ShoreHue.UI.Localization.LocalizationManager.Instance["Tray_AutoStart"])
             {
                 CheckOnClick = true,
                 Checked = IsAutoStartEnabled()
@@ -77,7 +77,7 @@ namespace DynamicBird.Core.Services
             autoStartItem.Click += (s, e) => ToggleAutoStart(autoStartItem.Checked);
             menu.Items.Add(autoStartItem);
             menu.Items.Add("-");
-            menu.Items.Add(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_Exit"], null, (s, e) => _onExit());
+            menu.Items.Add(ShoreHue.UI.Localization.LocalizationManager.Instance["Tray_Exit"], null, (s, e) => _onExit());
 
             _notifyIcon.ContextMenuStrip = menu;
             _notifyIcon.DoubleClick += (s, e) => _onToggleWindow();
@@ -102,7 +102,7 @@ namespace DynamicBird.Core.Services
             try
             {
                 using var key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", false);
-                return key?.GetValue("DynamicBird") != null;
+                return key?.GetValue("ShoreHue") != null;
             }
             catch { return false; }
         }
@@ -118,18 +118,18 @@ namespace DynamicBird.Core.Services
                 }
                 using var key = Registry.CurrentUser.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
                 if (enable)
-                    key?.SetValue("DynamicBird", "\"" + (Environment.ProcessPath ?? "") + "\"");
+                    key?.SetValue("ShoreHue", "\"" + (Environment.ProcessPath ?? "") + "\"");
                 else
-                    key?.DeleteValue("DynamicBird", false);
+                    key?.DeleteValue("ShoreHue", false);
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_AutoStartFail"], ex.Message), "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Tray_AutoStartFail"], ex.Message), "ShoreHue", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
         /// <summary>商店版开机自启：使用 MSIX 启动任务（清单中需声明 desktop:StartupTask）。</summary>
-        private const string StartupTaskId = "DynamicBirdStartupTask";
+        private const string StartupTaskId = "ShoreHueStartupTask";
 
         private static bool IsStartupTaskEnabled()
         {
@@ -156,7 +156,7 @@ namespace DynamicBird.Core.Services
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Tray_AutoStartFailStore"], ex.Message), "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Tray_AutoStartFailStore"], ex.Message), "ShoreHue", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
     }

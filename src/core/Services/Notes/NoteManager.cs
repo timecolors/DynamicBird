@@ -1,15 +1,15 @@
-﻿using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Core.Infrastructure.Service;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.src.core.Services.Notes;
-using DynamicBird.Infrastructure.Utils;
+﻿using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Service;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.src.core.Services.Notes;
+using ShoreHue.Infrastructure.Utils;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-namespace DynamicBird.Core.Services
+namespace ShoreHue.Core.Services
 {
     /// <summary>
     /// 便签管理器（实例类，实现 INoteService + IService）

@@ -1,4 +1,4 @@
-<Window x:Class="DynamicBird.UI.Onboarding.OnboardingWindow"
+<Window x:Class="ShoreHue.UI.Onboarding.OnboardingWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding Item[Ob_Win_Title], Source={x:Static loc:LocalizationManager.Instance}}"
@@ -7,7 +7,7 @@
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         Background="#F3F6FA"
-        Foreground="#1E1E1E" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+        Foreground="#1E1E1E" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
 
     <!-- ★ 内联主题按钮样式：OnboardingWindow 自身可解析（不依赖 App 资源环境，便于单元测试） -->
     <Window.Resources>
@@ -188,16 +188,16 @@
 
                             <!-- 四角（橙=快捷设置/最近/通知；灰=右上安全区） -->
                             <Border Grid.Row="0" Grid.Column="0" Background="#D0FF9900" CornerRadius="6" Margin="2">
-                                <TextBlock Text="🛠" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="设" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="4" Background="#CCAAAAAA" CornerRadius="6" Margin="2">
-                                <TextBlock Text="🔒" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="隐" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="4" Grid.Column="0" Background="#D0FF9900" CornerRadius="6" Margin="2">
-                                <TextBlock Text="🕘" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="近" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="4" Grid.Column="4" Background="#D0FF9900" CornerRadius="6" Margin="2">
-                                <TextBlock Text="🔔" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="通" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </Grid>
                     </Border>

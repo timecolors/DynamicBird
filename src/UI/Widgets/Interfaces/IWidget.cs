@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace DynamicBird.UI.Widgets
+namespace ShoreHue.UI.Widgets
 {
     /// <summary>
     /// 小组件接口，所有组件必须实现

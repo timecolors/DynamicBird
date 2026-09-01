@@ -7,7 +7,7 @@ using Windows.Devices.Radios;
 using Windows.Networking.Connectivity;
 using Windows.Networking.NetworkOperators;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 显示器亮度控制：优先 WMI（笔记本内屏），其次 Dxva2（部分外接显示器）。

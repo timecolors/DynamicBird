@@ -1,6 +1,6 @@
 using System;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     /// <summary>
     /// 边缘区域映射与位置计算（纯函数，无状态、无 UI 依赖，可单元测试）。

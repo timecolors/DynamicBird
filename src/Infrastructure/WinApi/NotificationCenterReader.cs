@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using DynamicBird.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Logging;
 using Microsoft.Data.Sqlite;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 直接读取 Windows 通知中心数据库（wpndatabase.db），获取各应用发到通知中心的 Toast。
@@ -109,7 +109,7 @@ namespace DynamicBird.Infrastructure.WinApi
             try
             {
                 if (string.Equals(appId, SystemToast.Aumid, StringComparison.OrdinalIgnoreCase))
-                    return null; // 不展示灵动鸟自己发出的通知
+                    return null; // 不展示 ShoreHue 自己发出的通知
 
                 string xml = System.Text.Encoding.UTF8.GetString(payload);
                 var doc = XDocument.Parse(xml);
@@ -122,7 +122,7 @@ namespace DynamicBird.Infrastructure.WinApi
                 if (texts.Count == 0)
                 {
                     bool hasImage = doc.Descendants("image").Any();
-                    message = hasImage ? DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Image"] : DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_Empty"];
+                    message = hasImage ? ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_Image"] : ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_Empty"];
                 }
                 else if (texts.Count == 1)
                 {
@@ -155,14 +155,14 @@ namespace DynamicBird.Infrastructure.WinApi
         /// <summary>把 AUMID / 包名转成可读短名（取最后一段）。</summary>
         public static string FriendlyAppName(string? appId)
         {
-            if (string.IsNullOrWhiteSpace(appId)) return DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_System"];
+            if (string.IsNullOrWhiteSpace(appId)) return ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_System"];
             var parts = appId.Split(new[] { '.', '!', '-' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
             // 去掉常见系统前缀，避免显示成 "Microsoft.Windows.xxx"
             while (parts.Count > 1 && (parts[0] == "Microsoft" || parts[0] == "Windows"))
                 parts.RemoveAt(0);
 
-            if (parts.Count == 0) return DynamicBird.UI.Localization.LocalizationManager.Instance["Toast_System"];
+            if (parts.Count == 0) return ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_System"];
 
             string name = parts[^1];
             // 末尾是 "App" 之类无意义后缀时，用前一段（如 "xxx!App" -> "xxx"）

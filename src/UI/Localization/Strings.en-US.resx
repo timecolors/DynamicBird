@@ -64,19 +64,19 @@
     <value>Open AI settings</value>
   </data>
   <data name="UI_AiChatView_3" xml:space="preserve">
-    <value>🧹 Clear</value>
+    <value>Clear</value>
   </data>
   <data name="UI_AiChatView_4" xml:space="preserve">
     <value>Clear current conversation messages</value>
   </data>
   <data name="UI_AiChatView_5" xml:space="preserve">
-    <value>➕ New</value>
+    <value>New</value>
   </data>
   <data name="UI_AiChatView_6" xml:space="preserve">
     <value>New conversation</value>
   </data>
   <data name="UI_AiChatView_7" xml:space="preserve">
-    <value>🗑 Delete</value>
+    <value>Delete</value>
   </data>
   <data name="UI_AiChatView_8" xml:space="preserve">
     <value>Delete current conversation</value>
@@ -85,19 +85,19 @@
     <value>Edit this message</value>
   </data>
   <data name="UI_AiChatView_10" xml:space="preserve">
-    <value>📋 Copy</value>
+    <value>Copy</value>
   </data>
   <data name="UI_AiChatView_11" xml:space="preserve">
     <value>Copy reply (Markdown)</value>
   </data>
   <data name="UI_AiChatView_12" xml:space="preserve">
-    <value>🔄 Regenerate</value>
+    <value>Regenerate</value>
   </data>
   <data name="UI_AiChatView_13" xml:space="preserve">
     <value>Get another answer</value>
   </data>
   <data name="UI_AiChatView_14" xml:space="preserve">
-    <value>💾 Save</value>
+    <value>Save</value>
   </data>
   <data name="UI_AiChatView_15" xml:space="preserve">
     <value>Save as Markdown file</value>
@@ -202,10 +202,10 @@
     <value>Volume up</value>
   </data>
   <data name="UI_MainWindow_49" xml:space="preserve">
-    <value>DynamicBird</value>
+    <value>ShoreHue</value>
   </data>
   <data name="UI_PanelMediaPlayer_50" xml:space="preserve">
-    <value>🖼 Mirror window　·　📌 Embed window
+    <value>Mirror window　·　Embed window
 Mouse wheel zooms the mirrored view</value>
   </data>
   <data name="UI_PanelMediaPlayer_51" xml:space="preserve">
@@ -230,10 +230,10 @@ Mouse wheel zooms the mirrored view</value>
     <value>Start</value>
   </data>
   <data name="UI_OnboardingWindow_58" xml:space="preserve">
-    <value>DynamicBird - Welcome</value>
+    <value>ShoreHue - Welcome</value>
   </data>
   <data name="UI_OnboardingWindow_59" xml:space="preserve">
-    <value>DynamicBird</value>
+    <value>ShoreHue</value>
   </data>
   <data name="UI_OnboardingWindow_60" xml:space="preserve">
     <value>Welcome</value>
@@ -254,7 +254,7 @@ Mouse wheel zooms the mirrored view</value>
     <value>Get Started</value>
   </data>
   <data name="UI_OnboardingWindow_66" xml:space="preserve">
-    <value>Welcome to DynamicBird</value>
+    <value>Welcome to ShoreHue</value>
   </data>
   <data name="UI_OnboardingWindow_67" xml:space="preserve">
     <value>A desktop edge-panel tool that fits Windows.</value>
@@ -263,10 +263,10 @@ Mouse wheel zooms the mirrored view</value>
     <value>Move the mouse to the screen edge and the panel slides out; quick actions, notifications and widgets are at hand.</value>
   </data>
   <data name="UI_OnboardingWindow_69" xml:space="preserve">
-    <value>💡 No extra dependencies needed: edge triggering, window pinning and system notifications all use native Windows capabilities.</value>
+    <value>No extra dependencies needed: edge triggering, window pinning and system notifications all use native Windows capabilities.</value>
   </data>
   <data name="UI_OnboardingWindow_70" xml:space="preserve">
-    <value>🎯 Edge Triggering &amp; Corner Duties</value>
+    <value>Edge Triggering &amp; Corner Duties</value>
   </data>
   <data name="UI_OnboardingWindow_71" xml:space="preserve">
     <value>Top / Bottom / Left / Right Edges</value>
@@ -290,7 +290,7 @@ Top-right = none (to avoid interfering with closing windows).</value>
     <value>What each region shows and its trigger toggle can be customized in Settings.</value>
   </data>
   <data name="UI_OnboardingWindow_77" xml:space="preserve">
-    <value>📌 Taskbar: Pin, Close, Reorder</value>
+    <value>Taskbar: Pin, Close, Reorder</value>
   </data>
   <data name="UI_OnboardingWindow_78" xml:space="preserve">
     <value>Pin apps</value>
@@ -305,10 +305,10 @@ Top-right = none (to avoid interfering with closing windows).</value>
     <value>The ✕ on the right of a window tab closes the window; drag tabs to reorder; drag a shortcut onto the top-left icon to remove it (the icon turns into a trash can).</value>
   </data>
   <data name="UI_OnboardingWindow_82" xml:space="preserve">
-    <value>⚙️ Settings, DND &amp; Updates</value>
+    <value>⚙Settings, DND &amp; Updates</value>
   </data>
   <data name="UI_OnboardingWindow_83" xml:space="preserve">
-    <value>The DynamicBird icon</value>
+    <value>The ShoreHue icon</value>
   </data>
   <data name="UI_OnboardingWindow_84" xml:space="preserve">
     <value>Left-click: toggle Do Not Disturb; right-click: open Settings / refresh / exit.</value>
@@ -338,7 +338,7 @@ Top-right = none (to avoid interfering with closing windows).</value>
     <value>After configuring a GitHub repo in Settings, new versions are announced in the notification dock; click to download.</value>
   </data>
   <data name="UI_OnboardingWindow_93" xml:space="preserve">
-    <value>✨ Settings Features Worth Knowing</value>
+    <value>Settings Features Worth Knowing</value>
   </data>
   <data name="UI_OnboardingWindow_94" xml:space="preserve">
     <value>Follow-the-bird mode</value>
@@ -369,7 +369,7 @@ Top-right = none (to avoid interfering with closing windows).</value>
   </data>
   <data name="UI_OnboardingWindow_103" xml:space="preserve">
     <value>Bring up the AI chat panel from the left edge center: streaming replies, quick commands (translate / summarize / explain code / polish), multi-session management.
-Drag an image file onto the DynamicBird icon on the left side of the panel to send it to the AI for analysis (requires a vision-capable model such as gpt-4o, glm-4v, qwen-vl, etc.).
+Drag an image file onto the ShoreHue icon on the left side of the panel to send it to the AI for analysis (requires a vision-capable model such as gpt-4o, glm-4v, qwen-vl, etc.).
 Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.) and a model in Settings → AI; the API key stays on this machine and requests go directly to the provider you choose.</value>
   </data>
   <data name="UI_OnboardingWindow_104" xml:space="preserve">
@@ -379,7 +379,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Show/hide animations, easing types, corner radius, opacity and icon size are all adjustable; Mica frosted-glass background is supported on Win11.</value>
   </data>
   <data name="UI_OnboardingWindow_106" xml:space="preserve">
-    <value>✅ All Set</value>
+    <value>All Set</value>
   </data>
   <data name="UI_OnboardingWindow_107" xml:space="preserve">
     <value>Try moving the mouse to the screen edge. Everything can be adjusted in Settings, and you can revisit this guide anytime.</value>
@@ -394,13 +394,13 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Next</value>
   </data>
   <data name="UI_NotificationDockView_111" xml:space="preserve">
-    <value>🔔 Notification Dock</value>
+    <value>Notification Dock</value>
   </data>
   <data name="UI_NotificationDockView_112" xml:space="preserve">
     <value>Clear notifications</value>
   </data>
   <data name="UI_QuickSettingsView_113" xml:space="preserve">
-    <value>⚡ Quick Toggles</value>
+    <value>Quick Toggles</value>
   </data>
   <data name="UI_QuickSettingsView_114" xml:space="preserve">
     <value>Quick access to common system settings</value>
@@ -436,7 +436,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Settings</value>
   </data>
   <data name="UI_RecentItemsView_125" xml:space="preserve">
-    <value>🧭 Recent Items</value>
+    <value>Recent Items</value>
   </data>
   <data name="UI_RecentItemsView_126" xml:space="preserve">
     <value>Recently opened files, running apps, favorite web pages</value>
@@ -463,16 +463,16 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Close window</value>
   </data>
   <data name="UI_SettingsWindow_134" xml:space="preserve">
-    <value>DynamicBird Settings</value>
+    <value>ShoreHue Settings</value>
   </data>
   <data name="UI_SettingsWindow_135" xml:space="preserve">
-    <value>DynamicBird Settings</value>
+    <value>ShoreHue Settings</value>
   </data>
   <data name="UI_SettingsWindow_136" xml:space="preserve">
-    <value>⚙️ Taskbar</value>
+    <value>⚙Taskbar</value>
   </data>
   <data name="UI_SettingsWindow_137" xml:space="preserve">
-    <value>📐 Layout &amp; Display</value>
+    <value>Layout &amp; Display</value>
   </data>
   <data name="UI_SettingsWindow_138" xml:space="preserve">
     <value>Icon size</value>
@@ -493,7 +493,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Opacity</value>
   </data>
   <data name="UI_SettingsWindow_144" xml:space="preserve">
-    <value>🎯 Trigger &amp; Position</value>
+    <value>Trigger &amp; Position</value>
   </data>
   <data name="UI_SettingsWindow_145" xml:space="preserve">
     <value>Top</value>
@@ -628,7 +628,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Follow mouse: the panel moves along the edge with the mouse. Fixed position: the panel stays at a specific spot on the edge.</value>
   </data>
   <data name="UI_SettingsWindow_189" xml:space="preserve">
-    <value>🗂 Region Panels</value>
+    <value>Region Panels</value>
   </data>
   <data name="UI_SettingsWindow_190" xml:space="preserve">
     <value>Set which panel each edge/corner shows. Choose "Default layout" to use the current default assignment.</value>
@@ -682,7 +682,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Bottom-right</value>
   </data>
   <data name="UI_SettingsWindow_207" xml:space="preserve">
-    <value>⚡ Advanced Settings</value>
+    <value>Advanced Settings</value>
   </data>
   <data name="UI_SettingsWindow_208" xml:space="preserve">
     <value>Layout threshold</value>
@@ -718,7 +718,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Debounce delay when the mouse jitters at region boundaries. Smaller = faster but may misfire; larger = more stable but slower. Recommended 80ms.</value>
   </data>
   <data name="UI_SettingsWindow_219" xml:space="preserve">
-    <value>📍 Region Shapes (Advanced)</value>
+    <value>Region Shapes (Advanced)</value>
   </data>
   <data name="UI_SettingsWindow_220" xml:space="preserve">
     <value>Tip: choose "Default" to use the global logic</value>
@@ -895,10 +895,10 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Vertical strip</value>
   </data>
   <data name="UI_SettingsWindow_278" xml:space="preserve">
-    <value>🌐 General</value>
+    <value>General</value>
   </data>
   <data name="UI_SettingsWindow_279" xml:space="preserve">
-    <value>🌐 Interface Language</value>
+    <value>Interface Language</value>
   </data>
   <data name="UI_SettingsWindow_280" xml:space="preserve">
     <value>Changing the interface language takes effect immediately and persists on next launch.</value>
@@ -913,7 +913,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Simplified Chinese</value>
   </data>
   <data name="UI_SettingsWindow_284" xml:space="preserve">
-    <value>🎨 Appearance</value>
+    <value>Appearance</value>
   </data>
   <data name="UI_SettingsWindow_285" xml:space="preserve">
     <value>Background color</value>
@@ -934,7 +934,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Choose image</value>
   </data>
   <data name="UI_SettingsWindow_291" xml:space="preserve">
-    <value>Choose an image to replace the DynamicBird icon (PNG, JPG, ICO, etc.).</value>
+    <value>Choose an image to replace the ShoreHue icon (PNG, JPG, ICO, etc.).</value>
   </data>
   <data name="UI_SettingsWindow_292" xml:space="preserve">
     <value>Show system status</value>
@@ -943,10 +943,10 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Show time, CPU, memory, volume, network, battery, FPS etc. at the top of the panel.</value>
   </data>
   <data name="UI_SettingsWindow_294" xml:space="preserve">
-    <value>🔄 Auto Update</value>
+    <value>Auto Update</value>
   </data>
   <data name="UI_SettingsWindow_295" xml:space="preserve">
-    <value>Checks GitHub Releases and downloads updates. The update package must be DynamicBird.exe or a zip containing it, with the SHA256 in the release notes.</value>
+    <value>Checks GitHub Releases and downloads updates. The update package must be ShoreHue.exe or a zip containing it, with the SHA256 in the release notes.</value>
   </data>
   <data name="UI_SettingsWindow_296" xml:space="preserve">
     <value>Enable auto update (check GitHub for the latest version at startup)</value>
@@ -958,19 +958,19 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Update source not configured</value>
   </data>
   <data name="UI_SettingsWindow_299" xml:space="preserve">
-    <value>灵动鸟 DynamicBird</value>
+    <value>ShoreHue</value>
   </data>
   <data name="UI_SettingsWindow_300" xml:space="preserve">
-    <value>Privacy: DynamicBird uploads no personal data by default. Only when auto update is enabled does it request version info from GitHub Releases (which may include your IP); the web-favorites feature reads browser history locally. All config, shortcuts and logs stay in %LOCALAPPDATA%\DynamicBird and are removed on uninstall (Store version).</value>
+    <value>Privacy: ShoreHue uploads no personal data by default. Only when auto update is enabled does it request version info from GitHub Releases (which may include your IP); the web-favorites feature reads browser history locally. All config, shortcuts and logs stay in %LOCALAPPDATA%\ShoreHue and are removed on uninstall (Store version).</value>
   </data>
   <data name="UI_SettingsWindow_301" xml:space="preserve">
     <value>Third-party notices are in the repo's THIRD-PARTY-NOTICES.md (MIT).</value>
   </data>
   <data name="UI_SettingsWindow_302" xml:space="preserve">
-    <value>🧰 Widgets</value>
+    <value>Widgets</value>
   </data>
   <data name="UI_SettingsWindow_303" xml:space="preserve">
-    <value>📊 Status Bar Items</value>
+    <value>Status Bar Items</value>
   </data>
   <data name="UI_SettingsWindow_304" xml:space="preserve">
     <value>Choose which items the status bar at the top of the panel shows.</value>
@@ -1003,10 +1003,10 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Click the "Choose…" button to search and pick a city; leave empty to locate by network IP.</value>
   </data>
   <data name="UI_SettingsWindow_314" xml:space="preserve">
-    <value>When weather is enabled, DynamicBird sends requests to open-meteo.com (weather &amp; city suggestions) and ipwho.is (IP location), only when "Weather" is checked.</value>
+    <value>When weather is enabled, ShoreHue sends requests to open-meteo.com (weather &amp; city suggestions) and ipwho.is (IP location), only when "Weather" is checked.</value>
   </data>
   <data name="UI_SettingsWindow_315" xml:space="preserve">
-    <value>🧩 Panel Widgets</value>
+    <value>Panel Widgets</value>
   </data>
   <data name="UI_SettingsWindow_316" xml:space="preserve">
     <value>Choose which widgets stay in the widget panel. Unchecking hides the tab (data is kept).</value>
@@ -1039,7 +1039,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>After setting, select text in any app and press the hotkey to bring up the panel and translate. Leave empty = not set.</value>
   </data>
   <data name="UI_SettingsWindow_326" xml:space="preserve">
-    <value>📋 Clipboard History</value>
+    <value>Clipboard History</value>
   </data>
   <data name="UI_SettingsWindow_327" xml:space="preserve">
     <value>Max items</value>
@@ -1051,7 +1051,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>Max items kept in clipboard history, and how many characters are previewed in the list.</value>
   </data>
   <data name="UI_SettingsWindow_330" xml:space="preserve">
-    <value>📝 Notes</value>
+    <value>Notes</value>
   </data>
   <data name="UI_SettingsWindow_331" xml:space="preserve">
     <value>Default color</value>
@@ -1069,22 +1069,22 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>When enabled, new notes show a title bar; otherwise only the content.</value>
   </data>
   <data name="UI_SettingsWindow_336" xml:space="preserve">
-    <value>💡 Notes are stored in Data/notes.json, clipboard history in Data/clipboard_history.json</value>
+    <value>Notes are stored in Data/notes.json, clipboard history in Data/clipboard_history.json</value>
   </data>
   <data name="UI_SettingsWindow_337" xml:space="preserve">
-    <value>📌 Shortcuts</value>
+    <value>Shortcuts</value>
   </data>
   <data name="UI_SettingsWindow_338" xml:space="preserve">
-    <value>🎬 Animations</value>
+    <value>Animations</value>
   </data>
   <data name="UI_SettingsWindow_339" xml:space="preserve">
-    <value>🎬 Animation Settings</value>
+    <value>Animation Settings</value>
   </data>
   <data name="UI_SettingsWindow_340" xml:space="preserve">
     <value>Enable animations</value>
   </data>
   <data name="UI_SettingsWindow_341" xml:space="preserve">
-    <value>📌 Show/Hide</value>
+    <value>Show/Hide</value>
   </data>
   <data name="UI_SettingsWindow_342" xml:space="preserve">
     <value>Animation when the panel slides in/out from the edge</value>
@@ -1130,7 +1130,7 @@ Back: slight overshoot then settle
 Bounce: bounces at the end, good for endings</value>
   </data>
   <data name="UI_SettingsWindow_354" xml:space="preserve">
-    <value>🔄 Transform/Switch</value>
+    <value>Transform/Switch</value>
   </data>
   <data name="UI_SettingsWindow_355" xml:space="preserve">
     <value>Animation for panel resizing / region switching / flying across edges</value>
@@ -1176,13 +1176,13 @@ Back: slight overshoot then settle
 Bounce: bounces at the end, good for endings</value>
   </data>
   <data name="UI_SettingsWindow_367" xml:space="preserve">
-    <value>🚀 Fly Duration</value>
+    <value>Fly Duration</value>
   </data>
   <data name="UI_SettingsWindow_368" xml:space="preserve">
     <value>Movement speed when flying across edges. Smaller = faster, larger = slower.</value>
   </data>
   <data name="UI_SettingsWindow_369" xml:space="preserve">
-    <value>⏱️ Delayed Hide</value>
+    <value>⏱Delayed Hide</value>
   </data>
   <data name="UI_SettingsWindow_370" xml:space="preserve">
     <value>How long after the mouse leaves the panel before the hide animation starts</value>
@@ -1191,43 +1191,43 @@ Bounce: bounces at the end, good for endings</value>
     <value>Wait time</value>
   </data>
   <data name="UI_SettingsWindow_372" xml:space="preserve">
-    <value>💡 With animations off, show/hide/switch are instant. Delayed hide still applies (the panel vanishes after the delay). Flying still works with animations off (the panel doesn't disappear, but transforms are instant).</value>
+    <value>With animations off, show/hide/switch are instant. Delayed hide still applies (the panel vanishes after the delay). Flying still works with animations off (the panel doesn't disappear, but transforms are instant).</value>
   </data>
   <data name="UI_SettingsWindow_373" xml:space="preserve">
-    <value>🤖 AI Assistant</value>
+    <value>AI Assistant</value>
   </data>
   <data name="UI_SettingsWindow_374" xml:space="preserve">
-    <value>DynamicBird has a built-in AI assistant: chat, translate, summarize, explain code, etc. Your API key stays on this machine (ai.json); requests go directly to the model provider you choose, with no intermediate server.</value>
+    <value>ShoreHue has a built-in AI assistant: chat, translate, summarize, explain code, etc. Your API key stays on this machine (ai.json); requests go directly to the model provider you choose, with no intermediate server.</value>
   </data>
   <data name="UI_SettingsWindow_375" xml:space="preserve">
     <value>Enable AI assistant</value>
   </data>
   <data name="UI_SettingsWindow_376" xml:space="preserve">
-    <value>🏢 Provider Presets</value>
+    <value>Provider Presets</value>
   </data>
   <data name="UI_SettingsWindow_377" xml:space="preserve">
     <value>Selecting one fills in the API URL and common models automatically; you can also edit manually.</value>
   </data>
   <data name="UI_SettingsWindow_378" xml:space="preserve">
-    <value>🌐 API URL</value>
+    <value>API URL</value>
   </data>
   <data name="UI_SettingsWindow_379" xml:space="preserve">
     <value>OpenAI-compatible Chat Completions URL, e.g. https://api.deepseek.com/v1, http://localhost:11434/v1 (Ollama)</value>
   </data>
   <data name="UI_SettingsWindow_380" xml:space="preserve">
-    <value>Stored locally only in %LOCALAPPDATA%\DynamicBird\ai.json, never uploaded. Leave empty if no auth is needed (e.g. local Ollama).</value>
+    <value>Stored locally only in %LOCALAPPDATA%\ShoreHue\ai.json, never uploaded. Leave empty if no auth is needed (e.g. local Ollama).</value>
   </data>
   <data name="UI_SettingsWindow_381" xml:space="preserve">
-    <value>🧠 Model</value>
+    <value>Model</value>
   </data>
   <data name="UI_SettingsWindow_382" xml:space="preserve">
     <value>Enter a model name the provider supports, e.g. deepseek-chat, gpt-4o-mini, llama3.2.</value>
   </data>
   <data name="UI_SettingsWindow_383" xml:space="preserve">
-    <value>📝 System Prompt</value>
+    <value>System Prompt</value>
   </data>
   <data name="UI_SettingsWindow_384" xml:space="preserve">
-    <value>⚙️ Advanced</value>
+    <value>⚙Advanced</value>
   </data>
   <data name="UI_SettingsWindow_385" xml:space="preserve">
     <value>Temperature</value>
@@ -1248,7 +1248,7 @@ Bounce: bounces at the end, good for endings</value>
     <value>Test connection</value>
   </data>
   <data name="UI_SettingsWindow_391" xml:space="preserve">
-    <value>🔒 Privacy: DynamicBird collects or uploads no AI conversation data. All requests are sent directly from this machine to the model provider you choose and are subject to that provider's privacy policy.</value>
+    <value>Privacy: ShoreHue collects or uploads no AI conversation data. All requests are sent directly from this machine to the model provider you choose and are subject to that provider's privacy policy.</value>
   </data>
   <data name="UI_SettingsWindow_392" xml:space="preserve">
     <value>View guide</value>
@@ -1263,10 +1263,10 @@ Bounce: bounces at the end, good for endings</value>
     <value>Saves current settings to config.json; they take effect after closing.</value>
   </data>
   <data name="UI_SettingsWindow_396" xml:space="preserve">
-    <value>Uninstall DynamicBird…</value>
+    <value>Uninstall ShoreHue…</value>
   </data>
   <data name="UI_SettingsWindow_397" xml:space="preserve">
-    <value>Are you sure you want to uninstall DynamicBird? App files will be deleted (Store version: uninstall from system Settings).</value>
+    <value>Are you sure you want to uninstall ShoreHue? App files will be deleted (Store version: uninstall from system Settings).</value>
   </data>
   <data name="UI_SettingsWindow_398" xml:space="preserve">
     <value>Also delete local data (settings/clipboard history/notes/AI sessions)? Yes = delete all, No = keep data.</value>
@@ -1275,16 +1275,16 @@ Bounce: bounces at the end, good for endings</value>
     <value>Shortcut Management</value>
   </data>
   <data name="UI_ShortcutManagementPage_397" xml:space="preserve">
-    <value>➕ Add Shortcut</value>
+    <value>Add Shortcut</value>
   </data>
   <data name="UI_ShortcutManagementPage_398" xml:space="preserve">
-    <value>🗑️ Clear All</value>
+    <value>Clear All</value>
   </data>
   <data name="UI_ShortcutManagementPage_399" xml:space="preserve">
     <value>Ready</value>
   </data>
   <data name="UI_ShortcutManagementPage_400" xml:space="preserve">
-    <value>💡 You can also drag on the taskbar panel to reorder, drag in to pin, drag out to delete</value>
+    <value>You can also drag on the taskbar panel to reorder, drag in to pin, drag out to delete</value>
   </data>
   <data name="UI_SystemStatusView_401" xml:space="preserve">
     <value>Connected</value>
@@ -1362,10 +1362,10 @@ Bounce: bounces at the end, good for endings</value>
     <value>↺ Reset</value>
   </data>
   <data name="TextAi_Copy" xml:space="preserve">
-    <value>📋 Copy</value>
+    <value>Copy</value>
   </data>
   <data name="TextAi_Copied" xml:space="preserve">
-    <value>✅ Copied</value>
+    <value>Copied</value>
   </data>
   <data name="Timer_InputUnit" xml:space="preserve">
     <value>Target time</value>
@@ -1389,10 +1389,10 @@ Bounce: bounces at the end, good for endings</value>
     <value>Alarm: {0}</value>
   </data>
   <data name="Timer_TimeUp" xml:space="preserve">
-    <value>⏰ Time's up!</value>
+    <value>Time's up!</value>
   </data>
   <data name="Timer_StopAlarm" xml:space="preserve">
-    <value>⏰ Stop alarm</value>
+    <value>Stop alarm</value>
   </data>
   <data name="Timer_Running" xml:space="preserve">
     <value>Running…</value>
@@ -1410,13 +1410,13 @@ Bounce: bounces at the end, good for endings</value>
     <value>Set a target time; a system reminder will fire at that time</value>
   </data>
   <data name="Timer_SetAlarm" xml:space="preserve">
-    <value>⏰ Set alarm</value>
+    <value>Set alarm</value>
   </data>
   <data name="Calc_Error" xml:space="preserve">
     <value>Error</value>
   </data>
   <data name="Note_New" xml:space="preserve">
-    <value>➕ New</value>
+    <value>New</value>
   </data>
   <data name="Note_Delete" xml:space="preserve">
     <value>✕ Delete</value>
@@ -1437,7 +1437,7 @@ Bounce: bounces at the end, good for endings</value>
     <value>Confirm</value>
   </data>
   <data name="Clip_DeleteSelected" xml:space="preserve">
-    <value>🗑️ Delete selected</value>
+    <value>Delete selected</value>
   </data>
   <data name="Clip_ClearAll" xml:space="preserve">
     <value>Clear all</value>
@@ -1470,10 +1470,10 @@ Bounce: bounces at the end, good for endings</value>
     <value>Pin (never auto-cleared)</value>
   </data>
   <data name="Clip_Copied" xml:space="preserve">
-    <value>✅ Copied</value>
+    <value>Copied</value>
   </data>
   <data name="Clip_Deleted" xml:space="preserve">
-    <value>🗑️ Deleted {0} items</value>
+    <value>Deleted {0} items</value>
   </data>
   <data name="Clip_ClearConfirm" xml:space="preserve">
     <value>Clear all clipboard history?</value>
@@ -1482,7 +1482,7 @@ Bounce: bounces at the end, good for endings</value>
     <value>Confirm</value>
   </data>
   <data name="Clip_Cleared" xml:space="preserve">
-    <value>🗑️ Cleared</value>
+    <value>Cleared</value>
   </data>
   <data name="Status_WeatherLoading" xml:space="preserve">
     <value>Weather…</value>
@@ -1509,10 +1509,10 @@ Bounce: bounces at the end, good for endings</value>
     <value>Favorites &amp; recent web pages ({0})</value>
   </data>
   <data name="Notify_Title" xml:space="preserve">
-    <value>🔔 Notification dock ({0})</value>
+    <value>Notification dock ({0})</value>
   </data>
   <data name="Notify_TitleEmpty" xml:space="preserve">
-    <value>🔔 Notification dock</value>
+    <value>Notification dock</value>
   </data>
   <data name="QS_On" xml:space="preserve">
     <value>On</value>
@@ -1557,10 +1557,10 @@ Bounce: bounces at the end, good for endings</value>
     <value>…(content too long, truncated; showing the first {0} characters)</value>
   </data>
   <data name="Ai_FileLabelDocx" xml:space="preserve">
-    <value>📄 Word document</value>
+    <value>Word document</value>
   </data>
   <data name="Ai_FileLabelGeneric" xml:space="preserve">
-    <value>📄 File</value>
+    <value>File</value>
   </data>
   <data name="Ai_CursorOutputStart" xml:space="preserve">
     <value>⌨ Output to cursor</value>
@@ -1590,7 +1590,7 @@ Bounce: bounces at the end, good for endings</value>
     <value>Model: {0} · context {1}% (trimmed to window)</value>
   </data>
   <data name="Ai_OnlyRecent" xml:space="preserve">
-    <value>⏪ Only showing the latest {0} messages; full history is saved locally</value>
+    <value>Only showing the latest {0} messages; full history is saved locally</value>
   </data>
   <data name="Ai_NewChatTitle" xml:space="preserve">
     <value>New chat</value>
@@ -1662,13 +1662,13 @@ Bounce: bounces at the end, good for endings</value>
     <value>Unknown</value>
   </data>
   <data name="Clip_ImageSize" xml:space="preserve">
-    <value>🖼️ Image ({0}×{1})</value>
+    <value>Image ({0}×{1})</value>
   </data>
   <data name="Clip_ImageSaveFailed" xml:space="preserve">
-    <value>🖼️ Image (save failed)</value>
+    <value>Image (save failed)</value>
   </data>
   <data name="Clip_ImageMissing" xml:space="preserve">
-    <value>🖼️ Image (file missing)</value>
+    <value>Image (file missing)</value>
   </data>
   <data name="Capture_NoFg" xml:space="preserve">
     <value>Cannot get the foreground window</value>
@@ -1743,19 +1743,19 @@ Bounce: bounces at the end, good for endings</value>
     <value>{0} shortcuts</value>
   </data>
   <data name="Scm_Added" xml:space="preserve">
-    <value>✅ Added: {0}</value>
+    <value>Added: {0}</value>
   </data>
   <data name="Scm_AddFailed" xml:space="preserve">
-    <value>⚠️ Already exists or failed to add</value>
+    <value>⚠Already exists or failed to add</value>
   </data>
   <data name="Scm_ClearConfirm" xml:space="preserve">
     <value>Clear all shortcuts?</value>
   </data>
   <data name="Scm_Cleared" xml:space="preserve">
-    <value>🗑️ Cleared</value>
+    <value>Cleared</value>
   </data>
   <data name="Scm_Deleted" xml:space="preserve">
-    <value>🗑️ Deleted: {0}</value>
+    <value>Deleted: {0}</value>
   </data>
   <data name="Scm_Confirm" xml:space="preserve">
     <value>Confirm</value>
@@ -1794,7 +1794,7 @@ Bounce: bounces at the end, good for endings</value>
     <value>System notification</value>
   </data>
   <data name="Toast_AppName" xml:space="preserve">
-    <value>DynamicBird</value>
+    <value>ShoreHue</value>
   </data>
   <data name="Recent_Wechat" xml:space="preserve">
     <value>WeChat</value>
@@ -1857,13 +1857,13 @@ Bounce: bounces at the end, good for endings</value>
     <value>Refresh</value>
   </data>
   <data name="Set_WidgetMarket" xml:space="preserve">
-    <value>🛒 Widget Market</value>
+    <value>Widget Market</value>
   </data>
   <data name="Set_Testing" xml:space="preserve">
     <value>Testing…</value>
   </data>
   <data name="Set_ConnOk" xml:space="preserve">
-    <value>✅ Connected</value>
+    <value>Connected</value>
   </data>
   <data name="Set_Saved" xml:space="preserve">
     <value>Settings saved</value>
@@ -1936,7 +1936,7 @@ Drag apps onto the icon to pin / remove
 Right-click for the quick menu</value>
   </data>
   <data name="Main_TitleDnd" xml:space="preserve">
-    <value>DynamicBird (Do Not Disturb)</value>
+    <value>ShoreHue (Do Not Disturb)</value>
   </data>
   <data name="Status_WeatherClick" xml:space="preserve">
     <value>Click to view the weather forecast</value>
@@ -1978,13 +1978,13 @@ Right-click for the quick menu</value>
     <value>Delay before the panel starts hiding after the mouse leaves; 0 = immediately.</value>
   </data>
   <data name="Perf_Smooth" xml:space="preserve">
-    <value>⚡ Smooth</value>
+    <value>Smooth</value>
   </data>
   <data name="Perf_Normal" xml:space="preserve">
-    <value>🎯 Normal</value>
+    <value>Normal</value>
   </data>
   <data name="Perf_Saver" xml:space="preserve">
-    <value>🔋 Saver</value>
+    <value>Saver</value>
   </data>
   <data name="Perf_SmoothDesc" xml:space="preserve">
     <value>Full panel animations, longer and smoother, faster response; may slightly increase system load</value>
@@ -1999,13 +1999,13 @@ Right-click for the quick menu</value>
     <value>Bird performance mode: click to switch</value>
   </data>
   <data name="Perf_Custom" xml:space="preserve">
-    <value>✏️ Custom</value>
+    <value>✏Custom</value>
   </data>
   <data name="Perf_CustomDesc" xml:space="preserve">
     <value>Animations/trigger parameters were tweaked manually, presets no longer apply; click the button to return to Normal</value>
   </data>
   <data name="WidgetMkt_Tab" xml:space="preserve">
-    <value>🧩 My Widgets</value>
+    <value>My Widgets</value>
   </data>
   <data name="WidgetMkt_Title" xml:space="preserve">
     <value>Create your own widget</value>
@@ -2014,10 +2014,10 @@ Right-click for the quick menu</value>
     <value>Write widgets in C#: click "New" to code in the built-in editor, or paste AI-generated C# code to import (see docs/WIDGET-SPEC.md). Saved widgets appear automatically in the panel's widget tabs.</value>
   </data>
   <data name="WidgetMkt_New" xml:space="preserve">
-    <value>🧩 New widget</value>
+    <value>New widget</value>
   </data>
   <data name="WidgetMkt_Import" xml:space="preserve">
-    <value>🤖 AI import</value>
+    <value>AI import</value>
   </data>
   <data name="WidgetMkt_Refresh" xml:space="preserve">
     <value>↻ Refresh</value>
@@ -2041,7 +2041,7 @@ Right-click for the quick menu</value>
     <value>Confirm</value>
   </data>
   <data name="WidgetMkt_None" xml:space="preserve">
-    <value>🔒 No permissions</value>
+    <value>No permissions</value>
   </data>
   <data name="WidgetMkt_Edit" xml:space="preserve">
     <value>Edit</value>
@@ -2095,10 +2095,10 @@ Right-click for the quick menu</value>
     <value>Applies to the foreground window</value>
   </data>
   <data name="Ob_Win_Title" xml:space="preserve">
-    <value>DynamicBird - First-run Guide</value>
+    <value>ShoreHue - First-run Guide</value>
   </data>
   <data name="Ob_Step_Brand" xml:space="preserve">
-    <value>DynamicBird</value>
+    <value>ShoreHue</value>
   </data>
   <data name="Ob_Step_1" xml:space="preserve">
     <value>Welcome</value>
@@ -2131,7 +2131,7 @@ Right-click for the quick menu</value>
     <value>Get Started</value>
   </data>
   <data name="Ob_Welcome_Title" xml:space="preserve">
-    <value>Welcome to DynamicBird</value>
+    <value>Welcome to ShoreHue</value>
   </data>
   <data name="Ob_Welcome_Sub" xml:space="preserve">
     <value>A Windows desktop edge panel tool — keep frequent actions at the screen edge, use them, then move on.</value>
@@ -2149,10 +2149,10 @@ Right-click for the quick menu</value>
     <value>Edges: quick actions &amp; taskbar; corners: standalone panels (quick toggles / recent items / notification dock); center areas: AI assistant and app assistant (picture-in-picture).</value>
   </data>
   <data name="Ob_Welcome_Tip" xml:space="preserve">
-    <value>💡 Privacy first: all data stays on your machine at %LOCALAPPDATA%\DynamicBird — no account, no ads, no cloud upload.</value>
+    <value>Privacy first: all data stays on your machine at %LOCALAPPDATA%\ShoreHue — no account, no ads, no cloud upload.</value>
   </data>
   <data name="Ob_Map_Title" xml:space="preserve">
-    <value>🗺️ Screen map: 16 trigger regions</value>
+    <value>Screen map: 16 trigger regions</value>
   </data>
   <data name="Ob_Map_Desc" xml:space="preserve">
     <value>This diagram shows the default layout. What each region shows, whether it is enabled, its shape and trigger delay can all be customized in Settings → General.</value>
@@ -2200,10 +2200,10 @@ Right-click for the quick menu</value>
     <value>Top-left: quick toggles (volume/brightness/Bluetooth/Wi-Fi/hotspot); bottom-left: recent items (files/apps/web); bottom-right: notification dock. Top-right stays hidden by default; you can make it a window control center.</value>
   </data>
   <data name="Ob_Map_Tip" xml:space="preserve">
-    <value>💡 The top-right corner is where window close buttons live, so it stays a safe zone by default — configure it as a window control center when you need it.</value>
+    <value>The top-right corner is where window close buttons live, so it stays a safe zone by default — configure it as a window control center when you need it.</value>
   </data>
   <data name="Ob_Taskbar_Title" xml:space="preserve">
-    <value>📌 Edge taskbar: pin, close, reorder</value>
+    <value>Edge taskbar: pin, close, reorder</value>
   </data>
   <data name="Ob_Taskbar_Desc" xml:space="preserve">
     <value>Top and bottom edges show the taskbar by default: your shortcuts on the left, running windows on the right.</value>
@@ -2227,10 +2227,10 @@ Right-click for the quick menu</value>
     <value>Drag tabs to reorder; single-click a shortcut to launch (switches to it if already running). Running apps are highlighted in the taskbar.</value>
   </data>
   <data name="Ob_Taskbar_Tip" xml:space="preserve">
-    <value>✅ The window list follows the system in real time (open/close/rename refresh instantly) — no manual refresh needed.</value>
+    <value>The window list follows the system in real time (open/close/rename refresh instantly) — no manual refresh needed.</value>
   </data>
   <data name="Ob_Pip_Title" xml:space="preserve">
-    <value>🖥️ App assistant: window picture-in-picture</value>
+    <value>App assistant: window picture-in-picture</value>
   </data>
   <data name="Ob_Pip_Desc" xml:space="preserve">
     <value>The right edge center hosts the app assistant — bring any window into the panel and keep an eye on it while working.</value>
@@ -2254,10 +2254,10 @@ Right-click for the quick menu</value>
     <value>Apps that register a system media session (QQ Music, Spotify, browsers…) appear in the panel — play/pause, previous/next, with title and cover art.</value>
   </data>
   <data name="Ob_Pip_Tip" xml:space="preserve">
-    <value>✅ When the source window is minimized, click the status bar to restore or re-embed it without interrupting playback.</value>
+    <value>When the source window is minimized, click the status bar to restore or re-embed it without interrupting playback.</value>
   </data>
   <data name="Ob_Widgets_Title" xml:space="preserve">
-    <value>🧩 Widgets: clipboard, notes, timer…</value>
+    <value>Widgets: clipboard, notes, timer…</value>
   </data>
   <data name="Ob_Widgets_Desc" xml:space="preserve">
     <value>Left/right edges (except center) show widgets by default, switched via tabs on top.</value>
@@ -2281,10 +2281,10 @@ Right-click for the quick menu</value>
     <value>Settings → Widgets → New widget: write C# (or let AI generate it), the built-in compiler compiles and previews instantly, save to activate. Import/export to share with others.</value>
   </data>
   <data name="Ob_Widgets_Tip" xml:space="preserve">
-    <value>✅ Widget visibility and limits are all adjustable in Settings → Widgets.</value>
+    <value>Widget visibility and limits are all adjustable in Settings → Widgets.</value>
   </data>
   <data name="Ob_Toggles_Title" xml:space="preserve">
-    <value>⚡ Quick toggles &amp; status bar</value>
+    <value>Quick toggles &amp; status bar</value>
   </data>
   <data name="Ob_Toggles_Desc" xml:space="preserve">
     <value>Top-left corner is the system quick toggles panel; the panel's top strip is the status bar.</value>
@@ -2308,10 +2308,10 @@ Right-click for the quick menu</value>
     <value>Hover over the volume percentage in the status bar and scroll the wheel to adjust volume; click the weather to refresh, double-click to open the forecast in your browser.</value>
   </data>
   <data name="Ob_Toggles_Tip" xml:space="preserve">
-    <value>✅ Weather uses Open-Meteo (free, no API key); leave the city blank for IP-based location.</value>
+    <value>Weather uses Open-Meteo (free, no API key); leave the city blank for IP-based location.</value>
   </data>
   <data name="Ob_Ai_Title" xml:space="preserve">
-    <value>🤖 AI assistant: your desktop AI</value>
+    <value>AI assistant: your desktop AI</value>
   </data>
   <data name="Ob_Ai_Desc" xml:space="preserve">
     <value>Hover the left edge center to open the AI panel. Any OpenAI-compatible provider works; the API key stays on your machine.</value>
@@ -2335,10 +2335,10 @@ Right-click for the quick menu</value>
     <value>Select text in any app and press this hotkey to open the panel and translate. Leave empty to disable.</value>
   </data>
   <data name="Ob_Ai_Tip" xml:space="preserve">
-    <value>💡 Pro tip: "Output to cursor" — click the button, click a target window (e.g. Word), and AI replies are typed straight into your document. Requests go directly to your chosen provider, no middleman server.</value>
+    <value>Pro tip: "Output to cursor" — click the button, click a target window (e.g. Word), and AI replies are typed straight into your document. Requests go directly to your chosen provider, no middleman server.</value>
   </data>
   <data name="Ob_Notify_Title" xml:space="preserve">
-    <value>🔔 Notification dock &amp; recent items</value>
+    <value>Notification dock &amp; recent items</value>
   </data>
   <data name="Ob_Notify_Desc" xml:space="preserve">
     <value>Bottom-right aggregates notifications; bottom-left gets you back to recent work.</value>
@@ -2356,10 +2356,10 @@ Right-click for the quick menu</value>
     <value>Three tabs: recently opened files, recently used apps (foreground-window tracking), and favorite/recent web pages (reads Edge/Chrome history, with manual favorites).</value>
   </data>
   <data name="Ob_Notify_Tip" xml:space="preserve">
-    <value>✅ Notification and recent data stay local — nothing is uploaded.</value>
+    <value>Notification and recent data stay local — nothing is uploaded.</value>
   </data>
   <data name="Ob_Customize_Title" xml:space="preserve">
-    <value>🎨 Customize: make it yours</value>
+    <value>Customize: make it yours</value>
   </data>
   <data name="Ob_Customize_Desc" xml:space="preserve">
     <value>Every aspect of appearance and behavior is adjustable, applied instantly.</value>
@@ -2383,10 +2383,10 @@ Right-click for the quick menu</value>
     <value>Each edge can follow the mouse or stay fixed; "Cling" mode lets the panel follow your cursor around; on multiple monitors the panel follows the screen the mouse is on.</value>
   </data>
   <data name="Ob_Customize_Tip" xml:space="preserve">
-    <value>💡 All 16 regions' panel type, shape and trigger delay are individually configurable — e.g. turn the right edge into the AI assistant, or the top-right corner into a window control center.</value>
+    <value>All 16 regions' panel type, shape and trigger delay are individually configurable — e.g. turn the right edge into the AI assistant, or the top-right corner into a window control center.</value>
   </data>
   <data name="Ob_Done_Title" xml:space="preserve">
-    <value>✅ You're all set</value>
+    <value>You're all set</value>
   </data>
   <data name="Ob_Done_Sub" xml:space="preserve">
     <value>Move the mouse to a screen edge and give it a try! Everything is adjustable in Settings, and you can reopen this guide anytime.</value>
@@ -2424,13 +2424,13 @@ Widgets</value>
 Widgets</value>
   </data>
   <data name="Ob_Map_CustomTitle" xml:space="preserve">
-    <value>✨ Everything is customizable</value>
+    <value>Everything is customizable</value>
   </data>
   <data name="Ob_Map_CustomText" xml:space="preserve">
     <value>All 16 regions — trigger on/off, panel type (taskbar/widgets/AI/PiP/notifications…), shape (square/horizontal/vertical strip), size and trigger delay — can be configured individually in Settings → General. Turn any edge or corner into whatever you want.</value>
   </data>
   <data name="Ob_Done_Tip" xml:space="preserve">
-    <value>💡 Tip: just move the mouse to a screen edge or corner to trigger panels — no buttons to click.</value>
+    <value>Tip: just move the mouse to a screen edge or corner to trigger panels — no buttons to click.</value>
   </data>
   <data name="Ob_Map_Taskbar" xml:space="preserve">
     <value>Taskbar</value>
@@ -2443,26 +2443,26 @@ Media control</value>
     <value>Widgets</value>
   </data>
   <data name="Ob_Map_CornerTL" xml:space="preserve">
-    <value>🛠 Top-left: quick toggles
+    <value>Top-left: quick toggles
 (volume/brightness/Bluetooth/Wi-Fi)</value>
   </data>
   <data name="Ob_Map_CornerBL" xml:space="preserve">
-    <value>🕘 Bottom-left: recent items
+    <value>Bottom-left: recent items
 (files/apps/web)</value>
   </data>
   <data name="Ob_Map_CornerBR" xml:space="preserve">
-    <value>🔔 Bottom-right: notification dock
+    <value>Bottom-right: notification dock
 (toasts/update alerts)</value>
   </data>
   <data name="Ob_Map_CornerTR" xml:space="preserve">
-    <value>🔒 Top-right: safe zone by default
+    <value>Top-right: safe zone by default
 (no panel, keeps close button clear)</value>
   </data>
   <data name="Set_AdvancedTrigger" xml:space="preserve">
-    <value>⚙️ Advanced trigger settings (distance / per-region delay)</value>
+    <value>⚙Advanced trigger settings (distance / per-region delay)</value>
   </data>
   <data name="Set_AdvancedRegion" xml:space="preserve">
-    <value>📍 Per-region panel configuration</value>
+    <value>Per-region panel configuration</value>
   </data>
   <data name="Ob_Map_Screen" xml:space="preserve">
     <value>Desktop</value>
@@ -2528,7 +2528,7 @@ Media control</value>
     <value>Open Settings</value>
   </data>
   <data name="Jump_OpenSettingsDesc" xml:space="preserve">
-    <value>Open DynamicBird settings</value>
+    <value>Open ShoreHue settings</value>
   </data>
   <data name="Jump_ToggleDnd" xml:space="preserve">
     <value>Toggle Do Not Disturb</value>
@@ -2562,10 +2562,10 @@ Media control</value>
   </data>
 
   <data name="Set_Tab_Region" xml:space="preserve">
-    <value>🗺️ Region</value>
+    <value>Region</value>
   </data>
   <data name="Set_Tab_Panel" xml:space="preserve">
-    <value>🧰 Panel</value>
+    <value>Panel</value>
   </data>
 
   <data name="Set_UiFontScale" xml:space="preserve">
@@ -2593,7 +2593,7 @@ Media control</value>
     <value>◈ Widgets (widget panel content)</value>
   </data>
   <data name="Set_WebTool_Title" xml:space="preserve">
-    <value>🌐 Web Tools</value>
+    <value>Web Tools</value>
   </data>
   <data name="Set_WebTool_Desc" xml:space="preserve">
     <value>The "Web Tools" tab in the widget panel opens the selected tool page via WebView2. Pick a default, or enter any URL.</value>

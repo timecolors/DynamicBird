@@ -1,6 +1,6 @@
 using Microsoft.Win32;
 
-namespace DynamicBird.Infrastructure.Utils
+namespace ShoreHue.Infrastructure.Utils
 {
     /// <summary>系统浅/深色主题读取（Windows 10/11 应用模式）。</summary>
     public static class SystemTheme

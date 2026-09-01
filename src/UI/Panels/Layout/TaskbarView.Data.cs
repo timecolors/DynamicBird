@@ -1,4 +1,4 @@
-using DynamicBird.Infrastructure.WinApi;
+using ShoreHue.Infrastructure.WinApi;
 using System;
 using System.Linq;
 using System.Windows;
@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public partial class TaskbarView
     {

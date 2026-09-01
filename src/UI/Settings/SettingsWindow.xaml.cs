@@ -1,13 +1,13 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Ai;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.UI.Widgets.Dynamic;
-using DynamicBird.UI.Settings.Pages;
-using DynamicBird.UI.Theme;
-using DynamicBird.UI.Localization;
+﻿using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Ai;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.UI.Widgets.Dynamic;
+using ShoreHue.UI.Settings.Pages;
+using ShoreHue.UI.Theme;
+using ShoreHue.UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     public partial class SettingsWindow : Window
     {
@@ -63,7 +63,7 @@ namespace DynamicBird.UI.Settings
             LoadSettings();
               // ★ 打开窗口：视觉树就绪后应用全局字号缩放（滑块 ValueChanged 在 LoadSettings 之后才订阅，
               //   此处显式应用一次，保证打开即按配置字号显示）
-              Loaded += (_, _) => DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsData.UiFontScale);
+              Loaded += (_, _) => ShoreHue.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsData.UiFontScale);
             LoadShortcutPage();
             // ★ 实时保存：所有设置控件变化自动保存（400ms 防抖）。
             //   注意：构造函数时窗口视觉树尚未建立（Show 之前），FindVisualChildren 找不到控件，
@@ -83,7 +83,7 @@ namespace DynamicBird.UI.Settings
                 try
                 {
                     if (_themeHandler != null) Microsoft.Win32.SystemEvents.UserPreferenceChanged -= _themeHandler;
-                    if (_pluginChangedHandler != null) DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.Changed -= _pluginChangedHandler;
+                    if (_pluginChangedHandler != null) ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.Changed -= _pluginChangedHandler;
                 }
                 catch { }
             };
@@ -93,7 +93,7 @@ namespace DynamicBird.UI.Settings
             {
                 RefreshWidgetMarket();
             });
-            DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.Changed += _pluginChangedHandler;
+            ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.Changed += _pluginChangedHandler;
 
             // AI 高级参数滑块
             sldAiTemperature.ValueChanged += (s, e) => txtAiTemperature.Text = sldAiTemperature.Value.ToString("F1");
@@ -103,7 +103,7 @@ namespace DynamicBird.UI.Settings
               sldUiFontScale.ValueChanged += (s, e) =>
               {
                   txtUiFontScale.Text = sldUiFontScale.Value.ToString("P0");
-                  DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, sldUiFontScale.Value);
+                  ShoreHue.UI.Theme.FontScaleManager.ApplyFontScale(this, sldUiFontScale.Value);
               };
             sldOpacity.ValueChanged += (s, e) => txtOpacityValue.Text = sldOpacity.Value.ToString("F2");
             sldCornerRadius.ValueChanged += (s, e) => txtCornerRadiusValue.Text = sldCornerRadius.Value.ToString("F0");
@@ -133,7 +133,7 @@ namespace DynamicBird.UI.Settings
             sldHideSpring.ValueChanged += (s, e) => txtHideSpring.Text = sldHideSpring.Value.ToString("0.0#");
             sldTransformDuration.ValueChanged += (s, e) => txtTransformDuration.Text = sldTransformDuration.Value.ToString("F0") + "ms";
             sldHideDelay.ValueChanged += (s, e) => txtHideDelay.Text =
-                sldHideDelay.Value <= 0 ? DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Immediate"] : sldHideDelay.Value.ToString("F0") + "ms";
+                sldHideDelay.Value <= 0 ? ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Immediate"] : sldHideDelay.Value.ToString("F0") + "ms";
             sldFlyDuration.ValueChanged += (s, e) => txtFlyDuration.Text = sldFlyDuration.Value.ToString("F0") + "ms";
             sldContentStabilize.ValueChanged += (s, e) => txtContentStabilize.Text = sldContentStabilize.Value.ToString("F0") + "ms";
             sldSnapRange.ValueChanged += (s, e) => txtSnapRange.Text = ((int)sldSnapRange.Value) + "px";
@@ -162,7 +162,7 @@ namespace DynamicBird.UI.Settings
             {
                 int fps = (int)sldPanelFrameRate.Value;
                 txtPanelFrameRate.Text = fps <= 0
-                    ? DynamicBird.UI.Localization.LocalizationManager.Instance["Set_FrameRateAuto"]
+                    ? ShoreHue.UI.Localization.LocalizationManager.Instance["Set_FrameRateAuto"]
                     : fps + "fps";
             };
         }
@@ -202,7 +202,7 @@ namespace DynamicBird.UI.Settings
         {
             try
             {
-                bool dark = !DynamicBird.Infrastructure.Utils.SystemTheme.IsLightTheme();
+                bool dark = !ShoreHue.Infrastructure.Utils.SystemTheme.IsLightTheme();
                 var bg = dark ? new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20)) : new SolidColorBrush(Color.FromRgb(0xF9, 0xF9, 0xF9));
                 var fg = dark ? new SolidColorBrush(Color.FromRgb(0xE6, 0xE6, 0xE6)) : new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x1E));
                 var card = dark ? new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A)) : new SolidColorBrush(Colors.White);
@@ -295,15 +295,15 @@ namespace DynamicBird.UI.Settings
             // ★★★ 动画设置 ★★★
             chkAnimationsEnabled.IsChecked = _settingsData.AnimationsEnabled;
 
-            // ★★★ 编程模式（鸟笼） ★★★
+            // ★★★ 编程模式（海床） ★★★
             chkProgrammingMode.IsChecked = _settingsData.ProgrammingModeEnabled;
-            UpdateBirdcageTabVisibility();
+            UpdateSeabedTabVisibility();
 
             cmbTransformEasing.SelectedItem = GetComboBoxItemByContent(cmbTransformEasing, SettingsUIHelper.GetEasingDisplayName(_settingsData.TransformEasingType ?? "CubicEase"));
 
             // ★ 触发/隐藏动画（类型 + 时长 + 特化参数）
-            // 自定义动画（鸟笼「动画」分组）：先确保注册表已加载，再把它加入四个类型下拉
-            DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.ReloadAnimations();
+            // 自定义动画（海床「动画」分组）：先确保注册表已加载，再把它加入四个类型下拉
+            ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.ReloadAnimations();
             RefreshCustomAnimItems(cmbShowAnimType);
             RefreshCustomAnimItems(cmbHideAnimType);
             RefreshCustomAnimItems(cmbRegionShowType);
@@ -342,7 +342,7 @@ namespace DynamicBird.UI.Settings
 
             sldHideDelay.Value = _settingsData.HideDelayMs;
             txtHideDelay.Text = _settingsData.HideDelayMs <= 0
-                ? DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Immediate"]
+                ? ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Immediate"]
                 : _settingsData.HideDelayMs + "ms";
 
             sldFlyDuration.Value = _settingsData.FlyDurationMs;
@@ -416,7 +416,7 @@ namespace DynamicBird.UI.Settings
 
             // ★★★ 关于与隐私 ★★★
             var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            txtAbout.Text = $"灵动鸟 DynamicBird  v{ver?.ToString(3) ?? "1.0.0"}";
+            txtAbout.Text = $"ShoreHue 海岸线 v{ver?.ToString(3) ?? "1.0.0"}";
 
             // ★★★ AI 助手设置 ★★★
             LoadAiSettings();
@@ -424,7 +424,7 @@ namespace DynamicBird.UI.Settings
             // ★★★ 面板运行帧率（0=自动满帧，30/60/90/120 手动） ★★★
             sldPanelFrameRate.Value = Math.Clamp(_settingsData.PanelFrameRate, 0, 120);
             txtPanelFrameRate.Text = _settingsData.PanelFrameRate <= 0
-                ? DynamicBird.UI.Localization.LocalizationManager.Instance["Set_FrameRateAuto"]
+                ? ShoreHue.UI.Localization.LocalizationManager.Instance["Set_FrameRateAuto"]
                 : _settingsData.PanelFrameRate + "fps";
 
             // ★★★ 预设覆盖：冲突的内置设置分组变灰（应用预设后刷新生效） ★★★
@@ -434,15 +434,15 @@ namespace DynamicBird.UI.Settings
 
         private void UpdateUpdateStatus()
         {
-            string owner = DynamicBird.Infrastructure.WinApi.UpdateService.GitHubOwner;
-            string repo = DynamicBird.Infrastructure.WinApi.UpdateService.GitHubRepo;
+            string owner = ShoreHue.Infrastructure.WinApi.UpdateService.GitHubOwner;
+            string repo = ShoreHue.Infrastructure.WinApi.UpdateService.GitHubRepo;
             if (string.IsNullOrWhiteSpace(owner) || string.IsNullOrWhiteSpace(repo))
             {
-                txtUpdateStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_UpdateSourceMissing"];
+                txtUpdateStatus.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_UpdateSourceMissing"];
             }
             else
             {
-                txtUpdateStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Set_UpdateSource"], owner, repo);
+                txtUpdateStatus.Text = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Set_UpdateSource"], owner, repo);
             }
         }
 
@@ -455,24 +455,24 @@ namespace DynamicBird.UI.Settings
             {
                 _loadingWebTool = true;
                 cmbWebTool.Items.Clear();
-                foreach (var t in DynamicBird.UI.Widgets.WebToolPresets.Presets)
+                foreach (var t in ShoreHue.UI.Widgets.WebToolPresets.Presets)
                 {
                     cmbWebTool.Items.Add(new ComboBoxItem { Tag = t, Content = t.Name });
                 }
                 cmbWebTool.Items.Add(new ComboBoxItem
                 {
                     Tag = null,
-                    Content = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_WebTool_CustomItem"]
+                    Content = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_WebTool_CustomItem"]
                 });
 
                 string url = _settingsData.WebWidgetUrl ?? "";
-                var match = DynamicBird.UI.Widgets.WebToolPresets.Presets.FirstOrDefault(t =>
+                var match = ShoreHue.UI.Widgets.WebToolPresets.Presets.FirstOrDefault(t =>
                     string.Equals(t.Url, url, StringComparison.OrdinalIgnoreCase));
                 txtWebToolUrl.Text = url;
                 RefreshWebBookmarkList();
                 if (match != null)
                 {
-                    cmbWebTool.SelectedIndex = DynamicBird.UI.Widgets.WebToolPresets.Presets.ToList().IndexOf(match);
+                    cmbWebTool.SelectedIndex = ShoreHue.UI.Widgets.WebToolPresets.Presets.ToList().IndexOf(match);
                 }
                 else
                 {
@@ -485,7 +485,7 @@ namespace DynamicBird.UI.Settings
         private void CmbWebTool_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_loadingWebTool || cmbWebTool.SelectedItem is not ComboBoxItem item) return;
-            if (item.Tag is DynamicBird.UI.Widgets.WebToolPresets.Tool t)
+            if (item.Tag is ShoreHue.UI.Widgets.WebToolPresets.Tool t)
             {
                 txtWebToolUrl.Text = t.Url;
                 _settingsData.WebWidgetUrl = t.Url;
@@ -534,7 +534,7 @@ namespace DynamicBird.UI.Settings
                 return;
             }
             string name = GetBookmarkName(url);
-            _settingsData.WebBookmarks.Add(new DynamicBird.Core.Services.Configuration.WebBookmark { Name = name, Url = url });
+            _settingsData.WebBookmarks.Add(new ShoreHue.Core.Services.Configuration.WebBookmark { Name = name, Url = url });
             RefreshWebBookmarkList();
             HookAutoSave();
             MessageBox.Show(this, "已收藏：" + name, "网页工具", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -542,7 +542,7 @@ namespace DynamicBird.UI.Settings
 
         private void BtnDelWebBookmark_Click(object sender, RoutedEventArgs e)
         {
-            if (lstWebBookmarks.SelectedItem is DynamicBird.Core.Services.Configuration.WebBookmark b)
+            if (lstWebBookmarks.SelectedItem is ShoreHue.Core.Services.Configuration.WebBookmark b)
             {
                 _settingsData.WebBookmarks.Remove(b);
                 RefreshWebBookmarkList();
@@ -560,35 +560,35 @@ namespace DynamicBird.UI.Settings
             catch { return url; }
         }
 
-        /// <summary>卸载灵动鸟（非商店版）：二次确认后启动卸载脚本（删除应用/可选删除数据）。</summary>
+        /// <summary>卸载 ShoreHue（非商店版）：二次确认后启动卸载脚本（删除应用/可选删除数据）。</summary>
         private void BtnUninstall_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (DynamicBird.Infrastructure.Utils.AppPaths.IsPackaged)
+                if (ShoreHue.Infrastructure.Utils.AppPaths.IsPackaged)
                 {
                     System.Windows.MessageBox.Show(this,
-                        DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_397"],
-                        "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Information);
+                        ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_397"],
+                        "ShoreHue", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
                 // ★ 二次确认 1：是否卸载
                 var c1 = System.Windows.MessageBox.Show(this,
-                    DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_397"],
-                    "灵动鸟", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                    ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_397"],
+                    "ShoreHue", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (c1 != MessageBoxResult.OK) return;
 
                 // ★ 二次确认 2：是否删除本地数据
                 var c2 = System.Windows.MessageBox.Show(this,
-                    DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_398"],
-                    "灵动鸟", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                    ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_398"],
+                    "ShoreHue", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
                 if (c2 == MessageBoxResult.Cancel) return;
 
-                bool ok = DynamicBird.Infrastructure.WinApi.UninstallHelper.LaunchUninstall(c2 == MessageBoxResult.Yes);
+                bool ok = ShoreHue.Infrastructure.WinApi.UninstallHelper.LaunchUninstall(c2 == MessageBoxResult.Yes);
                 if (!ok)
                 {
-                    System.Windows.MessageBox.Show(this, "启动卸载脚本失败", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show(this, "启动卸载脚本失败", "ShoreHue", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 // 卸载脚本随后会停止并删除应用；这里正常退出
@@ -596,12 +596,12 @@ namespace DynamicBird.UI.Settings
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("卸载失败", ex);
-                System.Windows.MessageBox.Show(this, "卸载失败：" + ex.Message, "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("卸载失败", ex);
+                System.Windows.MessageBox.Show(this, "卸载失败：" + ex.Message, "ShoreHue", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        /// <summary>切换设置窗口到指定页签（x:Name；找不到时忽略）。供右键菜单直达（如 AI 设置 / 鸟笼）。</summary>
+        /// <summary>切换设置窗口到指定页签（x:Name；找不到时忽略）。供右键菜单直达（如 AI 设置 / 海床）。</summary>
         public void ActivateTab(string tabName)
         {
             if (FindName(tabName) is TabItem tab)
@@ -612,28 +612,28 @@ namespace DynamicBird.UI.Settings
 
         private async void BtnCheckUpdate_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(DynamicBird.Infrastructure.WinApi.UpdateService.GitHubOwner) ||
-                string.IsNullOrWhiteSpace(DynamicBird.Infrastructure.WinApi.UpdateService.GitHubRepo))
+            if (string.IsNullOrWhiteSpace(ShoreHue.Infrastructure.WinApi.UpdateService.GitHubOwner) ||
+                string.IsNullOrWhiteSpace(ShoreHue.Infrastructure.WinApi.UpdateService.GitHubRepo))
             {
-                txtUpdateStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_UpdateSourceMissing2"];
+                txtUpdateStatus.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_UpdateSourceMissing2"];
                 return;
             }
 
             btnCheckUpdate.IsEnabled = false;
-            txtUpdateStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Checking"];
+            txtUpdateStatus.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Checking"];
             try
             {
                 var current = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
                               ?? new Version(1, 0, 0);
-                var info = await DynamicBird.Infrastructure.WinApi.UpdateService
+                var info = await ShoreHue.Infrastructure.WinApi.UpdateService
                     .CheckForUpdateAsync(current);
                 txtUpdateStatus.Text = info == null
-                    ? DynamicBird.UI.Localization.LocalizationManager.Instance["Set_Latest"]
-                    : string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Set_NewVersion"], info.Version, info.Tag);
+                    ? ShoreHue.UI.Localization.LocalizationManager.Instance["Set_Latest"]
+                    : string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Set_NewVersion"], info.Version, info.Tag);
             }
             catch
             {
-                txtUpdateStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_CheckFailed"];
+                txtUpdateStatus.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_CheckFailed"];
             }
             finally
             {
@@ -656,7 +656,7 @@ namespace DynamicBird.UI.Settings
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("打开城市选择器失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("打开城市选择器失败", ex);
             }
         }
 
@@ -695,17 +695,17 @@ namespace DynamicBird.UI.Settings
             string hotkey = txtTextAiHotkey.Text.Trim();
             if (hotkey.Length == 0)
             {
-                txtTextAiHotkeyHint.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_HotkeyHintNotSet"];
+                txtTextAiHotkeyHint.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_HotkeyHintNotSet"];
                 txtTextAiHotkeyHint.Foreground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
             }
             else if (hotkey == PanelToggleHotkey)
             {
-                txtTextAiHotkeyHint.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_HotkeyConflict"];
+                txtTextAiHotkeyHint.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_HotkeyConflict"];
                 txtTextAiHotkeyHint.Foreground = new SolidColorBrush(Color.FromRgb(200, 80, 70));
             }
             else
             {
-                txtTextAiHotkeyHint.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Set_HotkeySet"];
+                txtTextAiHotkeyHint.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Set_HotkeySet"];
                 txtTextAiHotkeyHint.Foreground = new SolidColorBrush(Color.FromRgb(60, 170, 90));
             }
         }
@@ -728,29 +728,29 @@ namespace DynamicBird.UI.Settings
         private void UpdateCurrentLanguageText()
         {
             if (txtCurrentLanguage == null) return;
-            var lm = DynamicBird.UI.Localization.LocalizationManager.Instance;
+            var lm = ShoreHue.UI.Localization.LocalizationManager.Instance;
             string suffix = string.IsNullOrEmpty(_settingsData.Language)
                 ? "（" + lm["Set_LangFollowSystem"] + "）"
                 : "";
             txtCurrentLanguage.Text = lm["Set_LangPrefix"] + lm.CurrentCultureName + suffix;
         }
 
-        // ========== 编程模式（鸟笼） ==========
+        // ========== 编程模式（海床） ==========
 
         private void ChkProgrammingMode_Changed(object sender, RoutedEventArgs e)
         {
             _settingsData.ProgrammingModeEnabled = chkProgrammingMode.IsChecked ?? false;
-            UpdateBirdcageTabVisibility();
+            UpdateSeabedTabVisibility();
         }
 
-        private void UpdateBirdcageTabVisibility()
+        private void UpdateSeabedTabVisibility()
         {
-            if (tabBirdcage == null) return;
+            if (tabSeabed == null) return;
             bool on = chkProgrammingMode.IsChecked == true;
-            tabBirdcage.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
-            if (on && tabBirdcage.Content == null)
+            tabSeabed.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            if (on && tabSeabed.Content == null)
             {
-                tabBirdcage.Content = new DynamicBird.UI.Settings.Pages.BirdcagePage(_settings);
+                tabSeabed.Content = new ShoreHue.UI.Settings.Pages.SeabedPage(_settings);
             }
         }
 
@@ -997,7 +997,7 @@ namespace DynamicBird.UI.Settings
             try
             {
                 ApplyControlsToData();
-                // ★ 服务端独有的数据（鸟笼新建的预设/冲突标记）不在窗口控件里，保存前同步进副本，
+                // ★ 服务端独有的数据（海床新建的预设/冲突标记）不在窗口控件里，保存前同步进副本，
                 //   避免 Apply(_settingsData) 用旧快照把这些数据从配置里抹掉（曾致"新建预设保存后丢失"）
                 _settingsData.CustomPanels = _settings.CustomPanels;
                 _settingsData.AppliedPresets = _settings.AppliedPresets;
@@ -1007,13 +1007,13 @@ namespace DynamicBird.UI.Settings
                 //   刷新/重启后还原（曾导致"关掉小鸟依人刷新又开"、面板一直跟随鼠标）。
                 _settings.Apply(_settingsData);
                 SaveAiSettings();
-                DynamicBird.Infrastructure.WinApi.WeatherService.ClearCache();
-                DynamicBird.UI.Localization.LocalizationManager.Instance.SetCulture(_settingsData.Language);
+                ShoreHue.Infrastructure.WinApi.WeatherService.ClearCache();
+                ShoreHue.UI.Localization.LocalizationManager.Instance.SetCulture(_settingsData.Language);
                 _settings.SaveSettings();
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("自动保存设置失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("自动保存设置失败", ex);
             }
         }
 
@@ -1042,7 +1042,7 @@ namespace DynamicBird.UI.Settings
                 cmbLanguage.SelectionChanged += (_, _) =>
                 {
                     _settingsData.Language = (cmbLanguage.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "";
-                    DynamicBird.UI.Localization.LocalizationManager.Instance.SetCulture(_settingsData.Language);
+                    ShoreHue.UI.Localization.LocalizationManager.Instance.SetCulture(_settingsData.Language);
                     ScheduleSave();
                 };
             }
@@ -1069,7 +1069,7 @@ namespace DynamicBird.UI.Settings
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("刷新设置失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("刷新设置失败", ex);
             }
         }
 
@@ -1093,7 +1093,7 @@ namespace DynamicBird.UI.Settings
         {
             try
             {
-                var onboarding = new DynamicBird.UI.Onboarding.OnboardingWindow(
+                var onboarding = new ShoreHue.UI.Onboarding.OnboardingWindow(
                     noMore => _settings.OnboardingCompleted = noMore,
                     _settings);
                 onboarding.Owner = this;

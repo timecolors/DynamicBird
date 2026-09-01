@@ -1,4 +1,4 @@
-<Window x:Class="DynamicBird.UI.Settings.WeatherCityPickerWindow"
+<Window x:Class="ShoreHue.UI.Settings.WeatherCityPickerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="选择城市"

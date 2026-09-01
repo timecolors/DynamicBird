@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 
-namespace DynamicBird.Animation
+namespace ShoreHue.Animation
 {
     /// <summary>
-    /// 自定义动画注册表：鸟笼「动画」分组的 IAnimation 插件编译后注册到这里，
+    /// 自定义动画注册表：海床「动画」分组的 IAnimation 插件编译后注册到这里，
     /// ShapeAnimator.SetShowHideTarget 按动画类型 Id 查表分发；
     /// 设置页动画类型下拉也从这里取自定义动画列表（Name 展示 / Id 存储）。
     /// 注册表是进程内静态字典，由 WidgetPluginStore.ReloadAnimations 整体重建。

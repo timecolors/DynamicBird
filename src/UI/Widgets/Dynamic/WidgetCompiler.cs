@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace DynamicBird.UI.Widgets.Dynamic
+namespace ShoreHue.UI.Widgets.Dynamic
 {
     /// <summary>
     /// C# 插件编译器：用 Roslyn 把用户编写的源码动态编译为内存程序集，
@@ -28,7 +28,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
         /// <summary>源码签名（供 WidgetSwitcher 判断是否需要重建）。</summary>
         public static string SourceHash(string source) => ComputeHash(source ?? "");
 
-        /// <summary>卸载缓存条目（插件删除/鸟笼项删除时调用，释放实例与程序集引用）。</summary>
+        /// <summary>卸载缓存条目（插件删除/海床项删除时调用，释放实例与程序集引用）。</summary>
         public static void Evict(string id)
         {
             if (string.IsNullOrEmpty(id)) return;
@@ -92,7 +92,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
                     .FirstOrDefault(t => typeof(IWidget).IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic);
                 if (type == null)
                 {
-                    return (null, "未找到 public 且实现 IWidget 的类。请定义一个公开类实现 DynamicBird.UI.Widgets.IWidget 接口。");
+                    return (null, "未找到 public 且实现 IWidget 的类。请定义一个公开类实现 ShoreHue.UI.Widgets.IWidget 接口。");
                 }
 
                 var widget = Activator.CreateInstance(type) as IWidget;
@@ -499,18 +499,18 @@ namespace DynamicBird.UI.Widgets.Dynamic
 
         /// <summary>
         /// 编译配置代码（赋值语句版）并返回可调用的 Apply 委托。
-        /// 鸟笼里保存的单预设（Kind=Config）源码形如：
+        /// 海床里保存的单预设（Kind=Config）源码形如：
         ///   public static class ConfigCode { public static void Apply(SettingsData data) { data.X = 值; ... } }
         /// 编译后反射找到静态 ConfigCode.Apply(SettingsData) 并包装为委托。
         /// 调用方传入一个 SettingsData 实例，Apply 委托会就地修改其字段值（写回由调用方负责）。
         /// 编译失败返回 null，error 含诊断信息。
         /// </summary>
-        public static Action<DynamicBird.Core.Services.Configuration.SettingsData>? CompileConfigApply(string source, out string error)
+        public static Action<ShoreHue.Core.Services.Configuration.SettingsData>? CompileConfigApply(string source, out string error)
         {
             error = "";
             try
             {
-                string wrapped = "using DynamicBird.Core.Services.Configuration;" + System.Environment.NewLine + (source ?? "");
+                string wrapped = "using ShoreHue.Core.Services.Configuration;" + System.Environment.NewLine + (source ?? "");
                 using var ms = new MemoryStream();
                 if (!TryEmit("config_" + Guid.NewGuid().ToString("N").Substring(0, 8), wrapped, ms, out error))
                 {
@@ -530,7 +530,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
                 var method = type.GetMethod("Apply",
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
                     null,
-                    new[] { typeof(DynamicBird.Core.Services.Configuration.SettingsData) },
+                    new[] { typeof(ShoreHue.Core.Services.Configuration.SettingsData) },
                     null);
                 if (method == null)
                 {
@@ -563,7 +563,7 @@ namespace DynamicBird.UI.Widgets.Dynamic
             try { refs.Add(MetadataReference.CreateFromFile(typeof(IWidget).Assembly.Location)); } catch { }
 
             // ★ 程序集名唯一：避免源码更新后重编译时 Default ALC 报"同名程序集已加载"
-            string asmName = "DynamicBird.Widget." + id + "_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            string asmName = "ShoreHue.Widget." + id + "_" + Guid.NewGuid().ToString("N").Substring(0, 8);
             var compilation = CSharpCompilation.Create(
                 asmName,
                 new[] { tree },

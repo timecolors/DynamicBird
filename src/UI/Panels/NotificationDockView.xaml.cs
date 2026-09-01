@@ -2,10 +2,10 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Localization;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Localization;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     /// <summary>
     /// 右下角通知坞：被动展示捕获到的消息弹窗/系统通知，点击打开对应应用。

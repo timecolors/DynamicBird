@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 捕获当前前台窗口中用户选中的文本（划词翻译 用）。
@@ -104,11 +104,11 @@ namespace DynamicBird.Infrastructure.WinApi
                 IntPtr fg = GetForegroundWindow();
                 if (fg == IntPtr.Zero)
                 {
-                    return new CaptureResult { Message = DynamicBird.UI.Localization.LocalizationManager.Instance["Capture_NoFg"] };
+                    return new CaptureResult { Message = ShoreHue.UI.Localization.LocalizationManager.Instance["Capture_NoFg"] };
                 }
                 if (ownHwnd != IntPtr.Zero && fg == ownHwnd)
                 {
-                    return new CaptureResult { Message = DynamicBird.UI.Localization.LocalizationManager.Instance["Capture_SwitchApp"] };
+                    return new CaptureResult { Message = ShoreHue.UI.Localization.LocalizationManager.Instance["Capture_SwitchApp"] };
                 }
 
                 // 1. 剪贴板方案
@@ -126,12 +126,12 @@ namespace DynamicBird.Infrastructure.WinApi
                     return new CaptureResult { Text = uiaText.Trim() };
                 }
 
-                return new CaptureResult { Message = DynamicBird.UI.Localization.LocalizationManager.Instance["Capture_NoSelection"] };
+                return new CaptureResult { Message = ShoreHue.UI.Localization.LocalizationManager.Instance["Capture_NoSelection"] };
             }
             catch (Exception ex)
             {
                 Log("捕获异常: " + ex);
-                return new CaptureResult { Message = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Capture_Failed"], ex.Message) };
+                return new CaptureResult { Message = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Capture_Failed"], ex.Message) };
             }
         }
 
@@ -339,7 +339,7 @@ namespace DynamicBird.Infrastructure.WinApi
         {
             try
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Debug("[SelectedTextCapture] " + msg);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Debug("[SelectedTextCapture] " + msg);
             }
             catch { }
         }

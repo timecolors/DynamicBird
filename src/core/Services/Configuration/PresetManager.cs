@@ -1,5 +1,5 @@
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,14 +7,14 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace DynamicBird.Core.Services.Configuration
+namespace ShoreHue.Core.Services.Configuration
 {
     /// <summary>
-    /// 预设管理（鸟笼编程模式）：把配置保存为命名预设。
+    /// 预设管理（海床编程模式）：把配置保存为命名预设。
     /// - 整套预设：SettingsData 全量快照；
     /// - 局部预设：只保存指定字段子集（如单个面板/功能的配置）；
     /// 应用预设 = 反序列化 → 写回配置 → SettingsManager.Reload 全量生效。
-    /// 预设存储于 %LOCALAPPDATA%\DynamicBird\Presets\&lt;名称&gt;.json。
+    /// 预设存储于 %LOCALAPPDATA%\ShoreHue\Presets\&lt;名称&gt;.json。
     /// </summary>
     public static class PresetManager
     {

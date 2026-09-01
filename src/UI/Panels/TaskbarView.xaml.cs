@@ -1,16 +1,16 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.src.core.Services.Shortcuts;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.src.core.Services.Shortcuts;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using DynamicBird.Infrastructure.WinApi;
+using ShoreHue.Infrastructure.WinApi;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DynamicBird.UI.Panels
+namespace ShoreHue.UI.Panels
 {
     public partial class TaskbarView : UserControl
     {

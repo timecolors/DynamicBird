@@ -1,6 +1,6 @@
-<UserControl x:Class="DynamicBird.UI.Panels.RecentItemsView"
+<UserControl x:Class="ShoreHue.UI.Panels.RecentItemsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
     <UserControl.Resources>
         <!-- 最近使用项的类型兜底图标（真实图标加载成功前/失败时显示） -->
         <Style x:Key="RecentFallbackIcon"

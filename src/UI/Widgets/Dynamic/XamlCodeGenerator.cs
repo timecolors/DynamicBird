@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DynamicBird.UI.Widgets.Dynamic
+namespace ShoreHue.UI.Widgets.Dynamic
 {
     /// <summary>
     /// XAML → C# 补全代码生成器（完全编程模式）：

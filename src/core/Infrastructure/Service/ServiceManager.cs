@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DynamicBird.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Logging;
 
-namespace DynamicBird.Core.Infrastructure.Service
+namespace ShoreHue.Core.Infrastructure.Service
 {
     /// <summary>
     /// 服务管理器（管理所有服务的生命周期）

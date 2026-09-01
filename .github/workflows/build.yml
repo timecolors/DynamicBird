@@ -24,13 +24,13 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Restore
-        run: dotnet restore DynamicBird.sln
+        run: dotnet restore ShoreHue.sln
 
       - name: Build Debug
-        run: dotnet build DynamicBird.sln -c Debug -v minimal
+        run: dotnet build ShoreHue.sln -c Debug -v minimal
 
       - name: Unit Tests
-        run: dotnet test tests/DynamicBird.Tests/DynamicBird.Tests.csproj -c Debug --no-build -v minimal
+        run: dotnet test tests/ShoreHue.Tests/ShoreHue.Tests.csproj -c Debug --no-build -v minimal
 
       - name: Market Packages Compile Check
         run: dotnet run --project tools/MarketValidator/MarketValidator.csproj -c Debug
@@ -71,13 +71,13 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Publish
-        run: dotnet publish DynamicBird.csproj -c Release -p:PublishProfile=win-x64 -v minimal
+        run: dotnet publish ShoreHue.csproj -c Release -p:PublishProfile=win-x64 -v minimal
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DynamicBird-win-x64
-          path: bin/publish/win-x64/DynamicBird.exe
+          name: ShoreHue-win-x64
+          path: bin/publish/win-x64/ShoreHue.exe
 
   msix:
     name: Package MSIX (unsigned)
@@ -93,7 +93,7 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Publish
-        run: dotnet publish DynamicBird.csproj -c Release -p:PublishProfile=win-x64 -v minimal
+        run: dotnet publish ShoreHue.csproj -c Release -p:PublishProfile=win-x64 -v minimal
 
       - name: Build MSIX
         shell: pwsh
@@ -105,7 +105,7 @@ jobs:
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DynamicBird-msix
+          name: ShoreHue-msix
           path: packaging/Output/*.msix
 
   release:
@@ -116,19 +116,19 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: DynamicBird-win-x64
+          name: ShoreHue-win-x64
           path: release
 
       - uses: actions/download-artifact@v4
         with:
-          name: DynamicBird-msix
+          name: ShoreHue-msix
           path: release-msix
 
       - name: Assemble
         shell: bash
         run: |
           mkdir -p final
-          cp release/DynamicBird.exe final/DynamicBird.exe
+          cp release/ShoreHue.exe final/ShoreHue.exe
           cp release-msix/*.msix final/ 2>/dev/null || true
 
       # Release body from RELEASE-NOTES.md (avoid commit message dev details)
@@ -143,7 +143,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: DynamicBird ${{ github.ref_name }}
+          name: ShoreHue ${{ github.ref_name }}
           body_path: ${{ env.body_path }}
           draft: true
           files: final/*

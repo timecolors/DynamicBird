@@ -5,8 +5,8 @@
     [string]$OutDir = (Join-Path $PSScriptRoot "Output")
 )
 
-# 灵动鸟 MSIX 打包脚本：
-#   1. 暂存 AppxManifest + DynamicBird.exe + 磁贴素材
+# ShoreHue MSIX 打包脚本：
+#   1. 暂存 AppxManifest + ShoreHue.exe + 磁贴素材
 #   2. MakeAppx 打包为 .msix
 #   3. 自签名证书（CN 与 Publisher 一致）签名；商店审核时会由微软重新签名
 #
@@ -36,13 +36,13 @@ Write-Output "MakeAppx: $makeAppx"
 Write-Output "SignTool: $signtool"
 
 # ---------- 2) 暂存目录 ----------
-$staging = Join-Path $env:TEMP "DynamicBird-msix-staging"
+$staging = Join-Path $env:TEMP "ShoreHue-msix-staging"
 if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
 New-Item -ItemType Directory -Path $staging | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $staging "Assets") | Out-Null
 
 Copy-Item (Join-Path $PSScriptRoot "AppxManifest.xml") $staging -Force
-$exe = Join-Path $PublishDir "DynamicBird.exe"
+$exe = Join-Path $PublishDir "ShoreHue.exe"
 if (-not (Test-Path $exe)) { throw "未找到发布产物: $exe" }
 Copy-Item $exe $staging -Force
 Get-ChildItem (Join-Path $PSScriptRoot "Assets") -Filter *.png | Copy-Item -Destination (Join-Path $staging "Assets") -Force
@@ -56,7 +56,7 @@ $xmlText = [System.Text.RegularExpressions.Regex]::Replace($xmlText, '(?<=<Ident
 
 # ---------- 4) MakeAppx 打包 ----------
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
-$outMsix = Join-Path $OutDir "DynamicBird-$Version-x64.msix"
+$outMsix = Join-Path $OutDir "ShoreHue-$Version-x64.msix"
 Remove-Item $outMsix -ErrorAction SilentlyContinue
 & $makeAppx pack /d $staging /p $outMsix /o | Out-Null
 if ($LASTEXITCODE -ne 0) { throw "makeappx 打包失败 (exit=$LASTEXITCODE)" }

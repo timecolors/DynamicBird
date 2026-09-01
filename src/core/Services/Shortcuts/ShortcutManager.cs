@@ -1,6 +1,6 @@
-﻿using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Core.Infrastructure.Service;
-using DynamicBird.src.core.Services.Shortcuts;
+﻿using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Service;
+using ShoreHue.src.core.Services.Shortcuts;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,9 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Windows.Media;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Core.Services
+namespace ShoreHue.Core.Services
 {
     /// <summary>
     /// 快捷方式管理器（实例类，实现 IShortcutService + IService）

@@ -1,5 +1,5 @@
-using DynamicBird.Core.Services;
-using DynamicBird.src.core.Services.Shortcuts;
+using ShoreHue.Core.Services;
+using ShoreHue.src.core.Services.Shortcuts;
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace DynamicBird.UI.Settings.Pages
+namespace ShoreHue.UI.Settings.Pages
 {
     public partial class ShortcutManagementPage : Page
     {
@@ -44,7 +44,7 @@ namespace DynamicBird.UI.Settings.Pages
 
         private void UpdateStatus()
         {
-            TxtStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Count"], _items.Count);
+            TxtStatus.Text = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Scm_Count"], _items.Count);
         }
 
         private void BtnAddShortcut_Click(object sender, RoutedEventArgs e)
@@ -63,11 +63,11 @@ namespace DynamicBird.UI.Settings.Pages
                 if (_shortcutService.AddShortcut(path, name))
                 {
                     LoadShortcuts();
-                    TxtStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Added"], name);
+                    TxtStatus.Text = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Scm_Added"], name);
                 }
                 else
                 {
-                    TxtStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_AddFailed"];
+                    TxtStatus.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Scm_AddFailed"];
                 }
             }
         }
@@ -75,7 +75,7 @@ namespace DynamicBird.UI.Settings.Pages
         private void BtnClearAll_Click(object sender, RoutedEventArgs e)
         {
             if (_items.Count == 0) return;
-            if (MessageBox.Show(DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_ClearConfirm"], DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Confirm"],
+            if (MessageBox.Show(ShoreHue.UI.Localization.LocalizationManager.Instance["Scm_ClearConfirm"], ShoreHue.UI.Localization.LocalizationManager.Instance["Scm_Confirm"],
                 MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 var ids = _items.Select(i => i.Id).ToList();
@@ -84,7 +84,7 @@ namespace DynamicBird.UI.Settings.Pages
                     _shortcutService.RemoveShortcut(id);
                 }
                 LoadShortcuts();
-                TxtStatus.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Cleared"];
+                TxtStatus.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Scm_Cleared"];
             }
         }
 
@@ -120,7 +120,7 @@ namespace DynamicBird.UI.Settings.Pages
             {
                 _shortcutService.RemoveShortcut(item.Id);
                 LoadShortcuts();
-                TxtStatus.Text = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Scm_Deleted"], item.Name);
+                TxtStatus.Text = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Scm_Deleted"], item.Name);
             }
         }
     }

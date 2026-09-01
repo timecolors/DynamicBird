@@ -1,20 +1,20 @@
-using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Core.Infrastructure.Service;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.src.core.Services.Clipboard;
+using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Core.Infrastructure.Service;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.src.core.Services.Clipboard;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 using System.Text;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
 
-namespace DynamicBird.Core.Services
+namespace ShoreHue.Core.Services
 {
     /// <summary>
     /// 剪贴板管理器（实例类，实现 IClipboardService + IService）
@@ -90,7 +90,7 @@ namespace DynamicBird.Core.Services
         {
             try
             {
-                var p = new HwndSourceParameters("DynamicBirdClipboardListener")
+                var p = new HwndSourceParameters("ShoreHueClipboardListener")
                 {
                     Width = 0,
                     Height = 0,
@@ -548,7 +548,7 @@ namespace DynamicBird.Core.Services
                     {
                         Type = "Image",
                         CachePath = filePath,
-                        DisplayText = string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Clip_ImageSize"], saveWidth, saveHeight)
+                        DisplayText = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Clip_ImageSize"], saveWidth, saveHeight)
                     };
                 }
                 catch
@@ -556,7 +556,7 @@ namespace DynamicBird.Core.Services
                     return new ClipboardItem
                     {
                         Type = "Image",
-                        DisplayText = DynamicBird.UI.Localization.LocalizationManager.Instance["Clip_ImageSaveFailed"]
+                        DisplayText = ShoreHue.UI.Localization.LocalizationManager.Instance["Clip_ImageSaveFailed"]
                     };
                 }
             }
@@ -568,7 +568,7 @@ namespace DynamicBird.Core.Services
                 {
                     Type = "File",
                     FilePaths = files,
-                    DisplayText = $"📁 {string.Join(", ", names.Take(3))}" + (names.Count > 3 ? $" (+{names.Count - 3})" : "")
+                    DisplayText = $"{string.Join(", ", names.Take(3))}" + (names.Count > 3 ? $" (+{names.Count - 3})" : "")
                 };
             }
 
@@ -581,7 +581,7 @@ namespace DynamicBird.Core.Services
                     Type = "Html",
                     HtmlContent = html,
                     FullText = plainText,
-                    DisplayText = $"📄 HTML: {(plainText.Length > 200 ? plainText.Substring(0, 200) + "..." : plainText)}"
+                    DisplayText = $"HTML: {(plainText.Length > 200 ? plainText.Substring(0, 200) + "..." : plainText)}"
                 };
             }
 
@@ -604,7 +604,7 @@ namespace DynamicBird.Core.Services
 
                     if (item.Type == "Image" && !string.IsNullOrEmpty(item.CachePath) && !File.Exists(item.CachePath))
                     {
-                        item.DisplayText = DynamicBird.UI.Localization.LocalizationManager.Instance["Clip_ImageMissing"];
+                        item.DisplayText = ShoreHue.UI.Localization.LocalizationManager.Instance["Clip_ImageMissing"];
                     }
                     return item;
                 }

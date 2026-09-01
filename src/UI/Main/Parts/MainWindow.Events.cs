@@ -1,10 +1,10 @@
-using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.UI.Settings;
+using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.UI.Settings;
 using System;
 using System.Windows;
 using System.Windows.Input;
 
-namespace DynamicBird.UI.Main
+namespace ShoreHue.UI.Main
 {
     public partial class MainWindow
     {
@@ -36,7 +36,7 @@ namespace DynamicBird.UI.Main
             catch (Exception ex)
             {
                 LogManager.Error("打开设置窗口失败", ex);
-                MessageBox.Show($"打开设置失败:\n{ex.Message}", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"打开设置失败:\n{ex.Message}", "ShoreHue", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /// <summary>隐形分隔线悬停：淡色反馈条 + 左右双箭头（可拖动调竖条宽度，双箭头是正常拖动提示）。

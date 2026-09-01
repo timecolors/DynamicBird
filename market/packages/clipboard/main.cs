@@ -5,12 +5,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using DynamicBird.Core.Infrastructure.Service;
-using DynamicBird.Core.Services;
-using DynamicBird.src.core.Services.Clipboard;
-using DynamicBird.UI.Widgets;
+using ShoreHue.Core.Infrastructure.Service;
+using ShoreHue.Core.Services;
+using ShoreHue.src.core.Services.Clipboard;
+using ShoreHue.UI.Widgets;
 
-namespace DynamicBird.Builtin
+namespace ShoreHue.Builtin
 {
     // 剪贴板 · 纯代码版（动态编译运行，风格与内置一致：深色卡片/列表）
     public class ClipboardPanel : UserControl, IWidget

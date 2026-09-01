@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DynamicBird.Core.Services.Ai
+namespace ShoreHue.Core.Services.Ai
 {
     /// <summary>
     /// OpenAI 兼容的 Chat Completions 客户端：
@@ -22,7 +22,7 @@ namespace DynamicBird.Core.Services.Ai
         public AiChatClient()
         {
             _http = new HttpClient { Timeout = TimeSpan.FromSeconds(120) };
-            _http.DefaultRequestHeaders.UserAgent.ParseAdd("DynamicBird/1.1");
+            _http.DefaultRequestHeaders.UserAgent.ParseAdd("ShoreHue/1.1");
         }
 
         /// <summary>测试连接：发送最小请求，成功返回 null，失败返回错误描述。</summary>

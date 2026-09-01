@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Theme;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Theme;
 
-namespace DynamicBird.UI.Media
+namespace ShoreHue.UI.Media
 {
     public class WindowPickItem
     {
@@ -27,15 +27,15 @@ namespace DynamicBird.UI.Media
 
             if (embedMode)
             {
-                Title = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_EmbedTitle"];
-                ModeHintText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_EmbedHint"];
-                BtnConfirm.Content = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_EmbedBtn"];
+                Title = ShoreHue.UI.Localization.LocalizationManager.Instance["Wp_EmbedTitle"];
+                ModeHintText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Wp_EmbedHint"];
+                BtnConfirm.Content = ShoreHue.UI.Localization.LocalizationManager.Instance["Wp_EmbedBtn"];
             }
             else
             {
-                Title = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_MirrorTitle"];
-                ModeHintText.Text = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_MirrorHint"];
-                BtnConfirm.Content = DynamicBird.UI.Localization.LocalizationManager.Instance["Wp_MirrorBtn"];
+                Title = ShoreHue.UI.Localization.LocalizationManager.Instance["Wp_MirrorTitle"];
+                ModeHintText.Text = ShoreHue.UI.Localization.LocalizationManager.Instance["Wp_MirrorHint"];
+                BtnConfirm.Content = ShoreHue.UI.Localization.LocalizationManager.Instance["Wp_MirrorBtn"];
             }
         }
 

@@ -1,12 +1,12 @@
-using DynamicBird.Core.Detection;
+using ShoreHue.Core.Detection;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
-using DynamicBird.Core.Services.Configuration;
+using ShoreHue.Core.Services.Configuration;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     /// <summary>
     /// 面板拖动（仅“固定位置”模式可用）：
@@ -98,7 +98,7 @@ namespace DynamicBird.Core.Controllers
             _edgeController.NotifyDragEnded();
             _lastDragEndTime = DateTime.Now;
 
-            var wa = DynamicBird.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
+            var wa = ShoreHue.Infrastructure.Utils.ScreenMetrics.GetCachedScreenForWindow(
                 _window.Left, _window.Top, _window.Width, _window.Height);
             double screenWidth = wa.Width;
             double screenHeight = wa.Height;

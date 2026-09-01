@@ -1,14 +1,14 @@
-using DynamicBird.Animation;
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Ai;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.Utils;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.src.core.Services.Shortcuts;
-using DynamicBird.UI.Widgets.Dynamic;
-using DynamicBird.UI.Settings.Pages;
-using DynamicBird.UI.Theme;
-using DynamicBird.UI.Localization;
+using ShoreHue.Animation;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Ai;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.Utils;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.src.core.Services.Shortcuts;
+using ShoreHue.UI.Widgets.Dynamic;
+using ShoreHue.UI.Settings.Pages;
+using ShoreHue.UI.Theme;
+using ShoreHue.UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     public partial class SettingsWindow
     {
@@ -64,7 +64,7 @@ namespace DynamicBird.UI.Settings
             };
         }
 
-        /// <summary>把自定义动画（鸟笼「动画」分组）作为选项加入动画类型下拉：Content=Name，Tag=custom_anim:&lt;Id&gt;。</summary>
+        /// <summary>把自定义动画（海床「动画」分组）作为选项加入动画类型下拉：Content=Name，Tag=custom_anim:&lt;Id&gt;。</summary>
         private static void RefreshCustomAnimItems(ComboBox cmb)
         {
             if (cmb == null) return;

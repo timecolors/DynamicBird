@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace DynamicBird.Infrastructure.WinApi
+namespace ShoreHue.Infrastructure.WinApi
 {
     /// <summary>
     /// 打开 Windows 系统功能入口（手机连接 / 蓝牙设置）。

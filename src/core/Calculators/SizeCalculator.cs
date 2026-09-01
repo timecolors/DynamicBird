@@ -1,9 +1,9 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird.Core.Calculators
+namespace ShoreHue.Core.Calculators
 {
     /// <summary>
     /// 尺寸计算器：计算目标尺寸、最小尺寸、内容尺寸
@@ -55,7 +55,7 @@ namespace DynamicBird.Core.Calculators
 
                 // ★ 特判小组件切换器：测其内部真实内容（绕开 ScrollViewer 视口限制，
                 //   否则从 AI 面板划到小组件时面板被量窄）
-                if (target is DynamicBird.UI.Widgets.WidgetSwitcher ws)
+                if (target is ShoreHue.UI.Widgets.WidgetSwitcher ws)
                 {
                     // ★ 测量内部已保证布局就绪；未就绪（首次且无历史）返回保底
                     var m = ws.MeasureContentSize();

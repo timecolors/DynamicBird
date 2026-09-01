@@ -1,32 +1,32 @@
-# 灵动鸟 鸟笼小组件开发指南
+# ShoreHue 海床小组件开发指南
 
 动态小组件/面板用 **C# 代码**编写（完整自由度：任意 WPF UI 与逻辑）。应用内置 Roslyn 编译器，保存/安装时把源码编译成可运行的小组件。
 
-> 本文档面向「鸟笼（编程模式）」用户：既能自己写，也能把本文档（尤其是第 9 节）整段喂给任意 AI 生成代码。
+> 本文档面向「海床（编程模式）」用户：既能自己写，也能把本文档（尤其是第 9 节）整段喂给任意 AI 生成代码。
 
 ---
 
-## 0. 入口与工作流（鸟笼 / 编程模式）
+## 0. 入口与工作流（海床 / 编程模式）
 
-1. 打开 设置 → 常规 → 勾选「编程模式（鸟笼）」→ 设置窗口出现「鸟笼」页签。
-2. 鸟笼页左侧是**配置树**：所有设置以树形呈现；自定义面板/小组件/配置项在树中编辑源码。
+1. 打开 设置 → 常规 → 勾选「编程模式（海床）」→ 设置窗口出现「海床」页签。
+2. 海床页左侧是**配置树**：所有设置以树形呈现；自定义面板/小组件/配置项在树中编辑源码。
 3. 在树中选中节点 → 右侧编程框写代码 →「编译」校验（失败会标红并显示错误）→「保存」。
 4. 「复制 AI 提示词」：把当前节点连同本文档第 9 节的完整规范复制给 AI，让 AI 生成代码后粘回来编译。
 5. **保存当前节点**：标准功能节点保存为「变体」（同名 + 数字后缀）；自定义项直接保存。
    - 小组件变体（Kind=Widget）→ 出现在小组件面板标签
    - 面板变体（Kind=Panel）→ 出现在 设置→区域 的面板下拉，可分配到任意边缘/角落
-   - 配置变体（Kind=Config）→ 仅鸟笼内，保存为单预设可「应用」
+   - 配置变体（Kind=Config）→ 仅海床内，保存为单预设可「应用」
 6. **本地自用**：你自己（或 AI 帮你）写的代码默认完全信任、不设限；**市场来源**（在线市场/导入 .dbp）自动走沙箱（见第 5 节）。
 
 ---
 
 ## 1. 接口契约（IWidget）
 
-小组件/面板就是实现 **`DynamicBird.UI.Widgets.IWidget`** 的公开类，并继承 `UserControl`：
+小组件/面板就是实现 **`ShoreHue.UI.Widgets.IWidget`** 的公开类，并继承 `UserControl`：
 
 ```csharp
 using System.Windows.Controls;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class MyWidget : UserControl, IWidget
 {
@@ -85,7 +85,7 @@ btn.Style = (Style)FindResource("AccentButton");
 - **定时器用 `DispatcherTimer`**（自动回 UI 线程），**不要**用 `System.Threading.Timer`（回调在后台线程，碰 UI 会崩）；
 - **剪贴板**：`Clipboard.SetText` 需要 STA/UI 线程（小组件运行在 UI 线程，直接调用即可）；
 - **资源清理**：`DispatcherTimer` 记得 `Stop()`——放在 `OnDeactivated()` 里（面板切走时调用）；
-- **编译失败**：鸟笼编程框会显示错误行号与信息，修好后重新「编译」；
+- **编译失败**：海床编程框会显示错误行号与信息，修好后重新「编译」；
 - **网络**：`HttpClient` 可用（本地自用不拦截）；请求超时要设 `Timeout`，失败要 catch 并给 UI 提示，别让面板卡住；
 - **不要在构造函数里做耗时/网络同步操作**（会卡面板），用异步加载 + “加载中…”占位。
 
@@ -93,13 +93,13 @@ btn.Style = (Style)FindResource("AccentButton");
 
 ## 4. 常用功能示例（可直接复制修改）
 
-### ⏰ 时钟（定时刷新）
+### 时钟（定时刷新）
 ```csharp
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class ClockWidget : UserControl, IWidget
 {
@@ -131,11 +131,11 @@ public class ClockWidget : UserControl, IWidget
 }
 ```
 
-### 🔢 计数器（按钮交互）
+### 计数器（按钮交互）
 ```csharp
 using System.Windows;
 using System.Windows.Controls;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class CounterWidget : UserControl, IWidget
 {
@@ -166,12 +166,12 @@ public class CounterWidget : UserControl, IWidget
 }
 ```
 
-### 🔗 快捷打开网址（本地自用；市场来源会拦截 Process）
+### 快捷打开网址（本地自用；市场来源会拦截 Process）
 ```csharp
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class ShortcutWidget : UserControl, IWidget
 {
@@ -188,7 +188,7 @@ public class ShortcutWidget : UserControl, IWidget
 }
 ```
 
-### 🌤 天气（异步联网 + 失败兜底）
+### 天气（异步联网 + 失败兜底）
 ```csharp
 using System;
 using System.Net.Http;
@@ -196,7 +196,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using DynamicBird.UI.Widgets;
+using ShoreHue.UI.Widgets;
 
 public class WeatherWidget : UserControl, IWidget
 {
@@ -262,7 +262,7 @@ public class WeatherWidget : UserControl, IWidget
 
 ## 6. 面板变体（Kind=Panel，分配到任意区域）
 
-- 鸟笼内置**面板功能模板**：通知坞、最近使用、快捷设置（完整纯代码模板）；任务栏、AI 助手、窗口控制（薄封装模板，复用内置视图）；
+- 海床内置**面板功能模板**：通知坞、最近使用、快捷设置（完整纯代码模板）；任务栏、AI 助手、窗口控制（薄封装模板，复用内置视图）；
 - 保存为面板变体后，到 设置 → 区域 → 面板类型 下拉选择该面板，即可替换默认内容；
 - 面板源码同样实现 `IWidget`，但尺寸/行为由面板框架管理（内容自适应尺寸，无需自己管窗口）。
 
@@ -279,19 +279,19 @@ public class WeatherWidget : UserControl, IWidget
 
 ## 8. 给 AI 的生成提示（完整模板，可直接整段复制）
 
-> 把下面整段（连同你的需求）发给任意 AI（DeepSeek/Claude/ChatGPT 等），要求它输出完整可编译的 C# 代码，粘回鸟笼编程框编译即可。
+> 把下面整段（连同你的需求）发给任意 AI（DeepSeek/Claude/ChatGPT 等），要求它输出完整可编译的 C# 代码，粘回海床编程框编译即可。
 
 ```text
-你是灵动鸟 DynamicBird 的 WPF 小组件/面板开发专家。请严格按下面的规范，为我的需求生成完整可编译的 C# 源码。
+你是ShoreHue 海岸线 的 WPF 小组件/面板开发专家。请严格按下面的规范，为我的需求生成完整可编译的 C# 源码。
 
-【目标】生成一个灵动鸟小组件（或面板）的完整 C# 类源码，粘回鸟笼编程框后可直接编译运行。
+【目标】生成一个ShoreHue小组件（或面板）的完整 C# 类源码，粘回海床编程框后可直接编译运行。
 
 【需求描述】
 （在这里用自然语言描述你想要的小组件：显示什么、有哪些交互、什么风格。例如：“一个每秒更新的时钟，显示大号时间和日期，深色背景适配面板”；“一个按钮，点击用系统浏览器打开 https://github.com”；“一个待办清单，能添加和勾选删除”。）
 
 【必须遵守的接口契约】
 1. 类必须是公开类（public class），命名空间随意但避免与内置冲突；
-2. 必须继承 System.Windows.Controls.UserControl 并实现 DynamicBird.UI.Widgets.IWidget；
+2. 必须继承 System.Windows.Controls.UserControl 并实现 ShoreHue.UI.Widgets.IWidget；
 3. 必须实现四个成员：
    - string Name（面板标签显示名，用中文）；
    - UserControl CreateView() → 固定返回 this；
@@ -328,7 +328,7 @@ public class WeatherWidget : UserControl, IWidget
 1. 类是否 public 且 : UserControl, IWidget？
 2. Name/CreateView/OnActivated/OnDeactivated 是否都实现了？CreateView 是否返回 this？
 3. 是否全部用代码构建 UI 且赋值给 Content？
-4. using 是否完整（System、System.Windows、System.Windows.Controls、System.Windows.Threading、DynamicBird.UI.Widgets，用到什么补什么）？
+4. using 是否完整（System、System.Windows、System.Windows.Controls、System.Windows.Threading、ShoreHue.UI.Widgets，用到什么补什么）？
 5. 定时器是否用 DispatcherTimer？OnDeactivated 是否 Stop？
 6. 网络/异步是否有 Timeout、catch 和 UI 提示？
 7. 是否误用了沙箱禁止的 API（如果面向市场）？
@@ -342,4 +342,4 @@ public class WeatherWidget : UserControl, IWidget
 ## 9. 其他
 
 - 本文档会持续补充常见功能示例（欢迎贡献）；
-- 预设/配置代码（非小组件）的 AI 提示词由鸟笼「复制 AI 提示词」按节点动态生成。
+- 预设/配置代码（非小组件）的 AI 提示词由海床「复制 AI 提示词」按节点动态生成。

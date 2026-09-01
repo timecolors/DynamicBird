@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DynamicBird.Core.Controllers
+namespace ShoreHue.Core.Controllers
 {
     public interface IPanelVisibilityController
     {

@@ -1,8 +1,8 @@
-﻿using DynamicBird.Core.Services;
+﻿using ShoreHue.Core.Services;
 using System;
 using System.Collections.ObjectModel;
 
-namespace DynamicBird.src.core.Services.Notes
+namespace ShoreHue.src.core.Services.Notes
 {
     /// <summary>
     /// 便签服务接口

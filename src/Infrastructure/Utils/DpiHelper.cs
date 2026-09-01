@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Media;
 
-namespace DynamicBird.Infrastructure.Utils
+namespace ShoreHue.Infrastructure.Utils
 {
     public static class DpiHelper
     {

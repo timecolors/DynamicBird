@@ -1,7 +1,7 @@
-using DynamicBird.Core.Services;
-using DynamicBird.Core.Services.Configuration;
-using DynamicBird.Infrastructure.WinApi;
-using DynamicBird.UI.Theme;
+using ShoreHue.Core.Services;
+using ShoreHue.Core.Services.Configuration;
+using ShoreHue.Infrastructure.WinApi;
+using ShoreHue.UI.Theme;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     /// <summary>
     /// 天气城市选择器：
@@ -147,7 +147,7 @@ namespace DynamicBird.UI.Settings
                 if (TxtSearch.Text.Trim() != query) return; // 输入已变化，丢弃过期结果
                 if (w.HasValue)
                 {
-                    WeatherPreview.Text = "🌐 " + query + " · " + w.Value.Text;
+                    WeatherPreview.Text = query + " · " + w.Value.Text;
                 }
                 else
                 {

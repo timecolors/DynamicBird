@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 
-namespace DynamicBird.UI.Main
+namespace ShoreHue.UI.Main
 {
     public partial class MainWindow
     {
@@ -111,7 +111,7 @@ namespace DynamicBird.UI.Main
             bool down = IsPassthroughModifierDown();
             if (down == _passthroughActive) return;
             _passthroughActive = down;
-            DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"[穿透] 状态切换 down={down} modifier={_settingsService.PassthroughModifier}");
+            ShoreHue.Core.Infrastructure.Logging.LogManager.Debug($"[穿透] 状态切换 down={down} modifier={_settingsService.PassthroughModifier}");
             try
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
@@ -280,23 +280,23 @@ namespace DynamicBird.UI.Main
                 string hotkey = _settingsService.TextAiHotkey;
                 if (string.IsNullOrWhiteSpace(hotkey)) return;
 
-                if (DynamicBird.Infrastructure.WinApi.HotkeyParser.TryParse(hotkey, out uint mods, out uint vk))
+                if (ShoreHue.Infrastructure.WinApi.HotkeyParser.TryParse(hotkey, out uint mods, out uint vk))
                 {
                     if (!RegisterHotKey(_hwnd, TextAiHotkeyId, mods, vk))
                     {
-                        DynamicBird.Infrastructure.WinApi.SystemToast.Show(
-                            "灵动鸟", string.Format(DynamicBird.UI.Localization.LocalizationManager.Instance["Set_HotkeyOccupied"], hotkey));
-                        DynamicBird.Core.Infrastructure.Logging.LogManager.Warning($"划词翻译 热键注册失败（冲突？）: {hotkey}");
+                        ShoreHue.Infrastructure.WinApi.SystemToast.Show(
+                            "ShoreHue", string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Set_HotkeyOccupied"], hotkey));
+                        ShoreHue.Core.Infrastructure.Logging.LogManager.Warning($"划词翻译 热键注册失败（冲突？）: {hotkey}");
                     }
                 }
                 else
                 {
-                    DynamicBird.Core.Infrastructure.Logging.LogManager.Warning($"划词翻译 热键格式无效: {hotkey}");
+                    ShoreHue.Core.Infrastructure.Logging.LogManager.Warning($"划词翻译 热键格式无效: {hotkey}");
                 }
             }
             catch (Exception ex)
             {
-                DynamicBird.Core.Infrastructure.Logging.LogManager.Error("重新注册划词热键失败", ex);
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("重新注册划词热键失败", ex);
             }
         }
 

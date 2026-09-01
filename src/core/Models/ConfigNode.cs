@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 
-namespace DynamicBird.Core.Models
+namespace ShoreHue.Core.Models
 {
     /// <summary>
-    /// 鸟笼配置树节点：一级（面板设计/动画/外观/交互/状态栏）→ 二级 → 三级。
+    /// 海床配置树节点：一级（面板设计/动画/外观/交互/状态栏）→ 二级 → 三级。
     /// 每个节点绑定一组 SettingsData 字段名，选中后在编程框里以 JSON 编辑。
     /// 每一级都可新增选项（新增节点 = 新增可编程单元）。
     /// </summary>

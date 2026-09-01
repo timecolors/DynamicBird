@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
-using DynamicBird.Core.Infrastructure.Logging;
-using DynamicBird.Infrastructure.Utils;
+using ShoreHue.Core.Infrastructure.Logging;
+using ShoreHue.Infrastructure.Utils;
 
-namespace DynamicBird
+namespace ShoreHue
 {
     public partial class App : Application
     {
@@ -16,14 +16,14 @@ namespace DynamicBird
         {
             base.OnStartup(e);
 
-            // ★ 旧版本数据迁移（安装目录/Data -> %LOCALAPPDATA%\DynamicBird），必须在日志初始化前执行
+            // ★ 旧版本数据迁移（安装目录/Data -> %LOCALAPPDATA%\ShoreHue），必须在日志初始化前执行
             AppPaths.MigrateLegacyData();
 
             // ★ 安全：收紧数据目录 ACL（仅当前用户 + SYSTEM + 管理员），防止同机其他账户读取
             //   github_token.dat / ai.json / clipboard_history.json 等敏感数据（旧版残留宽权限时自动修复）
             try
             {
-                DynamicBird.Infrastructure.Utils.DataDirSecurity.TightenAcl();
+                ShoreHue.Infrastructure.Utils.DataDirSecurity.TightenAcl();
             }
             catch { }
 
@@ -32,12 +32,12 @@ namespace DynamicBird
             bool startupActions = false;
             try
             {
-                startupActions = DynamicBird.Infrastructure.WinApi.JumpListCommand.ForwardOrExecute(e.Args);
+                startupActions = ShoreHue.Infrastructure.WinApi.JumpListCommand.ForwardOrExecute(e.Args);
             }
             catch { }
 
             // ★ 单实例保护：已有实例运行时直接退出，避免托盘出现多个进程/图标
-            _singleInstanceMutex = new Mutex(true, "DynamicBird_SingleInstance", out bool createdNew);
+            _singleInstanceMutex = new Mutex(true, "ShoreHue_SingleInstance", out bool createdNew);
             if (!createdNew)
             {
                 // ★ 已转发动作时静默退出（不打扰）；无动作仍提示
@@ -47,7 +47,7 @@ namespace DynamicBird
                     Current.Shutdown();
                     return;
                 }
-                MessageBox.Show("灵动鸟已在运行", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("ShoreHue已在运行", "ShoreHue", MessageBoxButton.OK, MessageBoxImage.Information);
                 Current.Shutdown();
                 return;
             }
@@ -55,14 +55,14 @@ namespace DynamicBird
             // ★ 本实例为唯一实例：注册 Jump List 动作监听（任务栏点击转发进来）
             try
             {
-                DynamicBird.Infrastructure.WinApi.JumpListCommand.Listen(ExecuteJumpListAction);
+                ShoreHue.Infrastructure.WinApi.JumpListCommand.Listen(ExecuteJumpListAction);
             }
             catch { }
 
             // ★ 配置任务栏 Jump List（关联开始菜单快捷方式 AUMID）
             try
             {
-                DynamicBird.Infrastructure.WinApi.JumpListManager.Configure();
+                ShoreHue.Infrastructure.WinApi.JumpListManager.Configure();
             }
             catch { }
 
@@ -72,18 +72,18 @@ namespace DynamicBird
             // ★ 本地化：按配置语言初始化（zh-CN / en-US，空=跟随系统）
             try
             {
-                var lang = DynamicBird.Core.Services.SettingsFileManager.Load().Language;
-                DynamicBird.UI.Localization.LocalizationManager.Instance.SetCulture(lang);
+                var lang = ShoreHue.Core.Services.SettingsFileManager.Load().Language;
+                ShoreHue.UI.Localization.LocalizationManager.Instance.SetCulture(lang);
             }
             catch { }
 
             // ★ 清理更新残留（.new.exe/.ps1）；上次更新失败则提示"仍为旧版本"
             try
             {
-                if (DynamicBird.Infrastructure.WinApi.UpdateService.CleanupStaleFiles())
+                if (ShoreHue.Infrastructure.WinApi.UpdateService.CleanupStaleFiles())
                 {
                     MessageBox.Show("上次更新未能完成，当前仍为旧版本。请稍后重试更新。",
-                        "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        "ShoreHue", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch { }
@@ -92,7 +92,7 @@ namespace DynamicBird
             try
             {
                 System.Threading.Tasks.Task.Run(
-                    DynamicBird.Infrastructure.WinApi.SystemToast.EnsureRegistered);
+                    ShoreHue.Infrastructure.WinApi.SystemToast.EnsureRegistered);
             }
             catch { }
 
@@ -102,7 +102,7 @@ namespace DynamicBird
                 LogManager.Error("Dispatcher未处理异常", args.Exception);
                 MessageBox.Show(
                     $"发生未处理异常:\n{args.Exception.Message}\n\n{args.Exception.StackTrace}",
-                    "灵动鸟错误",
+                    "ShoreHue错误",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 args.Handled = true;
@@ -114,7 +114,7 @@ namespace DynamicBird
                 LogManager.Fatal("AppDomain未处理异常", ex);
                 MessageBox.Show(
                     $"发生未处理异常:\n{ex?.Message}\n\n{ex?.StackTrace}",
-                    "灵动鸟错误",
+                    "ShoreHue错误",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             };
@@ -128,7 +128,7 @@ namespace DynamicBird
                 LogManager.Fatal("应用程序启动失败", ex);
                 MessageBox.Show(
                     $"应用程序启动失败:\n{ex.Message}\n\n详细信息已写入日志文件",
-                    "灵动鸟启动失败",
+                    "ShoreHue启动失败",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 Current.Shutdown();
@@ -138,7 +138,7 @@ namespace DynamicBird
         /// <summary>命令行参数是否含 Jump List 动作（决定单实例冲突时是否静默退出）。</summary>
         private static bool HasJumpListAction(string[] args)
         {
-            return DynamicBird.Infrastructure.WinApi.JumpListManager.ParseActions(args).Count > 0;
+            return ShoreHue.Infrastructure.WinApi.JumpListManager.ParseActions(args).Count > 0;
         }
 
         /// <summary>执行 Jump List 动作（UI 线程，由命令监听/启动 pending 触发；MainWindow 启动动作也调用）。</summary>
@@ -146,18 +146,18 @@ namespace DynamicBird
         {
             try
             {
-                if (Current?.MainWindow is not DynamicBird.UI.Main.MainWindow main) return;
+                if (Current?.MainWindow is not ShoreHue.UI.Main.MainWindow main) return;
                 foreach (var action in actions)
                 {
                     switch (action)
                     {
-                        case DynamicBird.Infrastructure.WinApi.JumpListManager.ArgOpenSettings:
+                        case ShoreHue.Infrastructure.WinApi.JumpListManager.ArgOpenSettings:
                             main.InvokeJumpListOpenSettings();
                             break;
-                        case DynamicBird.Infrastructure.WinApi.JumpListManager.ArgToggleDnd:
+                        case ShoreHue.Infrastructure.WinApi.JumpListManager.ArgToggleDnd:
                             main.InvokeJumpListToggleDnd();
                             break;
-                        case DynamicBird.Infrastructure.WinApi.JumpListManager.ArgTogglePanel:
+                        case ShoreHue.Infrastructure.WinApi.JumpListManager.ArgTogglePanel:
                             main.InvokeJumpListTogglePanel();
                             break;
                     }

@@ -1,0 +1,118 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+		<!-- 已安装更高主版本运行时（如 .NET 11）时允许滚动 -->
+		<RollForward>LatestMajor</RollForward>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ApplicationIcon>assets\icon.ico</ApplicationIcon>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AssemblyName>ShoreHue</AssemblyName>
+		<RootNamespace>ShoreHue</RootNamespace>
+
+		<!-- ★★★ 版本与产品信息（显示在文件属性/任务管理器/关于页） ★★★ -->
+		<Version>1.1.0</Version>
+		<FileVersion>1.1.0.0</FileVersion>
+		<AssemblyVersion>1.1.0.0</AssemblyVersion>
+		<Product>ShoreHue 海岸线</Product>
+		<AssemblyTitle>ShoreHue</AssemblyTitle>
+		<Description>Windows 桌面边缘面板工具</Description>
+		<Copyright>Copyright © 2026 TideHue</Copyright>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
+		<!-- ★★★ 禁用所有默认包含项（避免重复） ★★★ -->
+		<EnableDefaultItems>false</EnableDefaultItems>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- 供单元测试/开发探针访问 internal 成员 -->
+		<InternalsVisibleTo Include="ShoreHue.Tests" />
+		<InternalsVisibleTo Include="SeabedProbe" />
+		<InternalsVisibleTo Include="EdgeTriggerProbe" />
+		<InternalsVisibleTo Include="FpsProbe" />
+		<InternalsVisibleTo Include="HookIntegProbe" />
+		<InternalsVisibleTo Include="CodecifyProbe" />
+  		<InternalsVisibleTo Include="ScreenshotGen" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- NuGet 包 -->
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
+		<PackageReference Include="NAudio" Version="2.3.0" />
+		<PackageReference Include="Serilog" Version="4.2.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+		<PackageReference Include="System.Management" Version="10.0.11" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+		<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.11" />
+		<PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- ★★★ App.xaml ★★★ -->
+		<ApplicationDefinition Include="App.xaml">
+			<Generator>MSBuild:Compile</Generator>
+			<SubType>Designer</SubType>
+		</ApplicationDefinition>
+
+		<!-- ★★★ 所有 XAML 文件（Page） ★★★ -->
+		<Page Include="src\UI\Main\MainWindow.xaml" />
+		<Page Include="src\UI\Panels\TaskbarView.xaml" />
+		<Page Include="src\UI\Settings\SettingsWindow.xaml" />
+		<Page Include="src\UI\Settings\Pages\SeabedPage.xaml" />
+		<Page Include="src\UI\Settings\WeatherCityPickerWindow.xaml" />
+		<Page Include="src\UI\Settings\Pages\ShortcutManagementPage.xaml" />
+		<Page Include="src\UI\Status\SystemStatusView.xaml" />
+		<Page Include="src\UI\Theme\Theme.xaml" />
+		<Page Include="src\UI\Theme\AppIcons.xaml" />
+		<Page Include="src\UI\AppHelper\AppHelperView.xaml" />
+		<Page Include="src\UI\AppHelper\MediaControlView.xaml" />
+		<Page Include="src\UI\Panels\NotificationDockView.xaml" />
+		<Page Include="src\UI\Panels\RecentItemsView.xaml" />
+		<Page Include="src\UI\Panels\QuickSettingsView.xaml" />
+		<Page Include="src\UI\Media\PanelMediaPlayer.xaml" />
+		<Page Include="src\UI\Media\WindowPickerWindow.xaml" />
+		<Page Include="src\UI\Onboarding\OnboardingWindow.xaml" />
+		<Page Include="seabed\小组件\calculator\CalculatorWidget.xaml" />
+		<Page Include="seabed\小组件\timer\TimerWidget.xaml" />
+		<Page Include="seabed\小组件\clipboard\ClipboardHistoryWidget.xaml" />
+		<Page Include="seabed\小组件\note\NoteWidget.xaml" />
+		<Page Include="src\UI\Widgets\WidgetSwitcher.xaml" />
+		<Page Include="seabed\小组件\textai\TextAiWidget.xaml" />
+		<Page Include="src\UI\Widgets\WindowControlView.xaml" />
+		<Page Include="src\UI\AI\AiChatView.xaml" />
+
+		<!-- ★★★ 所有 CS 文件（递归包含） ★★★ -->
+		<Compile Include="src\**\*.cs" Exclude="**\obj\**\*.cs;src\UI\Widgets\Calculator\**;src\UI\Widgets\Timer\**;src\UI\Widgets\ClipboardHistory\**;src\UI\Widgets\Notes\**;src\UI\Widgets\TextAi\**;src\UI\Widgets\WebViewWidget.cs" />
+		<Compile Include="seabed\**\*.cs" Exclude="**\obj\**\*.cs" />
+		<Compile Remove="src\UI\Debug\**" />
+		<Compile Include="App.xaml.cs" />
+		<Compile Include="Properties\Settings.Designer.cs" />
+
+  	<!-- ★★★ 资源文件 ★★★ -->
+  	<None Include="assets\icon.ico">
+  		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  	</None>
+
+  	<!-- ★★★ AI 编程指南（海床界面按钮打开；发布时随 exe 携带） ★★★ -->
+  	<None Include="docs\AI-PROGRAMMING.md">
+  		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  	</None>
+
+		<!-- ★★★ 本地化资源（中英双语嵌入资源） ★★★ -->
+		<EmbeddedResource Include="src\UI\Localization\Strings.resx">
+			<LogicalName>ShoreHue.UI.Localization.Strings.resources</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="src\UI\Localization\Strings.en-US.resx">
+			<LogicalName>ShoreHue.UI.Localization.Strings.en-US.resources</LogicalName>
+		</EmbeddedResource>
+		<None Update="Properties\Settings.settings">
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
+
+</Project>

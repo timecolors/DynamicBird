@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
-namespace DynamicBird.UI.Settings
+namespace ShoreHue.UI.Settings
 {
     /// <summary>
     /// 设置界面辅助方法
@@ -157,15 +157,15 @@ namespace DynamicBird.UI.Settings
         {
             return easingValue switch
             {
-                "Linear" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_344"],
-                "CubicEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_345"],
-                "QuadraticEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_346"],
-                "QuarticEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_347"],
-                "QuinticEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_348"],
-                "ElasticEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_349"],
-                "BackEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_350"],
-                "BounceEase" => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_351"],
-                _ => DynamicBird.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_345"]
+                "Linear" => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_344"],
+                "CubicEase" => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_345"],
+                "QuadraticEase" => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_346"],
+                "QuarticEase" => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_347"],
+                "QuinticEase" => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_348"],
+                "ElasticEase" => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_349"],
+                "BackEase" => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_350"],
+                "BounceEase" => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_351"],
+                _ => ShoreHue.UI.Localization.LocalizationManager.Instance["UI_SettingsWindow_345"]
             };
         }
 

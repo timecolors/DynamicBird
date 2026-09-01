@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DynamicBird.Core.Services
+namespace ShoreHue.Core.Services
 {
     /// <summary>
     /// 管理面板锁定状态（拖拽/调整大小时锁定，防止自动隐藏）
