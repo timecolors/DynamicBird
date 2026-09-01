@@ -13,6 +13,8 @@
     "clipboard"
   ],
   "files": [
-    "main.cs"
+    "main.cs",
+    "TextAiWidget.xaml",
+    "TextAiWidget.xaml.cs"
   ]
 }

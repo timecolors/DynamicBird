@@ -11,6 +11,8 @@
   "sourceKey": "widget-calculator",
   "permissions": [],
   "files": [
-    "main.cs"
+    "main.cs",
+    "CalculatorWidget.xaml",
+    "CalculatorWidget.xaml.cs"
   ]
 }

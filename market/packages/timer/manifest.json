@@ -11,6 +11,8 @@
   "sourceKey": "widget-timer",
   "permissions": [],
   "files": [
-    "main.cs"
+    "main.cs",
+    "TimerWidget.xaml",
+    "TimerWidget.xaml.cs"
   ]
 }

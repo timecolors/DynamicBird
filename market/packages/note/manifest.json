@@ -11,6 +11,8 @@
   "sourceKey": "widget-note",
   "permissions": [],
   "files": [
-    "main.cs"
+    "main.cs",
+    "NoteWidget.xaml",
+    "NoteWidget.xaml.cs"
   ]
 }

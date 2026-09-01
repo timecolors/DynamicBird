@@ -129,7 +129,10 @@ namespace ShoreHue.UI.Widgets
                         continue;
                     }
                 }
-                var (widget, err) = WidgetCompiler.Compile(plugin.Id, plugin.Source);
+                // ★ 形态分流：XAML 形态（.xaml + .xaml.cs）走 CompileXaml；否则纯代码 Compile
+                var (widget, err) = !string.IsNullOrEmpty(plugin.Xaml) && !string.IsNullOrEmpty(plugin.XamlCs)
+                    ? WidgetCompiler.CompileXaml(plugin.Id, plugin.Xaml, plugin.XamlCs)
+                    : WidgetCompiler.Compile(plugin.Id, plugin.Source);
                 if (widget != null)
                 {
                     _tabs.Add(new WidgetTab

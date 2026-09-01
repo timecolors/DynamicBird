@@ -45,7 +45,9 @@ namespace ShoreHue.UI.Widgets.Dynamic
             sb.AppendLine("    {");
             sb.AppendLine("        var xamlB64 = \"" + xamlB64 + "\";");
             sb.AppendLine("        var xaml = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(xamlB64));");
+            sb.AppendLine("        // ★ 动态 XAML：{StaticResource} 依赖真实 App 资源（Theme.xaml 已由 App 加载）；裸 Parse");
             sb.AppendLine("        var root = (System.Windows.Controls.UserControl)System.Windows.Markup.XamlReader.Parse(xaml);");
+
             sb.AppendLine("        this.Content = ((System.Windows.Controls.UserControl)root).Content;");
             foreach (var kv in named)
             {
@@ -103,6 +105,10 @@ namespace ShoreHue.UI.Widgets.Dynamic
             // 移除 x:Class（verbatim）
             result = System.Text.RegularExpressions.Regex.Replace(result,
                 @"\s*x:Class=""[^""]*""", "");
+            // ★ 动态 XamlReader 解析本地类型：给无 assembly 的 clr-namespace 补 ;assembly=ShoreHue
+            //   （编译期 XAML 可省 assembly（默认当前程序集），但 XamlReader.Parse 需显式指定才能解析）
+            result = System.Text.RegularExpressions.Regex.Replace(result,
+                @"clr-namespace:([\w.]+)(?!;assembly=)", "clr-namespace:$1;assembly=ShoreHue");
             return result;
         }
 

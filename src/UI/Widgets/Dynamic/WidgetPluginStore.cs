@@ -22,6 +22,12 @@ namespace ShoreHue.UI.Widgets.Dynamic
         public string Group { get; set; } = "小组件";
         [JsonIgnore]
         public string Source { get; set; } = "";
+        /// <summary>XAML 形态（可选）：<id>.xaml 界面源码；与 XamlCs 配套，存在时编译走 CompileXaml。</summary>
+        [JsonIgnore]
+        public string Xaml { get; set; } = "";
+        /// <summary>XAML 代码后置（可选）：<id>.xaml.cs（partial class + 事件处理器）。</summary>
+        [JsonIgnore]
+        public string XamlCs { get; set; } = "";
         /// <summary>是否信任来源（跳过沙箱）。默认 true = 本地代码（本地编程不检测，见 HANDOFF）；
         /// 市场安装/系统内置副本按 manifest 标记。false = 每次加载前过沙箱。</summary>
         [JsonIgnore]
@@ -230,15 +236,23 @@ namespace ShoreHue.UI.Widgets.Dynamic
                     {
                         try { NormalizeDbp(dbpFile, groupDir); } catch { }
                     }
-                    // ③ 标准目录（main.cs + manifest.json）
+                    // ③ 标准目录（main.cs + manifest.json；或 XAML 形态 <id>.xaml + <id>.xaml.cs）
                     foreach (var dir in Directory.GetDirectories(groupDir))
                     {
                         try
                         {
-                            string main = Path.Combine(dir, "main.cs");
-                            if (!File.Exists(main)) continue;
                             string id = Path.GetFileName(dir);
-                            string source = File.ReadAllText(main);
+                            string dirName = Path.GetFileName(dir);
+                            string main = Path.Combine(dir, "main.cs");
+                            bool hasMain = File.Exists(main);
+                            // ★ XAML 形态：<id>.xaml + <id>.xaml.cs（无 main.cs 时也可运行，走 CompileXaml）
+                            string xamlFile = Path.Combine(dir, dirName + ".xaml");
+                            string xamlCsFile = Path.Combine(dir, dirName + ".xaml.cs");
+                            bool hasXaml = File.Exists(xamlFile) && File.Exists(xamlCsFile);
+                            if (!hasMain && !hasXaml) continue;   // 目录里既无 main.cs 也无 XAML → 跳过
+                            string source = hasMain ? File.ReadAllText(main) : "";
+                            string xaml = hasXaml ? File.ReadAllText(xamlFile) : "";
+                            string xamlCs = hasXaml ? File.ReadAllText(xamlCsFile) : "";
                             string name = id, author = "", desc = "";
                             var perms = new List<string>();
                             string mf = Path.Combine(dir, "manifest.json");
@@ -277,6 +291,7 @@ namespace ShoreHue.UI.Widgets.Dynamic
                             {
                                 Id = id, Name = name, Author = author, Description = desc,
                                 Permissions = perms, Group = group, Source = source,
+                                Xaml = xaml, XamlCs = xamlCs,
                                 TrustedSource = trusted, Kind = kind
                             });
                         }
