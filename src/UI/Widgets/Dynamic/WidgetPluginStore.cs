@@ -615,9 +615,13 @@ namespace ShoreHue.UI.Widgets.Dynamic
                 File.WriteAllText(Path.Combine(nodeDir, "manifest.json"),
                     JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true }));
 
-                // 内容文件：小组件/面板 → main.cs；配置 → config.json
+                // 内容文件：小组件/面板 → main.cs（+ 完全编程 .xaml/.xaml.cs）；配置 → config.json
                 if (!string.IsNullOrEmpty(cp.Source))
                     File.WriteAllText(Path.Combine(nodeDir, "main.cs"), cp.Source);
+                if (!string.IsNullOrEmpty(cp.Xaml))
+                    File.WriteAllText(Path.Combine(nodeDir, safeName + ".xaml"), cp.Xaml);
+                if (!string.IsNullOrEmpty(cp.XamlCs))
+                    File.WriteAllText(Path.Combine(nodeDir, safeName + ".xaml.cs"), cp.XamlCs);
                 if (!string.IsNullOrEmpty(cp.ConfigJson) && cp.ConfigJson != "{}")
                     File.WriteAllText(Path.Combine(nodeDir, "config.json"), cp.ConfigJson);
             }
@@ -647,6 +651,28 @@ namespace ShoreHue.UI.Widgets.Dynamic
                 }
             }
             catch { }
+        }
+
+        /// <summary>
+        /// 读取节点海床文件夹里的 XAML 形态文件（<名字>.xaml + <名字>.xaml.cs）。
+        /// 按 分类/节点名 定位；找不到返回空串。用于选中节点时补充加载完全编程代码。
+        /// </summary>
+        public static (string Xaml, string XamlCs) LoadNodeXaml(ShoreHue.Core.Models.CustomPanelDefinition cp)
+        {
+            try
+            {
+                string group = MapCategoryToFolder(cp.Category);
+                string safeName = SanitizeId(cp.Name);
+                string dir = Path.Combine(RootDir, group, safeName);
+                if (!Directory.Exists(dir)) return ("", "");
+                string x = "", xc = "";
+                string xf = Path.Combine(dir, safeName + ".xaml");
+                string xcf = Path.Combine(dir, safeName + ".xaml.cs");
+                if (File.Exists(xf)) x = File.ReadAllText(xf);
+                if (File.Exists(xcf)) xc = File.ReadAllText(xcf);
+                return (x, xc);
+            }
+            catch { return ("", ""); }
         }
 
         /// <summary>删除海床节点的文件夹（按 manifest.json 里的 id 匹配，跨分组查找）。</summary>

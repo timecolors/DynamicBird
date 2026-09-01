@@ -95,6 +95,9 @@ namespace ShoreHue.UI.Widgets.Dynamic
             return result;
         }
 
+        /// <summary>公开入口：清洗 XAML（移除事件/x:Class，动态解析可加载）。供海床预览等复用。</summary>
+        public static string CleanXamlPublic(string xaml) => CleanXaml(xaml);
+
         private static string CleanXaml(string xaml)
         {
             string result = xaml;

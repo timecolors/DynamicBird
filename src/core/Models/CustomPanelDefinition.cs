@@ -31,6 +31,10 @@ namespace ShoreHue.Core.Models
 
         /// <summary>面板源码（C#，实现 ShoreHue.UI.Widgets.IWidget 接口，动态编译运行）。</summary>
         public string Source { get; set; } = "";
+        /// <summary>完全编程：XAML 界面源码（<名字>.xaml）。与 XamlCs 配套，存在时编译走 CompileXaml。</summary>
+        public string Xaml { get; set; } = "";
+        /// <summary>完全编程：XAML 代码后置（<名字>.xaml.cs，partial class + 事件处理器）。</summary>
+        public string XamlCs { get; set; } = "";
 
         /// <summary>来源节点 Key（保存当前节点时记录：该变体替代/覆盖的内置节点）。</summary>
         public string SourceKey { get; set; } = "";

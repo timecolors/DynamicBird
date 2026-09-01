@@ -126,8 +126,104 @@ public class CustomPanel : UserControl, IWidget
             InitializeComponent();
             cmbProgMode.SelectedIndex = 0;   // ★ 默认简单编程
             _settings = settings;
+            txtXamlEditor.TextChanged += (_, _) => UpdateXamlPreview();
+            UpdateEditorVisibility();
             LoadTree();
             RefreshPresets();
+        }
+
+        /// <summary>当前编程模式：Simple=简单编程 / Xaml=完全编程。</summary>
+        private PromptGenerator.ProgrammingMode CurrentProgMode
+        {
+            get
+            {
+                if (cmbProgMode?.SelectedItem is System.Windows.Controls.ComboBoxItem item &&
+                    string.Equals(item.Tag as string, "Xaml", StringComparison.Ordinal))
+                    return PromptGenerator.ProgrammingMode.Xaml;
+                return PromptGenerator.ProgrammingMode.Simple;
+            }
+        }
+
+        /// <summary>模式切换：显示对应编辑器 + 重新加载当前节点代码。</summary>
+        private void CmbProgMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            UpdateEditorVisibility();
+            if (_selected != null)
+            {
+                if (CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml)
+                    RefreshXamlEditors(_selected);
+                else
+                    txtJsonEditor.Text = ExtractJson(_selected);
+            }
+        }
+
+        /// <summary>按模式显示编辑器（简单=单框；完全=双框+预览）。</summary>
+        private void UpdateEditorVisibility()
+        {
+            bool xaml = CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml;
+            if (txtJsonEditor != null) txtJsonEditor.Visibility = xaml ? Visibility.Collapsed : Visibility.Visible;
+            if (xamlEditorPanel != null) xamlEditorPanel.Visibility = xaml ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        /// <summary>加载当前节点的完全编程代码（.xaml + .xaml.cs；从海床文件夹补充读取）。</summary>
+        private void RefreshXamlEditors(ConfigNode node)
+        {
+            string x = "", xc = "";
+            var cp = _settings.CustomPanels.FirstOrDefault(p => p.Id == node.CustomId);
+            if (cp != null)
+            {
+                x = cp.Xaml ?? "";
+                xc = cp.XamlCs ?? "";
+                if (string.IsNullOrEmpty(x) && string.IsNullOrEmpty(xc))
+                {
+                    var (fx, fxc) = ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.LoadNodeXaml(cp);
+                    if (!string.IsNullOrEmpty(fx)) x = fx;
+                    if (!string.IsNullOrEmpty(fxc)) xc = fxc;
+                }
+            }
+            // 无已有 XAML 时给个最小模板
+            if (string.IsNullOrEmpty(x))
+                x = "<UserControl xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n             xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"\n             xmlns:loc=\"clr-namespace:ShoreHue.UI.Localization;assembly=ShoreHue\">\n    <StackPanel Margin=\"2\">\n        <!-- 在这里写界面 -->\n    </StackPanel>\n</UserControl>";
+            if (string.IsNullOrEmpty(xc))
+                xc = "using System.Windows;\nusing System.Windows.Controls;\nusing ShoreHue.UI.Widgets;\nusing ShoreHue.UI.Localization;\n\npublic partial class " + SanitizeClassName(node.Name) + " : UserControl, IWidget\n{\n    public " + SanitizeClassName(node.Name) + "() { InitializeComponent(); }\n    public string Name => \"" + node.Name + "\";\n    public UserControl CreateView() => this;\n    public void OnActivated() { }\n    public void OnDeactivated() { }\n}";
+            txtXamlEditor.Text = x;
+            txtXamlCsEditor.Text = xc;
+        }
+
+        private static string SanitizeClassName(string name)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (char ch in name ?? "")
+                if (char.IsLetterOrDigit(ch) || ch == '_') sb.Append(ch);
+            string s = sb.ToString();
+            if (s.Length == 0 || char.IsDigit(s[0])) s = "Xaml" + s;
+            return s.Length > 0 ? s : "XamlWidget";
+        }
+
+        /// <summary>实时预览：把 .xaml 文本解析为控件显示（失败显示错误，不崩）。</summary>
+        private void UpdateXamlPreview()
+        {
+            if (xamlPreviewHost == null) return;
+            try
+            {
+                string xaml = txtXamlEditor?.Text ?? "";
+                if (string.IsNullOrWhiteSpace(xaml)) { xamlPreviewHost.Content = null; return; }
+                // ★ 复用 XamlCodeGenerator 的清洗（移除 x:Class/事件，动态解析可加载）
+                string clean = ShoreHue.UI.Widgets.Dynamic.XamlCodeGenerator.CleanXamlPublic(xaml);
+                var obj = System.Windows.Markup.XamlReader.Parse(clean);
+                xamlPreviewHost.Content = obj;
+            }
+            catch (Exception ex)
+            {
+                // 解析失败：显示错误占位（不崩溃）
+                xamlPreviewHost.Content = new TextBlock
+                {
+                    Text = "预览失败：\n" + ex.Message,
+                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xD4, 0x50, 0x45)),
+                    FontSize = 11,
+                    TextWrapping = TextWrapping.Wrap
+                };
+            }
         }
 
         /// <summary>外部（设置页解除覆盖后）刷新整页：树高亮/删除线、预设列表、当前选中编辑框。</summary>
@@ -137,7 +233,11 @@ public class CustomPanel : UserControl, IWidget
             {
                 LoadTree();
                 RefreshPresets();
-                if (_selected != null) txtJsonEditor.Text = ExtractJson(_selected);
+                if (_selected != null)
+                {
+                    if (CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml) RefreshXamlEditors(_selected);
+                    else txtJsonEditor.Text = ExtractJson(_selected);
+                }
             }
             catch { }
         }
@@ -308,7 +408,15 @@ public class CustomPanel : UserControl, IWidget
                     : fn.Node.IsLeaf
                         ? $"共 {fn.Node.FieldNames.Count} 项可编辑"
                         : "分组（含子项，编辑需选中子项）";
-            txtJsonEditor.Text = ExtractJson(fn.Node);
+            if (CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml)
+            {
+                RefreshXamlEditors(fn.Node);
+                txtJsonEditor.Text = "";
+            }
+            else
+            {
+                txtJsonEditor.Text = ExtractJson(fn.Node);
+            }
             txtJsonStatus.Text = "";
         }
 
@@ -619,28 +727,63 @@ public class CustomPanel : UserControl, IWidget
                     var cp = list.FirstOrDefault(p => p.Id == _selected.CustomId);
                     if (cp != null)
                     {
-                        string src = txtJsonEditor.Text ?? "";
-                        // ★ 沙箱：市场来源先拦截危险 API（本地自写不受限）
-                        if (!cp.TrustedSource)
+                        // ★ 按编程模式分流：完全编程 = XAML + 代码后置（CompileXaml）；简单 = 纯代码
+                        string err;
+                        if (CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml)
                         {
-                            string sandboxErr = ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.SandboxErrors(src);
-                            if (sandboxErr.Length > 0)
+                            string xaml = txtXamlEditor.Text ?? "";
+                            string xamlCs = txtXamlCsEditor.Text ?? "";
+                            // ★ 沙箱：市场来源先拦截危险 API（本地自写不受限，扫描合并源码）
+                            if (!cp.TrustedSource)
+                            {
+                                string merged = xaml + "\n" + xamlCs;
+                                string sandboxErr = ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.SandboxErrors(merged);
+                                if (sandboxErr.Length > 0)
+                                {
+                                    _errorCustomId = cp.Id;
+                                    LoadTree();
+                                    txtJsonStatus.Text = "沙箱拦截：" + sandboxErr;
+                                    return;
+                                }
+                            }
+                            // 校验：先走 XamlCodeGenerator 生成并编译（失败给错误）
+                            var (w, cerr) = ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.CompileXaml("panel_" + cp.Id, xaml, xamlCs);
+                            if (w == null)
                             {
                                 _errorCustomId = cp.Id;
                                 LoadTree();
-                                txtJsonStatus.Text = "沙箱拦截：" + sandboxErr;
+                                txtJsonStatus.Text = "编译失败：" + (cerr.Length > 0 ? cerr : "XAML 编译未通过");
                                 return;
                             }
+                            cp.Source = xamlCs;   // 保留代码后置作 Source（兼容）
+                            cp.Xaml = xaml;
+                            cp.XamlCs = xamlCs;
                         }
-                        string err = ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.Validate("panel_" + cp.Id, src);
-                        if (err.Length > 0)
+                        else
                         {
-                            _errorCustomId = cp.Id;
-                            LoadTree();
-                            txtJsonStatus.Text = "编译失败：" + err;
-                            return;
+                            string src = txtJsonEditor.Text ?? "";
+                            // ★ 沙箱：市场来源先拦截危险 API（本地自写不受限）
+                            if (!cp.TrustedSource)
+                            {
+                                string sandboxErr = ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.SandboxErrors(src);
+                                if (sandboxErr.Length > 0)
+                                {
+                                    _errorCustomId = cp.Id;
+                                    LoadTree();
+                                    txtJsonStatus.Text = "沙箱拦截：" + sandboxErr;
+                                    return;
+                                }
+                            }
+                            err = ShoreHue.UI.Widgets.Dynamic.WidgetCompiler.Validate("panel_" + cp.Id, src);
+                            if (err.Length > 0)
+                            {
+                                _errorCustomId = cp.Id;
+                                LoadTree();
+                                txtJsonStatus.Text = "编译失败：" + err;
+                                return;
+                            }
+                            cp.Source = src;
                         }
-                        cp.Source = src;
                         _settings.CustomPanels = list;
                         // ★ 树↔文件夹同步：更新文件
                         ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.SaveNodeToFolder(cp);
@@ -648,7 +791,9 @@ public class CustomPanel : UserControl, IWidget
                         LoadTree();
                         txtJsonStatus.Text = cp.Kind == "Config"
                             ? "编译通过（配置代码项，未注册为面板）"
-                            : "编译通过，面板已注册（可在 设置→区域面板 中选用）";
+                            : CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml
+                                ? "编译通过（完全编程：.xaml + .xaml.cs 已写入文件夹，可挂载）"
+                                : "编译通过，面板已注册（可在 设置→区域面板 中选用）";
                         return;
                     }
                 }
@@ -717,7 +862,11 @@ public class CustomPanel : UserControl, IWidget
                 LoadTree();
                 RefreshOwnerSettingsDimming();
                 txtJsonStatus.Text = "已一键复原所有设置（预设/变体保留，变灰已解除）";
-                if (_selected != null) txtJsonEditor.Text = ExtractJson(_selected);
+                if (_selected != null)
+                {
+                    if (CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml) RefreshXamlEditors(_selected);
+                    else txtJsonEditor.Text = ExtractJson(_selected);
+                }
             }
             catch (Exception ex) { txtJsonStatus.Text = ex.Message; }
         }
@@ -800,7 +949,11 @@ public class CustomPanel : UserControl, IWidget
             {
                 mode = PromptGenerator.ProgrammingMode.Xaml;
             }
-            string prompt = PromptGenerator.Generate(_selected, ExtractJson(_selected), mode);
+            // ★ 完全编程：把 .xaml + .xaml.cs 当前内容作为"现有源码"传入提示词（AI 基于它修改）
+            string currentSrc = mode == PromptGenerator.ProgrammingMode.Xaml
+                ? (txtXamlEditor.Text ?? "") + "\n/* --- .xaml.cs --- */\n" + (txtXamlCsEditor.Text ?? "")
+                : ExtractJson(_selected);
+            string prompt = PromptGenerator.Generate(_selected, currentSrc, mode);
             Clipboard.SetText(prompt);
             txtJsonStatus.Text = mode == PromptGenerator.ProgrammingMode.Xaml
                 ? "已复制【完全编程】提示词（生成 .xaml + .xaml.cs 两文件，放入文件夹自动生效）"
@@ -841,7 +994,13 @@ public class CustomPanel : UserControl, IWidget
         {
             if (_selected == null) { txtJsonStatus.Text = "请先选中一个节点"; return; }
             string code = txtJsonEditor.Text ?? "";
-            if (string.IsNullOrWhiteSpace(code)) { txtJsonStatus.Text = "编程框内容为空，无法保存"; return; }
+            bool xamlMode = CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml;
+            if (xamlMode)
+            {
+                if (string.IsNullOrWhiteSpace(txtXamlEditor.Text) && string.IsNullOrWhiteSpace(txtXamlCsEditor.Text))
+                { txtJsonStatus.Text = "XAML/代码后置均为空，无法保存"; return; }
+            }
+            else if (string.IsNullOrWhiteSpace(code)) { txtJsonStatus.Text = "编程框内容为空，无法保存"; return; }
 
             // ===== 场景 B：已有自定义项 → 直接保存到该项 =====
             if (!string.IsNullOrEmpty(_selected.CustomId))
@@ -851,7 +1010,16 @@ public class CustomPanel : UserControl, IWidget
                     var list = _settings.CustomPanels;
                     var cp = list.FirstOrDefault(p => p.Id == _selected.CustomId);
                     if (cp == null) { txtJsonStatus.Text = "找不到该项，无法保存"; return; }
-                    cp.Source = code;
+                    if (xamlMode)
+                    {
+                        cp.Xaml = txtXamlEditor.Text ?? "";
+                        cp.XamlCs = txtXamlCsEditor.Text ?? "";
+                        cp.Source = cp.XamlCs;   // Source 兜底存代码后置
+                    }
+                    else
+                    {
+                        cp.Source = code;
+                    }
                     _settings.CustomPanels = list;
                     // ★ 树↔文件夹同步：更新文件
                     ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.SaveNodeToFolder(cp);
@@ -889,7 +1057,9 @@ public class CustomPanel : UserControl, IWidget
                     BaseType = baseType,
                     Kind = kind,
                     ConfigJson = "{}",
-                    Source = code,
+                    Source = xamlMode ? (txtXamlCsEditor.Text ?? "") : code,
+                    Xaml = xamlMode ? (txtXamlEditor.Text ?? "") : "",
+                    XamlCs = xamlMode ? (txtXamlCsEditor.Text ?? "") : "",
                     SourceKey = _selected.Key,   // 记录来源：应用时若冲突则原节点高亮/设置页变灰
                     CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm")
                 });
@@ -1011,7 +1181,11 @@ public class CustomPanel : UserControl, IWidget
                 LoadTree();
                 RefreshOwnerSettingsDimming();
                 txtJsonStatus.Text = $"已应用单预设「{cp.Name}」（冲突的内置设置已置灰）";
-                if (_selected != null) txtJsonEditor.Text = ExtractJson(_selected);
+                if (_selected != null)
+                {
+                    if (CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml) RefreshXamlEditors(_selected);
+                    else txtJsonEditor.Text = ExtractJson(_selected);
+                }
             }
             catch (Exception ex)
             {
