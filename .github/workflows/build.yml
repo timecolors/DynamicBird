@@ -1,4 +1,4 @@
-name: build
+﻿name: build
 
 permissions:
   contents: write
@@ -43,7 +43,6 @@ jobs:
           dotnet build tools/SmokeTest/SmokeTest.csproj -c Debug -o $p -v minimal
           if ($LASTEXITCODE -ne 0) { Write-Error "SmokeTest build failed"; exit 1 }
           $proc = Start-Process -FilePath (Join-Path $p "SmokeTest.exe") -WorkingDirectory $p -PassThru
-          # runner 机器可能较慢：最多等 60 秒，轮询结果文件
           $deadline = (Get-Date).AddSeconds(60)
           $result = $null
           while ((Get-Date) -lt $deadline -and -not $proc.HasExited) {
@@ -132,10 +131,19 @@ jobs:
           cp release/DynamicBird.exe final/DynamicBird.exe
           cp release-msix/*.msix final/ 2>/dev/null || true
 
+      # Release body from RELEASE-NOTES.md (avoid commit message dev details)
+      - name: Extract release body
+        shell: bash
+        run: |
+          tag="${{ github.ref_name }}"
+          awk -v tag="$tag" '$0 ~ "^## " tag { insec=1; next } insec && /^## / { exit } insec { print }' docs/RELEASE-NOTES.md > release-body.md
+          echo "body_path=$GITHUB_WORKSPACE/release-body.md" >> "$GITHUB_ENV"
+
       - name: Draft Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: DynamicBird ${{ github.ref_name }}
+          body_path: ${{ env.body_path }}
           draft: true
           files: final/*
