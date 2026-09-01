@@ -14,17 +14,22 @@ namespace ShoreHue.UI.Settings.Pages
     /// </summary>
     public static class PromptGenerator
     {
-        public static string Generate(ConfigNode node, string currentJson)
+        /// <summary>编程模式：Simple=简单编程（纯 C#，默认）；Xaml=完全编程（.xaml + .xaml.cs）。</summary>
+        public enum ProgrammingMode { Simple, Xaml }
+
+        public static string Generate(ConfigNode node, string currentJson, ProgrammingMode mode = ProgrammingMode.Simple)
         {
-            // 自定义面板：生成 C# 源码（动态编译），而非 JSON 配置
+            // 自定义面板：生成源码（动态编译），而非 JSON 配置
             if (!string.IsNullOrEmpty(node.CustomId))
             {
-                // ★ 按节点种类分发：状态栏/动画插件走接口模板，其余走现有面板源码
+                // ★ 按节点种类分发：状态栏/动画插件走接口模板（仅简单编程）；小组件/面板按模式分发
                 switch (node.Kind)
                 {
                     case "StatusProvider": return GenerateStatusProviderSource(node.Name, currentJson);
                     case "Animation": return GenerateAnimationSource(node.Name, currentJson);
-                    default: return GeneratePanelSource(node.Name, currentJson);
+                    default: return mode == ProgrammingMode.Xaml
+                        ? GeneratePanelXamlSource(node.Name, currentJson)
+                        : GeneratePanelSource(node.Name, currentJson);
                 }
             }
             return GenerateConfigJson(node, currentJson);
@@ -191,6 +196,87 @@ namespace ShoreHue.UI.Settings.Pages
             sb.AppendLine("1. 类是否 public 且 : UserControl, IWidget？2. Name/CreateView/OnActivated/OnDeactivated 是否都实现、CreateView 是否返回 this？3. 是否全代码构建 UI 并赋给 Content？4. using 是否完整？5. 定时器是否 DispatcherTimer、OnDeactivated 是否 Stop？6. 网络/异步是否有 Timeout、catch、UI 提示？7. 是否误用沙箱禁止 API（面向市场时）？8. 是否无占位符、可直接编译？");
             sb.AppendLine();
             sb.AppendLine("【报错处理】如果用户把编译报错信息粘贴回来，请指出错误位置（文件/行/列）和原因，并给出修正后的完整代码（仍遵守以上全部规范）。");
+            sb.AppendLine();
+            sb.AppendLine("【用户需求】");
+            sb.AppendLine("（在这里描述你想要的面板效果：显示什么、有哪些交互）");
+            return sb.ToString();
+        }
+
+        /// <summary>完全编程：生成 XAML + 代码后置（.xaml + .xaml.cs，放入海床文件夹即可动态编译运行）。</summary>
+        private static string GeneratePanelXamlSource(string panelName, string currentSource)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("【角色】你是 ShoreHue 海岸线 的 WPF 小组件/面板开发专家。请严格按下面的规范，为「" + panelName + "」生成【完全编程】形态的 XAML + 代码后置（两个文件：.xaml 和 .xaml.cs），放入海床文件夹后由系统自动编译挂载为真实可运行的面板。");
+            sb.AppendLine();
+            sb.AppendLine("【完全编程说明】完全编程 = XAML 声明界面 + C# 代码后置（事件/逻辑）。与【简单编程】（纯 C# 构建 UI）二选一，本模式产出两个文件：");
+            sb.AppendLine("  - <名字>.xaml       ：界面声明（布局、样式、事件挂接）");
+            sb.AppendLine("  - <名字>.xaml.cs    ：代码后置（partial class + 事件处理器 + 逻辑）");
+            sb.AppendLine();
+            sb.AppendLine("【必须遵守的接口契约】");
+            sb.AppendLine("1. .xaml 根元素必须是 <UserControl>，且 xmlns 声明完整（见下）；");
+            sb.AppendLine("2. .xaml.cs 必须是 public partial class <名字> : System.Windows.Controls.UserControl, ShoreHue.UI.Widgets.IWidget；");
+            sb.AppendLine("3. .xaml.cs 必须实现四个成员：string Name（面板显示名，中文）；UserControl CreateView()（固定返回 this）；void OnActivated()（激活回调）；void OnDeactivated()（切走回调，这里停止定时器等资源）；");
+            sb.AppendLine("4. 构造函数必须调用 InitializeComponent()（由系统生成的加载方法，不要自己写 XamlReader）；");
+            sb.AppendLine("5. 事件处理器签名：private void Xxx_Click(object sender, RoutedEventArgs e)。");
+            sb.AppendLine();
+            sb.AppendLine("【.xaml 文件模板】（复制此结构，替换内容）");
+            sb.AppendLine("<UserControl xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"");
+            sb.AppendLine("             xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"");
+            sb.AppendLine("             xmlns:loc=\"clr-namespace:ShoreHue.UI.Localization;assembly=ShoreHue\">");
+            sb.AppendLine("    <StackPanel Margin=\"2\">");
+            sb.AppendLine("        <!-- 在这里写界面：TextBlock/Button/TextBox/ListBox/ScrollViewer... -->");
+            sb.AppendLine("    </StackPanel>");
+            sb.AppendLine("</UserControl>");
+            sb.AppendLine();
+            sb.AppendLine("【界面风格要求】");
+            sb.AppendLine("1. 背景深色（#1E1E1E 或半透明白），文字白色/浅灰（#FFFFFF/#EEEEEE/#BBBBBB），与系统一致；");
+            sb.AppendLine("2. 按钮样式用 {StaticResource AccentButton}（主按钮）/ {StaticResource FlatButton}（工具按钮）；卡片用 CardStyle；");
+            sb.AppendLine("3. 中英文案用 {Binding Item[<键名>], Source={x:Static loc:LocalizationManager.Instance}}（键名可自造，运行时缺省显示键名）——不要写死中文到 XAML，除非是临时演示；");
+            sb.AppendLine("4. 需要图标用内置线性图标：{StaticResource IconLogo} 等。");
+            sb.AppendLine();
+            sb.AppendLine("【.xaml.cs 文件模板】（复制此结构，替换类名与逻辑）");
+            sb.AppendLine("using System.Windows;");
+            sb.AppendLine("using System.Windows.Controls;");
+            sb.AppendLine("using ShoreHue.UI.Widgets;");
+            sb.AppendLine("using ShoreHue.UI.Localization;");
+            sb.AppendLine("");
+            sb.AppendLine("public partial class <名字> : UserControl, IWidget");
+            sb.AppendLine("{");
+            sb.AppendLine("    public <名字>() { InitializeComponent(); }");
+            sb.AppendLine("    public string Name => \"<中文名>\";");
+            sb.AppendLine("    public UserControl CreateView() => this;");
+            sb.AppendLine("    public void OnActivated() { }");
+            sb.AppendLine("    public void OnDeactivated() { }");
+            sb.AppendLine("    // 事件处理器：private void Xxx_Click(object sender, RoutedEventArgs e) { ... }");
+            sb.AppendLine("}");
+            sb.AppendLine();
+            sb.AppendLine("【线程与可靠性要求】");
+            sb.AppendLine("1. 定时器必须用 System.Windows.Threading.DispatcherTimer（自动回 UI 线程），禁止 System.Threading.Timer；");
+            sb.AppendLine("2. UI 更新必须在 UI 线程：async/await 后更新界面先 await Dispatcher.InvokeAsync(...)；");
+            sb.AppendLine("3. 联网（HttpClient）设 Timeout（如 8 秒），所有异常 catch 并显示友好提示，禁止崩溃；");
+            sb.AppendLine("4. 不要在构造函数里做同步耗时/网络操作——用异步 + 加载中占位；");
+            sb.AppendLine("5. 剪贴板操作在 UI 线程直接调用。");
+            sb.AppendLine();
+            sb.AppendLine("【沙箱注意（若将发布到市场需避免；本地自用可忽略）】");
+            sb.AppendLine("禁止：System.Diagnostics（Process）、System.Reflection（GetMethod/Activator/Assembly.Load/Type.GetType）、System.Runtime.InteropServices（DllImport/Marshal）、System.Management（WMI）、Microsoft.Win32（注册表）、System.DirectoryServices；以及 FindWindow/EnumWindows/SetWindowsHookEx/SendInput/SetForegroundWindow/PostMessage/SendMessage/keybd_event/mouse_event/CopyFromScreen/PrintWindow/BitBlt/File.Write*/File.Delete/FileStream/StreamWriter/Directory.Create/Clipboard/IDataObject 等。");
+            sb.AppendLine();
+            sb.AppendLine("【现有源码】当前节点源码如下（可参考，完全编程将替换为 .xaml + .xaml.cs 两文件）：");
+            sb.AppendLine(currentSource);
+            sb.AppendLine();
+            sb.AppendLine("【输出格式要求】");
+            sb.AppendLine("1. 输出两个文件，用以下标记分隔：");
+            sb.AppendLine("   --- FILE: <名字>.xaml ---");
+            sb.AppendLine("   （.xaml 内容）");
+            sb.AppendLine("   --- FILE: <名字>.xaml.cs ---");
+            sb.AppendLine("   （.xaml.cs 内容）");
+            sb.AppendLine("2. 不要 Markdown 代码块标记（三个反引号不要），不要解释文字；");
+            sb.AppendLine("3. 代码必须能直接编译：using 完整、partial class、事件处理器齐全；");
+            sb.AppendLine("4. 不要写占位注释；变量名清晰。");
+            sb.AppendLine();
+            sb.AppendLine("【自检清单（输出前逐项核对）】");
+            sb.AppendLine("1. .xaml 根是 UserControl、xmlns 声明完整（含 loc）？2. .xaml.cs 是 public partial class : UserControl, IWidget？3. Name/CreateView/OnActivated/OnDeactivated 都实现、CreateView 返回 this？4. 构造函数调 InitializeComponent？5. 事件处理器与 .xaml 里 Click= 对应？6. using 完整？7. 定时器 DispatcherTimer、OnDeactivated Stop？8. 网络/异步有 Timeout、catch、UI 提示？9. 是否误用沙箱禁止 API（面向市场时）？10. 无占位符、可直接编译？");
+            sb.AppendLine();
+            sb.AppendLine("【报错处理】如果用户把编译报错信息粘贴回来，请指出错误位置（文件/行/列）和原因，并给出修正后的完整两文件（仍遵守以上全部规范）。");
             sb.AppendLine();
             sb.AppendLine("【用户需求】");
             sb.AppendLine("（在这里描述你想要的面板效果：显示什么、有哪些交互）");

@@ -116,6 +116,11 @@
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
                 <Button x:Name="btnCompile" Content="编译" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Click="BtnCompile_Click" ToolTip="校验并写入配置（面板动态编译将基于此扩展）"/>
                 <Button x:Name="btnRestore" Content="恢复" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnRestore_Click"/>
+                <ComboBox x:Name="cmbProgMode" Width="110" Height="28" FontSize="11" VerticalAlignment="Center"
+                          ToolTip="编程模式：简单编程=纯 C# 代码；完全编程=XAML 界面 + 代码后置（两文件）">
+                    <ComboBoxItem Content="简单编程" Tag="Simple"/>
+                    <ComboBoxItem Content="完全编程" Tag="Xaml"/>
+                </ComboBox>
                 <Button x:Name="btnCopyPrompt" Content="复制 AI 提示词" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnCopyPrompt_Click"/>
                   <Button x:Name="btnOpenNodeFolder" Content="打开文件夹" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnOpenNodeFolder_Click" ToolTip="在系统文件管理器中打开当前选中功能的文件夹"/>
                   <Button x:Name="btnAiGuide" Content="AI 编程指南" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnAiGuide_Click" ToolTip="打开 AI 编程指南：能做什么/不能做什么/各类功能教程"/>

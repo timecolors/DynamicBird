@@ -124,6 +124,7 @@ public class CustomPanel : UserControl, IWidget
         public SeabedPage(ISettingsService settings)
         {
             InitializeComponent();
+            cmbProgMode.SelectedIndex = 0;   // ★ 默认简单编程
             _settings = settings;
             LoadTree();
             RefreshPresets();
@@ -792,9 +793,18 @@ public class CustomPanel : UserControl, IWidget
         private void BtnCopyPrompt_Click(object sender, RoutedEventArgs e)
         {
             if (_selected == null) return;
-            string prompt = PromptGenerator.Generate(_selected, ExtractJson(_selected));
+            // ★ 编程模式：简单编程（纯 C#）/ 完全编程（XAML + 代码后置）
+            var mode = PromptGenerator.ProgrammingMode.Simple;
+            if (cmbProgMode?.SelectedItem is System.Windows.Controls.ComboBoxItem item &&
+                string.Equals(item.Tag as string, "Xaml", StringComparison.Ordinal))
+            {
+                mode = PromptGenerator.ProgrammingMode.Xaml;
+            }
+            string prompt = PromptGenerator.Generate(_selected, ExtractJson(_selected), mode);
             Clipboard.SetText(prompt);
-            txtJsonStatus.Text = "提示词已复制，粘贴到 AI 生成配置后粘回编程框";
+            txtJsonStatus.Text = mode == PromptGenerator.ProgrammingMode.Xaml
+                ? "已复制【完全编程】提示词（生成 .xaml + .xaml.cs 两文件，放入文件夹自动生效）"
+                : "已复制【简单编程】提示词（生成纯 C# 单文件，放入文件夹自动生效）";
         }
 
         // ========== 预设 ==========
