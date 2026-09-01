@@ -609,6 +609,31 @@ namespace ShoreHue.UI.Widgets.Dynamic
             catch { }
         }
 
+        /// <summary>
+        /// 向已保存节点的海床文件夹写入附加文件（多形态：.xaml / .xaml.cs 等）。
+        /// 目录按 分类/节点名 定位；找不到节点目录时静默跳过（仅附加文件，不影响主功能）。
+        /// </summary>
+        public static void WriteExtraFiles(ShoreHue.Core.Models.CustomPanelDefinition cp,
+            System.Collections.Generic.List<ShoreHue.UI.Seabed.GitHubMarketService.PackageFile> files)
+        {
+            try
+            {
+                if (files == null || files.Count == 0) return;
+                string group = MapCategoryToFolder(cp.Category);
+                string safeName = SanitizeId(cp.Name);
+                string dir = Path.Combine(RootDir, group, safeName);
+                if (!Directory.Exists(dir)) return;
+                foreach (var f in files)
+                {
+                    if (string.IsNullOrWhiteSpace(f.Name) || string.IsNullOrWhiteSpace(f.Content)) continue;
+                    string fname = Path.GetFileName(f.Name);
+                    if (string.IsNullOrEmpty(fname)) continue;
+                    WithWatcherSuspended(() => File.WriteAllText(Path.Combine(dir, fname), f.Content));
+                }
+            }
+            catch { }
+        }
+
         /// <summary>删除海床节点的文件夹（按 manifest.json 里的 id 匹配，跨分组查找）。</summary>
         public static void DeleteNodeFolder(string customId)
         {

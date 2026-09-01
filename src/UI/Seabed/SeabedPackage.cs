@@ -24,12 +24,14 @@ namespace ShoreHue.UI.Seabed
         {
             public string Name = "未命名";
             public string Kind = "Config";          // Config/Widget/Panel/Category/Full
+            public string? Category;                // 所属一级分类（小组件/面板功能/…）
             public string? BaseType;
             public string? ParentKey;
             public string? SourceKey;
             public string Source = "";
             public string ConfigJson = "{}";
             public List<string> Permissions = new();
+            public System.Collections.Generic.List<GitHubMarketService.PackageFile> ExtraFiles = new();
             public SettingsData? FullData;          // Kind==Full：整套预设数据
         }
 
@@ -50,11 +52,35 @@ namespace ShoreHue.UI.Seabed
                     ["sourceKey"] = cp.SourceKey,
                     ["createdAt"] = cp.CreatedAt,
                     // ★ 导出（上传）时刻检测权限，随包下发
-                    ["permissions"] = WidgetPermissions.Detect(cp.Source ?? "")
+                    ["permissions"] = WidgetPermissions.Detect(cp.Source ?? ""),
+                    // ★ 文件清单（下载端按此解包）
+                    ["files"] = new System.Collections.Generic.List<string> { "main.cs" }
                 };
                 WriteEntry(zip, "manifest.json", JsonSerializer.Serialize(manifest, JsonOptions));
                 WriteEntry(zip, "main.cs", cp.Source ?? "");
                 WriteEntry(zip, "config.json", cp.ConfigJson ?? "{}");
+                // ★ 多形态：把节点海床文件夹里的附加文件（.xaml/.xaml.cs 等）一并打包
+                try
+                {
+                    string group = ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.MapCategoryToFolder(cp.Category);
+                    string safeName = SanitizeFolderName(cp.Name);
+                    string nodeDir = Path.Combine(ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.RootDir, group, safeName);
+                    if (Directory.Exists(nodeDir))
+                    {
+                        foreach (var f in Directory.EnumerateFiles(nodeDir))
+                        {
+                            string fn = Path.GetFileName(f);
+                            if (fn == "main.cs" || fn == "config.json" || fn == "manifest.json") continue;
+                            if (fn.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)
+                                || fn.EndsWith(".xaml.cs", StringComparison.OrdinalIgnoreCase)
+                                || fn.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                            {
+                                WriteEntry(zip, fn, File.ReadAllText(f));
+                            }
+                        }
+                    }
+                }
+                catch { }
                 return null;
             }
             catch (Exception ex) { return "导出失败：" + ex.Message; }
@@ -99,12 +125,20 @@ namespace ShoreHue.UI.Seabed
                 {
                     Name = GetStr(root, "name") ?? "未命名",
                     Kind = GetStr(root, "kind") ?? "Config",
+                    Category = GetStr(root, "category"),
                     BaseType = GetStr(root, "baseType"),
                     ParentKey = GetStr(root, "parentKey"),
                     SourceKey = GetStr(root, "sourceKey"),
                     Source = ReadEntry(zip, "main.cs") ?? "",
                     ConfigJson = ReadEntry(zip, "config.json") ?? "{}"
                 };
+                // ★ 多形态：读取包内 main.cs/config.json 之外的条目（.xaml / .xaml.cs 等）
+                foreach (var entry in zip.Entries)
+                {
+                    string en = entry.Name;
+                    if (string.IsNullOrEmpty(en) || en == "main.cs" || en == "config.json" || en == "manifest.json") continue;
+                    result.ExtraFiles.Add(new GitHubMarketService.PackageFile(en, ReadEntry(zip, en) ?? ""));
+                }
                 if (root.TryGetProperty("permissions", out var perms) && perms.ValueKind == JsonValueKind.Array)
                 {
                     foreach (var p in perms.EnumerateArray())
@@ -125,6 +159,17 @@ namespace ShoreHue.UI.Seabed
                 return result;
             }
             catch (Exception ex) { error = "导入失败：" + ex.Message; return null; }
+        }
+
+        private static string SanitizeFolderName(string name)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (char ch in (name ?? "").ToLowerInvariant())
+            {
+                if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-') sb.Append(ch);
+                if (sb.Length >= 32) break;
+            }
+            return sb.Length >= 2 ? sb.ToString() : "unnamed";
         }
 
         private static string? GetStr(JsonElement root, string name)

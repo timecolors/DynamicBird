@@ -36,10 +36,14 @@ namespace ShoreHue.UI.Seabed
         /// <summary>发布时最终使用的名称（成功后可读）。</summary>
         public string NameResult { get; private set; } = "";
 
+        private readonly System.Collections.Generic.List<GitHubMarketService.PackageFile> _extraFiles;
+
         public PublishWindow(string source, string defaultName, string kind, string baseType,
-            string parentKey, string sourceKey, string defaultCategory, System.Collections.Generic.List<string> permissions)
+            string parentKey, string sourceKey, string defaultCategory, System.Collections.Generic.List<string> permissions,
+            System.Collections.Generic.List<GitHubMarketService.PackageFile>? extraFiles = null)
         {
             _source = source ?? "";
+            _extraFiles = extraFiles ?? new();
             _defaultName = defaultName ?? "";
             _kind = kind ?? "Widget";
             _baseType = baseType ?? "Widget";
@@ -205,7 +209,7 @@ namespace ShoreHue.UI.Seabed
                 string name = string.IsNullOrWhiteSpace(_nameBox.Text) ? _defaultName : _nameBox.Text.Trim();
                 string? err = await GitHubMarketService.PublishPackageAsync(
                     id, name, _kind, _catBox.SelectedItem?.ToString() ?? "小组件", "1.0.0",
-                    _descBox.Text.Trim(), _baseType, _parentKey, _sourceKey, _permissions, _source);
+                    _descBox.Text.Trim(), _baseType, _parentKey, _sourceKey, _permissions, _source, _extraFiles);
                 if (err != null)
                 {
                     _status.Text = err;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -270,7 +271,20 @@ namespace ShoreHue.UI.Seabed
                 return "非法包 id";
             try
             {
-                foreach (var file in new[] { "main.cs", "manifest.json" })
+                // ★ 按 manifest 的 files 清单删除全部文件（兼容多形态包）
+                var toDelete = new System.Collections.Generic.List<string> { "manifest.json", "main.cs" };
+                var mfInfo = await GetContentAsync($"market/packages/{id}/manifest.json");
+                if (mfInfo != null)
+                {
+                    try
+                    {
+                        var doc = System.Text.Json.JsonDocument.Parse(System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(mfInfo.Value.Content)));
+                        if (doc.RootElement.TryGetProperty("files", out var files) && files.ValueKind == System.Text.Json.JsonValueKind.Array)
+                            foreach (var f in files.EnumerateArray()) { var s = f.GetString(); if (!string.IsNullOrWhiteSpace(s)) toDelete.Add(s); }
+                    }
+                    catch { }
+                }
+                foreach (var file in toDelete.Distinct())
                 {
                     var info = await GetContentAsync($"market/packages/{id}/{file}");
                     if (info != null) await DeleteFileAsync($"market/packages/{id}/{file}", info.Value.Sha);
@@ -380,11 +394,15 @@ namespace ShoreHue.UI.Seabed
 
         // ==================== 放流：发布包到市场 ====================
 
-        /// <summary>发布一个包到市场（写 manifest.json + main.cs + 更新 index.json）。返回 null=成功，否则错误信息。</summary>
+        /// <summary>包内一个文件（文件名 + 内容），用于多形态（纯代码 / XAML / 整套预设 / 配置）。</summary>
+        public sealed record PackageFile(string Name, string Content);
+
+        /// <summary>发布一个包到市场（写 manifest.json + files 清单 + 更新 index.json）。返回 null=成功，否则错误信息。</summary>
         public static async Task<string?> PublishPackageAsync(
             string id, string name, string kind, string category, string version,
             string description, string baseType, string parentKey, string sourceKey,
-            List<string> permissions, string source)
+            List<string> permissions, string source,
+            System.Collections.Generic.List<PackageFile>? extraFiles = null)
         {
             if (string.IsNullOrEmpty(_token)) return "未登录 GitHub";
             // ★ 安全：包 id 仅允许 英文/数字/下划线/连字符（防路径穿越）
@@ -394,6 +412,16 @@ namespace ShoreHue.UI.Seabed
             try
             {
                 // 1) manifest.json（含权限检测）
+                var allFiles = new System.Collections.Generic.List<PackageFile>
+                {
+                    new PackageFile("main.cs", source)
+                };
+                if (extraFiles != null) foreach (var f in extraFiles)
+                {
+                    if (!string.IsNullOrWhiteSpace(f.Name) && !string.IsNullOrWhiteSpace(f.Content)
+                        && !allFiles.Exists(x => string.Equals(x.Name, f.Name, StringComparison.OrdinalIgnoreCase)))
+                        allFiles.Add(f);
+                }
                 var manifest = new Dictionary<string, object?>
                 {
                     ["id"] = id,
@@ -408,20 +436,26 @@ namespace ShoreHue.UI.Seabed
                     ["baseType"] = baseType,
                     ["parentKey"] = parentKey,
                     ["sourceKey"] = sourceKey,
-                    ["permissions"] = permissions ?? new List<string>()
+                    ["permissions"] = permissions ?? new List<string>(),
+                    // ★ 文件清单：下载端按此逐个拉取；形态 = 是否含 .xaml
+                    ["files"] = allFiles.Select(f => f.Name).ToList()
                 };
                 string manifestJson = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
 
                 // 2) 已存在则取 sha（覆盖更新），否则创建
                 string dir = $"market/packages/{id}";
-                string mfSha = "", csSha = "";
+                string mfSha = "";
                 var mf = await GetContentAsync(dir + "/manifest.json");
                 if (mf != null) mfSha = mf.Value.Sha;
-                var cs = await GetContentAsync(dir + "/main.cs");
-                if (cs != null) csSha = cs.Value.Sha;
-
                 await PutFileAsync(dir + "/manifest.json", manifestJson, mfSha, $"发布市场包 {id}（manifest）");
-                await PutFileAsync(dir + "/main.cs", source, csSha, $"发布市场包 {id}（源码）");
+
+                foreach (var f in allFiles)
+                {
+                    string fileSha = "";
+                    var existing = await GetContentAsync(dir + "/" + f.Name);
+                    if (existing != null) fileSha = existing.Value.Sha;
+                    await PutFileAsync(dir + "/" + f.Name, f.Content, fileSha, $"发布市场包 {id}（{f.Name}）");
+                }
 
                 // 3) 更新 index.json（读 → 加/改条目 → 写）
                 var idx = await GetContentAsync("market/index.json");

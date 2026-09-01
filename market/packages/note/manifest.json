@@ -1,13 +1,16 @@
 {
   "id": "note",
-  "name": "\u4FBF\u7B7E",
+  "name": "便签",
   "kind": "Widget",
-  "category": "\u5C0F\u7EC4\u4EF6",
+  "category": "小组件",
   "version": "1.0.0",
   "author": "timecolors",
-  "description": "\u7075\u52A8\u9E1F\u5185\u7F6E\u4FBF\u7B7E\uFF1A\u591A\u8272 / \u7F16\u8F91 / \u7F6E\u9876\u3002",
+  "description": "ShoreHue 内置便签：多色 / 编辑 / 置顶。",
   "baseType": "Widget",
   "parentKey": "panel-widgets",
   "sourceKey": "widget-note",
-  "permissions": []
+  "permissions": [],
+  "files": [
+    "main.cs"
+  ]
 }

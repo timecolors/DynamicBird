@@ -65,8 +65,9 @@ namespace ShoreHue.UI.Seabed
             Margin = new Thickness(0, 8, 0, 8)
         };
         private readonly TextBlock _detailInfo = new() { FontSize = 11, TextWrapping = TextWrapping.Wrap };
-        private string _detailSource = "";      // 当前详情源码
+        private string _detailSource = "";      // 当前详情源码（main.cs）
         private string _detailManifest = "";    // 当前详情 manifest（供下载）
+        private readonly System.Collections.Generic.Dictionary<string, string> _detailFileSizes = new();  // 文件名→可读大小
         private MarketItem? _currentItem;       // 当前详情包（删除时校验作者）
         private int _detailSeq;                 // ★ 详情加载序号：防快速连点竞态（旧请求结果丢弃）
         private readonly Button _loginBtn = new();   // 登录 GitHub 按钮（文本随登录状态更新）
@@ -86,6 +87,22 @@ namespace ShoreHue.UI.Seabed
             public List<string> Permissions { get; set; } = new();
             /// <summary>发布者 GitHub 数字 ID（删除时身份校验；老包可能为 null）。</summary>
             public long? PublisherId { get; set; }
+            /// <summary>包内文件清单（manifest.files，下载端按此拉取）。</summary>
+            public List<string> Files { get; set; } = new();
+
+            /// <summary>包形态标注（预览用）：XAML 形态 / 纯代码 / 整套预设 / 配置代码。</summary>
+            public string FormatLabel
+            {
+                get
+                {
+                    bool hasXaml = Files.Any(f => f.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)
+                        && !f.EndsWith(".xaml.cs", StringComparison.OrdinalIgnoreCase));
+                    if (hasXaml) return "XAML 形态";
+                    if (Kind == "Full") return "整套预设";
+                    if (Kind == "Config") return "配置代码";
+                    return "纯代码";
+                }
+            }
 
             public string MetaLine =>
                 Id + " · " + Author +
@@ -572,8 +589,32 @@ namespace ShoreHue.UI.Seabed
                     return;
                 }
                 var permissions = ShoreHue.UI.Widgets.Dynamic.WidgetPermissions.Detect(cp.Source);
+                // ★ 多形态上传：收集节点海床文件夹里的附加文件（.xaml/.xaml.cs 等，与 .dbp 导出一致）
+                var extra = new System.Collections.Generic.List<GitHubMarketService.PackageFile>();
+                try
+                {
+                    string group = ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.MapCategoryToFolder(cp.Category);
+                    string safeName = SanitizeForFolder(cp.Name);
+                    string nodeDir = System.IO.Path.Combine(
+                        ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.RootDir, group, safeName);
+                    if (System.IO.Directory.Exists(nodeDir))
+                    {
+                        foreach (var f in System.IO.Directory.EnumerateFiles(nodeDir))
+                        {
+                            string fn = System.IO.Path.GetFileName(f);
+                            if (fn == "main.cs" || fn == "config.json" || fn == "manifest.json") continue;
+                            if (fn.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)
+                                || fn.EndsWith(".xaml.cs", StringComparison.OrdinalIgnoreCase)
+                                || fn.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                            {
+                                extra.Add(new GitHubMarketService.PackageFile(fn, System.IO.File.ReadAllText(f)));
+                            }
+                        }
+                    }
+                }
+                catch { }
                 var win = new PublishWindow(cp.Source, cp.Name, cp.Kind ?? "Widget",
-                    cp.BaseType ?? "Widget", cp.ParentKey ?? "", cp.SourceKey ?? "", cp.Category, permissions) { Owner = this };
+                    cp.BaseType ?? "Widget", cp.ParentKey ?? "", cp.SourceKey ?? "", cp.Category, permissions, extra) { Owner = this };
                 win.ShowDialog();
                 if (win.Published)
                 {
@@ -614,15 +655,16 @@ namespace ShoreHue.UI.Seabed
             }
 
             var settings = _page.SettingsService;
-            var list = settings.CustomPanels;
+            var list = settings.CustomPanels ?? new System.Collections.Generic.List<CustomPanelDefinition>();
             string defaultParent = result.Kind == "Widget" ? "panel-widgets"
                 : result.Kind == "Panel" ? "panel-features"
                 : result.Kind == "Category" ? "root" : "";
-            list.Add(new CustomPanelDefinition
+            var cp = new CustomPanelDefinition
             {
                 Id = "custom_" + Guid.NewGuid().ToString("N").Substring(0, 8),
                 Name = result.Name,
-                Category = "面板设计",
+                // ★ 按包分类落到对应海床一级分类（文件夹即真相源：seabed/<分类>/<id>/）
+                Category = string.IsNullOrEmpty(result.Category) ? MapKindToCategory(result.Kind) : result.Category,
                 ParentKey = string.IsNullOrEmpty(result.ParentKey) ? defaultParent : result.ParentKey,
                 BaseType = string.IsNullOrEmpty(result.BaseType)
                     ? (result.Kind == "Widget" ? "Widget" : result.Kind == "Panel" ? "Panel" : "Config")
@@ -633,10 +675,17 @@ namespace ShoreHue.UI.Seabed
                 SourceKey = result.SourceKey ?? "",
                 TrustedSource = false,   // ★ 市场来源统一走沙箱（剪贴板已降为权限声明，安装时提示）
                 CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm")
-            });
+            };
+            list.Add(cp);
             settings.CustomPanels = list;
+            // ★ 落盘到海床文件夹（文件夹即真相源）：watcher/Reload 检测 → 编译挂载 → UI 自动刷新
+            ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.SaveNodeToFolder(cp);
+            // ★ 多形态：把 .xaml/.xaml.cs 等附加文件写入节点目录（XAML 形态走 CompileXaml）
+            if (result.ExtraFiles.Count > 0)
+                ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.WriteExtraFiles(cp, result.ExtraFiles);
+            ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.Reload();
             _page.RefreshAll();
-            _status.Text = "已安装「" + result.Name + "」 · " + scanNote +
+            _status.Text = "已拾贝「" + result.Name + "」 · " + scanNote +
                 " · 权限：" + WidgetPermissions.Describe(result.Permissions);
         }
 
@@ -654,10 +703,42 @@ namespace ShoreHue.UI.Seabed
                     MarketBase + "/packages/" + item.Id + "/manifest.json");
                 _detailSource = await _http.GetStringAsync(
                     MarketBase + "/packages/" + item.Id + "/main.cs");
+                // ★ 读取 manifest 的 files 清单（多形态包；老包无 files 字段时回退 main.cs）
+                item.Files = new List<string> { "main.cs" };
+                try
+                {
+                    using var doc = JsonDocument.Parse(_detailManifest);
+                    if (doc.RootElement.TryGetProperty("files", out var files) && files.ValueKind == JsonValueKind.Array)
+                    {
+                        var list = new List<string>();
+                        foreach (var f in files.EnumerateArray()) { var s = f.GetString(); if (!string.IsNullOrWhiteSpace(s)) list.Add(s); }
+                        if (list.Count > 0) item.Files = list;
+                    }
+                }
+                catch { }
+                // ★ 按 files 清单拉取各文件并记录大小（main.cs 已拉，跳过）
+                _detailFileSizes.Clear();
+                if (item.Files.Count > 0)
+                {
+                    _detailFileSizes["main.cs"] = (_detailSource.Length / 1024.0).ToString("F1") + "KB";
+                    foreach (var f in item.Files)
+                    {
+                        if (f == "main.cs") continue;
+                        try
+                        {
+                            string content = await _http.GetStringAsync(MarketBase + "/packages/" + item.Id + "/" + f);
+                            if (seq != _detailSeq) return;
+                            _detailFileSizes[f] = (content.Length / 1024.0).ToString("F1") + "KB";
+                        }
+                        catch { _detailFileSizes[f] = "?"; }
+                    }
+                }
                 // ★ 加载期间用户点了别的包：丢弃过期结果，避免显示内容与 _currentItem 不一致（误装/误删）
                 if (seq != _detailSeq) return;
 
                 _detailInfo.Text = item.Name + "  ·  " + item.Id +
+                    System.Environment.NewLine + "类型：" + item.FormatLabel +
+                    System.Environment.NewLine + "文件：" + string.Join(" + ", item.Files.Select(f => f + "(" + (_detailFileSizes.TryGetValue(f, out var sz) ? sz : "?") + ")")) +
                     System.Environment.NewLine + "上传者：" + item.Author +
                     (string.IsNullOrEmpty(item.Version) ? "" : "  ·  v" + item.Version) +
                     "  ·  分类：" + item.Category +
@@ -698,9 +779,24 @@ namespace ShoreHue.UI.Seabed
                     var root = doc.RootElement;
                     result.Name = GetStr(root, "name") ?? "未命名";
                     result.Kind = GetStr(root, "kind") ?? "Widget";
+                    result.Category = GetStr(root, "category");
                     result.BaseType = GetStr(root, "baseType");
                     result.ParentKey = GetStr(root, "parentKey");
                     result.SourceKey = GetStr(root, "sourceKey");
+                    if (root.TryGetProperty("files", out var files) && files.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var f in files.EnumerateArray())
+                        {
+                            string? fname = f.GetString();
+                            if (string.IsNullOrWhiteSpace(fname) || fname == "main.cs") continue;
+                            try
+                            {
+                                string fcontent = await _http.GetStringAsync(MarketBase + "/packages/" + _currentItem!.Id + "/" + fname);
+                                result.ExtraFiles.Add(new GitHubMarketService.PackageFile(fname, fcontent));
+                            }
+                            catch { }
+                        }
+                    }
                 }
                 result.Permissions = WidgetPermissions.Detect(_detailSource);
 
@@ -771,6 +867,17 @@ namespace ShoreHue.UI.Seabed
         }
 
         /// <summary>kind → 默认分类（与海床树一致）。</summary>
+        private static string SanitizeForFolder(string name)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (char ch in (name ?? "").ToLowerInvariant())
+            {
+                if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-') sb.Append(ch);
+                if (sb.Length >= 32) break;
+            }
+            return sb.Length >= 2 ? sb.ToString() : "unnamed";
+        }
+
         private static string MapKindToCategory(string kind) => kind switch
         {
             "Widget" => "小组件",
@@ -800,9 +907,25 @@ namespace ShoreHue.UI.Seabed
                 using (var doc = JsonDocument.Parse(manifestJson))
                 {
                     var root = doc.RootElement;
+                    result.Category = GetStr(root, "category");
                     result.BaseType = GetStr(root, "baseType");
                     result.ParentKey = GetStr(root, "parentKey");
                     result.SourceKey = GetStr(root, "sourceKey");
+                    // ★ 多形态：按 files 清单拉取附加文件（.xaml / .xaml.cs / config.json）
+                    if (root.TryGetProperty("files", out var files) && files.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var f in files.EnumerateArray())
+                        {
+                            string? fname = f.GetString();
+                            if (string.IsNullOrWhiteSpace(fname) || fname == "main.cs") continue;
+                            try
+                            {
+                                string fcontent = await _http.GetStringAsync(MarketBase + "/packages/" + item.Id + "/" + fname);
+                                result.ExtraFiles.Add(new GitHubMarketService.PackageFile(fname, fcontent));
+                            }
+                            catch { }
+                        }
+                    }
                 }
                 result.Permissions = WidgetPermissions.Detect(source);
 
@@ -813,6 +936,13 @@ namespace ShoreHue.UI.Seabed
             {
                 _status.Text = "拾贝失败：" + ex.Message;
             }
+        }
+
+        /// <summary>预览用：文件大小标注（显示 KB）。</summary>
+        private static string FileSizeLabel(string name)
+        {
+            // 源码在内存里，无真实大小——按文件名给个可读标注
+            return name;
         }
 
         // ==================== GitHub 登录 / 删除 ====================
