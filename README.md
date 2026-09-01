@@ -94,15 +94,20 @@
 
 ---
 
+
 ## 📸 截图 / Screenshots
 
-| 边缘任务栏 | 应用辅助（画中画） |
+| 边缘任务栏 | 小组件面板 |
 | --- | --- |
-| ![Edge Taskbar](assets/screenshots/01-Taskbar.png) | ![App Assistant](assets/screenshots/02-AppHelper.png) |
+| ![Edge Taskbar](assets/screenshots/01-Taskbar.png) | ![Widget Panel](assets/screenshots/03-Widget.png) |
 
-| 小组件 - 计算器 | 小组件 - 计时器 |
+| AI 助手 | 应用辅助（画中画） |
 | --- | --- |
-| ![Widget Calculator](assets/screenshots/03-Widget-Calculator.png) | ![Widget Timer](assets/screenshots/04-Widget-Timer.png) |
+| ![AI Assistant](assets/screenshots/04-AI.png) | ![App Assistant](assets/screenshots/02-AppHelper.png) |
+
+| 鸟笼（AI 编程） |
+| --- |
+| ![Birdcage](assets/screenshots/05-Birdcage.png) |
 
 ---
 
