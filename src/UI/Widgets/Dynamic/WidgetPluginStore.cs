@@ -84,7 +84,6 @@ namespace ShoreHue.UI.Widgets.Dynamic
         // ★ 文件夹变化监听：用户在系统文件夹增删文件时，自动刷新小组件列表（双向同步）
         private static FileSystemWatcher? _watcher;
         private static readonly object _watcherLock = new object();
-        private static DateTime _lastWatcherFire = DateTime.MinValue;
 
         /// <summary>开始监听小组件文件夹（应用启动时调用一次；Watcher 生命周期随进程）。
         /// ★ 职责边界（2026-09-01 明确）：**只检测文件/目录的增删**（用户手工放 .dbp 包 / .cs
@@ -94,6 +93,17 @@ namespace ShoreHue.UI.Widgets.Dynamic
         ///   应用自身覆盖写文件（main.cs/manifest.json）不再触发事件，只有新建/删除/重命名触发；
         ///   配合 800ms 防抖 + Reload 期间暂停 + 应用写盘走 WithWatcherSuspended，切断
         ///   "应用写盘 → 事件 → Reload → 又写盘"的自触发链（曾实测 CPU 78%/100% 卡死）。</summary>
+        private static System.Threading.Timer? _watchDebounceTimer;
+        private static readonly object _watchDebounceLock = new object();
+        private static bool _watchDebouncePending;
+
+        /// <summary>开始监听小组件文件夹（应用启动时调用一次；Watcher 生命周期随进程）。
+        /// ★ VS Code 风格：文件事件 → 时间窗口聚合（防抖合并，不丢事件）→ 窗口结束统一 Reload。
+        ///    - 事件只触发"扫描更新缓存"（ReloadCore 轻量，不编译），编译在使用时按需进行；
+        ///    - 应用自身写盘走 WithWatcherSuspended（暂停 watcher），不引发事件链；
+        ///    - NotifyFilter 只留 FileName|DirectoryName（去掉 LastWrite），应用覆盖写不触发。
+        /// ★ 相比旧版（800ms 直接丢弃后续事件）：聚合窗口内收集全部事件，窗口结束处理一次，
+        ///   避免"丢真实变更"；且 Reload 串行化 + 暂停 watcher 防自触发循环（曾实测 CPU 卡死）。</summary>
         public static void StartWatching()
         {
             lock (_watcherLock)
@@ -108,50 +118,46 @@ namespace ShoreHue.UI.Widgets.Dynamic
                         // ★ 只监听增删：内容写入（LastWrite）不触发，应用自身写盘不再引发事件链
                         NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName
                     };
-                    FileSystemEventHandler handler = (_, _) =>
-                    {
-                        // ★ 防抖：连续文件操作（如解包写入多个文件）合并为一次刷新
-                        var now = DateTime.Now;
-                        if ((now - _lastWatcherFire).TotalMilliseconds < 800) return;
-                        _lastWatcherFire = now;
-                        try
-                        {
-                            // ★ 暂停 watcher：Reload 的目录扫描（GetDirectories 等）会产生文件系统事件，
-                            //   若不禁用会形成"事件→Reload→事件"死循环（实测 CPU 78% 卡死）
-                            _watcher.EnableRaisingEvents = false;
-                            try
-                            {
-                                Reload();
-                                Changed?.Invoke();
-                            }
-                            finally
-                            {
-                                _watcher.EnableRaisingEvents = true;
-                            }
-                        }
-                        catch { }
-                    };
+                    // VS Code 时间窗口聚合：事件 → 标记 pending → 防抖定时器（120ms）到点统一 Reload
+                    FileSystemEventHandler handler = (_, _) => ScheduleWatchReload();
                     _watcher.Created += handler;
                     _watcher.Deleted += handler;
                     _watcher.Changed += handler;
-                    _watcher.Renamed += (_, _) =>
-                    {
-                        // ★ 与 Created/Deleted 一致：防抖 + 暂停 watcher（防自触发循环）
-                        var now2 = DateTime.Now;
-                        if ((now2 - _lastWatcherFire).TotalMilliseconds < 800) return;
-                        _lastWatcherFire = now2;
-                        try
-                        {
-                            _watcher.EnableRaisingEvents = false;
-                            try { Reload(); Changed?.Invoke(); }
-                            finally { _watcher.EnableRaisingEvents = true; }
-                        }
-                        catch { }
-                    };
+                    _watcher.Renamed += (_, _) => ScheduleWatchReload();
                     _watcher.EnableRaisingEvents = true;
                 }
                 catch { }
             }
+        }
+
+        /// <summary>聚合 watcher 事件：窗口内标记 pending，定时器到点统一 Reload（不丢事件、不风暴）。</summary>
+        private static void ScheduleWatchReload()
+        {
+            lock (_watchDebounceLock)
+            {
+                if (_watchDebouncePending) return;   // 已有挂起的刷新，只重置定时器
+                _watchDebouncePending = true;
+            }
+            _watchDebounceTimer?.Dispose();
+            _watchDebounceTimer = new System.Threading.Timer(_ =>
+            {
+                lock (_watchDebounceLock) _watchDebouncePending = false;
+                try
+                {
+                    // ★ 暂停 watcher：Reload 的目录扫描会产生文件系统事件，防"事件→Reload→事件"死循环
+                    if (_watcher != null) _watcher.EnableRaisingEvents = false;
+                    try
+                    {
+                        Reload();
+                        Changed?.Invoke();
+                    }
+                    finally
+                    {
+                        if (_watcher != null) _watcher.EnableRaisingEvents = true;
+                    }
+                }
+                catch { }
+            }, null, 120, System.Threading.Timeout.Infinite);   // 120ms 窗口聚合
         }
 
         /// <summary>
