@@ -55,6 +55,8 @@ namespace DynamicBird.UI.AI
                 => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
         }
 
+        /// <summary>截图模式：不读真实会话数据（ScreenshotGen 离屏渲染用）。</summary>
+        internal static bool UseEmptyForScreenshot;
         private readonly AiChatClient _client = new();
         private readonly ObservableCollection<ChatItem> _items = new();
         private readonly ObservableCollection<AiSession> _sessions = new();
@@ -83,7 +85,7 @@ namespace DynamicBird.UI.AI
             InitializeComponent();
             MsgList.ItemsSource = _items;
 
-            _sessionData = AiSessionStore.Load();
+            _sessionData = UseEmptyForScreenshot ? new AiSessionData() : AiSessionStore.Load();
             foreach (var s in _sessionData.Sessions) _sessions.Add(s);
             SessionCombo.ItemsSource = _sessions;   // DisplayMemberPath 已在 XAML 声明（先于 ItemsSource 生效，避免类型名泄漏）
 

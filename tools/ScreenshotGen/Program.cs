@@ -38,13 +38,13 @@ namespace ScreenshotGen
             app.Resources.MergedDictionaries.Add(LoadResource("src/UI/Theme/Theme.xaml"));
             app.Resources.MergedDictionaries.Add(LoadResource("src/UI/Theme/AppIcons.xaml"));
 
-            string outDir = Path.Combine(FindRepoRoot(), "packaging", "StoreScreenshots");
+            string outDir = Path.Combine(FindRepoRoot(), "assets", "screenshots");
             Directory.CreateDirectory(outDir);
             foreach (var old in Directory.EnumerateFiles(outDir, "*.png")) File.Delete(old);
 
             // 1) 边缘任务栏：通用示例快捷方式 + 虚拟窗口
             var taskbarSettings = new FakeSettings();
-            var taskbar = new TaskbarView(new FakeShortcutService(), taskbarSettings, SampleWindows);
+              var taskbar = new TaskbarView(new FakeShortcutService(), taskbarSettings, SampleWindows);
             Render("01-Taskbar.png", taskbar, 1280, 100, new Point(320, 940), outDir);
 
             // 2) 应用辅助：画中画（镜像窗口 / 嵌入窗口 / 播放视频）
@@ -61,7 +61,16 @@ namespace ScreenshotGen
             Render("04-Widget-Timer.png",
                 new WidgetSwitcher(timerSettings, new FakeClipboard(), new FakeNotes()),
                 360, 260, new Point(24, 700), outDir);
+
+            // 5) AI 助手面板（截图模式：不读真实会话数据）
+            DynamicBird.UI.AI.AiChatView.UseEmptyForScreenshot = true;
+            Render("05-AI.png", new DynamicBird.UI.AI.AiChatView(), 420, 400, new Point(730, 240), outDir);
+
+            // 6) 鸟笼（AI 编程）界面
+            var birdSettings = new FakeSettings();
+            Render("06-Birdcage.png", new DynamicBird.UI.Settings.Pages.BirdcagePage(birdSettings), 880, 600, new Point(520, 150), outDir);
         }
+
 
         private static ResourceDictionary LoadResource(string relativePath)
         {
@@ -174,67 +183,34 @@ namespace ScreenshotGen
     }
 
     /// <summary>测试用设置：全部使用默认值，不读取真实配置。</summary>
-    internal sealed class FakeSettings : ISettingsService
-    {
-        public string BackgroundColor { get; set; } = "#2D2D2D";
-        public string TextColor { get; set; } = "#FFFFFF";
-        public double Opacity { get; set; } = 0.85;
-        public int CornerRadius { get; set; } = 16;
-        public bool ShowSystemStatus { get; set; } = true;
-        public string CustomIconPath { get; set; } = "";
-        public double StripLengthRatio { get; set; } = 0.6;
-        public double StripWidthMultiplier { get; set; } = 1.5;
-        public double SquareShortSideMultiplier { get; set; } = 1.8;
-        public double GoldenRatio { get; set; } = 1.618;
-        public double TriggerRegionRatio { get; set; } = 1.0 / 3.0;
-        public double HorizontalLayoutThreshold { get; set; } = 0.43;
-        public double TagWidth { get; set; } = 120;
-        public bool AutoFitOnTrigger { get; set; } = true;
-        public int ClipboardMaxCount { get; set; } = 10;
-        public int ClipboardDisplayLength { get; set; } = 100;
-        public string LastWidgetTab { get; set; } = "Calculator";
-        public string DefaultNoteColor { get; set; } = "#FFFF99";
-        public bool NoteShowTitleByDefault { get; set; } = true;
-        public bool UseAutoSize { get; set; } = true;
-        public bool RememberDndMode { get; set; }
-        public bool DndModeEnabled { get; set; }
-        public double TaskbarIconSize { get; set; } = 28;
-        public double DividerOffset { get; set; } = 0.4;
-        public bool AnimationsEnabled { get; set; } = true;
-        public string ShowHideEasingType { get; set; } = "CubicEase";
-        public int ShowHideDurationMs { get; set; } = 150;
-        public string TransformEasingType { get; set; } = "CubicEase";
-        public int TransformDurationMs { get; set; } = 250;
-        public int HideDelayMs { get; set; } = 200;
-        public int FlyDurationMs { get; set; } = 500;
-        public bool ClingModeEnabled { get; set; }
-        public int RegionDebounceMs { get; set; } = 80;
-        public bool AutoCheckUpdate { get; set; } = true;
-        public bool OnboardingCompleted { get; set; } = true;
-
-        public event Action? SettingsChanged;
-
-        public bool IsEdgeEnabled(string edge) => true;
-        public void SetEdgeEnabled(string edge, bool enabled) { }
-        public bool IsCornerEnabled(string corner) => true;
-        public void SetCornerEnabled(string corner, bool enabled) { }
-        public string GetEdgeMode(string edge) => "Follow";
-        public void SetEdgeMode(string edge, string mode) { }
-        public string GetFixedShape(string edge) => "Square";
-        public void SetFixedShape(string edge, string shape) { }
-        public double GetFixedOffset(string edge) => 0;
-        public void SetFixedOffset(string edge, double offset) { }
-        public string GetRegionShape(string edge, string region) => "Default";
-        public void SetRegionShape(string edge, string region, string shape) { }
-        public (double width, double height) GetUserSize(string regionKey) => (0, 0);
-        public void SetUserSize(string regionKey, double width, double height) { }
-        public string GetRegionPanel(string regionKey) => "Default";
-        public void SetRegionPanel(string regionKey, string panelType) { }
-        public void Reload() { }
-        public void Apply(DynamicBird.Core.Services.Configuration.SettingsData data) { }
-    }
 
     /// <summary>测试用快捷方式服务：通用 Windows 应用。</summary>
+    /// <summary>测试用设置：继承真实 SettingsManager（自动实现全部接口成员），仅覆盖截图所需字段。</summary>
+    internal sealed class FakeSettings : DynamicBird.Core.Services.Configuration.SettingsManager
+    {
+        public FakeSettings()
+        {
+            BackgroundColor = "#2D2D2D";
+            TextColor = "#FFFFFF";
+            Opacity = 0.85;
+            CornerRadius = 16;
+            ShowSystemStatus = true;
+            LastWidgetTab = "Calculator";
+            TaskbarIconSize = 28;
+            DividerOffset = 0.4;
+            AnimationsEnabled = true;
+            ShowHideEasingType = "CubicEase";
+            ShowHideDurationMs = 150;
+            TransformEasingType = "CubicEase";
+            TransformDurationMs = 250;
+            HideDelayMs = 200;
+            FlyDurationMs = 500;
+            RegionDebounceMs = 80;
+            AutoCheckUpdate = true;
+            OnboardingCompleted = true;
+        }
+    }
+
     internal sealed class FakeShortcutService : IShortcutService
     {
         public ObservableCollection<ShortcutData> Shortcuts { get; } = new();
@@ -319,6 +295,7 @@ namespace ScreenshotGen
         public void ClearAll() { }
         public void CopyToClipboard(ClipboardManager.ClipboardItem item) { }
         public bool SaveDroppedFile(string sourcePath, string targetFolder) => false;
+        public void SetPinned(ClipboardManager.ClipboardItem item, bool pinned) { }
     }
 
     /// <summary>测试用便签服务：空列表。</summary>
