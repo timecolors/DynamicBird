@@ -39,27 +39,23 @@ namespace DynamicBird.UI.Main
                 MessageBox.Show($"打开设置失败:\n{ex.Message}", "灵动鸟", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
-        /// <summary>隐形分隔线悬停：淡色反馈条 + 双向箭头（竖条 Hand 会盖掉元素 Cursor，用 OverrideCursor 强制）。</summary>
+        /// <summary>隐形分隔线悬停：淡色反馈条 + 左右双箭头（可拖动调竖条宽度，双箭头是正常拖动提示）。
+        /// ★ 只用局部 Cursor（XAML 已设 SizeWE），不用 Mouse.OverrideCursor——它是全局的，
+        ///   鼠标移到设置窗口等其他窗口时若 Leave/Move 竞态未清除，全局残留 → 到处双箭头。</summary>
         private void IconBarSplitter_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            Mouse.OverrideCursor = System.Windows.Input.Cursors.SizeWE;
             IconBarSplitter.Background = new System.Windows.Media.SolidColorBrush(
                 System.Windows.Media.Color.FromArgb(0x26, 0xFF, 0xFF, 0xFF));
         }
 
         private void IconBarSplitter_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            if (Mouse.OverrideCursor == System.Windows.Input.Cursors.SizeWE)
-            {
-                Mouse.OverrideCursor = null;
-            }
             IconBarSplitter.Background = System.Windows.Media.Brushes.Transparent;
         }
 
-        /// <summary>鼠标在分隔线区域移动时每帧强制双向箭头。</summary>
+        /// <summary>鼠标在分隔线区域移动时保持局部双箭头（XAML Cursor 已覆盖，无需额外处理）。</summary>
         private void IconBarSplitter_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            Mouse.OverrideCursor = System.Windows.Input.Cursors.SizeWE;
         }
 
         private void ToggleWindow()

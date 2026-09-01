@@ -198,9 +198,10 @@ namespace DynamicBird.Core.Controllers
             string panelId = regionType.Substring("Custom:".Length);
             try
             {
-                // 源码变化时清缓存（签名对比）
+                // 源码变化时清缓存（签名对比；★ 用哈希而非长度——同长不同内容会漏判导致陈旧缓存）
                 string sig = string.Join("|",
-                    _settings.CustomPanels.Select(p => p.Id + ":" + (p.Source ?? "").Length));
+                    _settings.CustomPanels.Select(p =>
+                        p.Id + ":" + DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.SourceHash(p.Source ?? "")));
                 if (sig != _customPanelsSignature)
                 {
                     _customPanelsSignature = sig;

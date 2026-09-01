@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using System.Windows;
@@ -289,7 +289,11 @@ namespace DynamicBird.UI.Panels
                 SetScrollDirection(_shortcutScrollViewer, _currentLayoutMode);
             }
             else
+            {
+                // ★ 复用 handler 停用（Detach 停计时器、解绑事件），避免滚动计时器滞留
+                oldShortcutHandler?.Detach();
                 _shortcutScrollHandler = null;
+            }
 
             if (_windowScrollViewer != null)
             {
@@ -303,7 +307,10 @@ namespace DynamicBird.UI.Panels
                 SetScrollDirection(_windowScrollViewer, _currentLayoutMode);
             }
             else
+            {
+                oldWindowHandler?.Detach();
                 _windowScrollHandler = null;
+            }
         }
     }
 }

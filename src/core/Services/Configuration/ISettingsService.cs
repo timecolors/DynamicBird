@@ -169,6 +169,9 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 面板运行帧率（fps，0=自动满帧） ==========
         int PanelFrameRate { get; set; }
 
+        // ========== 全局界面字号缩放（0.75~1.5） ==========
+        double UiFontScale { get; set; }
+
         // ========== 边缘触发距离与延时 ==========
         int TriggerDistancePx { get; set; }
         int TriggerDelayMs { get; set; }
@@ -180,6 +183,10 @@ namespace DynamicBird.Core.Services.Configuration
         // ========== 小组件显示开关 ==========
         bool IsWidgetEnabled(string widgetKey);
         void SetWidgetEnabled(string widgetKey, bool enabled);
+
+        // ========== 自定义状态栏显示项开关 ==========
+        bool IsStatusProviderEnabled(string providerId);
+        void SetStatusProviderEnabled(string providerId, bool enabled);
 
         // ========== 划词翻译 热键 ==========
         string TextAiHotkey { get; set; }

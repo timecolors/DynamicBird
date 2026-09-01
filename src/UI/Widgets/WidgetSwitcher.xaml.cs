@@ -74,20 +74,24 @@ namespace DynamicBird.UI.Widgets
             // ★ 签名立即初始化：避免首次激活时因 _dynamicSignature 为空而重复编译（同名程序集冲突）
             _dynamicSignature = BuildPluginSignature();
 
-            // 小组件安装/删除：重建动态标签
+            // 小组件安装/删除：重建动态标签。
+            // ★ 先失效签名缓存再比签名：Installed 已 Reload 出新列表，不失效会拿到旧签名
+            //   误判"未变化"而漏建；失效后重算（SHA256 全源 ≈ 几 ms）很便宜，
+            //   真正的重活（Roslyn 沙箱编译 + 插件编译）被 RebuildIfSignatureChanged 按签名挡住。
             WidgetPluginStore.Changed += () => Dispatcher.Invoke(() =>
             {
-                _cachedPluginSignature = null; // 插件变化 → 下次激活重算签名
-                RebuildDynamicTabs();
-                RebuildTabs();
+                _cachedPluginSignature = null;
+                if (!RebuildIfSignatureChanged()) RebuildTabs();
             });
 
-            // 设置变化（含小组件开关/鸟笼保存小组件变体）时重建标签栏，不丢失各小组件内部状态
+            // 设置变化（含小组件开关/鸟笼保存小组件变体）时重建标签栏，不丢失各小组件内部状态。
+            // ★ 性能：设置窗口任何控件变化都会触发 SettingsChanged，必须先比签名——
+            //   旧实现无条件全量重建 = 每次对全部插件跑 Roslyn 沙箱编译（实测 2-4s UI 冻结）。
+            //   签名未变（颜色/动画/帧率等无关设置）→ 只重建标签按钮（反映启停开关），不碰编译。
             _settings.SettingsChanged += () => Dispatcher.Invoke(() =>
             {
                 _cachedPluginSignature = null;
-                RebuildDynamicTabs();
-                RebuildTabs();
+                if (!RebuildIfSignatureChanged()) RebuildTabs();
             });
 
             // ★ 标签栏自动滚动：鼠标移到左/右边缘自动滚动（与任务栏一致）
@@ -107,6 +111,24 @@ namespace DynamicBird.UI.Widgets
             _tabs.RemoveAll(t => t.Key.StartsWith("Widget_", StringComparison.Ordinal));
             foreach (var plugin in WidgetPluginStore.Installed)
             {
+                // ★ 只把 Widget 类当作小组件标签：Panel/Config/Category 是区域面板/配置项，
+                //   编译成标签既错（面板功能出现在小组件栏）又白耗 Roslyn 编译（每次激活/设置变更全量跑）。
+                //   旧文件夹项（无 manifest，Kind 为空）是历史小组件，照常作为标签。
+                  if (plugin.Kind is "Panel" or "Config" or "Category" or "StatusProvider" or "Animation") continue;
+                // ★ 沙箱只对市场来源（TrustedSource=false）执行：本地编程不检测（HANDOFF 设计），
+                //   内置模板构建时已验证且合理使用黑名单 API（如 panel-recent 的 Process.Start/FileInfo），
+                //   无条件沙箱会把它们全拦掉（2026-08 误杀回归）且每次重建白跑 Roslyn 编译。
+                //   结果已按源码哈希缓存（SandboxErrors），未变化源码的重复重建零成本。
+                if (!plugin.TrustedSource)
+                {
+                    string sandboxErr = WidgetCompiler.SandboxErrors(plugin.Source);
+                    if (sandboxErr.Length > 0)
+                    {
+                        DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                            $"小组件 [{plugin.Id}] 被沙箱拦截: {sandboxErr}");
+                        continue;
+                    }
+                }
                 var (widget, err) = WidgetCompiler.Compile(plugin.Id, plugin.Source);
                 if (widget != null)
                 {
@@ -117,6 +139,7 @@ namespace DynamicBird.UI.Widgets
                         LocKey = "",
                         Widget = widget
                     });
+                      DynamicBird.Core.Infrastructure.Logging.LogManager.Debug($"[插件] 小组件编译成功: " + plugin.Id);
                 }
                 else
                 {
@@ -174,6 +197,21 @@ namespace DynamicBird.UI.Widgets
                             .Where(cp => cp.Kind != "Config" && (cp.BaseType ?? "") == "Widget")
                             .Select(cp => "B:" + cp.Id + ":" + DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.SourceHash(cp.Source))));
             return _cachedPluginSignature;
+        }
+
+        /// <summary>
+        /// 签名变化时重建动态标签（含沙箱/编译）；未变化返回 false（跳过昂贵的全量重建）。
+        /// ★ 性能关键：SettingsChanged 对无关设置（颜色/动画/帧率…）也触发，签名未变时
+        ///   全量重建 = 对全部插件重复 Roslyn 编译（每次 2-4s UI 冻结），必须按签名跳过。
+        /// </summary>
+        private bool RebuildIfSignatureChanged()
+        {
+            string sig = BuildPluginSignature();
+            if (sig == _dynamicSignature) return false;
+            _dynamicSignature = sig;
+            RebuildDynamicTabs();
+            RebuildTabs();
+            return true;
         }
 
         /// <summary>划词翻译 小组件实例（供主窗口热键处理调用）。</summary>
@@ -396,13 +434,7 @@ namespace DynamicBird.UI.Widgets
         {
             // ★ 插件列表/源码变化（保存时 WidgetSwitcher 可能尚未创建，订阅丢失）：
             //   每次面板激活时对比签名（含源码哈希），变化则重建动态标签，保证新增/修改的小组件一定出现
-            string sig = BuildPluginSignature();
-            if (sig != _dynamicSignature)
-            {
-                _dynamicSignature = sig;
-                RebuildDynamicTabs();
-                RebuildTabs();
-            }
+            RebuildIfSignatureChanged();
 
             switch (_currentTab)
             {

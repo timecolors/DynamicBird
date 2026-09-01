@@ -322,6 +322,8 @@ namespace DynamicBird.UI.Main
 
         internal void OnPanelContentChanged()
         {
+            // ★ 全局字号缩放：面板内容切换（新控件进视觉树）后补应用一次
+            DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
             _appHelperView = ContentContainer.Content as AppHelperView;
             _aiChatView = ContentContainer.Content as DynamicBird.UI.AI.AiChatView;
             UpdateIconTooltip();

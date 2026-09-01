@@ -29,6 +29,28 @@ namespace DynamicBird.UI.Birdcage
             return FindRecursive(root, key);
         }
 
+        /// <summary>按 Key 返回节点路径的名称链（如 [面板设计, 面板尺寸]）；未找到返回空。用于树↔文件夹映射。</summary>
+        public static System.Collections.Generic.List<string> FindPathNames(string key)
+        {
+            var result = new System.Collections.Generic.List<string>();
+            if (string.IsNullOrEmpty(key)) return result;
+            var root = Build();
+            if (FindPathRecursive(root, key, result)) return result;
+            return new System.Collections.Generic.List<string>();
+        }
+
+        private static bool FindPathRecursive(ConfigNode n, string key, System.Collections.Generic.List<string> path)
+        {
+            path.Add(n.Name);
+            if (n.Key == key) return true;
+            foreach (var c in n.Children)
+            {
+                if (FindPathRecursive(c, key, path)) return true;
+            }
+            path.RemoveAt(path.Count - 1);
+            return false;
+        }
+
         private static ConfigNode? FindRecursive(ConfigNode n, string key)
         {
             if (n.Key == key) return n;
@@ -171,7 +193,7 @@ namespace DynamicBird.UI.Birdcage
         {
             var c = new ConfigNode { Key = "appr", Name = "外观", Category = "外观" };
             c.Children.Add(Leaf("appr-theme", "颜色主题", "外观",
-                "BackgroundColor", "TextColor", "Opacity", "CornerRadius"));
+                "BackgroundColor", "TextColor", "Opacity", "CornerRadius", "UiFontScale"));
             c.Children.Add(Leaf("appr-shape", "形状参数", "外观",
                 "StripLengthRatio", "StripWidthMultiplier", "SquareShortSideMultiplier",
                 "GoldenRatio", "TriggerRegionRatio"));

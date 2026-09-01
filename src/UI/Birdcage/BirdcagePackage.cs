@@ -139,10 +139,14 @@ namespace DynamicBird.UI.Birdcage
             sw.Write(content ?? "");
         }
 
+        /// <summary>zip 条目读取，带大小上限（防恶意包塞超大文件内存炸弹）。</summary>
+        private const int MaxEntryBytes = 2 * 1024 * 1024;   // 单条目 2MB 上限（源码/配置足够）
+
         private static string? ReadEntry(ZipArchive zip, string name)
         {
             var entry = zip.GetEntry(name);
             if (entry == null) return null;
+            if (entry.Length > MaxEntryBytes) throw new InvalidOperationException("包内条目过大: " + name);
             using var sr = new StreamReader(entry.Open(), System.Text.Encoding.UTF8);
             return sr.ReadToEnd();
         }

@@ -1354,6 +1354,9 @@
   <data name="Clip_Cleared" xml:space="preserve">
     <value>🗑️ 已清空</value>
   </data>
+  <data name="Clip_Ready" xml:space="preserve">
+    <value>剪贴板就绪</value>
+  </data>
   <data name="Weather_Desc61" xml:space="preserve">
     <value>雨</value>
   </data>
@@ -2560,10 +2563,14 @@
   </data>
 
   <data name="Set_Tab_Region" xml:space="preserve">
-    <value>区域</value>
+    <value>🗺️ 区域</value>
   </data>
   <data name="Set_Tab_Panel" xml:space="preserve">
-    <value>面板</value>
+    <value>🧰 面板</value>
+  </data>
+
+  <data name="Set_UiFontScale" xml:space="preserve">
+    <value>界面字号</value>
   </data>
   <data name="Set_Sec_EdgeTrigger" xml:space="preserve">
     <value>◈ 边缘与触发</value>

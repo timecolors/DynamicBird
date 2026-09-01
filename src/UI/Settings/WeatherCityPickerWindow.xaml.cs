@@ -166,6 +166,7 @@ namespace DynamicBird.UI.Settings
             {
                 SelectedCity = city.Name;
                 await PreviewWeatherAsync(city.Name);
+                if (!IsLoaded || !IsVisible) return;   // ★ 防窗口已关闭后设 DialogResult
                 SaveRecent(city.Name);
                 DialogResult = true;
             }
@@ -187,6 +188,7 @@ namespace DynamicBird.UI.Settings
 
             SelectedCity = city;
             await PreviewWeatherAsync(city); // 确认前再看一眼该城市天气
+            if (!IsLoaded || !IsVisible) return;   // ★ 防窗口已关闭后设 DialogResult
             SaveRecent(city);
             DialogResult = true;
         }

@@ -15,7 +15,7 @@ using System.Windows.Media;
 namespace DynamicBird.UI.Birdcage
 {
     /// <summary>
-    /// 其他鸟笼 · 共享平台：按分类（对齐鸟笼树）浏览在线市场，Win11 资源管理器式查看（大图标/小图标/列表/详细信息）；
+    /// 其他鸟笼：按分类（对齐鸟笼树）浏览在线市场，Win11 资源管理器式查看（大图标/小图标/列表/详细信息）；
     /// 本地 .dbp 导出/导入；安装走权限确认 + Defender + 沙箱编译。
     /// </summary>
     public sealed class BirdcageMarketWindow : Window
@@ -67,6 +67,10 @@ namespace DynamicBird.UI.Birdcage
         private readonly TextBlock _detailInfo = new() { FontSize = 11, TextWrapping = TextWrapping.Wrap };
         private string _detailSource = "";      // 当前详情源码
         private string _detailManifest = "";    // 当前详情 manifest（供下载）
+        private MarketItem? _currentItem;       // 当前详情包（删除时校验作者）
+        private int _detailSeq;                 // ★ 详情加载序号：防快速连点竞态（旧请求结果丢弃）
+        private readonly Button _loginBtn = new();   // 登录 GitHub 按钮（文本随登录状态更新）
+        private readonly Button _syncBtn = new();    // 同步设置按钮（上传/下载个人配置，登录后可用）
 
         /// <summary>在线市场条目。</summary>
         public sealed class MarketItem
@@ -80,6 +84,8 @@ namespace DynamicBird.UI.Birdcage
             public string Author { get; set; } = "";
             public string Description { get; set; } = "";
             public List<string> Permissions { get; set; } = new();
+            /// <summary>发布者 GitHub 数字 ID（删除时身份校验；老包可能为 null）。</summary>
+            public long? PublisherId { get; set; }
 
             public string MetaLine =>
                 Id + " · " + Author +
@@ -102,13 +108,16 @@ namespace DynamicBird.UI.Birdcage
             _cSub = light ? Color.FromRgb(0x66, 0x66, 0x66) : Color.FromRgb(0xBB, 0xBB, 0xBB);
             _cBorder = light ? Color.FromRgb(0xE0, 0xE0, 0xE0) : Color.FromRgb(0x40, 0x40, 0x40);
 
-            Title = "其他鸟笼 · 共享平台";
+            Title = "其他鸟笼";
             Width = 760;
             Height = 600;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            ResizeMode = ResizeMode.NoResize;   // ★ 固定大小：内容区内部滚动，避免窗口边缘出现调整大小光标
+            ResizeMode = ResizeMode.CanResize;   // ★ 可调整大小（内容多时拖大窗口看全）
+            MinWidth = 640;
+            MinHeight = 480;
             ShowInTaskbar = false;
             Background = new SolidColorBrush(_cBg);
+            Closed += (_, _) => { try { _http.Dispose(); } catch { } };
 
             // ===== 顶部工具栏（Win11Button 与设置页一致） =====
             var export = new Button { Content = "导出当前预设", Width = 110, Height = 28, FontSize = 11, Margin = new Thickness(0, 0, 6, 0) };
@@ -120,6 +129,20 @@ namespace DynamicBird.UI.Birdcage
             var refresh = new Button { Content = "刷新列表", Width = 80, Height = 28, FontSize = 11, Margin = new Thickness(0, 0, 10, 0) };
             refresh.Style = (Style)FindResource("Win11Button");
             refresh.Click += RefreshOnline_Click;
+            var publish = new Button { Content = "🕊 放飞", Width = 90, Height = 28, FontSize = 11, Margin = new Thickness(0, 0, 10, 0) };
+            publish.Style = (Style)FindResource("Win11Button");
+            publish.ToolTip = "把当前选中的鸟笼项发布到市场，其他用户即可领养";
+            publish.Click += Publish_Click;
+            _loginBtn.Content = "登录 GitHub";
+            _loginBtn.Width = 100; _loginBtn.Height = 28; _loginBtn.FontSize = 11; _loginBtn.Margin = new Thickness(0, 0, 10, 0);
+            _loginBtn.Style = (Style)FindResource("Win11Button");
+            _loginBtn.Click += Login_Click;
+            _syncBtn.Content = "☁ 同步设置";
+            _syncBtn.Width = 100; _syncBtn.Height = 28; _syncBtn.FontSize = 11; _syncBtn.Margin = new Thickness(0, 0, 10, 0);
+            _syncBtn.Style = (Style)FindResource("Win11Button");
+            _syncBtn.IsEnabled = false;   // 登录后启用
+            _syncBtn.ToolTip = "把当前电脑的设置上传到 GitHub，或从云端下载恢复（换电脑/重装后使用）";
+            _syncBtn.Click += SyncConfig_Click;
 
             // 查看切换（Win11 资源管理器式）
             var viewLabel = new TextBlock { Text = "查看:", FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 4, 0) };
@@ -134,9 +157,16 @@ namespace DynamicBird.UI.Birdcage
             var views = new StackPanel { Orientation = Orientation.Horizontal };
             views.Children.Add(btnLarge); views.Children.Add(btnSmall); views.Children.Add(btnList); views.Children.Add(btnDetails);
 
-            var toolbar = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 10) };
-            toolbar.Children.Add(export); toolbar.Children.Add(import); toolbar.Children.Add(refresh);
-            toolbar.Children.Add(viewLabel); toolbar.Children.Add(views);
+            // ★ 工具栏两行：行1 = 本地操作（导出/导入/刷新）；行2 = 账号 + 查看方式（防溢出 760px 窗口）
+            var toolbar = new StackPanel { Margin = new Thickness(0, 0, 0, 10) };
+            var row1 = new StackPanel { Orientation = Orientation.Horizontal };
+            row1.Children.Add(export); row1.Children.Add(import); row1.Children.Add(publish); row1.Children.Add(refresh);
+            var row2 = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 6, 0, 0) };
+            row2.Children.Add(_loginBtn);
+            row2.Children.Add(_syncBtn);
+            row2.Children.Add(viewLabel); row2.Children.Add(views);
+            toolbar.Children.Add(row1);
+            toolbar.Children.Add(row2);
 
             // ===== 左侧分类导航 =====
             foreach (var c in Categories)
@@ -166,13 +196,23 @@ namespace DynamicBird.UI.Birdcage
             };
 
             // ===== 右侧内容区 =====
+            // ★ 禁水平滚动：WrapPanel 按视口宽换行（否则排一行被截断）
+            ScrollViewer.SetHorizontalScrollBarVisibility(_content, ScrollBarVisibility.Disabled);
             // ★ 视图项点击 → 打开详情页（不自动下载；详情页可下载/复制）
             _content.SelectionChanged += (_, _) =>
             {
                 if (_content.SelectedItem is ListBoxItem lbi && lbi.Tag is MarketItem mi)
                 {
                     _content.SelectedItem = null;
-                    _ = ShowDetailAsync(mi);
+                    // ★ 安全：包 id 仅允许 英文/数字/下划线/连字符（防 index.json 被注入 ../../ 路径）
+                    if (IsValidMarketId(mi.Id))
+                    {
+                        _ = ShowDetailAsync(mi);
+                    }
+                    else
+                    {
+                        _status.Text = "❌ 包 id 非法，已忽略（" + mi.Id + "）";
+                    }
                 }
             };
             _contentScroll.Content = _content;   // ★ ListBox 挂进 ScrollViewer（此前丢失导致不渲染）
@@ -193,7 +233,7 @@ namespace DynamicBird.UI.Birdcage
             var back = new Button { Content = "← 返回列表", Width = 90, Height = 26, FontSize = 11 };
             back.Style = (Style)FindResource("Win11Button");
             back.Click += (_, _) => { _detail.Visibility = Visibility.Collapsed; _contentScroll.Visibility = Visibility.Visible; _empty.Visibility = _allPackages.Count == 0 ? Visibility.Visible : Visibility.Collapsed; };
-            var download = new Button { Content = "⬇ 下载安装", Width = 100, Height = 28, FontSize = 11, Margin = new Thickness(0, 0, 8, 0) };
+            var download = new Button { Content = "🐣 领养", Width = 90, Height = 28, FontSize = 11, Margin = new Thickness(0, 0, 8, 0) };
             download.Style = (Style)FindResource("Win11Button");
             download.Click += (_, _) => { if (!string.IsNullOrEmpty(_detailManifest)) _ = InstallFromDetailAsync(); };
             var copy = new Button { Content = "📋 复制代码", Width = 100, Height = 28, FontSize = 11 };
@@ -203,9 +243,15 @@ namespace DynamicBird.UI.Birdcage
                 try { if (!string.IsNullOrEmpty(_detailSource)) { System.Windows.Clipboard.SetText(_detailSource); _status.Text = "✅ 代码已复制到剪贴板"; } }
                 catch (Exception ex) { _status.Text = "❌ 复制失败：" + ex.Message; }
             };
+            // ★ 删除：生成删除指引（删除是仓库操作，需仓库写权限；无账号体系不做假身份验证）
+            var del = new Button { Content = "🗑 删除此包", Width = 100, Height = 28, FontSize = 11, Margin = new Thickness(8, 0, 0, 0) };
+            del.Style = (Style)FindResource("Win11Button");
+            del.Foreground = System.Windows.Media.Brushes.Firebrick;
+            del.Click += (_, _) => ShowDeleteGuide();
             var detailBtns = new StackPanel { Orientation = Orientation.Horizontal };
             detailBtns.Children.Add(download);
             detailBtns.Children.Add(copy);
+            detailBtns.Children.Add(del);
             var detailHead = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
             detailHead.Children.Add(back);
             var detailTitle = new TextBlock { FontSize = 14, FontWeight = FontWeights.SemiBold, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
@@ -263,7 +309,12 @@ namespace DynamicBird.UI.Birdcage
             _empty.Foreground = new SolidColorBrush(_cSub);
             _categoryList.Foreground = new SolidColorBrush(_cText);
 
-            Loaded += async (_, _) => await RefreshOnlineAsync();
+            Loaded += async (_, _) =>
+            {
+                await GitHubMarketService.TryLoadTokenAsync();
+                UpdateLoginButton();
+                await RefreshOnlineAsync();
+            };
         }
 
         private Button MakeViewButton(string text)
@@ -352,21 +403,75 @@ namespace DynamicBird.UI.Birdcage
                 b.Child = new TextBlock { Text = item.Name, FontSize = 11, Foreground = new SolidColorBrush(_cText) };
                 return b;
             }
-            // 列表 / 详细信息
-            var row = new Border
+            if (_viewMode == ViewMode.List)
+            {
+                // ★ 列表视图（Win11 资源管理器式紧凑行）：名称 + 类型 · 作者 · 版本
+                var row = new Border
+                {
+                    Background = Brushes.Transparent,
+                    CornerRadius = new CornerRadius(6),
+                    Padding = new Thickness(8, 4, 8, 4),
+                    Cursor = System.Windows.Input.Cursors.Hand
+                };
+                var rp = new Grid();
+                rp.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                rp.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                rp.Children.Add(new TextBlock
+                {
+                    Text = item.Name,
+                    FontSize = 12,
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = new SolidColorBrush(_cText),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextTrimming = TextTrimming.CharacterEllipsis
+                });
+                rp.Children.Add(new TextBlock
+                {
+                    Text = (item.Kind ?? "Widget") + " · " + item.Author + (string.IsNullOrEmpty(item.Version) ? "" : " · v" + item.Version),
+                    FontSize = 10.5,
+                    Foreground = new SolidColorBrush(_cSub),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(12, 0, 0, 0)
+                });
+                Grid.SetColumn(rp.Children[1], 1);
+                row.Child = rp;
+                return row;
+            }
+            // ★ 详细信息视图（Win11 资源管理器式多列）：名称 + 作者/版本/分类/权限/描述
+            var detailRow = new Border
             {
                 Background = Brushes.Transparent,
                 CornerRadius = new CornerRadius(6),
                 Padding = new Thickness(8, 6, 8, 6),
                 Cursor = System.Windows.Input.Cursors.Hand
             };
-            var rp = new StackPanel();
-            rp.Children.Add(new TextBlock { Text = item.Name, FontSize = 12, FontWeight = FontWeights.SemiBold, Foreground = new SolidColorBrush(_cText) });
-            rp.Children.Add(new TextBlock { Text = item.DetailLine, FontSize = 10.5, Foreground = new SolidColorBrush(_cSub), Margin = new Thickness(0, 2, 0, 0), TextWrapping = TextWrapping.Wrap });
-            row.Child = rp;
-            return row;
+            var dp = new StackPanel();
+            dp.Children.Add(new TextBlock { Text = item.Name, FontSize = 12, FontWeight = FontWeights.SemiBold, Foreground = new SolidColorBrush(_cText) });
+            dp.Children.Add(new TextBlock
+            {
+                Text = "👤 " + item.Author + (string.IsNullOrEmpty(item.Version) ? "" : "  ·  v" + item.Version) +
+                       "  ·  " + (item.Category ?? "小组件") +
+                       (item.Permissions.Count > 0 ? "  ·  ⚠ " + string.Join(",", item.Permissions) : ""),
+                FontSize = 10.5,
+                Foreground = new SolidColorBrush(_cSub),
+                Margin = new Thickness(0, 2, 0, 0),
+                TextTrimming = TextTrimming.CharacterEllipsis
+            });
+            if (!string.IsNullOrEmpty(item.Description))
+            {
+                dp.Children.Add(new TextBlock
+                {
+                    Text = item.Description,
+                    FontSize = 10.5,
+                    Foreground = new SolidColorBrush(_cSub),
+                    Margin = new Thickness(0, 2, 0, 0),
+                    TextWrapping = TextWrapping.Wrap,
+                    MaxHeight = 36
+                });
+            }
+            detailRow.Child = dp;
+            return detailRow;
         }
-        // ==================== 本地：导出/导入 ====================
         // ==================== 本地：导出/导入 ====================
 
         private void Export_Click(object sender, RoutedEventArgs e)
@@ -441,6 +546,47 @@ namespace DynamicBird.UI.Birdcage
             catch (Exception ex) { _status.Text = "❌ " + ex.Message; }
         }
 
+        /// <summary>放飞：把当前选中的鸟笼自定义项发布到市场（需登录 + 沙箱通过）。</summary>
+        private void Publish_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!GitHubMarketService.IsLoggedIn)
+                {
+                    var needLogin = new ConfirmDialog("放飞", "请先登录 GitHub 才能发布", "去登录", "取消") { Owner = this };
+                    if (needLogin.ShowDialog() == true) { _loginBtn.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent)); }
+                    return;
+                }
+                var cp = _page.CurrentSelectedCustom();
+                if (cp == null || string.IsNullOrWhiteSpace(cp.Source))
+                {
+                    _status.Text = "❌ 请先在鸟笼页选中一个有源码的自定义项（小组件/面板/配置代码）";
+                    return;
+                }
+                // ★ 安全：发布前沙箱校验（防发布恶意代码到市场祸害他人）
+                string sandboxErr = DynamicBird.UI.Widgets.Dynamic.WidgetCompiler.SandboxErrors(cp.Source);
+                if (sandboxErr.Length > 0)
+                {
+                    MessageBox.Show(this, "❌ 该代码被沙箱拦截，不能发布：\n\n" + sandboxErr,
+                        "放飞 · 安全检查", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                var permissions = DynamicBird.UI.Widgets.Dynamic.WidgetPermissions.Detect(cp.Source);
+                var win = new PublishWindow(cp.Source, cp.Name, cp.Kind ?? "Widget",
+                    cp.BaseType ?? "Widget", cp.ParentKey ?? "", cp.SourceKey ?? "", cp.Category, permissions) { Owner = this };
+                win.ShowDialog();
+                if (win.Published)
+                {
+                    _status.Text = "✅ 已放飞「" + (string.IsNullOrWhiteSpace(win.NameResult) ? cp.Name : win.NameResult) + "」";
+                    _ = RefreshOnlineAsync();   // 刷新市场列表
+                }
+            }
+            catch (Exception ex)
+            {
+                _status.Text = "❌ 放飞失败：" + ex.Message;
+            }
+        }
+
         private bool ConfirmPermissions(string name, List<string> permissions)
         {
             string perms = WidgetPermissions.Describe(permissions);
@@ -499,13 +645,17 @@ namespace DynamicBird.UI.Birdcage
         /// <summary>点包打开详情：拉取 manifest + main.cs 展示，可下载或复制。</summary>
         private async Task ShowDetailAsync(MarketItem item)
         {
+            int seq = ++_detailSeq;
             try
             {
+                _currentItem = item;
                 _status.Text = "正在加载「" + item.Name + "」…";
                 _detailManifest = await _http.GetStringAsync(
                     MarketBase + "/packages/" + item.Id + "/manifest.json");
                 _detailSource = await _http.GetStringAsync(
                     MarketBase + "/packages/" + item.Id + "/main.cs");
+                // ★ 加载期间用户点了别的包：丢弃过期结果，避免显示内容与 _currentItem 不一致（误装/误删）
+                if (seq != _detailSeq) return;
 
                 _detailInfo.Text = "📦 " + item.Name + "  ·  " + item.Id +
                     System.Environment.NewLine + "👤 上传者：" + item.Author +
@@ -522,11 +672,12 @@ namespace DynamicBird.UI.Birdcage
                 _detail.Visibility = Visibility.Visible;
                 _contentScroll.Visibility = Visibility.Collapsed;
                 _empty.Visibility = Visibility.Collapsed;
-                _status.Text = "✅ 已加载，可下载安装或复制代码";
+                _status.Text = "✅ 已加载，可领养或复制代码";
             }
             catch (Exception ex)
             {
-                _status.Text = "❌ 加载详情失败：" + ex.Message;
+                if (_detailSeq == seq)
+                    _status.Text = "❌ 加载详情失败：" + ex.Message;
             }
         }
 
@@ -558,7 +709,7 @@ namespace DynamicBird.UI.Birdcage
             }
             catch (Exception ex)
             {
-                _status.Text = "❌ 下载/安装失败：" + ex.Message;
+                _status.Text = "❌ 领养失败：" + ex.Message;
             }
         }
 
@@ -601,6 +752,10 @@ namespace DynamicBird.UI.Birdcage
                                 if (!string.IsNullOrEmpty(s) && !item.Permissions.Contains(s)) item.Permissions.Add(s);
                             }
                         }
+                        if (p.TryGetProperty("publisherId", out var pid) && pid.ValueKind == JsonValueKind.Number)
+                        {
+                            item.PublisherId = pid.GetInt64();
+                        }
                         if (!string.IsNullOrEmpty(item.Id)) _allPackages.Add(item);
                     }
                 }
@@ -626,9 +781,10 @@ namespace DynamicBird.UI.Birdcage
 
         private async Task DownloadInstallAsync(MarketItem item)
         {
+            if (!IsValidMarketId(item.Id)) { _status.Text = "❌ 包 id 非法，已拒绝下载"; return; }
             try
             {
-                _status.Text = "正在下载「" + item.Name + "」…";
+                _status.Text = "正在领养「" + item.Name + "」…";
                 string manifestJson = await _http.GetStringAsync(
                     MarketBase + "/packages/" + item.Id + "/manifest.json");
                 string source = await _http.GetStringAsync(
@@ -655,13 +811,152 @@ namespace DynamicBird.UI.Birdcage
             }
             catch (Exception ex)
             {
-                _status.Text = "❌ 下载/安装失败：" + ex.Message;
+                _status.Text = "❌ 领养失败：" + ex.Message;
+            }
+        }
+
+        // ==================== GitHub 登录 / 删除 ====================
+
+        private async void Login_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (GitHubMarketService.IsLoggedIn)
+                {
+                    var c = MessageBox.Show(this,
+                        "已登录：" + GitHubMarketService.CurrentUser + "，点击确定退出登录？\n\n" +
+                        "（仅移除本机登录状态；GitHub 授权仍有效，可在 GitHub 设置 → 应用程序 中撤销）",
+                        "GitHub", MessageBoxButton.OKCancel);
+                    if (c == MessageBoxResult.OK)
+                    {
+                        GitHubMarketService.Logout();
+                        UpdateLoginButton();
+                        _status.Text = "已退出登录（如不再使用可在 GitHub 设置中撤销授权）";
+                    }
+                    return;
+                }
+                _status.Text = "正在获取 GitHub 授权…";
+                var (code, uri, deviceCode) = await GitHubMarketService.StartDeviceFlowAsync();
+                var win = new DeviceLoginWindow(uri, code, deviceCode) { Owner = this };
+                win.ShowDialog();
+                if (GitHubMarketService.IsLoggedIn)
+                {
+                    UpdateLoginButton();
+                    _status.Text = "✅ 已登录：" + GitHubMarketService.CurrentUser;
+                }
+                else _status.Text = "未登录（已取消或超时）";
+            }
+            catch (Exception ex)
+            {
+                GitHubMarketService.Log("❌ 登录失败（UI捕获）: " + ex.GetType().Name + " " + ex.Message + (ex.InnerException != null ? " / inner: " + ex.InnerException.Message : ""));
+                _status.Text = "❌ 登录失败：" + ex.Message + "（详情见 %LOCALAPPDATA%\\DynamicBird\\github_login.log）";
+            }
+        }
+
+        private void UpdateLoginButton()
+        {
+            bool loggedIn = GitHubMarketService.IsLoggedIn;
+            _loginBtn.Content = loggedIn ? "已登录：" + GitHubMarketService.CurrentUser : "登录 GitHub";
+            _syncBtn.IsEnabled = loggedIn;
+        }
+
+        /// <summary>同步个人设置：自定义弹窗（上传/下载/确认均非系统 MessageBox）。</summary>
+        private async void SyncConfig_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!GitHubMarketService.IsLoggedIn || string.IsNullOrEmpty(GitHubMarketService.CurrentUser))
+                {
+                    var needLogin = new ConfirmDialog("同步设置", "请先登录 GitHub", "去登录", "取消") { Owner = this };
+                    if (needLogin.ShowDialog() == true) { _loginBtn.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent)); }
+                    return;
+                }
+                string user = GitHubMarketService.CurrentUser!;
+                bool? hasCloud = await GitHubMarketService.HasConfigAsync(user);
+
+                var win = new ConfigSyncWindow(user, hasCloud) { Owner = this };
+                win.ShowDialog();
+
+                // 下载完成后刷新设置页
+                if (win.Result == "download")
+                {
+                    try { _page.SettingsService.Reload(); } catch { }
+                    _page.RefreshAll();
+                    _status.Text = "✅ 已从云端恢复设置（设置页已刷新）";
+                }
+                else if (win.Result == "upload")
+                {
+                    _status.Text = "✅ 设置已上传到云端";
+                }
+            }
+            catch (Exception ex)
+            {
+                GitHubMarketService.Log("❌ 同步设置异常: " + ex.GetType().Name + " " + ex.Message);
+                _status.Text = "❌ 同步失败：" + ex.Message;
+            }
+        }
+
+        private async void ShowDeleteGuide()
+        {
+            try
+            {
+                if (_currentItem == null) return;
+                if (!GitHubMarketService.IsLoggedIn)
+                {
+                    var needLogin = new ConfirmDialog("删除此包", "请先登录 GitHub，登录后即可删除自己上传的包。", "去登录", "取消") { Owner = this };
+                    if (needLogin.ShowDialog() == true) { _loginBtn.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent)); }
+                    return;
+                }
+                // ★ 身份校验：优先比 GitHub 数字 ID（publisherId 不可伪造、不可改名）；
+                //   老包无 publisherId 时回退比 author 字符串（至少挡住不同名用户）
+                bool isOwner = false;
+                if (_currentItem.PublisherId.HasValue && GitHubMarketService.CurrentUserId.HasValue)
+                {
+                    isOwner = _currentItem.PublisherId.Value == GitHubMarketService.CurrentUserId.Value;
+                }
+                else
+                {
+                    isOwner = !string.IsNullOrEmpty(_currentItem.Author) &&
+                              string.Equals(GitHubMarketService.CurrentUser, _currentItem.Author, StringComparison.OrdinalIgnoreCase);
+                }
+                if (!isOwner)
+                {
+                    var notOwner = new ConfirmDialog("删除此包",
+                        "仅上传者可删除此包。\n当前登录：" + GitHubMarketService.CurrentUser + "\n包作者：" + _currentItem.Author,
+                        "知道了", "关闭") { Owner = this };
+                    notOwner.ShowDialog();
+                    return;
+                }
+                var c = new ConfirmDialog("删除此包",
+                    "确定删除市场包「" + _currentItem.Name + "」？\n删除后所有用户无法再安装，此操作不可恢复。",
+                    "确定删除", "取消") { Owner = this };
+                if (c.ShowDialog() != true) return;
+                _status.Text = "正在删除…";
+                string? err = await GitHubMarketService.DeletePackageAsync(_currentItem.Id);
+                if (err == null)
+                {
+                    _status.Text = "✅ 已删除「" + _currentItem.Name + "」（仓库已更新，稍后市场同步）";
+                    _allPackages.Remove(_currentItem);
+                    RefreshContent();
+                }
+                else _status.Text = "❌ " + err;
+            }
+            catch (Exception ex)
+            {
+                _status.Text = "❌ 删除失败：" + ex.Message;
             }
         }
 
         private static string? GetStr(JsonElement root, string name)
         {
             return root.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+        }
+
+        /// <summary>市场包 id 校验：仅英文/数字/下划线/连字符（防路径穿越注入）。</summary>
+        private static bool IsValidMarketId(string? id)
+        {
+            return !string.IsNullOrEmpty(id) &&
+                   System.Text.RegularExpressions.Regex.IsMatch(id, "^[A-Za-z0-9_-]{2,64}$");
         }
     }
 }

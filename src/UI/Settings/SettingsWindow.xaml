@@ -943,6 +943,20 @@
                                     <TextBlock Grid.Column="1" Style="{StaticResource InfoTipStyle}"
                                                ToolTip="{Binding Item[UI_SettingsWindow_293], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
+                                  <Grid Margin="0,6,0,0">
+                                      <Grid.ColumnDefinitions>
+                                          <ColumnDefinition Width="60"/>
+                                          <ColumnDefinition Width="*"/>
+                                          <ColumnDefinition Width="40"/>
+                                      </Grid.ColumnDefinitions>
+                                      <TextBlock Grid.Column="0" Text="{Binding Item[Set_UiFontScale], Source={x:Static loc:LocalizationManager.Instance}}" VerticalAlignment="Center" FontSize="12"/>
+                                      <Slider Grid.Column="1" x:Name="sldUiFontScale"
+                                              Minimum="0.75" Maximum="1.5" Value="1.0"
+                                              TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                              VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                      <TextBlock Grid.Column="2" x:Name="txtUiFontScale"
+                                                 Text="100%" TextAlignment="Center" Width="40" FontSize="12"/>
+                                  </Grid>
                             </StackPanel>
                         </Border>
 

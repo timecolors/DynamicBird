@@ -363,7 +363,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# MSIX �������������ɣ�����⣩
+# MSIX �������������ɣ�����⣩
 packaging/Output/
 packaging/StoreScreenshots/
 
@@ -382,3 +382,20 @@ docs/INTERACTION-MODEL.md
 !market/
 !market/packages/
 !market/packages/**
+
+# ===== 本地开发文件（不入库） =====
+# 单元测试（216 个本地跑；不提交，CI 用 SmokeTest 冒烟）
+tests/
+!tests/DynamicBird.Tests/DynamicBird.Tests.csproj
+# 调试/分析探针（不入库）
+tools/*Probe*/
+tools/ai_samples/
+tools/mouse_helper/
+tools/wpf_same_value_test/
+tools/old_*.cs
+tools/csproj-v103.txt
+# 旧版本对照 worktree（不入库）
+old_v103/
+# AI 交接/评估文档（不入库）
+docs/HANDOFF*.md
+docs/评估-*.md

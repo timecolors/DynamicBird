@@ -19,6 +19,14 @@ namespace DynamicBird
             // ★ 旧版本数据迁移（安装目录/Data -> %LOCALAPPDATA%\DynamicBird），必须在日志初始化前执行
             AppPaths.MigrateLegacyData();
 
+            // ★ 安全：收紧数据目录 ACL（仅当前用户 + SYSTEM + 管理员），防止同机其他账户读取
+            //   github_token.dat / ai.json / clipboard_history.json 等敏感数据（旧版残留宽权限时自动修复）
+            try
+            {
+                DynamicBird.Infrastructure.Utils.DataDirSecurity.TightenAcl();
+            }
+            catch { }
+
             // ★ Jump List 命令：带动作参数启动时优先转发给已运行实例
             //   （无实例 → 返回 true，动作由 MainWindow 初始化后执行）
             bool startupActions = false;

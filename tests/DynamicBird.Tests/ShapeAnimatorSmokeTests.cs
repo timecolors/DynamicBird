@@ -39,6 +39,12 @@ namespace DynamicBird.Tests
                     anim.SetSettings(settings);
                     anim.SetAnimationsEnabled(true);
 
+                    // ★ 节能降帧：PowerSaver 跳帧（含钳制边界）
+                    anim.SetFrameSkip(2);        // 省电 ~20fps
+                    anim.SetFrameSkip(0);        // 恢复正常满帧
+                    anim.SetFrameSkip(-5);       // 钳制到 0
+                    anim.SetFrameSkip(99);       // 钳制到 3
+
                     anim.SetPositionAndSizeTarget(0, 0, 200, 100);   // 切换
                     anim.SetSizeTarget(150, 80);                     // 尺寸
                     anim.SetPositionTargetWithoutReset(10, 10);      // 跟随(动画重定向)

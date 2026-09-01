@@ -7,6 +7,10 @@ namespace DynamicBird.UI.Settings.Pages
     /// <summary>
     /// AI 提示词生成器：按配置树节点动态生成完整提示词（含可定制字段清单、当前配置、
     /// 格式要求与报错处理说明），用户复制后粘贴到任意 AI（如 DeepSeek 网页版）即可生成配置。
+    /// 节点种类（ConfigNode.Kind）分发：
+    ///   - StatusProvider → IStatusProvider 完整 .cs 模板提示词（状态栏插件）
+    ///   - Animation     → IAnimation 完整 .cs 模板提示词（自定义动画）
+    ///   - 其余           → 现有逻辑（配置代码 / 自定义面板源码）
     /// </summary>
     public static class PromptGenerator
     {
@@ -15,9 +19,94 @@ namespace DynamicBird.UI.Settings.Pages
             // 自定义面板：生成 C# 源码（动态编译），而非 JSON 配置
             if (!string.IsNullOrEmpty(node.CustomId))
             {
-                return GeneratePanelSource(node.Name, currentJson);
+                // ★ 按节点种类分发：状态栏/动画插件走接口模板，其余走现有面板源码
+                switch (node.Kind)
+                {
+                    case "StatusProvider": return GenerateStatusProviderSource(node.Name, currentJson);
+                    case "Animation": return GenerateAnimationSource(node.Name, currentJson);
+                    default: return GeneratePanelSource(node.Name, currentJson);
+                }
             }
             return GenerateConfigJson(node, currentJson);
+        }
+
+        /// <summary>状态栏显示项：生成实现 IStatusProvider 的完整 .cs 源码提示词（放入 状态栏/ 文件夹生效）。</summary>
+        private static string GenerateStatusProviderSource(string providerName, string currentSource)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("【角色】你是灵动鸟 DynamicBird 的状态栏显示项开发专家。请严格按下面的规范，为状态栏显示项「" + providerName + "」生成完整可编译的 C# 源码（实现 IStatusProvider，放入 状态栏/ 文件夹后由 watcher 自动编译挂载到状态栏）。");
+            sb.AppendLine();
+            sb.AppendLine("【必须遵守的接口契约】");
+            sb.AppendLine("1. 类必须公开（public class），命名空间随意但避免与内置冲突；");
+            sb.AppendLine("2. 必须实现 DynamicBird.UI.Status.IStatusProvider 接口；");
+            sb.AppendLine("3. 必须实现五个成员：string Name（显示名，中文）；string IconText（图标，emoji 或文本如 🌡️）；string GetText()（当前文本，每秒被调用一次，UI 线程，禁止耗时操作）；void OnActivated()（挂载时调用，可订阅资源/启动 DispatcherTimer）；void OnDeactivated()（卸载时调用，必须停止定时器、释放资源）；bool IsEnabled(DynamicBird.Core.Services.Configuration.ISettingsService settings)（是否显示，默认返回 true 即可）；");
+            sb.AppendLine("4. 不要创建任何 UI 控件——状态栏项由系统自动生成「图标+文本」布局，插件只提供数据和生命周期。");
+            sb.AppendLine();
+            sb.AppendLine("【可靠性要求】");
+            sb.AppendLine("1. 定时器必须用 System.Windows.Threading.DispatcherTimer（自动回 UI 线程），禁止 System.Threading.Timer；");
+            sb.AppendLine("2. GetText() 必须在几毫秒内返回——传感器/WMI/网络查询等耗时操作放后台线程并缓存结果，禁止每次调用实时阻塞；");
+            sb.AppendLine("3. 所有异常 catch，返回友好降级文本（如 \"--\"），禁止崩溃；");
+            sb.AppendLine("4. 不要引用被沙箱拦截的危险 API（见下）。");
+            sb.AppendLine();
+            sb.AppendLine("【沙箱注意（若将发布到市场需避免；本地自用可忽略）】");
+            sb.AppendLine("禁止：System.Diagnostics（Process）、System.Reflection（GetMethod/Activator/Assembly.Load/Type.GetType）、System.Runtime.InteropServices（DllImport/Marshal）、System.Management（WMI）、Microsoft.Win32（注册表）；以及 FindWindow/EnumWindows/SetWindowsHookEx/SendInput/SetForegroundWindow/PostMessage/SendMessage/keybd_event/mouse_event/CopyFromScreen/PrintWindow/BitBlt/File.Write*/File.Delete/FileStream/StreamWriter/Directory.Create 等。");
+            sb.AppendLine();
+            sb.AppendLine("【当前源码】现有源码如下（可整体替换或基于它修改）：");
+            sb.AppendLine(currentSource);
+            sb.AppendLine();
+            sb.AppendLine("【输出格式要求】");
+            sb.AppendLine("1. 只输出一个完整 C# 源码文件（所有 using 齐全），不要 Markdown 代码块标记（三个反引号不要），不要任何解释文字；");
+            sb.AppendLine("2. 代码必须能直接编译：类名、继承、接口、using 完整；");
+            sb.AppendLine("3. 不要写占位注释；变量名清晰。");
+            sb.AppendLine();
+            sb.AppendLine("【自检清单（输出前逐项核对）】");
+            sb.AppendLine("1. 类是否 public 且实现 IStatusProvider？2. Name/IconText/GetText/OnActivated/OnDeactivated/IsEnabled 是否都实现？3. 定时器是否 DispatcherTimer、OnDeactivated 是否 Stop？4. GetText 是否轻量（秒级调用不卡 UI）？5. using 是否完整？6. 是否误用沙箱禁止 API（面向市场时）？7. 是否无占位符、可直接编译？");
+            sb.AppendLine();
+            sb.AppendLine("【报错处理】如果用户把编译报错信息粘贴回来，请指出错误位置（文件/行/列）和原因，并给出修正后的完整代码（仍遵守以上全部规范）。");
+            sb.AppendLine();
+            sb.AppendLine("【用户需求】");
+            sb.AppendLine("（在这里描述你想在状态栏显示什么：数据来源、刷新频率、显示格式）");
+            return sb.ToString();
+        }
+
+        /// <summary>自定义动画：生成实现 IAnimation 的完整 .cs 源码提示词（放入 动画/ 文件夹后在设置页可选）。</summary>
+        private static string GenerateAnimationSource(string animName, string currentSource)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("【角色】你是灵动鸟 DynamicBird 的面板动画开发专家。请严格按下面的规范，为动画「" + animName + "」生成完整可编译的 C# 源码（实现 IAnimation，放入 动画/ 文件夹后自动出现在设置页动画类型下拉，可被选为呼出/隐藏动画）。");
+            sb.AppendLine();
+            sb.AppendLine("【必须遵守的接口契约】");
+            sb.AppendLine("1. 类必须公开（public class），命名空间随意但避免与内置冲突；");
+            sb.AppendLine("2. 必须实现 DynamicBird.Animation.IAnimation 接口；");
+            sb.AppendLine("3. 必须实现四个成员：string Name（显示名，中文，设置页下拉展示）；string Id（唯一标识，英文/数字/下划线，设置里存这个值）；void AnimateShow(System.Windows.FrameworkElement panel, System.Windows.Window window, double ms, System.Action onCompleted)（呼出动画，完成后调 onCompleted）；void AnimateHide(System.Windows.FrameworkElement panel, System.Windows.Window window, double ms, System.Action onCompleted)（隐藏动画，把 panel 透明度降到 0，完成后调 onCompleted）；");
+            sb.AppendLine();
+            sb.AppendLine("【动画实现要点（★ 渲染帧热路径，必须遵守）】");
+            sb.AppendLine("1. 用 System.Windows.Threading.DispatcherTimer 逐帧驱动（每帧约 16ms，Tick 里推进进度并更新 panel/window 属性）；");
+            sb.AppendLine("2. ★ 绝对禁止直接订阅 CompositionTarget.Rendering 而不取消——会导致无限自激循环 100% CPU 卡死（本项目历史教训）；如需渲染帧请务必在 onCompleted/动画结束时取消订阅；");
+            sb.AppendLine("3. 位置动画改 window.Left/Top（窗口位置），透明度动画改 panel.Opacity；");
+            sb.AppendLine("4. 时长 ms 为毫秒（double），进度 = elapsed/ms，到 1 时必须调用 onCompleted（只调一次）并停掉定时器；");
+            sb.AppendLine("5. 所有异常 catch 并仍调用 onCompleted（系统还有超时兜底，但正常完成不依赖它）；");
+            sb.AppendLine("6. 不要引用被沙箱拦截的危险 API（见下）。");
+            sb.AppendLine();
+            sb.AppendLine("【沙箱注意（若将发布到市场需避免；本地自用可忽略）】");
+            sb.AppendLine("禁止：System.Diagnostics（Process）、System.Reflection（GetMethod/Activator/Assembly.Load/Type.GetType）、System.Runtime.InteropServices（DllImport/Marshal）、System.Management（WMI）、Microsoft.Win32（注册表）；以及 FindWindow/EnumWindows/SetWindowsHookEx/SendInput/SetForegroundWindow/PostMessage/SendMessage/keybd_event/mouse_event/CopyFromScreen/PrintWindow/BitBlt/File.Write*/File.Delete/FileStream/StreamWriter/Directory.Create 等。");
+            sb.AppendLine();
+            sb.AppendLine("【当前源码】现有源码如下（可整体替换或基于它修改）：");
+            sb.AppendLine(currentSource);
+            sb.AppendLine();
+            sb.AppendLine("【输出格式要求】");
+            sb.AppendLine("1. 只输出一个完整 C# 源码文件（所有 using 齐全），不要 Markdown 代码块标记（三个反引号不要），不要任何解释文字；");
+            sb.AppendLine("2. 代码必须能直接编译：类名、继承、接口、using 完整；");
+            sb.AppendLine("3. 不要写占位注释；变量名清晰。");
+            sb.AppendLine();
+            sb.AppendLine("【自检清单（输出前逐项核对）】");
+            sb.AppendLine("1. 类是否 public 且实现 IAnimation？2. Name/Id/AnimateShow/AnimateHide 是否都实现？3. 是否 DispatcherTimer 驱动、动画结束停定时器并调 onCompleted（且只调一次）？4. 是否避免 CompositionTarget.Rendering 常驻订阅？5. 隐藏动画是否把 panel.Opacity 降到 0？6. using 是否完整？7. 是否误用沙箱禁止 API（面向市场时）？8. 是否无占位符、可直接编译？");
+            sb.AppendLine();
+            sb.AppendLine("【报错处理】如果用户把编译报错信息粘贴回来，请指出错误位置（文件/行/列）和原因，并给出修正后的完整代码（仍遵守以上全部规范）。");
+            sb.AppendLine();
+            sb.AppendLine("【用户需求】");
+            sb.AppendLine("（在这里描述你想要的面板动画效果：如弹跳/抖动/翻转，呼出与隐藏各自的形态）");
+            return sb.ToString();
         }
 
         /// <summary>标准节点：生成 C# 配置代码提示词（编译校验，保存小预设时在同级创建新项）。</summary>

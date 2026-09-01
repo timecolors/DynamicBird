@@ -30,6 +30,10 @@ namespace DynamicBird.Core.Models
         /// <summary>自定义面板 Id（非空 = 用户新增的自定义功能，编辑其 CustomPanels 配置）。</summary>
         public string? CustomId { get; set; }
 
+        /// <summary>自定义项的种类（Widget/Panel/Config/StatusProvider/Animation；由 CustomPanels.Kind 带出，
+        /// PromptGenerator 据此分发生成不同提示词）。</summary>
+        public string? Kind { get; set; }
+
         public bool IsLeaf => Children.Count == 0;
     }
 }

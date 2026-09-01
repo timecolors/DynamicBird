@@ -4,6 +4,7 @@ using DynamicBird.Core.Services.Configuration;
 using DynamicBird.UI.Birdcage;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -246,7 +247,8 @@ public class CustomPanel : UserControl, IWidget
                     Key = "custom_" + cp.Id,
                     Name = cp.Name,
                     Category = cp.Category,
-                    CustomId = cp.Id
+                    CustomId = cp.Id,
+                    Kind = cp.Kind
                 },
                 Level = level,
                 HasDelete = true,
@@ -296,6 +298,7 @@ public class CustomPanel : UserControl, IWidget
 
             _selected = fn.Node;
             txtNodeTitle.Text = fn.Node.Name;
+            UpdateOpenFolderButton();
             bool hasTemplate = DynamicBird.UI.Birdcage.BuiltinFeatureSources.Sources.ContainsKey(fn.Node.Key);
             txtNodeHint.Text = !string.IsNullOrEmpty(fn.Node.CustomId)
                 ? BuildCustomHint(fn.Node)
@@ -391,6 +394,8 @@ public class CustomPanel : UserControl, IWidget
                     var list = _settings.CustomPanels;
                     list.RemoveAll(p => p.Id == customId);
                     _settings.CustomPanels = list;
+                    // ★ 树↔文件夹同步：删除对应文件夹（按 manifest.id 匹配）
+                    DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.DeleteNodeFolder(customId);
 
                     // ★ 删除已应用的单预设 → 清除其冲突标记（对应设置页变灰解除）
                     var overrides = _settings.AppliedPresets;
@@ -414,6 +419,7 @@ public class CustomPanel : UserControl, IWidget
                     {
                         _selected = null;
                         txtNodeTitle.Text = "";
+                        UpdateOpenFolderButton();
                         txtJsonEditor.Text = "";
                     }
                     LoadTree();
@@ -485,8 +491,11 @@ public class CustomPanel : UserControl, IWidget
                     CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm")
                 });
                 _settings.CustomPanels = list;
+                // ★ 树↔文件夹同步：新节点落盘到 birdcage/ 对应分组文件夹（manifest + 内容文件）
+                var created = list.FirstOrDefault(p => p.Name == input && p.ParentKey == parentKey);
+                if (created != null) DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.SaveNodeToFolder(created);
                 LoadTree();
-                txtJsonStatus.Text = $"✅ 已创建{levelName}：{input}（在「自定义功能」下编辑）";
+                txtJsonStatus.Text = $"✅ 已创建{levelName}：{input}（在「自定义功能」下编辑，文件已写入小组件文件夹）";
             }
             catch (Exception ex)
             {
@@ -632,6 +641,8 @@ public class CustomPanel : UserControl, IWidget
                         }
                         cp.Source = src;
                         _settings.CustomPanels = list;
+                        // ★ 树↔文件夹同步：更新文件
+                        DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.SaveNodeToFolder(cp);
                         _errorCustomId = null;   // 编译通过，清除错误高亮
                         LoadTree();
                         txtJsonStatus.Text = cp.Kind == "Config"
@@ -710,6 +721,74 @@ public class CustomPanel : UserControl, IWidget
             catch (Exception ex) { txtJsonStatus.Text = "❌ " + ex.Message; }
         }
 
+        /// <summary>更新「打开文件夹」按钮可用性（选中任意节点即启用：内置/自定义都定位到对应目录）。</summary>
+        private void UpdateOpenFolderButton()
+        {
+            if (btnOpenNodeFolder == null) return;
+            btnOpenNodeFolder.IsEnabled = _selected != null;
+        }
+
+        /// <summary>在系统文件管理器中打开当前选中功能的文件夹（源码/配置/清单所在目录）。</summary>
+        private void BtnOpenNodeFolder_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // ★ 未选中节点也兜底打开根目录（避免"点击有反馈但没动作"）
+                if (_selected == null)
+                {
+                    DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.OpenFolder();
+                    return;
+                }
+                var sel = _selected;
+                // 自定义项：按 manifest.id 定位
+                if (!string.IsNullOrEmpty(sel.CustomId))
+                {
+                    var cp = _settings.CustomPanels.FirstOrDefault(p => p.Id == sel.CustomId);
+                    if (cp != null)
+                    {
+                        DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.OpenNodeFolder(cp.Id, cp.Name, cp.Category);
+                        return;
+                    }
+                }
+                // 内置/配置节点：按 分类 + 节点Key/名称 定位到对应分组目录
+                DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.OpenNodeFolder("", sel.Name, sel.Category);
+            }
+            catch (Exception ex)
+            {
+                txtJsonStatus.Text = "❌ " + ex.Message;
+            }
+        }
+
+        /// <summary>打开 AI 编程指南文档（docs/AI-PROGRAMMING.md，发布时随 exe 携带）。</summary>
+        private void BtnAiGuide_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 运行目录优先（发布携带），回退项目根（开发期）
+                string? doc = Path.Combine(AppContext.BaseDirectory, "docs", "AI-PROGRAMMING.md");
+                if (!File.Exists(doc))
+                {
+                    string? root = AppContext.BaseDirectory;
+                    for (int i = 0; i < 8 && root != null; i++)
+                    {
+                        if (File.Exists(Path.Combine(root, "DynamicBird.csproj")))
+                        {
+                            string p = Path.Combine(root, "docs", "AI-PROGRAMMING.md");
+                            if (File.Exists(p)) { doc = p; break; }
+                        }
+                        root = Path.GetDirectoryName(root);
+                    }
+                }
+                if (doc == null || !File.Exists(doc))
+                {
+                    txtJsonStatus.Text = "❌ 未找到 AI-PROGRAMMING.md（文档未随程序发布）";
+                    return;
+                }
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(doc) { UseShellExecute = true });
+            }
+            catch (Exception ex) { txtJsonStatus.Text = "❌ " + ex.Message; }
+        }
+
         private void BtnCopyPrompt_Click(object sender, RoutedEventArgs e)
         {
             if (_selected == null) return;
@@ -764,6 +843,8 @@ public class CustomPanel : UserControl, IWidget
                     if (cp == null) { txtJsonStatus.Text = "找不到该项，无法保存"; return; }
                     cp.Source = code;
                     _settings.CustomPanels = list;
+                    // ★ 树↔文件夹同步：更新文件
+                    DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.SaveNodeToFolder(cp);
                     _errorCustomId = null;
                     LoadTree();
                     txtJsonStatus.Text = $"✅ 已更新单预设「{cp.Name}」";
@@ -803,6 +884,9 @@ public class CustomPanel : UserControl, IWidget
                     CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm")
                 });
                 _settings.CustomPanels = list;
+                // ★ 树↔文件夹同步：变体落盘到 birdcage/ 对应分组文件夹
+                var savedCp = list.LastOrDefault(p => p.Name == newName && p.ParentKey == parentKey);
+                if (savedCp != null) DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.SaveNodeToFolder(savedCp);
                 LoadTree();
                 txtJsonStatus.Text = isPanel
                     ? $"✅ 已保存单预设「{newName}」（面板变体，可在 设置→区域面板 中选用）"
@@ -955,6 +1039,14 @@ public class CustomPanel : UserControl, IWidget
         private void BtnDeletePreset_Click(object sender, RoutedEventArgs e)
         {
             if (cmbPresets.SelectedItem is not string name) return;
+            // ★ 预设是灵动鸟管理的内部数据：删除前警告（已应用的设置会回退）
+            if (!DynamicBird.UI.Birdcage.BirdcageFileGuard.ConfirmDelete(
+                    System.Windows.Window.GetWindow(this), name,
+                    "删除预设",
+                    "「" + name + "」是一个已保存的预设。删除后：\n• 已应用的该预设配置会回退到默认\n• 无法再恢复\n\n确定要删除吗？"))
+            {
+                return;
+            }
             PresetManager.DeletePreset(name);
             // 删除预设 → 清除其覆盖标记（对应变灰解除）
             var overrides = _settings.AppliedPresets;

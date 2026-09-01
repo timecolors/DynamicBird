@@ -1,13 +1,13 @@
-# 🕊️ DynamicBird 灵动鸟
+﻿# 🕊️ DynamicBird 灵动鸟
 
 <p align="center">
   <img src="packaging/Assets/qr-icon-source.png" width="128" height="128" alt="DynamicBird 灵动鸟"/>
 </p>
 
 <p align="center">
-  <b>Dynamic Island-style edge panel & taskbar replacement for Windows</b><br/>
-  一款 Windows 桌面边缘面板工具：把常用功能收纳到屏幕边缘，鼠标滑过即呼出，用完自动隐去。
-</p>
+  <b>Dynamic Island-style edge panel & programmable exoskeleton for Windows</b><br/>
+  一款 Windows 桌面边缘面板工具，更是一层「可编程外骨骼」：常用功能收纳到屏幕边缘，鼠标滑过即呼出，用完自动隐去；
+  内置 AI 编程（鸟笼）+ 在线市场，让你和 AI 一起按需「长出」新功能——小组件、面板、状态栏显示项、动画，全部可自定义。
 
 <p align="center">
   <a href="https://github.com/timecolors/DynamicBird/releases">GitHub Releases</a> ·
@@ -66,12 +66,20 @@
 - Panels slide in/out from their corresponding edge (left edge slides from the left, bottom from below); duration and easing are fully adjustable.
 - **16 个区域可独立设置触发/隐藏动画**：每个边缘与四角使用自己的动画类型与时长，也可继承全局
 
+
+  ### 🔤 界面字号 / UI Font Scale
+  - 设置 → 面板 → 外观：全局字号缩放滑块（75%~150%），所有界面即时生效
+  - Global UI font scale (75%–150%) in Panel settings, applied across the whole UI instantly.
 ### 编程模式（鸟笼）/ Birdcage (Programming Mode)
 - **配置即代码**：整个设置模型以配置树呈现，每个节点可生成/编辑可执行 C# 配置代码，逐字段带中文注释
 - **单预设闭环**：保存当前节点 → 应用时编译执行写回生效 → 被覆盖的内置设置自动变灰，两击解除单处覆盖
 - **整套预设**：全量配置快照保存/应用/删除；被预设覆盖的设置页、鸟笼树、预设列表三处联动标记
 - **功能模板**：计时器、计算器、划词翻译、剪贴板、便签等小组件模板 + 通知坞/最近使用/快捷设置等面板模板，保存为变体后分配到任意区域
 - **复制 AI 提示词**：描述需求 → AI 生成 C# → 编译 → 应用
+  - **状态栏插件**：AI 生成实现 `IStatusProvider` 的 C#（如 CPU 温度、网速），放入 `birdcage\状态栏\` 自动挂载到状态栏
+  - **自定义动画**：AI 生成实现 `IAnimation` 的 C#（如弹跳、翻转），放入 `birdcage\动画\` 后可在设置中选作呼出/隐藏动画
+  - **📖 AI 编程指南**：鸟笼界面内置「AI 编程指南」按钮，打开完整教程（能做什么/不能做什么/各类格式）
+  - **📂 打开文件夹**：一键定位当前节点在 birdcage 文件夹的位置，AI 产出的文件直接放进去即可生效
 - Everything is configurable as C# code — a config tree over the full settings model, presets with visual conflict markers, built-in widget & panel templates, and AI-assisted code generation.
 
 ### 🛒 在线市场 / Online Marketplace

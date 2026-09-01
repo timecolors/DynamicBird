@@ -138,6 +138,13 @@ namespace DynamicBird.UI.Widgets
                 string url = _addr.Text?.Trim() ?? "";
                 if (string.IsNullOrEmpty(url)) url = _settings.WebWidgetUrl;
                 if (!url.Contains("://")) url = "https://" + url;
+                // ★ 安全：仅 http/https 放行，拦截 file:///、ms-msdt:、shell: 等协议注入
+                if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+                    (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                {
+                    _addr.Text = "仅支持 http/https 网址";
+                    return;
+                }
                 _web.CoreWebView2.Navigate(url);
                 // 保存为默认地址（下次打开沿用）
                 if (!string.Equals(_settings.WebWidgetUrl, url, StringComparison.Ordinal))

@@ -1,7 +1,9 @@
 <UserControl x:Class="DynamicBird.UI.Status.SystemStatusView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:DynamicBird.UI.Localization">
-    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+    <!-- ★ 状态栏容器：内置项（TimePanel/CpuPanel/...）在 XAML 里声明，
+         自定义状态栏插件（IStatusProvider）由 SystemStatusView 动态 Children.Add 到其后 -->
+    <StackPanel x:Name="StatusContainer" Orientation="Horizontal" VerticalAlignment="Center">
 
         <StackPanel x:Name="TimePanel" Orientation="Horizontal">
         <TextBlock x:Name="TimeText" 

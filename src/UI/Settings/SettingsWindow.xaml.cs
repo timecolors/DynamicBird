@@ -25,6 +25,9 @@ namespace DynamicBird.UI.Settings
         private readonly ISettingsService _settings;
         private readonly IShortcutService _shortcutService;
         private SettingsData _settingsData = null!;
+        // ★ 静态事件订阅句柄：关闭时注销，避免每次打开窗口都累积强引用（泄漏 + 主题切换重复执行）
+        private Microsoft.Win32.UserPreferenceChangedEventHandler? _themeHandler;
+        private Action? _pluginChangedHandler;
 
         public SettingsWindow(ISettingsService settings, IShortcutService shortcutService)
         {
@@ -45,18 +48,22 @@ namespace DynamicBird.UI.Settings
             ApplySystemTheme();
             try
             {
-                Microsoft.Win32.SystemEvents.UserPreferenceChanged += (_, e) =>
+                _themeHandler = (_, e) =>
                 {
                     if (e.Category == Microsoft.Win32.UserPreferenceCategory.General)
                     {
                         Dispatcher.BeginInvoke(new Action(ApplySystemTheme));
                     }
                 };
+                Microsoft.Win32.SystemEvents.UserPreferenceChanged += _themeHandler;
             }
             catch { }
             // ★ 不启用 Mica：Mica 跟随系统主题，深色主题下会把设置页背景变成黑色。
             //   固定用 XAML 浅色背景（#F9F9F9），Win10/Win11 观感一致。
             LoadSettings();
+              // ★ 打开窗口：视觉树就绪后应用全局字号缩放（滑块 ValueChanged 在 LoadSettings 之后才订阅，
+              //   此处显式应用一次，保证打开即按配置字号显示）
+              Loaded += (_, _) => DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsData.UiFontScale);
             LoadShortcutPage();
             // ★ 实时保存：所有设置控件变化自动保存（400ms 防抖）。
             //   注意：构造函数时窗口视觉树尚未建立（Show 之前），FindVisualChildren 找不到控件，
@@ -69,18 +76,35 @@ namespace DynamicBird.UI.Settings
             var autoSaveMaintenance = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             autoSaveMaintenance.Tick += (_, _) => HookAutoSave();
             autoSaveMaintenance.Start();
-            Closed += (_, _) => autoSaveMaintenance.Stop();
+            Closed += (_, _) =>
+            {
+                autoSaveMaintenance.Stop();
+                // ★ 注销静态事件订阅（防累积泄漏）
+                try
+                {
+                    if (_themeHandler != null) Microsoft.Win32.SystemEvents.UserPreferenceChanged -= _themeHandler;
+                    if (_pluginChangedHandler != null) DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.Changed -= _pluginChangedHandler;
+                }
+                catch { }
+            };
 
             // ★ 插件安装/删除时实时刷新（本窗口非模态常驻，可能在别处保存插件）
-            DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.Changed += () => Dispatcher.Invoke(() =>
+            _pluginChangedHandler = () => Dispatcher.Invoke(() =>
             {
                 RefreshWidgetMarket();
             });
+            DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.Changed += _pluginChangedHandler;
 
             // AI 高级参数滑块
             sldAiTemperature.ValueChanged += (s, e) => txtAiTemperature.Text = sldAiTemperature.Value.ToString("F1");
 
             // 滑块事件绑定
+              // ★ 全局字号缩放：滑块变化 → 更新显示 + 应用缩放（保存时落盘）
+              sldUiFontScale.ValueChanged += (s, e) =>
+              {
+                  txtUiFontScale.Text = sldUiFontScale.Value.ToString("P0");
+                  DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, sldUiFontScale.Value);
+              };
             sldOpacity.ValueChanged += (s, e) => txtOpacityValue.Text = sldOpacity.Value.ToString("F2");
             sldCornerRadius.ValueChanged += (s, e) => txtCornerRadiusValue.Text = sldCornerRadius.Value.ToString("F0");
             sldHorizontalThreshold.ValueChanged += (s, e) => txtHorizontalThreshold.Text = (sldHorizontalThreshold.Value * 100).ToString("F0") + "%";
@@ -237,6 +261,9 @@ namespace DynamicBird.UI.Settings
             sldOpacity.Value = _settingsData.Opacity;
             sldCornerRadius.Value = _settingsData.CornerRadius;
             chkShowSystemStatus.IsChecked = _settingsData.ShowSystemStatus;
+              _settingsData.UiFontScale = sldUiFontScale.Value;
+              sldUiFontScale.Value = _settingsData.UiFontScale;
+              txtUiFontScale.Text = $"{_settingsData.UiFontScale:P0}";
 
             // 网页工具（预置下拉 + 自定义地址）
             LoadWebToolSettings();
@@ -275,8 +302,14 @@ namespace DynamicBird.UI.Settings
             cmbTransformEasing.SelectedItem = GetComboBoxItemByContent(cmbTransformEasing, SettingsUIHelper.GetEasingDisplayName(_settingsData.TransformEasingType ?? "CubicEase"));
 
             // ★ 触发/隐藏动画（类型 + 时长 + 特化参数）
-            cmbShowAnimType.SelectedItem = GetComboBoxItemByContent(cmbShowAnimType, AnimTypeToLabel(_settingsData.ShowAnimationType, isHide: false));
-            cmbHideAnimType.SelectedItem = GetComboBoxItemByContent(cmbHideAnimType, AnimTypeToLabel(_settingsData.HideAnimationType, isHide: true));
+            // 自定义动画（鸟笼「动画」分组）：先确保注册表已加载，再把它加入四个类型下拉
+            DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.ReloadAnimations();
+            RefreshCustomAnimItems(cmbShowAnimType);
+            RefreshCustomAnimItems(cmbHideAnimType);
+            RefreshCustomAnimItems(cmbRegionShowType);
+            RefreshCustomAnimItems(cmbRegionHideType);
+            SelectComboByAnimType(cmbShowAnimType, _settingsData.ShowAnimationType, isHide: false);
+            SelectComboByAnimType(cmbHideAnimType, _settingsData.HideAnimationType, isHide: true);
 
             // ★★★ 逐区域动画（动画应用于：全局默认 / 16 区域） ★★★
             PopulateAnimRegionCombo();

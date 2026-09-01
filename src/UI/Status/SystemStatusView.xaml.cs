@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Windows;
@@ -8,6 +9,7 @@ using System.Windows.Threading;
 using DynamicBird.Core.Services.Configuration;
 using DynamicBird.UI.Localization;
 using DynamicBird.Infrastructure.WinApi;
+using DynamicBird.UI.Widgets.Dynamic;
 using NAudio.CoreAudioApi;
 
 namespace DynamicBird.UI.Status
@@ -26,6 +28,18 @@ namespace DynamicBird.UI.Status
         private ISettingsService? _settings;
         private bool _weatherEnabled;
         private string _weatherCity = "";
+
+        // ===== 自定义状态栏显示项（IStatusProvider 动态挂载） =====
+        private sealed class CustomStatusItem
+        {
+            public string Key = "";
+            public IStatusProvider Provider = null!;
+            public TextBlock Text = null!;
+            public StackPanel Panel = null!;
+        }
+
+        private readonly List<CustomStatusItem> _customItems = new();
+        private readonly System.Action _pluginChangedHandler;   // 保存引用以便 Unloaded 解绑（防视图重建累积订阅）
 
         public SystemStatusView()
         {
@@ -54,12 +68,25 @@ namespace DynamicBird.UI.Status
             _timer.Tick += (s, e) => UpdateStatus();
             _timer.Start();
 
+            // ★ 鸟笼文件夹增删（用户放/删状态栏插件）：自动重新挂载自定义项
+            _pluginChangedHandler = () =>
+            {
+                if (_settings == null || !IsLoaded) return;
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try { ApplySettings(_settings); } catch { }
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            };
+            WidgetPluginStore.Changed += _pluginChangedHandler;
+
             Unloaded += (s, e) =>
             {
                 _timer?.Stop();
                 _weatherTimer?.Stop();
                 CompositionTarget.Rendering -= OnRendering;
                 _audioDevice?.Dispose();
+                DeactivateCustomItems();
+                WidgetPluginStore.Changed -= _pluginChangedHandler;
             };
         }
 
@@ -80,6 +107,9 @@ namespace DynamicBird.UI.Status
             SetVisible(BatteryPanel, settings.StatusShowBattery);
             SetVisible(WeatherPanel, settings.StatusShowWeather && _weatherEnabled);
 
+            // ★ 自定义状态栏显示项：先卸载旧项再按当前启用状态重新挂载（内置项之后）
+            RebuildCustomItems(settings);
+
             if (_weatherEnabled && settings.StatusShowWeather)
             {
                 WeatherText.Text = LocalizationManager.Instance["Status_WeatherLoading"];
@@ -92,6 +122,79 @@ namespace DynamicBird.UI.Status
             {
                 _weatherTimer?.Stop();
             }
+        }
+
+        /// <summary>重新挂载自定义状态栏显示项：卸载旧项 → 编译缓存中取启用项 → Children.Add 到容器尾。</summary>
+        private void RebuildCustomItems(ISettingsService settings)
+        {
+            DeactivateCustomItems();
+
+            foreach (var kvp in WidgetPluginStore.StatusProviders)
+            {
+                try
+                {
+                    var provider = kvp.Value;
+                    // ★ 启用判定：设置开关（StatusProviderEnabled，缺省启用）+ 插件自决 IsEnabled
+                    if (!settings.IsStatusProviderEnabled(kvp.Key) || !provider.IsEnabled(settings)) continue;
+
+                    var icon = new TextBlock
+                    {
+                        Text = provider.IconText ?? "",
+                        FontSize = 13,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)),
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    var text = new TextBlock
+                    {
+                        Text = "",
+                        FontSize = 13,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)),
+                        Margin = new Thickness(4, 0, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    var panel = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin = new Thickness(0, 0, 15, 0)
+                    };
+                    panel.Children.Add(icon);
+                    panel.Children.Add(text);
+                    StatusContainer.Children.Add(panel);
+
+                    provider.OnActivated();
+                    _customItems.Add(new CustomStatusItem
+                    {
+                        Key = kvp.Key,
+                        Provider = provider,
+                        Text = text,
+                        Panel = panel
+                    });
+                }
+                catch { /* 单个插件异常不影响其他项 */ }
+            }
+
+            UpdateCustomItems();
+        }
+
+        /// <summary>每秒刷新自定义状态栏项的文本（provider.GetText()）。</summary>
+        private void UpdateCustomItems()
+        {
+            foreach (var item in _customItems)
+            {
+                try { item.Text.Text = item.Provider.GetText() ?? ""; }
+                catch { }
+            }
+        }
+
+        /// <summary>卸载全部自定义项：OnDeactivated + 从容器移除。</summary>
+        private void DeactivateCustomItems()
+        {
+            foreach (var item in _customItems)
+            {
+                try { item.Provider.OnDeactivated(); } catch { }
+                StatusContainer.Children.Remove(item.Panel);
+            }
+            _customItems.Clear();
         }
 
         private static void SetVisible(FrameworkElement el, bool visible)
@@ -176,6 +279,7 @@ namespace DynamicBird.UI.Status
             UpdateVolume();
             UpdateNetwork();
             UpdateBattery();
+            UpdateCustomItems();
         }
 
         private void UpdateTime()

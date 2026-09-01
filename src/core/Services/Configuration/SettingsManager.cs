@@ -563,6 +563,13 @@ namespace DynamicBird.Core.Services.Configuration
             set => SetField(v => _data.PanelFrameRate = v, value);
         }
 
+        // ========== 全局界面字号缩放（0.75~1.5） ==========
+        public double UiFontScale
+        {
+            get => _data.UiFontScale;
+            set => SetField(v => _data.UiFontScale = Math.Max(0.75, Math.Min(1.5, value)), value);
+        }
+
         /// <summary>应用性能预设（内部标志保护：不触发自定义检测）。</summary>
         public void SetPerformanceMode(string mode)
         {
@@ -671,6 +678,22 @@ namespace DynamicBird.Core.Services.Configuration
                 case "Web": _data.WidgetEnabled_Web = enabled; break;
                 default: return;
             }
+            Save();
+        }
+
+        // ========== 自定义状态栏显示项开关 ==========
+        /// <summary>自定义状态栏插件（status_&lt;id&gt;）是否启用；缺省视为启用。</summary>
+        public bool IsStatusProviderEnabled(string providerId)
+        {
+            if (string.IsNullOrEmpty(providerId)) return false;
+            return _data.StatusProviderEnabled.TryGetValue(providerId, out var v) ? v : true;
+        }
+
+        /// <summary>设置自定义状态栏插件开关（true=显示）。</summary>
+        public void SetStatusProviderEnabled(string providerId, bool enabled)
+        {
+            if (string.IsNullOrEmpty(providerId)) return;
+            _data.StatusProviderEnabled[providerId] = enabled;
             Save();
         }
 

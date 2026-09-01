@@ -267,7 +267,12 @@ namespace DynamicBird.UI.AI
                     {
                         try
                         {
-                            Process.Start(new ProcessStartInfo(e.Uri.ToString()) { UseShellExecute = true });
+                            // ★ 安全：仅 http/https 协议放行，拦截 file:///、ms-msdt:、shell:、javascript: 等协议注入
+                            //   （AI 输出内容不可信，恶意链接可诱导执行本地程序）
+                            if (e.Uri != null && (e.Uri.Scheme == Uri.UriSchemeHttp || e.Uri.Scheme == Uri.UriSchemeHttps))
+                            {
+                                Process.Start(new ProcessStartInfo(e.Uri.ToString()) { UseShellExecute = true });
+                            }
                         }
                         catch { }
                         e.Handled = true;

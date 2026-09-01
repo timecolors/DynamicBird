@@ -73,6 +73,7 @@ namespace DynamicBird.UI.Birdcage
             { "TextColor", "文本颜色（#RRGGBB）" },
             { "Opacity", "面板不透明度（0-1）" },
             { "CornerRadius", "面板圆角半径（px）" },
+              { "UiFontScale", "全局界面字号缩放系数（0.75~1.5，1.0=默认）" },
             // ---- 形状参数 ----
             { "StripLengthRatio", "条状面板长度占比（0-1）" },
             { "StripWidthMultiplier", "条状面板宽度倍数" },

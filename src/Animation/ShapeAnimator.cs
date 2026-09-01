@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using DynamicBird.Core.Services.Configuration;
 
 namespace DynamicBird.Animation
@@ -50,6 +52,11 @@ namespace DynamicBird.Animation
         private double _followLerp = 1.0;
         // ★ 中置状态（乱逛/切换期间）覆盖：强制绝对跟手（图标跟着鼠标逛）
         private double? _followLerpOverride;
+        // ★ 滑入/滑出动画保护期（TickCount64 截止时刻）：SetShowHideTarget 启动动画后，
+        //   OnRendering 的跟随分支在保护期内让位，避免"渲染帧直达目标"把动画瞬间化。
+        //   根因：ShowAt(SetShowHideTarget) 与 StartFollowContext 同一 tick 连发，
+        //   动画首帧 HasAnimatedProperties 尚为 false → 跟随分支提前写目标位置 → 动画被掐断。
+        private long _followSuppressUntilTick;
 
         /// <summary>跟随目标提供者：渲染帧每帧调用，返回面板应处的 (left, top)。由业务层设置。</summary>
         public Func<(double left, double top)>? FollowPositionProvider { get; set; }
@@ -90,8 +97,17 @@ namespace DynamicBird.Animation
             double dist = Math.Sqrt(dx * dx + dy * dy);
             if (dist <= moveDist || dist < 0.5)
             {
-                _window.Left = targetLeft;
-                _window.Top = targetTop;
+                // ★ 落定写整数值：WPF 窗口位置底层是整数像素，写小数（如 508.5）会被取整，
+                //   下一帧又差 0.5px → 永不收敛 → 每帧 SetWindowPos → 渲染自激循环（100% CPU）。
+                //   取整 + 仅值不同才写：落定后不重复 SetWindowPos（WPF 对相同值也可能发原生消息，
+                //   必须显式跳过，否则渲染帧每帧写相同值仍产生消息风暴）。
+                double rl = Math.Round(targetLeft);
+                double rt = Math.Round(targetTop);
+                if (Math.Abs(_window.Left - rl) > 0.5 || Math.Abs(_window.Top - rt) > 0.5)
+                {
+                    _window.Left = rl;
+                    _window.Top = rt;
+                }
                 return;
             }
             // 匀速：移动固定距离（方向向量 × moveDist）
@@ -281,6 +297,10 @@ namespace DynamicBird.Animation
             //   动画完成后（HasAnimatedProperties=false）再接管位置。
             if (_followActive && _window.HasAnimatedProperties) return;
 
+            // ★ 滑入/滑出动画保护期：SetShowHideTarget 启动的动画（含首帧时钟未就绪）
+            //   在保护期内跟随让位，避免"渲染帧直达目标"把动画掐断成瞬间到位
+            if (_followActive && Environment.TickCount64 < _followSuppressUntilTick) return;
+
             if (_followActive && FollowPositionProvider != null)
             {
                 var (l, t) = FollowPositionProvider();
@@ -288,10 +308,14 @@ namespace DynamicBird.Animation
                 if (k >= 0.999 || _followLerpOverride != null)
                 {
                     // ★ 绝对跟手（FlyDurationMs 拉满 / 中置强制）：每帧直接设置——拖窗口手感
-                    if (Math.Abs(_window.Left - l) > 0.01 || Math.Abs(_window.Top - t) > 0.01)
+                    //   目标取整到像素再比较/写入：小数目标（mx-w/2）与整数窗口位置差 0.5px
+                    //   恒 > 0.01 → 每帧写 → 渲染自激循环（100% CPU）。取整后相同值不触发 SetWindowPos。
+                    double rl = Math.Round(l);
+                    double rt = Math.Round(t);
+                    if (Math.Abs(_window.Left - rl) > 0.5 || Math.Abs(_window.Top - rt) > 0.5)
                     {
-                        _window.Left = l;
-                        _window.Top = t;
+                        _window.Left = rl;
+                        _window.Top = rt;
                     }
                 }
                 else
@@ -302,8 +326,14 @@ namespace DynamicBird.Animation
                     double T = _clingFlyDurationMs;
                     if (T <= 0)
                     {
-                        _window.Left = l;
-                        _window.Top = t;
+                        // ★ 同上：写整数值 + 仅值不同才写，避免渲染帧每帧 SetWindowPos 消息风暴
+                        double rl = Math.Round(l);
+                        double rt = Math.Round(t);
+                        if (Math.Abs(_window.Left - rl) > 0.5 || Math.Abs(_window.Top - rt) > 0.5)
+                        {
+                            _window.Left = rl;
+                            _window.Top = rt;
+                        }
                     }
                     else
                     {
@@ -346,8 +376,15 @@ namespace DynamicBird.Animation
                         ClingArrived?.Invoke();
                         return;
                     }
-                    _window.Left = _clingTargetLeft;
-                    _window.Top = _clingTargetTop;
+                    // ★ 写整数值 + 仅值不同才写：cling 目标 = 鼠标 - 半宽（小数），
+                    //   取整避免小数振荡，跳过相同值避免每帧 SetWindowPos 消息风暴
+                    double crl = Math.Round(_clingTargetLeft);
+                    double crt = Math.Round(_clingTargetTop);
+                    if (Math.Abs(_window.Left - crl) > 0.5 || Math.Abs(_window.Top - crt) > 0.5)
+                    {
+                        _window.Left = crl;
+                        _window.Top = crt;
+                    }
                     return;
                 }
                 // ★ 高精度单调计时（同跟随分支）：消除 DateTime.Now 分辨率量化导致的步长跳变
@@ -361,8 +398,9 @@ namespace DynamicBird.Animation
                 double moveDist = speed * dt;
                 if (dist <= moveDist || dist < ClingStopDist)
                 {
-                    _window.Left = _clingTargetLeft;
-                    _window.Top = _clingTargetTop;
+                    // ★ 写整数值（同跟随分支）：小数目标 + 整数窗口位置 → 落定判定不收敛 → 每帧移动自激
+                    _window.Left = Math.Round(_clingTargetLeft);
+                    _window.Top = Math.Round(_clingTargetTop);
                     _clingMode = false;
                     StopRenderingLoop();
                     ClingArrived?.Invoke();
@@ -628,6 +666,18 @@ namespace DynamicBird.Animation
                 return;
             }
             int ms = Math.Max(30, durationMs > 0 ? durationMs : _showHideDurationMs);
+            // ★ 动画保护期：动画期间（含首帧时钟未就绪）渲染帧跟随不写位置，
+            //   否则 ShowAt→StartFollowContext 连发会让跟随分支提前直达目标 → 动画瞬间化
+            _followSuppressUntilTick = Environment.TickCount64 + ms + 100;
+
+            // ★ 自定义动画（鸟笼「动画」分组）：按类型 Id 查注册表，命中则走
+            //   沙箱/超时/异常隔离保护的执行路径（见 RunCustomShowHide）
+            if (AnimationRegistry.TryGet(animType, out var customAnim) && customAnim != null)
+            {
+                RunCustomShowHide(customAnim, left, top, opacity, ms);
+                return;
+            }
+
             // ★ 平滑缓动（滑入/淡入/缩放用；不再用旧 ShowHideEasingType——那可能是 ElasticEase，
             //   起步极快导致位置瞬间到位，动画时长观感失效）
             var smooth = new CubicEase { EasingMode = EasingMode.EaseOut };
@@ -670,11 +720,85 @@ namespace DynamicBird.Animation
                     // ★ 滑入滑出：纯位置动画，不带透明度渐变（淡入淡出是"淡入/淡出"类型的特性）。
                     //   呼出：透明度直接设为不透明（无渐变），滑入过程完整可见；
                     //   隐藏：透明度保持不变（滑出过程可见），窗口滑出屏幕后自然不可见。
-                    if (opacity > 0.5) _panel.Opacity = opacity;
-                    Animate(_window, Window.LeftProperty, left, ms, smooth);
-                    Animate(_window, Window.TopProperty, top, ms, smooth);
+                    FallbackSlideShowHide(left, top, opacity, ms);
                     break;
             }
+        }
+
+        // ============================================================
+        //  自定义动画执行（★ 沙箱 + 超时 + 异常隔离，渲染帧热路径保护）
+        // ============================================================
+
+        /// <summary>进行中的自定义动画超时计时器（StopAll/Dispose 时统一停止，防悬挂回调）。</summary>
+        private readonly List<DispatcherTimer> _customAnimTimers = new();
+
+        /// <summary>
+        /// 执行自定义动画并包裹三道保护：
+        /// 1) 异常隔离：AnimateShow/Hide 抛异常 → 回退内置 Slide（滑入/滑出），不崩溃、不卡半路；
+        /// 2) 超时保护：动画时长 ×2 后仍未回调 onCompleted → 强制完成（停动画 + 落终值），
+        ///    防止自定义动画不回调导致面板卡在中间态（历史教训：100% CPU 卡死）；
+        /// 3) 完成回调幂等：onCompleted 只执行一次（落终值后再重复调用无副作用）。
+        /// </summary>
+        private void RunCustomShowHide(IAnimation custom, double left, double top, double opacity, int ms)
+        {
+            bool completed = false;
+            Action onCompleted = () =>
+            {
+                if (completed) return;
+                completed = true;
+                StopAllAnimations();
+                RestorePanelContentLayout();
+                // 锁定终值：位置到位 + 透明度到位（隐藏=0）
+                _window.Left = left;
+                _window.Top = top;
+                _panel.Opacity = opacity;
+            };
+            try
+            {
+                if (opacity <= 0.01)
+                    custom.AnimateHide(_panel, _window, ms, onCompleted);
+                else
+                    custom.AnimateShow(_panel, _window, ms, onCompleted);
+            }
+            catch (Exception ex)
+            {
+                DynamicBird.Core.Infrastructure.Logging.LogManager.Warning(
+                    "自定义动画异常，回退内置动画: " + ex.Message);
+                FallbackSlideShowHide(left, top, opacity, ms);
+                return;
+            }
+            // ★ 超时兜底：自定义动画不回调也不至于卡死（ms×2 后强制完成）
+            var timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(Math.Max(1, ms * 2L))
+            };
+            timer.Tick += (_, _) =>
+            {
+                timer.Stop();
+                _customAnimTimers.Remove(timer);
+                onCompleted();
+            };
+            timer.Start();
+            _customAnimTimers.Add(timer);
+        }
+
+        /// <summary>内置 Slide 回退（滑入/滑出：纯位置动画，不带透明度渐变）。</summary>
+        private void FallbackSlideShowHide(double left, double top, double opacity, int ms)
+        {
+            var smooth = new CubicEase { EasingMode = EasingMode.EaseOut };
+            if (opacity > 0.5) _panel.Opacity = opacity;
+            Animate(_window, Window.LeftProperty, left, ms, smooth);
+            Animate(_window, Window.TopProperty, top, ms, smooth);
+        }
+
+        /// <summary>停止所有自定义动画超时计时器（中断/释放时调用）。</summary>
+        private void StopCustomAnimTimers()
+        {
+            foreach (var t in new List<DispatcherTimer>(_customAnimTimers))
+            {
+                try { t.Stop(); } catch { }
+            }
+            _customAnimTimers.Clear();
         }
 
         public void SetShowHideDirect(double left, double top, double opacity)
@@ -894,6 +1018,7 @@ namespace DynamicBird.Animation
         {
             StopAllAnimations();
             StopRenderingLoop();
+            StopCustomAnimTimers();
             RestorePanelContentLayout();
             _followActive = false;
             _switching = false;
@@ -952,6 +1077,7 @@ namespace DynamicBird.Animation
             _disposed = true;
             CompositionTarget.Rendering -= OnRendering;
             StopAllAnimations();
+            StopCustomAnimTimers();
         }
     }
 }

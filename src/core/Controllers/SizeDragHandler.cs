@@ -154,9 +154,9 @@ namespace DynamicBird.Core.Controllers
                 var pos = e.GetPosition(_mainPanel);
                 var handle = GetHandleAt(pos);
                 _mainPanel.Cursor = handle.HasValue ? GetHandleCursor(handle.Value) : Cursors.Arrow;
-                // ★ 竖条（Hand 光标）贴边后覆盖面板边缘 resize 手柄区，会盖住手柄光标——
-                //   OverrideCursor 优先级最高：手柄区强制 resize 光标，非手柄区恢复 null（竖条 Hand 正常显示）
-                Mouse.OverrideCursor = handle.HasValue ? GetHandleCursor(handle.Value) : null;
+                // ★ 不用 Mouse.OverrideCursor：它是进程级全局，鼠标移到设置窗口等其他窗口时
+                //   残留 SizeWE 清不掉 → 别处到处双箭头。手柄光标用局部 _mainPanel.Cursor 即可，
+                //   鼠标离开面板自动恢复（竖条 Hand 与手柄互斥由局部光标优先级自然处理）。
             }
             catch { }
         }

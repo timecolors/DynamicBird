@@ -258,6 +258,8 @@ namespace DynamicBird.UI.Main
                 // ★ 剪贴板监听应用级常驻：任何来源的复制（含 AI 面板“复制”按钮）都会进入历史
                 _clipboardService.StartListening();
                 CheckForUpdatesAsync();
+                // ★ 全局字号缩放：面板主体应用当前缩放（设置变化时由 OnSettingsChanged 重新应用）
+                DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
                 // 首次启动：等界面就绪后弹出引导窗口
                 Dispatcher.BeginInvoke(new Action(ShowOnboardingIfNeeded),
                     System.Windows.Threading.DispatcherPriority.ApplicationIdle);
@@ -275,6 +277,19 @@ namespace DynamicBird.UI.Main
             try
             {
                 LogManager.Info("=== 第三阶段：初始化扩展功能 ===");
+
+                // ★ 方案B：内置模板落盘（首次/重装把内置功能写入 birdcage/，文件夹=鸟笼真相源）
+                try
+                {
+                    DynamicBird.UI.Birdcage.BuiltinTemplateSeeder.Seed();
+                }
+                catch { }
+                // ★ 监听鸟笼文件夹（birdcage/）：用户在系统文件夹增删小组件时自动同步
+                try
+                {
+                    DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.StartWatching();
+                }
+                catch { }
 
                 try
                 {
@@ -830,6 +845,8 @@ namespace DynamicBird.UI.Main
                 ReapplyTextAiHotkey();
                 // ★ 性能模式切换（Smooth/Normal/PowerSaver）→ 渲染降帧即时生效
                 ApplyPerformanceFrameRate();
+                  // ★ 全局字号缩放：设置变化即时重算（FontScaleManager 内部用原始值×新比例，不累积）
+                  DynamicBird.UI.Theme.FontScaleManager.ApplyFontScale(this, _settingsService.UiFontScale);
 
                 // ★★★ 同步设置到 ShapeAnimator ★★★
                 _shapeAnimator?.SetSettings(_settingsService);

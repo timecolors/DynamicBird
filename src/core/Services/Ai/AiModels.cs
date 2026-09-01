@@ -41,7 +41,13 @@ namespace DynamicBird.Core.Services.Ai
     {
         public bool Enabled { get; set; } = false;
         public string BaseUrl { get; set; } = "https://api.deepseek.com/v1";
+        /// <summary>内存中的明文 API Key（不直接序列化到 ai.json，见 AiSettingsStore 的 DPAPI 加密存储）。</summary>
+        [System.Text.Json.Serialization.JsonIgnore]
         public string ApiKey { get; set; } = "";
+        /// <summary>DPAPI 加密后的 API Key（持久化字段）。</summary>
+        public string ApiKeyEncrypted { get; set; } = "";
+        /// <summary>旧版明文 API Key（仅迁移用，读取后转加密并清空）。</summary>
+        public string ApiKeyLegacy { get; set; } = "";
         public string Model { get; set; } = "deepseek-chat";
         public double Temperature { get; set; } = 0.7;
 

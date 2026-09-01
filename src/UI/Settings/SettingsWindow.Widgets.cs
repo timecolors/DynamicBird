@@ -37,6 +37,12 @@ namespace DynamicBird.UI.Settings
         private string _selectedWidgetKey = "";
 
         /// <summary>刷新左侧小组件列表（内置 + 用户插件），保持当前选中项。</summary>
+        /// <summary>在系统文件管理器中打开小组件文件夹。</summary>
+        private void BtnOpenWidgetFolder_Click(object sender, RoutedEventArgs e)
+        {
+            DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.OpenFolder();
+        }
+
         private void RefreshWidgetMarket()
         {
             if (WidgetMarketList == null) return;
@@ -236,14 +242,27 @@ namespace DynamicBird.UI.Settings
         /// <summary>卸载已安装的插件小组件。</summary>
         private void DeletePlugin(WidgetPlugin plugin)
         {
-            if (MessageBox.Show(string.Format(LocalizationManager.Instance["WidgetMkt_DeleteConfirm"], plugin.Name),
-                    LocalizationManager.Instance["WidgetMkt_Confirm"],
-                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            // ★ 灵动鸟内置文件保护：官方随附的小组件删除前警告（用户自定义/领养的不适用）
+            if (DynamicBird.UI.Widgets.Dynamic.WidgetPluginStore.IsBuiltin(plugin))
             {
-                _settings.SetWidgetEnabled("Widget_" + plugin.Id, false);
-                WidgetPluginStore.Delete(plugin.Id);
-                RefreshWidgetMarket();
+                var warn = new DynamicBird.UI.Birdcage.ConfirmDialog(
+                    "删除灵动鸟内部文件",
+                    "「" + plugin.Name + "」是灵动鸟内部文件，删除可能导致运行异常。\n\n确定要删除吗？（删除自定义功能与卸载灵动鸟不受此提示影响）",
+                    "确定删除", "取消")
+                {
+                    Owner = this
+                };
+                if (warn.ShowDialog() != true) return;
             }
+            else if (MessageBox.Show(string.Format(LocalizationManager.Instance["WidgetMkt_DeleteConfirm"], plugin.Name),
+                    LocalizationManager.Instance["WidgetMkt_Confirm"],
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+            _settings.SetWidgetEnabled("Widget_" + plugin.Id, false);
+            WidgetPluginStore.Delete(plugin.Id);
+            RefreshWidgetMarket();
         }
     }
 }

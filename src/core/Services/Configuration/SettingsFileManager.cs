@@ -33,8 +33,18 @@ namespace DynamicBird.Core.Services
                 }
                 return data;
             }
-            catch
+            catch (Exception ex)
             {
+                // ★ 2026-08：文件损坏时备份原文件，而不是静默返回空配置——
+                //   否则下一次 Save（防抖落盘/恢复/应用预设）会把空配置写盘，用户设置永久丢失
+                try
+                {
+                    string backup = ConfigPath + ".bak";
+                    File.Copy(ConfigPath, backup, true);
+                    DynamicBird.Core.Infrastructure.Logging.LogManager.Error(
+                        "config.json 解析失败，已备份为 " + backup + ": " + ex.Message);
+                }
+                catch { }
                 return new SettingsData();
             }
         }
@@ -68,7 +78,7 @@ namespace DynamicBird.Core.Services
         }
 
         /// <summary>
-        /// 保存配置到文件
+        /// 保存配置到文件（★ 原子写：临时文件 + File.Replace，崩溃/断电不会留下半写损坏的 config.json）
         /// </summary>
         public static void Save(SettingsData data)
         {
@@ -78,9 +88,21 @@ namespace DynamicBird.Core.Services
                 {
                     WriteIndented = true
                 });
-                File.WriteAllText(ConfigPath, json);
+                string tmp = ConfigPath + ".tmp";
+                File.WriteAllText(tmp, json);
+                if (File.Exists(ConfigPath))
+                {
+                    File.Replace(tmp, ConfigPath, null, true);
+                }
+                else
+                {
+                    File.Move(tmp, ConfigPath);
+                }
             }
-            catch { }
+            catch
+            {
+                try { if (File.Exists(ConfigPath + ".tmp")) File.Delete(ConfigPath + ".tmp"); } catch { }
+            }
         }
     }
 }

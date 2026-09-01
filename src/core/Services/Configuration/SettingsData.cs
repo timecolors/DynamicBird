@@ -137,6 +137,10 @@ namespace DynamicBird.Core.Services.Configuration
         public double UserWidth_Corner_BottomRight { get; set; } = 0;
         public double UserHeight_Corner_BottomRight { get; set; } = 0;
 
+        // ========== 界面字号缩放 ==========
+        /// <summary>全局界面字号缩放系数（0.75~1.5，1.0=默认）。</summary>
+        public double UiFontScale { get; set; } = 1.0;
+
         // ========== 动画设置 ==========
         public bool AnimationsEnabled { get; set; } = true;
         // ★ 旧版"呼出/隐藏共用"字段（保留兼容；新字段为空/0 时迁移用）
@@ -260,6 +264,10 @@ namespace DynamicBird.Core.Services.Configuration
 
         /// <summary>用户插件小组件（Widget_&lt;id&gt;）的启用覆盖；缺省视为启用。</summary>
         public Dictionary<string, bool> WidgetPluginOverrides { get; set; } = new();
+
+        // ========== 自定义状态栏显示项开关 ==========
+        /// <summary>自定义状态栏插件（status_&lt;id&gt;，IStatusProvider）的启用覆盖；缺省视为启用。</summary>
+        public Dictionary<string, bool> StatusProviderEnabled { get; set; } = new();
 
         // ========== 划词翻译 ==========
         // 全局热键字符串（如 "Ctrl+Alt+Q"）；空 = 未设置（面板内提示去设置）
