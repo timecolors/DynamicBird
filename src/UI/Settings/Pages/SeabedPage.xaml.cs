@@ -165,7 +165,7 @@ public class CustomPanel : UserControl, IWidget
             if (xamlEditorPanel != null) xamlEditorPanel.Visibility = xaml ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        /// <summary>加载当前节点的完全编程代码（.xaml + .xaml.cs；从海床文件夹补充读取）。</summary>
+        /// <summary>加载当前节点的完全编程代码（.xaml + .xaml.cs；从文件资源管理器 seabed 文件夹读取）。</summary>
         private void RefreshXamlEditors(ConfigNode node)
         {
             string x = "", xc = "";
@@ -174,22 +174,99 @@ public class CustomPanel : UserControl, IWidget
             {
                 x = cp.Xaml ?? "";
                 xc = cp.XamlCs ?? "";
+            }
+            // ★ 文件夹即真相源：从 seabed 文件夹读取实际文件（小组件/面板/状态栏/动画/配置全覆盖）
+            if (string.IsNullOrEmpty(x) || string.IsNullOrEmpty(xc))
+            {
+                var (fsrc, fx, fxc, fcfg) = LoadNodeFromFolder(node, cp);
+                if (!string.IsNullOrEmpty(fx)) x = fx;
+                if (!string.IsNullOrEmpty(fxc)) xc = fxc;
+                // 无 XAML 形态的项目（面板/状态栏/动画/配置只有 main.cs 或 config.json）：显示真实文件内容
                 if (string.IsNullOrEmpty(x) && string.IsNullOrEmpty(xc))
                 {
-                    var (fx, fxc) = ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.LoadNodeXaml(cp);
-                    if (!string.IsNullOrEmpty(fx)) x = fx;
-                    if (!string.IsNullOrEmpty(fxc)) xc = fxc;
+                    x = "";
+                    xc = !string.IsNullOrEmpty(fcfg) ? fcfg : (fsrc ?? "");
                 }
             }
-            // 无已有 XAML 时给个最小模板
-            if (string.IsNullOrEmpty(x))
-                x = "<UserControl xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n             xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"\n             xmlns:loc=\"clr-namespace:ShoreHue.UI.Localization;assembly=ShoreHue\">\n    <StackPanel Margin=\"2\">\n        <!-- 在这里写界面 -->\n    </StackPanel>\n</UserControl>";
-            if (string.IsNullOrEmpty(xc))
-                xc = "using System.Windows;\nusing System.Windows.Controls;\nusing ShoreHue.UI.Widgets;\nusing ShoreHue.UI.Localization;\n\npublic partial class " + SanitizeClassName(node.Name) + " : UserControl, IWidget\n{\n    public " + SanitizeClassName(node.Name) + "() { InitializeComponent(); }\n    public string Name => \"" + node.Name + "\";\n    public UserControl CreateView() => this;\n    public void OnActivated() { }\n    public void OnDeactivated() { }\n}";
             txtXamlEditor.Text = x;
             txtXamlCsEditor.Text = xc;
         }
 
+        /// <summary>测试访问器：暴露 LoadNodeFromFolder（InternalsVisibleTo 未配置时的桥梁）。</summary>
+        internal static (string Source, string Xaml, string XamlCs, string ConfigJson) LoadNodeFromFolderPublic(
+            ConfigNode node, ShoreHue.Core.Models.CustomPanelDefinition? cp) => LoadNodeFromFolder(node, cp);
+
+        /// <summary>从 seabed 文件夹读取节点内容（文件夹即真相源）。返回 (源码, XAML, XAML代码后置, 配置JSON)。</summary>
+        private static (string Source, string Xaml, string XamlCs, string ConfigJson) LoadNodeFromFolder(ConfigNode node, ShoreHue.Core.Models.CustomPanelDefinition? cp)
+        {
+            string src = "", x = "", xc = "", cfg = "";
+            try
+            {
+                string? folderName = null;
+                string? group = null;
+                bool isXaml = false;
+                if (!string.IsNullOrEmpty(node.CustomId))
+                {
+                    var customDir = ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.FindNodeDirById(node.CustomId);
+                    if (customDir != null)
+                    {
+                        if (File.Exists(Path.Combine(customDir, "main.cs"))) src = File.ReadAllText(Path.Combine(customDir, "main.cs"));
+                        foreach (var f in Directory.GetFiles(customDir))
+                        {
+                            if (f.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase) && !f.EndsWith(".xaml.cs", StringComparison.OrdinalIgnoreCase)) x = File.ReadAllText(f);
+                            else if (f.EndsWith(".xaml.cs", StringComparison.OrdinalIgnoreCase)) xc = File.ReadAllText(f);
+                            else if (f.EndsWith("config.json", StringComparison.OrdinalIgnoreCase)) cfg = File.ReadAllText(f);
+                        }
+                        return (src, x, xc, cfg);
+                    }
+                }
+                else if (node.Key.StartsWith("widget-", StringComparison.Ordinal))
+                {
+                    folderName = node.Key.Substring("widget-".Length);
+                    group = "小组件";
+                    isXaml = true;
+                }
+                else if (node.Key.StartsWith("panel-", StringComparison.Ordinal))
+                {
+                    folderName = node.Key;
+                    group = "面板功能";
+                }
+                else if (node.Key.StartsWith("status-", StringComparison.Ordinal))
+                {
+                    folderName = node.Name;
+                    group = "状态栏";
+                }
+                else if (node.Key.StartsWith("anim-", StringComparison.Ordinal))
+                {
+                    folderName = node.Name;
+                    group = "动画";
+                }
+                else
+                {
+                    folderName = node.Name;
+                    group = node.Category;
+                }
+                if (string.IsNullOrEmpty(folderName)) return ("", "", "", "");
+                string dir = Path.Combine(ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.RootDir, group, folderName);
+                if (!Directory.Exists(dir)) return ("", "", "", "");
+                if (isXaml)
+                {
+                    foreach (var f in Directory.GetFiles(dir))
+                    {
+                        if (f.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase) && !f.EndsWith(".xaml.cs", StringComparison.OrdinalIgnoreCase)) x = File.ReadAllText(f);
+                        else if (f.EndsWith(".xaml.cs", StringComparison.OrdinalIgnoreCase)) xc = File.ReadAllText(f);
+                        else if (f.EndsWith("main.cs", StringComparison.OrdinalIgnoreCase)) src = File.ReadAllText(f);
+                    }
+                }
+                else
+                {
+                    if (File.Exists(Path.Combine(dir, "main.cs"))) src = File.ReadAllText(Path.Combine(dir, "main.cs"));
+                    if (File.Exists(Path.Combine(dir, "config.json"))) cfg = File.ReadAllText(Path.Combine(dir, "config.json"));
+                }
+            }
+            catch { }
+            return (src, x, xc, cfg);
+        }
         private static string SanitizeClassName(string name)
         {
             var sb = new System.Text.StringBuilder();

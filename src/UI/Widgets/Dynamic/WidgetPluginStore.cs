@@ -675,6 +675,34 @@ namespace ShoreHue.UI.Widgets.Dynamic
             catch { return ("", ""); }
         }
 
+        /// <summary>按 manifest.json 的 id 查找节点文件夹（跨分组）。找不到返回 null。</summary>
+        public static string? FindNodeDirById(string customId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(customId) || !Directory.Exists(RootDir)) return null;
+                foreach (var groupDir in Directory.GetDirectories(RootDir))
+                {
+                    foreach (var dir in Directory.GetDirectories(groupDir))
+                    {
+                        string mf = Path.Combine(dir, "manifest.json");
+                        if (!File.Exists(mf)) continue;
+                        try
+                        {
+                            using var doc = JsonDocument.Parse(File.ReadAllText(mf));
+                            if (doc.RootElement.TryGetProperty("id", out var idEl) &&
+                                idEl.ValueKind == JsonValueKind.String &&
+                                idEl.GetString() == customId)
+                                return dir;
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+            return null;
+        }
+
         /// <summary>删除海床节点的文件夹（按 manifest.json 里的 id 匹配，跨分组查找）。</summary>
         public static void DeleteNodeFolder(string customId)
         {
