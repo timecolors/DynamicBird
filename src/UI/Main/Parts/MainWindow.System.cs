@@ -20,22 +20,13 @@ namespace ShoreHue.UI.Main
         [DllImport("shell32.dll")]
         private static extern IntPtr SHAppBarMessage(uint dwMessage, ref APPBARDATA pData);
 
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
-
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-        private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
-        private const int DWMSBT_MAINWINDOW = 2;
-        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
-        private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
-        private const int DWMWCP_ROUND = 2;
-
-        // ★ Win11 22H2+：启用 DWM 原生圆角后跳过 SetWindowRgn（两者互斥，Mica 下不可混用）
+        // ★ 稳定不透明模式：恒用 SetWindowRgn 圆角（不启用 DWM 材质/圆角）
         private bool _useDwmCorner;
         private const int WM_HOTKEY = 0x0312;
         private const int HotkeyId = 0x5A11;
@@ -77,6 +68,9 @@ namespace ShoreHue.UI.Main
 
         private bool _passthroughActive;
         private bool _passthroughWasVisible;   // 穿透前面板是否可见（松开后恢复）
+        // ★ 数字环呼出后短时抑制穿透：Ctrl 兼作穿透修饰键时，按住 Ctrl 按数字键
+        //   会被穿透逻辑误判为"点击穿透"而把面板藏掉（T+30ms tick 即隐藏）。
+        private long _passthroughSuppressUntilTick;
 
         private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
         {
@@ -102,13 +96,36 @@ namespace ShoreHue.UI.Main
             }
         }
 
+        /// <summary>鼠标当前是否位于面板窗口矩形内（DIP 换算，与 IsMouseInsidePanel 同一语义）。</summary>
+        private bool IsMouseOverPanelRect()
+        {
+            try
+            {
+                var p = System.Windows.Forms.Cursor.Position;
+                double dpi = GetDpiScale();
+                double mx = p.X / dpi;
+                double my = p.Y / dpi;
+                return mx >= Left && mx <= Left + Width &&
+                       my >= Top && my <= Top + Height;
+            }
+            catch { return false; }
+        }
+
         /// <summary>
         /// 按住穿透修饰键 → 窗口加 WS_EX_TRANSPARENT（鼠标命中测试跳过本窗口，
         /// 点击穿透到面板覆盖区域下方的屏幕内容）；松开 → 移除。
+        /// ★ 触发条件（2026-09-02 修复 Ctrl+数字环冲突）：
+        ///   仅在「鼠标位于面板上」时才进入穿透——穿透的用途是按住修饰键点击面板
+        ///   穿透到下层，鼠标不在面板上时没有可穿透的点击目标。否则按住 Ctrl 按数字
+        ///   环热键（修饰键同为 Ctrl）会在 30ms tick 内把面板藏掉，热键形同失效。
+        ///   另设数字环呼出后的短时抑制（_passthroughSuppressUntilTick），覆盖 300ms
+        ///   精修组合窗口；热键呼出若遇穿透已激活则立即恢复显示。
         /// </summary>
         private void UpdatePassthroughState()
         {
-            bool down = IsPassthroughModifierDown();
+            bool keyDown = IsPassthroughModifierDown();
+            bool suppressed = Environment.TickCount64 < _passthroughSuppressUntilTick;
+            bool down = keyDown && !suppressed && IsMouseOverPanelRect();
             if (down == _passthroughActive) return;
             _passthroughActive = down;
             ShoreHue.Core.Infrastructure.Logging.LogManager.Debug($"[穿透] 状态切换 down={down} modifier={_settingsService.PassthroughModifier}");
@@ -212,33 +229,6 @@ namespace ShoreHue.UI.Main
             return 1.0;
         }
 
-        /// <summary>
-        /// Win11 22H2+（Build 22621+）：启用 Fluent 材质 —— 强制深色 Mica 毛玻璃 + DWM 原生圆角。
-        /// Mica 与 DWM 圆角同属 DWM 合成：圆角外自动透明且点击穿透，替代 SetWindowRgn。
-        /// （SetWindowRgn 与 Mica 混用会因 DWM 合成不受区域裁剪而在圆角外填充白/黑块。）
-        /// Win10/旧版返回 false，调用方回退 SetWindowRgn 圆角方案。
-        /// </summary>
-        private bool TryApplyWin11FluentMaterial(IntPtr hwnd)
-        {
-            if (hwnd == IntPtr.Zero) return false;
-            if (Environment.OSVersion.Version.Build < 22621) return false;
-            try
-            {
-                // ★ 强制深色：面板内容是浅色文字（#EEEEEE），浅色系统主题下 Mica 也必须是深色，否则文字不可读
-                int dark = 1;
-                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref dark, sizeof(int));
-                // Mica 毛玻璃背景
-                int backdrop = DWMSBT_MAINWINDOW;
-                if (DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int)) != 0) return false;
-                // DWM 原生圆角（圆角外透明 + 点击穿透由 DWM 处理）
-                int corner = DWMWCP_ROUND;
-                DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref corner, sizeof(int));
-                _useDwmCorner = true;
-                return true;
-            }
-            catch { return false; }
-        }
-
         /// <summary>注册全局热键 Ctrl+Alt+B：切换面板显示/隐藏；并按设置注册划词翻译 热键。</summary>
         private void RegisterGlobalHotkey(IntPtr hwnd)
         {
@@ -246,6 +236,7 @@ namespace ShoreHue.UI.Main
             try
             {
                 RegisterHotKey(hwnd, HotkeyId, MOD_CONTROL | MOD_ALT, VK_B);
+                ApplyRegionHotkeys();   // ★ Ctrl+数字环：键盘呼出 16 区域面板（默认关，按设置修饰键）
             }
             catch { }
             // 服务可能尚未初始化（SourceInitialized 早于 InitializeCoreServices），稍后再补注册
@@ -260,6 +251,7 @@ namespace ShoreHue.UI.Main
                 {
                     UnregisterHotKey(hwnd, HotkeyId);
                     UnregisterHotKey(hwnd, TextAiHotkeyId);
+                    UnregisterRegionHotkeys(hwnd);
                 }
             }
             catch { }
@@ -313,6 +305,11 @@ namespace ShoreHue.UI.Main
                 else if (id == TextAiHotkeyId)
                 {
                     OnTextAiHotkey();
+                    handled = true;
+                }
+                else if (IsRegionHotkey(id))
+                {
+                    HandleRegionHotkey(id);
                     handled = true;
                 }
             }

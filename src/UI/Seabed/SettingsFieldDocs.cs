@@ -56,8 +56,8 @@ namespace ShoreHue.UI.Seabed
             { "TransformDurationMs", "尺寸形变时长（ms）" },
             { "FlyDurationMs", "跟随/飞行动画时长（ms）" },
             { "HideDelayMs", "隐藏延迟（ms）" },
-            // ---- 小鸟依人 ----
-            { "ClingModeEnabled", "小鸟依人模式启用" },
+            // ---- 引潮 ----
+            { "ClingModeEnabled", "引潮模式启用" },
             { "SnapRangePx", "贴边吸附范围 px（0=关闭）" },
             { "ContentStabilizeMs", "内容切换稳定防抖（ms）" },
             // ---- 穿透 / 防抖 / 性能 ----
@@ -101,6 +101,8 @@ namespace ShoreHue.UI.Seabed
             { "WidgetEnabled_Timer", "计时器小组件启用" },
             { "WidgetEnabled_Calculator", "计算器小组件启用" },
             { "WidgetEnabled_TextAi", "划词翻译小组件启用" },
+            { "WidgetEnabled_Web", "网页小组件启用（开箱不联网，需用户主动开启）" },
+            { "WebWidgetUrl", "网页小组件默认地址（WebView2）" },
         };
 
         // ========== 区域名 → 中文 ==========

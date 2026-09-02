@@ -117,7 +117,7 @@ namespace ShoreHue.Infrastructure.WinApi
             try
             {
                 // 更新通知：点击即下载安装
-                if (item.AppId == "dynamicbird-update")
+                if (item.AppId == "shorehue-update")
                 {
                     RemoveItem(item);
                     if (_pendingUpdates.TryGetValue(item.Id, out var info))
@@ -167,7 +167,7 @@ namespace ShoreHue.Infrastructure.WinApi
                 AppName = ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_AppName"],
                 Message = string.Format(ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_NewVersion"], info.Version),
                 Time = DateTime.Now,
-                AppId = "dynamicbird-update"
+                AppId = "shorehue-update"
             };
             Notifications.Insert(0, item);
             while (Notifications.Count > MaxItems) Notifications.RemoveAt(Notifications.Count - 1);
@@ -181,7 +181,7 @@ namespace ShoreHue.Infrastructure.WinApi
                 AppName = ShoreHue.UI.Localization.LocalizationManager.Instance["Toast_AppName"],
                 Message = message,
                 Time = DateTime.Now,
-                AppId = "dynamicbird-update-status"
+                AppId = "shorehue-update-status"
             };
             Notifications.Insert(0, item);
             while (Notifications.Count > MaxItems) Notifications.RemoveAt(Notifications.Count - 1);

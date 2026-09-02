@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -341,10 +341,10 @@ Top-right = none (to avoid interfering with closing windows).</value>
     <value>Settings Features Worth Knowing</value>
   </data>
   <data name="UI_OnboardingWindow_94" xml:space="preserve">
-    <value>Follow-the-bird mode</value>
+    <value>Tide-follow mode</value>
   </data>
   <data name="UI_OnboardingWindow_95" xml:space="preserve">
-    <value>When enabled, the panel follows the mouse as it leaves the panel (like a bird following you); when the mouse stops, the panel stays nearby — handy for carrying the panel wherever you need it.</value>
+    <value>When enabled, the panel follows the mouse as it leaves the panel (like the tide drawn by the moon); when the mouse stops, the panel stays nearby — handy for carrying the panel wherever you need it.</value>
   </data>
   <data name="UI_OnboardingWindow_96" xml:space="preserve">
     <value>Auto-fit / Fixed position</value>
@@ -703,7 +703,7 @@ Fill in an OpenAI-compatible provider (DeepSeek, local Ollama, SiliconFlow, etc.
     <value>When enabled, the Do Not Disturb state is saved and restored on next launch.</value>
   </data>
   <data name="UI_SettingsWindow_214" xml:space="preserve">
-    <value>Follow-the-bird mode</value>
+    <value>Tide-follow mode</value>
   </data>
   <data name="UI_SettingsWindow_215" xml:space="preserve">
     <value>When enabled, the panel softly follows the mouse and sticks to it; when disabled, the panel stays where it is after leaving the edge.</value>
@@ -1996,7 +1996,7 @@ Right-click for the quick menu</value>
     <value>Panel animations off, instant switching; most power-efficient (panel less smooth)</value>
   </data>
   <data name="Perf_ButtonTip" xml:space="preserve">
-    <value>Bird performance mode: click to switch</value>
+    <value>ShoreHue mode: click to switch</value>
   </data>
   <data name="Perf_Custom" xml:space="preserve">
     <value>✏Custom</value>
@@ -2146,7 +2146,7 @@ Right-click for the quick menu</value>
     <value>Three zones</value>
   </data>
   <data name="Ob_Welcome_Card2Text" xml:space="preserve">
-    <value>Edges: quick actions &amp; taskbar; corners: standalone panels (quick toggles / recent items / notification dock); center areas: AI assistant and app assistant (picture-in-picture).</value>
+    <value>Panels only appear at the screen edges — nothing floats in the center: top/bottom edges = taskbar; left edge = widgets with the AI assistant mid-edge; right edge = widgets with the app assistant (picture-in-picture) mid-edge; four corners = quick toggles / recent items / notification dock (top-right is a safe zone by default).</value>
   </data>
   <data name="Ob_Welcome_Tip" xml:space="preserve">
     <value>Privacy first: all data stays on your machine at %LOCALAPPDATA%\ShoreHue — no account, no ads, no cloud upload.</value>
@@ -2155,7 +2155,7 @@ Right-click for the quick menu</value>
     <value>Screen map: 16 trigger regions</value>
   </data>
   <data name="Ob_Map_Desc" xml:space="preserve">
-    <value>This diagram shows the default layout. What each region shows, whether it is enabled, its shape and trigger delay can all be customized in Settings → General.</value>
+    <value>This diagram shows the default layout. What each region shows, whether it is enabled, its shape and trigger delay can be customized in Settings → Region; panel appearance and widgets live in Settings → Panel.</value>
   </data>
   <data name="Ob_Map_TopLeft" xml:space="preserve">
     <value>Taskbar</value>
@@ -2212,13 +2212,13 @@ Right-click for the quick menu</value>
     <value>Pin an app</value>
   </data>
   <data name="Ob_Taskbar_Card1Text" xml:space="preserve">
-    <value>Drag a running window tab onto the bird icon at the panel's top-left and release to pin it as a shortcut (the icon turns into ＋ while dragging). You can also drop an .exe directly onto the panel.</value>
+    <value>Drag a running window tab onto the interaction strip on the left side of the panel and release to pin it as a shortcut (the strip shows a ＋ while you drag over it). You can also drop an .exe directly onto the panel.</value>
   </data>
   <data name="Ob_Taskbar_Card2Title" xml:space="preserve">
     <value>Close &amp; remove</value>
   </data>
   <data name="Ob_Taskbar_Card2Text" xml:space="preserve">
-    <value>Click ✕ on a window tab to close it; drag a shortcut onto the top-left icon (it becomes a trash can) to remove it.</value>
+    <value>Click ✕ on a window tab to close it; drag an existing shortcut back onto the left interaction strip (it shows 🗑) to remove it.</value>
   </data>
   <data name="Ob_Taskbar_Card3Title" xml:space="preserve">
     <value>Reorder &amp; launch</value>
@@ -2263,10 +2263,10 @@ Right-click for the quick menu</value>
     <value>Left/right edges (except center) show widgets by default, switched via tabs on top.</value>
   </data>
   <data name="Ob_Widgets_Card1Title" xml:space="preserve">
-    <value>Five built-in widgets</value>
+    <value>Six built-in widgets</value>
   </data>
   <data name="Ob_Widgets_Card1Text" xml:space="preserve">
-    <value>Clipboard history (persists across restarts, pinned items never evicted, search &amp; filters), notes (multi-color), timer (count-up/countdown/alarm), calculator (standard/scientific/programmer), and text selection AI translation.</value>
+    <value>Clipboard history (persists across restarts, pinned items never evicted, search &amp; filters), notes (multi-color), timer (count-up/countdown/alarm), calculator (standard/scientific/programmer), selection AI translation, and a web page (built-in browser, changeable in Settings).</value>
   </data>
   <data name="Ob_Widgets_Card2Title" xml:space="preserve">
     <value>Selection translation</value>
@@ -2278,10 +2278,10 @@ Right-click for the quick menu</value>
     <value>Custom widgets</value>
   </data>
   <data name="Ob_Widgets_Card3Text" xml:space="preserve">
-    <value>Settings → Widgets → New widget: write C# (or let AI generate it), the built-in compiler compiles and previews instantly, save to activate. Import/export to share with others.</value>
+    <value>Create widgets in Settings → Panel → Widgets / Widget Market, or paste C# generated by an AI — the built-in compiler compiles and previews instantly, save to activate. With Programming mode on, widget code lives as files in the Seabed "Panel/Widgets" folder and can be edited directly.</value>
   </data>
   <data name="Ob_Widgets_Tip" xml:space="preserve">
-    <value>Widget visibility and limits are all adjustable in Settings → Widgets.</value>
+    <value>Widget visibility can be toggled per item in Settings → Panel → Widgets.</value>
   </data>
   <data name="Ob_Toggles_Title" xml:space="preserve">
     <value>Quick toggles &amp; status bar</value>
@@ -2299,7 +2299,7 @@ Right-click for the quick menu</value>
     <value>Status bar</value>
   </data>
   <data name="Ob_Toggles_Card2Text" xml:space="preserve">
-    <value>The strip shows time, CPU, memory, FPS, volume, network, battery and weather — enable or disable each item in Settings → Taskbar.</value>
+    <value>The strip shows time, CPU, memory, FPS, volume, network, battery and weather — enable or disable each item in Settings → Panel.</value>
   </data>
   <data name="Ob_Toggles_Card3Title" xml:space="preserve">
     <value>Quick gestures</value>
@@ -2320,7 +2320,7 @@ Right-click for the quick menu</value>
     <value>First-time setup</value>
   </data>
   <data name="Ob_Ai_Card1Text" xml:space="preserve">
-    <value>Settings → AI assistant: pick a provider preset (DeepSeek / OpenAI / SiliconFlow / local Ollama / OpenRouter…), enter the API key and model, then click "Test connection".</value>
+    <value>Settings → AI: pick a provider preset (DeepSeek / OpenAI / SiliconFlow / local Ollama / OpenRouter…), enter the API key and model, then click "Test connection".</value>
   </data>
   <data name="Ob_Ai_Card2Title" xml:space="preserve">
     <value>Chat &amp; files</value>
@@ -2368,22 +2368,43 @@ Right-click for the quick menu</value>
     <value>Appearance</value>
   </data>
   <data name="Ob_Customize_Card1Text" xml:space="preserve">
-    <value>Background/text colors, opacity, corner radius and a custom icon — all in Settings → General; Mica backdrop is enabled automatically on Win11 22H2+.</value>
+    <value>Background/text colors, opacity, corner radius, a custom icon and the global font scale — all in Settings → Panel → Appearance; Mica backdrop is enabled automatically on Win11 22H2+.</value>
   </data>
   <data name="Ob_Customize_Card2Title" xml:space="preserve">
     <value>Animation &amp; performance</value>
   </data>
   <data name="Ob_Customize_Card2Text" xml:space="preserve">
-    <value>Show/hide animation, easing and duration are adjustable; three performance presets (Smooth/Normal/Power Saver) switch in one click — Power Saver disables animation for minimal CPU.</value>
+    <value>Show/hide animation, easing, duration and panel frame rate are adjustable in Settings → Animations; three performance presets (Smooth/Normal/Power Saver) switch in one click from the quick-toggles panel — Power Saver disables animation for minimal CPU.</value>
   </data>
   <data name="Ob_Customize_Card3Title" xml:space="preserve">
     <value>Edge behavior &amp; multi-monitor</value>
   </data>
   <data name="Ob_Customize_Card3Text" xml:space="preserve">
-    <value>Each edge can follow the mouse or stay fixed; "Cling" mode lets the panel follow your cursor around; on multiple monitors the panel follows the screen the mouse is on.</value>
+    <value>Each edge can follow the mouse or stay fixed; "Tide-follow" mode lets the panel follow your cursor around; on multiple monitors the panel follows the screen the mouse is on.</value>
   </data>
   <data name="Ob_Customize_Tip" xml:space="preserve">
     <value>All 16 regions' panel type, shape and trigger delay are individually configurable — e.g. turn the right edge into the AI assistant, or the top-right corner into a window control center.</value>
+  </data>
+  <data name="Ob_Customize_Card4Title" xml:space="preserve">
+    <value>Seabed: settings and features are files</value>
+  </data>
+  <data name="Ob_Customize_Card4Text" xml:space="preserve">
+    <value>Turn on "Programming mode (Seabed)" in Settings → General and the window gains a "Seabed" tab: every setting is organized under General / Region / Panel / Animations as real folders and JSON files, and widget code lives in "Panel/Widgets" where you can edit it directly — save and it takes effect instantly. Settings itself becomes a visual file explorer: what you see in the tree is what is in the folder.</value>
+  </data>
+  <data name="Ob_Map_RingTitle" xml:space="preserve">
+    <value>No mouse? Try the number ring (modifier + 1-9)</value>
+  </data>
+  <data name="Ob_Map_RingText" xml:space="preserve">
+    <value>After enabling "Keyboard summon region panels" in Settings → Region → Advanced, press the modifier (Ctrl by default; switch to Ctrl+Shift / Alt / Ctrl+Alt to avoid browser conflicts) + a number key to summon the matching region: 7/9/1/3 = corners, 2/4/6/8 = mid-edges. Both the top-row and numpad digits work; press again to dismiss; Ctrl+9 (top-right) stays a safe zone by default.</value>
+  </data>
+  <data name="Ob_Done_Hotkey3DescSet" xml:space="preserve">
+    <value>Number ring: press 1-9 to summon the matching region panel (top-row or numpad; press again to dismiss)</value>
+  </data>
+  <data name="Ob_Done_Hotkey3DescUnset" xml:space="preserve">
+    <value>Number ring is off — enable "Keyboard summon region panels" in Settings → Region → Advanced to use it</value>
+  </data>
+  <data name="Ob_Done_Hotkey3KeyUnset" xml:space="preserve">
+    <value>(off)</value>
   </data>
   <data name="Ob_Done_Title" xml:space="preserve">
     <value>You're all set</value>
@@ -2427,7 +2448,7 @@ Widgets</value>
     <value>Everything is customizable</value>
   </data>
   <data name="Ob_Map_CustomText" xml:space="preserve">
-    <value>All 16 regions — trigger on/off, panel type (taskbar/widgets/AI/PiP/notifications…), shape (square/horizontal/vertical strip), size and trigger delay — can be configured individually in Settings → General. Turn any edge or corner into whatever you want.</value>
+    <value>All 16 regions — trigger on/off, panel type (taskbar/widgets/AI/PiP/notifications…), shape (square/horizontal/vertical strip), size and trigger delay — can be configured individually in Settings → Region. Turn any edge or corner into whatever you want.</value>
   </data>
   <data name="Ob_Done_Tip" xml:space="preserve">
     <value>Tip: just move the mouse to a screen edge or corner to trigger panels — no buttons to click.</value>
@@ -2441,6 +2462,18 @@ Media control</value>
   </data>
   <data name="Ob_Map_Widgets" xml:space="preserve">
     <value>Widgets</value>
+  </data>
+  <data name="Ob_Map_CornerTLShort" xml:space="preserve">
+    <value>Quick</value>
+  </data>
+  <data name="Ob_Map_CornerBLShort" xml:space="preserve">
+    <value>Recent</value>
+  </data>
+  <data name="Ob_Map_CornerBRShort" xml:space="preserve">
+    <value>Notify</value>
+  </data>
+  <data name="Ob_Map_CornerTRShort" xml:space="preserve">
+    <value>Safe</value>
   </data>
   <data name="Ob_Map_CornerTL" xml:space="preserve">
     <value>Top-left: quick toggles
@@ -2546,7 +2579,7 @@ Media control</value>
     <value>Panel Frame Rate</value>
   </data>
   <data name="Set_PanelFrameRateTip" xml:space="preserve">
-    <value>Rendering frame rate for panel follow / cling animation. Higher = smoother, lower = less CPU.</value>
+    <value>Rendering frame rate for panel follow / tide-follow animation. Higher = smoother, lower = less CPU.</value>
   </data>
   <data name="Set_PanelFrameRateLabel" xml:space="preserve">
     <value>Frame rate</value>
@@ -2555,7 +2588,7 @@ Media control</value>
     <value>0 = Auto (follows display refresh rate). Manual options: 30 / 60 / 90 / 120 fps.</value>
   </data>
   <data name="Set_PanelFrameRateHint" xml:space="preserve">
-    <value>Higher frame rate makes edge follow and cling mode smoother (Smooth mode recommends 60-120); lower saves CPU (Power Saver auto-lowers).</value>
+    <value>Higher frame rate makes edge follow and tide-follow mode smoother (Smooth mode recommends 60-120); lower saves CPU (Power Saver auto-lowers).</value>
   </data>
   <data name="Set_FrameRateAuto" xml:space="preserve">
     <value>Auto</value>

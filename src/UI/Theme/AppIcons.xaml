@@ -28,8 +28,8 @@
     <Geometry x:Key="IconPlay">M8,5 L19,12 L8,19 Z</Geometry>
     <Geometry x:Key="IconPause">M7,5 L10,5 L10,19 L7,19 Z M14,5 L17,5 L17,19 L14,19 Z</Geometry>
     <Geometry x:Key="IconStop">M7,7 L17,7 L17,17 L7,17 Z</Geometry>
-    <Geometry x:Key="IconPrev">M6,5 L16,12 L6,19 Z M17,5 L19,5 L19,19 L17,19 Z</Geometry>
-    <Geometry x:Key="IconNext">M18,5 L8,12 L18,19 Z M5,5 L7,5 L7,19 L5,19 Z</Geometry>
+    <Geometry x:Key="IconPrev">M18,5 L8,12 L18,19 Z M5,5 L7,5 L7,19 L5,19 Z</Geometry>
+    <Geometry x:Key="IconNext">M6,5 L16,12 L6,19 Z M17,5 L19,5 L19,19 L17,19 Z</Geometry>
 
     <!-- ================= 状态栏 ================= -->
     <Geometry x:Key="IconClock">M12,4 a8,8 0 1,1 0,16 a8,8 0 1,1 0,-16 M12,8 L12,12 L15,14</Geometry>

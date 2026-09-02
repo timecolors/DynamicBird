@@ -100,9 +100,7 @@ namespace ShoreHue.UI.Main
 
         private void ApplyAppearance()
         {
-            // ★ Win11 Mica 模式：MainPanel 背景必须保持 Transparent（毛玻璃由窗口半透明背景 + Mica 提供）；
-            //   设置不透明背景会盖住 Mica → 黑色面板（改滑块/刷新触发 SettingsChanged 时曾出现）。
-            //   非 Mica（Win10）才应用背景色设置。
+            // ★ 面板底色：稳定不透明模式（_useDwmCorner 恒 false）→ 画不透明底色
             if (!_useDwmCorner)
             {
                 try

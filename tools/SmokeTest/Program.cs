@@ -139,7 +139,7 @@ namespace SmokeTest
             var shortcutService = new ShortcutManager();
             shortcutService.Initialize();
 
-            string appPath = Path.Combine(Path.GetTempPath(), "dynbird_smoke_app.exe");
+            string appPath = Path.Combine(Path.GetTempPath(), "shorehue_smoke_app.exe");
             File.WriteAllBytes(appPath, new byte[0]);
             shortcutService.AddShortcut(appPath, "冒烟应用");
 
@@ -148,7 +148,7 @@ namespace SmokeTest
             // 创建一个“目标窗口”，并让它进入窗口列表
             var form = new WinForms.Form
             {
-                Text = "DynBirdCloseTest",
+                Text = "ShoreHueCloseTest",
                 ShowInTaskbar = true,
                 Opacity = 0
             };

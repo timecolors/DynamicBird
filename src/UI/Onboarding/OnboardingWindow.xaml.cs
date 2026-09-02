@@ -159,6 +159,7 @@ namespace ShoreHue.UI.Onboarding
             }
         }
 
+        // ================================================================
         // ========== 导航 ==========
 
         private void Next_Click(object sender, RoutedEventArgs e)
@@ -224,7 +225,7 @@ namespace ShoreHue.UI.Onboarding
             }
         }
 
-        /// <summary>完成页展示快捷键：面板呼出固定 + 划词翻译（如已设置）。</summary>
+        /// <summary>完成页展示快捷键：面板呼出固定 + 划词翻译 + 数字环（按设置态展示）。</summary>
         private void RefreshDoneHotkeys()
         {
             string hotkey = _settings?.TextAiHotkey?.Trim() ?? "";
@@ -237,6 +238,22 @@ namespace ShoreHue.UI.Onboarding
             {
                 DoneHotkey2Key.Text = hotkey;
                 DoneHotkey2Desc.Text = LocalizationManager.Instance["Ob_Done_Hotkey2SetDesc"];
+            }
+
+            // ★ 数字环：开启时显示「修饰键 + 1-9」，未开启给出开启入口提示
+            bool ringEnabled = _settings?.RegionHotkeysEnabled ?? false;
+            if (ringEnabled)
+            {
+                string mod = string.IsNullOrEmpty(_settings?.RegionHotkeyModifier)
+                    ? "Ctrl"
+                    : _settings!.RegionHotkeyModifier;
+                DoneHotkey3Key.Text = mod + " + 1–9";
+                DoneHotkey3Desc.Text = LocalizationManager.Instance["Ob_Done_Hotkey3DescSet"];
+            }
+            else
+            {
+                DoneHotkey3Key.Text = LocalizationManager.Instance["Ob_Done_Hotkey3KeyUnset"];
+                DoneHotkey3Desc.Text = LocalizationManager.Instance["Ob_Done_Hotkey3DescUnset"];
             }
         }
     }

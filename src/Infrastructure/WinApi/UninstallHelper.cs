@@ -29,20 +29,31 @@ namespace ShoreHue.Infrastructure.WinApi
                 string lnk = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.Programs), "ShoreHue.lnk");
                 string tempUpdate = Path.Combine(Path.GetTempPath(), "ShoreHueUpdate");
-                string ps = Path.Combine(Path.GetTempPath(), "uninstall_dynamicbird.ps1");
+                string ps = Path.Combine(Path.GetTempPath(), "uninstall_shorehue.ps1");
                 string nl = Environment.NewLine;
 
                 string script =
+                    // ★ 1) 停止应用并等待进程真正退出（轮询，最多 5 秒；不再固定睡 800ms——
+                    //    句柄未释放时立即删目录会静默失败、残留文件）
                     "Stop-Process -Name ShoreHue -Force -ErrorAction SilentlyContinue" + nl +
-                    "Start-Sleep -Milliseconds 800" + nl +
+                    "for ($i = 0; $i -lt 10 -and (Get-Process -Name ShoreHue -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 500 }" + nl +
+                    // 2) 删除开机启动项 + 开始菜单快捷方式
                     "Remove-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name 'ShoreHue' -ErrorAction SilentlyContinue" + nl +
-                    "Remove-Item '" + Escape(lnk) + "' -Force -ErrorAction SilentlyContinue" + nl +
-                    "Remove-Item '" + Escape(exeDir) + "' -Recurse -Force -ErrorAction SilentlyContinue" + nl +
-                    (deleteData
-                        ? "Remove-Item '" + Escape(dataDir) + "' -Recurse -Force -ErrorAction SilentlyContinue" + nl
-                        : "") +
-                    "Remove-Item '" + Escape(tempUpdate) + "' -Recurse -Force -ErrorAction SilentlyContinue" + nl +
-                    "Remove-Item '" + Escape(ps) + "' -Force -ErrorAction SilentlyContinue";
+                    "Remove-Item -LiteralPath '" + Escape(lnk) + "' -Force -ErrorAction SilentlyContinue" + nl +
+                    // 3) 删除目录（安装目录 + 按选择的数据目录 + 更新临时目录），带存在性检查与重试
+                    "$dirs = @('" + Escape(exeDir) + "'" +
+                    (deleteData ? ", '" + Escape(dataDir) + "'" : "") +
+                    ", '" + Escape(tempUpdate) + "')" + nl +
+                    "foreach ($d in $dirs) {" + nl +
+                    "  if (Test-Path -LiteralPath $d) {" + nl +
+                    "    for ($i = 0; $i -lt 5; $i++) {" + nl +
+                    "      try { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction Stop; break }" + nl +
+                    "      catch { Start-Sleep -Milliseconds 600 }" + nl +
+                    "    }" + nl +
+                    "  }" + nl +
+                    "}" + nl +
+                    // 4) 自删脚本
+                    "Remove-Item -LiteralPath '" + Escape(ps) + "' -Force -ErrorAction SilentlyContinue";
 
                 File.WriteAllText(ps, script, new UTF8Encoding(true));
 

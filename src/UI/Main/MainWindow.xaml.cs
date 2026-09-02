@@ -1,4 +1,4 @@
-﻿using ShoreHue.Animation;
+using ShoreHue.Animation;
 using ShoreHue.Core;
 using ShoreHue.Core.Controllers;
 using ShoreHue.Core.Detection;
@@ -99,7 +99,7 @@ namespace ShoreHue.UI.Main
                     ApplyWindowRegion(atBottom && Height > BottomStripClickThroughPx + 2);
                 };
                 // ★ 非透明窗口：句柄创建后应用圆角窗口区域（尺寸变化由周期刷新覆盖）；
-                //   Win11 22H2+ 尝试启用 Mica 背景，让面板透出系统毛玻璃材质
+                //   稳定不透明模式（不启用 DWM 材质）
                 SourceInitialized += (_, _) =>
                 {
                     // ★ 启动时把窗口移到屏幕外右下角：即使透明度异常也不会在屏幕上露头或拦截鼠标
@@ -108,23 +108,8 @@ namespace ShoreHue.UI.Main
                     Top = SystemParameters.PrimaryScreenHeight + 60;
 
                     var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-                    if (TryApplyWin11FluentMaterial(hwnd))
-                    {
-                        // ★ Win11 22H2+：Fluent 材质 —— 半透明深色背景透出 Mica，MainPanel 让出背景，
-                        //   通知动画器：尺寸动画期间需临时禁用 backdrop 防闪烁
-                        _shapeAnimator?.SetMicaBackdropEnabled(true);
-                        //   DWM 原生圆角替代 SetWindowRgn（圆角外透明+点击穿透，无白角/黑块）。
-                        //   窗口与面板背景统一半透明：Mica 透出量 = alpha 层（0xE0 ≈ 12%）。
-                        Background = new System.Windows.Media.SolidColorBrush(
-                            System.Windows.Media.Color.FromArgb(0xE0, 0x2D, 0x2D, 0x2D));
-                        MainPanel.Background = System.Windows.Media.Brushes.Transparent;
-                        MainPanel.CornerRadius = new CornerRadius(8);
-                    }
-                    else
-                    {
-                        // ★ Win10/旧版：不透明深色 + SetWindowRgn 圆角（无 Mica，行为稳定）
-                        ApplyWindowRegion(false);
-                    }
+                    // ★ 稳定模式：不透明深色面板 + SetWindowRgn 圆角（毛玻璃已整体移除）
+                    ApplyOpaqueMaterial();
                     if (hwnd != IntPtr.Zero)
                     {
                         System.Windows.Interop.HwndSource.FromHwnd(hwnd)?.AddHook(HotkeyWndProc);
@@ -168,6 +153,23 @@ namespace ShoreHue.UI.Main
                 MessageBox.Show($"启动失败:\n{ex.Message}", "ShoreHue 错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 Application.Current.Shutdown();
             }
+        }
+
+        /// <summary>稳定不透明：SetWindowRgn 圆角 + 深色背景（原行为）；MainPanel 底色由 ApplyAppearance 负责。</summary>
+        private void ApplyOpaqueMaterial()
+        {
+            try
+            {
+                _useDwmCorner = false;
+                ApplyWindowRegion(false);
+                var solid = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(0x2D, 0x2D, 0x2D));
+                solid.Freeze();
+                Background = solid;
+                MainPanel.Background = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(0x2D, 0x2D, 0x2D));
+            }
+            catch { }
         }
 
         private bool InitializeCoreServices()
@@ -240,6 +242,8 @@ namespace ShoreHue.UI.Main
 
                 // ★ 划词翻译 热键注册（SourceInitialized 时服务尚未初始化，这里补一次）
                 ReapplyTextAiHotkey();
+                // ★ 数字环区域热键（同上，服务就绪后按设置注册）
+                ApplyRegionHotkeys();
 
                 _sizeController.UserResizeStarted += (started) =>
                 {
@@ -427,7 +431,7 @@ namespace ShoreHue.UI.Main
                     _mouseHook = null;
                 }
 
-                // ★ 小鸟依人实时目标源：渲染帧每帧读实时鼠标位置（钩子缓存 → DIP → 钳制目标）。
+                // ★ 引潮实时目标源：渲染帧每帧读实时鼠标位置（钩子缓存 → DIP → 钳制目标）。
                 //   目标更新频率 = 渲染帧（~16ms），消除"tick 30ms 才更新一次目标"的滞后卡顿，
                 //   与贴边跟随（FollowPositionProvider 每帧读鼠标）同样跟手。
                 //   ★ onPanel = 鼠标是否在面板上（面板内+边）：追逐中（T>0）只认"中心追到鼠标"；
@@ -570,18 +574,18 @@ namespace ShoreHue.UI.Main
                     // ★ 面板贴着屏幕边缘时，边缘触发带优先：鼠标在屏幕边缘（region 有效）
                     //   即使落在面板贴边区域，也按边缘处理（可切换内容/呼出），
                     //   避免"想切内容却变成拖拽面板"。面板内侧（离边缘超过触发距离）仍为正常交互区。
-                    //   例外：小鸟依人模式开启时此逻辑不生效——面板追上鼠标停在边缘带内时，
+                    //   例外：引潮模式开启时此逻辑不生效——面板追上鼠标停在边缘带内时，
                     //   不能被 ProcessRegion 拉去贴边（否则"跟随→贴边→再跟随"反复横跳）。
                     if (isInsidePanel && region != EdgeRegion.Unknown && !_settingsService.ClingModeEnabled)
                     {
                         isInsidePanel = false;
                     }
 
-                    // ★ 小鸟依人进行中：面板专心跟随鼠标，本 tick 不再响应边缘触发，
+                    // ★ 引潮进行中：面板专心跟随鼠标，本 tick 不再响应边缘触发，
                     //   避免"跟随到屏幕边缘 → 立即被贴边逻辑接管"的打架。
                     if (_edgeController.IsInClinging())
                     {
-                        // ★ 修复：关闭小鸟依人设置后立即停止跟随（否则已处于 cling 状态会一直追）
+                        // ★ 修复：关闭引潮设置后立即停止跟随（否则已处于 cling 状态会一直追）
                         if (!_settingsService.ClingModeEnabled)
                         {
                             _edgeController.SetClingModeEnabled(false);
@@ -682,9 +686,9 @@ namespace ShoreHue.UI.Main
                             }
                             else if (_settingsService.ClingModeEnabled &&
                                      _visibilityController.IsVisible && !_edgeController.IsInClinging())
-                            // ★ 省电模式不省机制：省电也启动小鸟依人（省电只降帧率，见 ApplyPerformanceFrameRate）
+                            // ★ 省电模式不省机制：省电也启动引潮（省电只降帧率，见 ApplyPerformanceFrameRate）
                             {
-                                // ★ 尝试启动小鸟依人跟随；若因鼠标贴近边缘等被拒绝（false），
+                                // ★ 尝试启动引潮跟随；若因鼠标贴近边缘等被拒绝（false），
                                 //   回退到正常隐藏延时——否则面板会悬在屏幕中永不隐藏。
                                 bool clinging = _edgeController.StartClinging(mouseX, mouseY);
                                 if (!clinging)
@@ -843,6 +847,8 @@ namespace ShoreHue.UI.Main
                 _edgeController?.InvalidateTargetSizeCache();
                 // ★ 划词翻译 热键随设置变化重新注册（保存后立即生效）
                 ReapplyTextAiHotkey();
+                // ★ 数字环区域热键随设置变化重应用（开关/修饰键）
+                ApplyRegionHotkeys();
                 // ★ 性能模式切换（Smooth/Normal/PowerSaver）→ 渲染降帧即时生效
                 ApplyPerformanceFrameRate();
                   // ★ 全局字号缩放：设置变化即时重算（FontScaleManager 内部用原始值×新比例，不累积）
@@ -901,6 +907,23 @@ namespace ShoreHue.UI.Main
         {
             // ★ 内容加载（稳定后由 CompletePendingSwitch 触发）：只加载内容，不再进入中置（中置已由 SwitchStarted 触发）
             _contentController.LoadContentForRegion(regionType, regionKey);
+            // ★ 字号缩放：区域内容为动态新建视图，需在内容挂载后重新遍历一次，
+            //   否则桌面各面板的字号永远是 100%（FontScaleManager 只缩放遍历时存在的元素）
+            ReapplyFontScaleAfterContent();
+        }
+
+        /// <summary>内容挂载完成（Loaded 优先级）后重放字号缩放。</summary>
+        private void ReapplyFontScaleAfterContent()
+        {
+            try
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ShoreHue.UI.Theme.FontScaleManager.ApplyFontScale(
+                        this, _settingsService?.UiFontScale ?? 1.0);
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+            catch { }
         }
 
         // ============================================================
@@ -1097,6 +1120,25 @@ namespace ShoreHue.UI.Main
         {
             // 面板显示时清理残留状态
             ShoreHue.Infrastructure.WinApi.ToastMonitor.SetPanelVisible(true);
+            // ★ 字号缩放：面板显示/内容挂载后重放，保证桌面各面板字号跟随设置
+            ReapplyFontScaleAfterContent();
+
+            // ★ 内容在隐藏时被释放（OnPanelHidden 会把 ContentContainer 清空，AppHelper 除外）
+            //   后，锚点/热键呼出（ShowPanelAtAnchor）不会自动重载 → 会出现"有窗口无内容"的黑面板。
+            //   这里兜底：显示时若内容为空，重载当前区域内容（同 type 复用缓存实例）。
+            try
+            {
+                if (ContentContainer.Content == null)
+                {
+                    string type = _contentController.CurrentRegionType;
+                    if (!string.IsNullOrEmpty(type))
+                    {
+                        string key = _visibilityController.CurrentRegionKey ?? "";
+                        _contentController.LoadContentForRegion(type, key);
+                    }
+                }
+            }
+            catch { }
         }
 
         private void OnPanelHidden()

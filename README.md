@@ -1,4 +1,4 @@
-﻿# ShoreHue 海岸线
+# ShoreHue 海岸线
 
 <p align="center">
   <img src="packaging/Assets/qr-icon-source.png" width="128" height="128" alt="ShoreHue 海岸线"/>
@@ -28,10 +28,10 @@
 - Works hand-in-hand with Windows apps: media control (QQ Music, etc.), window mirroring / embedding (picture-in-picture), and local video playback.
 
 ### 小组件 / Widgets
-- **剪贴板历史**、**便签**、**计时器 / 倒计时**、**标准 / 科学 / 程序员计算器**
-- Clipboard history, notes, countdown timer, and standard / scientific / programmer calculator.
-- **自定义小组件**：用 C# 编写自己的小组件插件（内置编辑器与插件库），安装后自动出现在小组件面板
-- **Custom widgets**: write your own C# widget plugins (built-in editor & marketplace), they appear in the widget panel automatically.
+- **剪贴板历史**、**便签**、**计时器 / 倒计时**、**标准 / 科学 / 程序员计算器**、**划词翻译**、**网页**
+- Clipboard history, notes, countdown timer, calculator (standard / scientific / programmer), selection translation, and a built-in web page.
+- **自定义小组件**：纯 C#（main.cs）或**完全编程 .xaml + .xaml.cs（完整 WPF 用户控件，实时预览）**，在「海床」里编辑或让 AI 生成
+- **Custom widgets**: write them in the Seabed as pure C#, or as full WPF XAML + code-behind with live preview — or let AI generate them.
 
 ### 快捷开关 / Quick Toggles
 - **音量与亮度**、**蓝牙**、**Wi-Fi**、**移动热点**、**省电模式**、快速打开 Windows 设置
@@ -53,11 +53,12 @@
 - Smooth animations, adaptive sizing, and multi-monitor support.
 - **设置页按作用对象分类**：常规 / 区域 / 面板 / 动画 / AI / 海床，任务栏与小组件统一归入面板设置
 - **左侧交互竖条**：主图标区域改为整条热区——右键菜单按当前面板提供专属操作（显示桌面、清空运行中窗口、直达海床/AI 设置等），支持拖入快捷方式/固定窗口/删除；宽度可拖调
-- Settings are grouped by scope (General / Regions / Panels / Animation / AI / Seabed); the left icon area is now a full-height interaction bar with per-panel right-click actions and drag-to-pin support.
+- **数字环（键盘呼出）**：设置 → 区域 → 高级 开启后，按 修饰键+数字 1-9（主键盘或小键盘均可）直接呼出对应区域面板——7/9/1/3 四角、2/4/6/8 四边中段；再按一次收起；修饰键可改（默认 Ctrl），右上角默认安全区不呼出
+- Settings are grouped by scope (General / Regions / Panels / Animation / AI / Seabed); the left icon area is now a full-height interaction bar with per-panel right-click actions and drag-to-pin support. The optional "number ring" summons any region panel straight from the keyboard.
 
 ### 风格适配 Windows / Windows-Native Styling
-- **Win11 风格适配**：Mica 毛玻璃背景、原生圆角、深色标题栏，与系统外观融为一体
-- Windows 11 native styling: Mica backdrop, native rounded corners, and dark title bar that blend with the OS.
+- **圆角深色面板**：原生圆角 + 深色主题，适配 Win11/10 外观
+- Rounded dark panels and native corners
 
 ### 动画设置 / Animation Settings
 - **触发 / 隐藏动画分开设置**：滑入滑出、淡入淡出、缩放、弹性（回弹），每种带独立时长与特化参数（缩放比例 / 振荡次数 / 弹性强度）
@@ -68,8 +69,8 @@
 
 
   ### 界面字号 / UI Font Scale
-  - 设置 → 面板 → 外观：全局字号缩放滑块（75%~150%），所有界面即时生效
-  - Global UI font scale (75%–150%) in Panel settings, applied across the whole UI instantly.
+  - 设置 → 面板 → 外观：全局字号缩放滑块（75%~150%），设置窗口与**桌面各面板**（任务栏/小组件/AI 等）都即时生效
+  - Global UI font scale (75%–150%) in Panel settings, applied instantly to the settings window and every desktop panel.
 ### 编程模式（海床）/ Seabed (Programming Mode)
 - **配置即代码**：整个设置模型以配置树呈现，每个节点可生成/编辑可执行 C# 配置代码，逐字段带中文注释
 - **单预设闭环**：保存当前节点 → 应用时编译执行写回生效 → 被覆盖的内置设置自动变灰，两击解除单处覆盖
@@ -80,6 +81,9 @@
   - **自定义动画**：AI 生成实现 `IAnimation` 的 C#（如弹跳、翻转），放入 `seabed\动画\` 后可在设置中选作呼出/隐藏动画
   - **AI 编程指南**：海床界面内置「AI 编程指南」按钮，打开完整教程（能做什么/不能做什么/各类格式）
   - **打开文件夹**：一键定位当前节点在 seabed 文件夹的位置，AI 产出的文件直接放进去即可生效
+  - **文件夹即真相源**：设置/功能按 常规 / 区域 / 面板 / 动画 组织成真实文件夹与文件（小组件代码在「面板/小组件」），可直接编辑、保存即时生效——海床本身就是个可视化文件资源管理器（增删改实时同步）
+  - **完全编程 / 完全编译**：小组件与面板功能支持 .xaml + .xaml.cs（完整 WPF 用户控件，事件/绑定/样式全可用）；VS Code 式双编辑器 Tab 切换，保存即编译并实时预览，报错内联显示
+  - 详细规则（能做什么/不能做什么/两种模式/文件格式）见海床内「AI 编程指南」（docs/AI-PROGRAMMING.md）
 - Everything is configurable as C# code — a config tree over the full settings model, presets with visual conflict markers, built-in widget & panel templates, and AI-assisted code generation.
 
 ### 在线市场 / Online Marketplace
@@ -132,6 +136,7 @@
    - **上 / 下 / 左 / 右边缘**：任务栏、应用辅助、小组件等（默认按位置分配）
    - **四角**：快捷开关（左上）、最近使用（左下）、通知坞（右下）；右上角不呼出，避免影响关闭窗口
 3. 鼠标离开面板后自动隐藏；也可在设置中调整每个区域的面板类型、尺寸与触发行为。
+4. 快捷键：**Ctrl+Alt+B** 随时呼出/隐藏面板；**Ctrl+1-9**（可改修饰键，小键盘同样有效）直接呼出指定区域面板（数字环，需在 设置 → 区域 → 高级 开启）。
 
 ---
 
@@ -156,7 +161,7 @@ dotnet publish -c Release -p:PublishProfile=win-x64
 dotnet test tests/ShoreHue.Tests/ShoreHue.Tests.csproj
 ```
 
-> 已配置 [GitHub Actions](.github/workflows/build.yml)：每次推送自动构建 + 单元测试 + 冒烟测试；
+> 已配置 [GitHub Actions](.github/workflows/build.yml)：每次推送自动构建 + 单元测试（当前 220 项全绿）+ 冒烟测试；
 > 打 `v*` tag 时自动发布 win-x64 单文件、打包 MSIX 并生成 Release 草稿。
 
 ---

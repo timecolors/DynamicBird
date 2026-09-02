@@ -34,7 +34,9 @@ namespace ShoreHue.UI.Widgets.Dynamic
             if (string.IsNullOrEmpty(id)) return;
             _cache.TryRemove(id, out _);
             _genericCache.TryRemove(id, out _);
-            _genericCache.TryRemove("xaml:" + id, out _);
+            // ★ 修复：CompileXaml 的缓存键 "xaml:"+id 存在 _cache（IWidget 缓存）里，
+            //   原实现从 _genericCache 删除（删错字典）→ XAML 形态插件删除后缓存残留
+            _cache.TryRemove("xaml:" + id, out _);
         }
 
 

@@ -15,7 +15,7 @@ namespace ShoreHue.Animation
     /// - 切换（区域切换/飞行落地）：位置+尺寸同步动画（贴边锚定，无内容等比缩放），
     ///   内容随窗口真实布局（★ 不做 ScaleTransform 缩放）；
     /// - 滑入/滑出：位置 + 透明度 WPF 动画（尺寸不变，本就丝滑）；
-    /// - 连续跟随（贴边滑动/小鸟依人）：CompositionTarget.Rendering 渲染帧驱动（帧率可配）。
+    /// - 连续跟随（贴边滑动/引潮）：CompositionTarget.Rendering 渲染帧驱动（帧率可配）。
     /// 设置中 TransformDurationMs/TransformEasingType、ShowHideDurationMs/ShowHideEasingType 真实映射为动画参数。
     /// </summary>
     public class ShapeAnimator : IDisposable
@@ -35,10 +35,10 @@ namespace ShoreHue.Animation
         // ===== 飞行 =====
         private int _flyDurationMs = 500;
 
-        // ===== 渲染帧循环（跟随 + 小鸟依人）=====
+        // ===== 渲染帧循环（跟随 + 引潮）=====
         private bool _renderingActive;
         private bool _followActive;            // 贴边跟随：每帧调用 provider 实时跟手（Windows 拖拽式）
-        private bool _clingMode;               // 小鸟依人：每帧 lerp 平滑趋近
+        private bool _clingMode;               // 引潮：每帧 lerp 平滑趋近
         private double _clingTargetLeft;
         private double _clingTargetTop;
 
@@ -61,28 +61,28 @@ namespace ShoreHue.Animation
         /// <summary>跟随目标提供者：渲染帧每帧调用，返回面板应处的 (left, top)。由业务层设置。</summary>
         public Func<(double left, double top)>? FollowPositionProvider { get; set; }
 
-        /// <summary>小鸟依人实时目标源：渲染帧每帧调用，返回 (目标位置, 鼠标是否在面板上)。
+        /// <summary>引潮实时目标源：渲染帧每帧调用，返回 (目标位置, 鼠标是否在面板上)。
         /// 业务层设置为"实时读鼠标 → 钳制目标"，使目标更新频率 = 渲染帧，
         /// 消除"tick 30ms 才更新一次目标"的滞后卡顿。null = 用 SetClingTarget 设定的目标。
         /// ★ onPanel：鼠标在面板上（面板内+边）——T≤0 直接设置分支用它判定"追到即停"，
         ///   追逐中（T>0）只认"中心追到鼠标"，不受 onPanel 影响。</summary>
         public Func<(double left, double top, bool onPanel)>? ClingTargetProvider { get; set; }
 
-        /// <summary>小鸟依人"追到目标/面板内停止"事件：渲染循环到达目标（含面板内原地停）时触发。
+        /// <summary>引潮"追到目标/面板内停止"事件：渲染循环到达目标（含面板内原地停）时触发。
         /// 业务层据此复位跟随状态（_isClinging=false）——否则渲染循环停后 tick 检测到
         /// 鼠标在面板内一动（中心偏差>2px）会再次 SetClingTarget 重启追赶（面板内绕圈也追）。</summary>
         public event Action? ClingArrived;
 
-        // ===== 小鸟依人（匀速飞行，由 FlyDurationMs 管控） =====
+        // ===== 引潮（匀速飞行，由 FlyDurationMs 管控） =====
         // 设计（用户确认）：
         //  - 追的目标 = 面板中心 → 鼠标位置（钳制屏内，由业务层算好传 SetClingTarget）
         //  - 速度 = 飞行时间 FlyDurationMs 管控：0 = 直接设置（拖动窗口式最跟手）；
         //    调大 = 匀速慢速飞追（线性进度，无 lerp 指数衰减的"顿一下"）
         //  - 匀速实现：记录本次飞行起点 + 开始时间，每帧 pos = start + (target-start) × (elapsed/duration)
         //  - 帧率无关：用真实 elapsed（时间），不受跳帧影响
-        private double _clingFlyDurationMs;      // 小鸟依人飞行时长（来自设置 FlyDurationMs；0=直接设置）
+        private double _clingFlyDurationMs;      // 引潮飞行时长（来自设置 FlyDurationMs；0=直接设置）
         private bool _clingMouseOnPanel;         // 渲染帧最近一次 provider 判定：鼠标是否在面板上（T≤0 直接设置分支用）
-        private long _lastFlyTick = Environment.TickCount64; // 跟随/小鸟依人匀速飞行的上帧时刻（算 dt；TickCount64 单调 1ms 精度）
+        private long _lastFlyTick = Environment.TickCount64; // 跟随/引潮匀速飞行的上帧时刻（算 dt；TickCount64 单调 1ms 精度）
         private const double ClingStopDist = 0.5;          // 到达阈值（px）
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace ShoreHue.Animation
         }
 
         // ============================================================
-        //  渲染帧循环（跟随 / 小鸟依人）
+        //  渲染帧循环（跟随 / 引潮）
         // ============================================================
 
         private void EnsureRenderingLoop()
@@ -285,7 +285,7 @@ namespace ShoreHue.Animation
         private void OnRendering(object? sender, EventArgs e)
         {
             // ★ 节能跳帧：PowerSaver 下每 N 帧才处理一次（等效降帧降 CPU）。
-            //   跟随/小鸟依人为匀速飞行（时间驱动），跳帧只降低刷新率，不改变追赶速度。
+            //   跟随/引潮为匀速飞行（时间驱动），跳帧只降低刷新率，不改变追赶速度。
             if (_frameSkip > 0)
             {
                 _frameCounter++;
@@ -350,7 +350,7 @@ namespace ShoreHue.Animation
             }
             else if (_clingMode)
             {
-                // ★ 小鸟依人：匀速飞行，由 FlyDurationMs 管控（用户确认）
+                // ★ 引潮：匀速飞行，由 FlyDurationMs 管控（用户确认）
                 //   - FlyDurationMs <= 0 → 直接设置（拖动窗口式最跟手）
                 //   - > 0 → 每帧移动**固定距离**（匀速，不减速，与跟随分支一致）
                 //   - 到达目标（≤ moveDist / ClingStopDist）→ 停
@@ -429,7 +429,7 @@ namespace ShoreHue.Animation
             // ★ 跟随松紧：FlyDurationMs=0（不飞）→ 1.0 绝对跟手（立即到达）；调大 → 缓慢飞追
             //   语义：飞行时长越短越跟手（0 时长 = 立即跟随），越长追得越慢
             _followLerp = Math.Max(0.05, Math.Min(1.0, 1.0 - _settings.FlyDurationMs / 2000.0));
-            // ★ 小鸟依人飞行时长 = 设置 FlyDurationMs（0 = 直接设置/拖动窗口式最跟手）
+            // ★ 引潮飞行时长 = 设置 FlyDurationMs（0 = 直接设置/拖动窗口式最跟手）
             _clingFlyDurationMs = Math.Max(0, _settings.FlyDurationMs);
             _transformEasing = CreateEasing(_settings.TransformEasingType);
             _showHideEasing = CreateEasing(_settings.ShowHideEasingType);
@@ -564,7 +564,7 @@ namespace ShoreHue.Animation
         }
 
         // ============================================================
-        //  小鸟依人（渲染帧 lerp）
+        //  引潮（渲染帧 lerp）
         // ============================================================
 
         public void SetClingParameters()
@@ -590,7 +590,7 @@ namespace ShoreHue.Animation
             _lastFlyTick = Environment.TickCount64;   // 重置计时：进入/更新目标时首帧不跳一大步
             _clingTargetLeft = left;
             _clingTargetTop = top;
-            // ★ 跟随让位给 cling：隐藏滑出/小鸟依人由渲染帧循环接管位置（不可被打断）
+            // ★ 跟随让位给 cling：隐藏滑出/引潮由渲染帧循环接管位置（不可被打断）
             _followActive = false;
             _clingMode = true;
             EnsureRenderingLoop();

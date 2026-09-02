@@ -92,7 +92,8 @@ namespace ShoreHue.UI.Settings
                 Padding = new Thickness(10, 0, 10, 0),
                 Margin = new Thickness(0, 0, 6, 6),
                 FontSize = 12,
-                Style = (Style)FindResource("FlatButton"),
+                // ★ 修复：浅色窗口用 Win11Button（白底深字），原 FlatButton 是深色面板样式（前景 #EEEEEE），在 #F9F9F9 背景上文字几乎不可见
+                Style = (Style)FindResource("Win11Button"),
                 Tag = city
             };
             btn.Click += (_, _) => CityButton_Click(city, kind);

@@ -70,7 +70,7 @@ namespace ShoreHue.UI.Settings
             ("SnapRangePx", "sldSnapRange"),
             ("HideDelayMs", "sldHideDelay"), ("HideDelayMs", "sldGlbHide"),
             ("FlyDurationMs", "sldFlyDuration"),
-            // 小鸟依人 / 穿透
+            // 引潮 / 穿透
             ("ClingModeEnabled", "chkClingMode"), ("PassthroughModifier", "cmbPassthrough"),
             // 触发
             ("RegionDebounceMs", "sldRegionDebounce"),

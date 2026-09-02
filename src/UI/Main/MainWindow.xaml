@@ -1,4 +1,4 @@
-﻿<Window x:Class="ShoreHue.UI.Main.MainWindow"
+<Window x:Class="ShoreHue.UI.Main.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
@@ -15,8 +15,8 @@
         ResizeMode="CanResize" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
 
     <WindowChrome.WindowChrome>
-        <shell:WindowChrome 
-            ResizeBorderThickness="0"
+        <shell:WindowChrome
+            ResizeBorderThickness="6"
             CaptionHeight="0"
             GlassFrameThickness="0"
             CornerRadius="0"/>
@@ -82,6 +82,17 @@
                                     Margin="0"
                                     Opacity="0"
                                     IsHitTestVisible="False"/>
+                            <!-- ★ 拖放模式字标：拖窗口/文件进来固定显示 ＋，拖快捷方式出去删除显示 🗑
+                                 （图标图形已按用户要求移除，用文字字标保留添加/删除的视觉反馈） -->
+                            <TextBlock x:Name="IconModeGlyph"
+                                       Text=""
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       Foreground="#FFFFFF"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Opacity="0"
+                                       IsHitTestVisible="False"/>
                             <!-- 图标图形已按用户要求移除（保留元素，永不显示） -->
                             <Path x:Name="IconPath" Visibility="Collapsed" IsHitTestVisible="False"/>
                             <Image x:Name="IconImage" Visibility="Collapsed" IsHitTestVisible="False"/>

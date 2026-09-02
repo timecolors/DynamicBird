@@ -5,7 +5,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- 工具栏 -->
@@ -102,33 +101,5 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-
-        <!-- 系统媒体键兜底 -->
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="0,6,0,0">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding Item[UI_MediaControlView_43], Source={x:Static loc:LocalizationManager.Instance}}"
-                               FontSize="10"
-                               Foreground="#8A8A8A"
-                               VerticalAlignment="Center"
-                               Margin="0,0,6,0"/>
-                    <Button Style="{StaticResource IconButton}" Click="KeyPrev_Click" ToolTip="{Binding Item[UI_MediaControlView_44], Source={x:Static loc:LocalizationManager.Instance}}">
-                        <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconPrev}"/>
-                    </Button>
-                    <Button Style="{StaticResource IconButton}" Click="KeyPlayPause_Click" ToolTip="{Binding Item[UI_MediaControlView_45], Source={x:Static loc:LocalizationManager.Instance}}">
-                        <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconPlay}"/>
-                    </Button>
-                    <Button Style="{StaticResource IconButton}" Click="KeyNext_Click" ToolTip="{Binding Item[UI_MediaControlView_46], Source={x:Static loc:LocalizationManager.Instance}}">
-                        <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconNext}"/>
-                    </Button>
-                    <Button Style="{StaticResource IconButton}" Click="KeyVolDown_Click" ToolTip="{Binding Item[UI_MediaControlView_47], Source={x:Static loc:LocalizationManager.Instance}}">
-                        <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconVolume}"/>
-                    </Button>
-                    <Button Style="{StaticResource IconButton}" Click="KeyVolUp_Click" ToolTip="{Binding Item[UI_MediaControlView_48], Source={x:Static loc:LocalizationManager.Instance}}">
-                        <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconVolume}"/>
-                    </Button>
-                </StackPanel>
-            </StackPanel>
-        </Border>
     </Grid>
 </UserControl>

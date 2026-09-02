@@ -148,10 +148,6 @@ namespace ShoreHue.Infrastructure.WinApi
         /// <summary>
         /// 应用更新：把新 exe 暂存到程序目录，生成 PowerShell 替换脚本并启动。
         /// 主进程退出后脚本完成替换并重启新版本。
-        /// </summary>
-        /// <summary>
-        /// 应用更新：把新 exe 暂存到程序目录，生成 PowerShell 替换脚本并启动。
-        /// 主进程退出后脚本完成替换并重启新版本。
         /// ★ 健壮性：替换失败不再静默——写 update_failed.txt，下次启动提示"仍为旧版本"；
         ///   成功才重启新 exe；脚本自身最后删除（含残留清理）。
         /// </summary>
@@ -189,8 +185,10 @@ namespace ShoreHue.Infrastructure.WinApi
                     "Remove-Item '" + EscapePs(ps) + "' -ErrorAction SilentlyContinue";
                 File.WriteAllText(ps, script, new UTF8Encoding(true));
 
+                // ★ 修复：-File 参数必须真正拼接脚本路径（原字符串字面量写成 \" + ps + \"，
+                //   ps 变量从未进入命令行参数 → 替换脚本从不执行，自动更新静默失败）
                 Process.Start(new ProcessStartInfo("powershell.exe",
-                    "-NoProfile -ExecutionPolicy Bypass -File \" + ps + \"")
+                    "-NoProfile -ExecutionPolicy Bypass -File \"" + ps + "\"")
                 {
                     UseShellExecute = true,
                     CreateNoWindow = true

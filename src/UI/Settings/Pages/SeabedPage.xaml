@@ -19,6 +19,16 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
+                            <Grid.ContextMenu>
+                                <!-- ★ 文件资源管理器右键（VS Code 语义）：新建文件夹/重命名/删除/打开 -->
+                                <ContextMenu>
+                                    <MenuItem Header="新建文件夹…" Click="Fs_NewFolder_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="重命名…" Click="Fs_Rename_Click"/>
+                                    <MenuItem Header="删除" Click="Fs_Delete_Click"/>
+                                    <MenuItem Header="在资源管理器中打开" Click="Fs_OpenDir_Click"/>
+                                </ContextMenu>
+                            </Grid.ContextMenu>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="26"/>
@@ -165,13 +175,14 @@
             </Grid>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
-                <Button x:Name="btnCompile" Content="编译" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Click="BtnCompile_Click" ToolTip="校验并写入配置（面板动态编译将基于此扩展）"/>
+                <Button x:Name="btnCompile" Content="编译" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Click="BtnCompile_Click" ToolTip="校验当前编辑内容（不写盘）"/>
+                <Button x:Name="btnSaveFile" Content="保存文件" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnSaveFile_Click" ToolTip="把编辑器内容写回选中的真实文件（文件夹=真相，VS Code 语义）"/>
                 <Button x:Name="btnRestore" Content="恢复" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnRestore_Click"/>
                 <ComboBox x:Name="cmbProgMode" Width="110" Height="28" FontSize="11" VerticalAlignment="Center"
                           ToolTip="编程模式：简单编程=纯 C# 代码；完全编程=XAML 界面 + 代码后置（两文件）"
                           SelectionChanged="CmbProgMode_SelectionChanged">
                     <ComboBoxItem Content="简单编程" Tag="Simple"/>
-                    <ComboBoxItem Content="完全编程" Tag="Xaml"/>
+                    <ComboBoxItem x:Name="cmbProgXamlItem" Content="完全编程" Tag="Xaml"/>
                 </ComboBox>
                 <Button x:Name="btnCopyPrompt" Content="复制 AI 提示词" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnCopyPrompt_Click"/>
                   <Button x:Name="btnOpenNodeFolder" Content="打开文件夹" Style="{StaticResource Win11Button}" Height="28" Padding="16,0" Margin="8,0,0,0" Click="BtnOpenNodeFolder_Click" ToolTip="在系统文件管理器中打开当前选中功能的文件夹"/>

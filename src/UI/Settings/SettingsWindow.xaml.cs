@@ -1,4 +1,4 @@
-﻿using ShoreHue.Core.Services;
+using ShoreHue.Core.Services;
 using ShoreHue.Core.Services.Ai;
 using ShoreHue.Core.Services.Configuration;
 using ShoreHue.Infrastructure.Utils;
@@ -207,10 +207,19 @@ namespace ShoreHue.UI.Settings
                 var fg = dark ? new SolidColorBrush(Color.FromRgb(0xE6, 0xE6, 0xE6)) : new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x1E));
                 var card = dark ? new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A)) : new SolidColorBrush(Colors.White);
                 var border = dark ? new SolidColorBrush(Color.FromRgb(0x3F, 0x3F, 0x3F)) : new SolidColorBrush(Color.FromRgb(0xD0, 0xD0, 0xD0));
+                // 窗口背景：海岸线静态渐变（右上沙滩 → 左下海；深色 = 夜海）
+                var coast = new System.Windows.Media.LinearGradientBrush(
+                    dark ? Color.FromRgb(0x33, 0x2C, 0x22) : Color.FromRgb(0xFB, 0xF3, 0xDF),
+                    dark ? Color.FromRgb(0x14, 0x1E, 0x29) : Color.FromRgb(0xB4, 0xD3, 0xE0),
+                    45);
+                coast.GradientStops.Add(new System.Windows.Media.GradientStop(
+                    dark ? Color.FromRgb(0x24, 0x28, 0x2B) : Color.FromRgb(0xDC, 0xE9, 0xE6), 0.50));
+                coast.Freeze();
                 Resources["SettingsWindowBg"] = bg;
                 Resources["SettingsWindowFg"] = fg;
                 Resources["SettingsCardBg"] = card;
                 Resources["SettingsBorder"] = border;
+                Resources["CoastFlat"] = coast;
             }
             catch { }
         }
@@ -261,7 +270,8 @@ namespace ShoreHue.UI.Settings
             sldOpacity.Value = _settingsData.Opacity;
             sldCornerRadius.Value = _settingsData.CornerRadius;
             chkShowSystemStatus.IsChecked = _settingsData.ShowSystemStatus;
-              _settingsData.UiFontScale = sldUiFontScale.Value;
+              // ★ 修复：先读持久化值再回填滑块（原实现先把滑块默认值 1.0 写进数据，
+              //   持久化的字号缩放从未被读取，打开设置即被冲掉）
               sldUiFontScale.Value = _settingsData.UiFontScale;
               txtUiFontScale.Text = $"{_settingsData.UiFontScale:P0}";
 
@@ -348,8 +358,16 @@ namespace ShoreHue.UI.Settings
             sldFlyDuration.Value = _settingsData.FlyDurationMs;
             txtFlyDuration.Text = _settingsData.FlyDurationMs + "ms";
 
-            // ★★★ 小鸟依人模式 ★★★
+            // ★★★ 引潮模式 ★★★
             chkClingMode.IsChecked = _settingsData.ClingModeEnabled;
+
+            // ★★★ 键盘呼出区域面板（Ctrl+数字环） ★★★
+            chkRegionHotkeys.IsChecked = _settingsData.RegionHotkeysEnabled;
+            string rhMod = _settingsData.RegionHotkeyModifier ?? "Ctrl";
+            foreach (var it in cmbRegionHotkeyMod.Items)
+            {
+                if (it is ComboBoxItem cbi && (cbi.Tag?.ToString() ?? "") == rhMod) { cmbRegionHotkeyMod.SelectedItem = it; break; }
+            }
 
             // ★ 面板点击穿透修饰键
             string passthrough = _settingsData.PassthroughModifier ?? "Ctrl";
@@ -833,6 +851,7 @@ namespace ShoreHue.UI.Settings
             _settingsData.Opacity = sldOpacity.Value;
             _settingsData.CornerRadius = (int)sldCornerRadius.Value;
             _settingsData.ShowSystemStatus = chkShowSystemStatus.IsChecked ?? true;
+            _settingsData.UiFontScale = sldUiFontScale.Value;   // ★ 修复：字号缩放写回（此前不落盘，重启还原 1.0）
 
             // 网页工具
             _settingsData.WebWidgetUrl = txtWebToolUrl.Text.Trim();
@@ -883,7 +902,7 @@ namespace ShoreHue.UI.Settings
             _settingsData.HideDelayMs = (int)sldHideDelay.Value;
             _settingsData.FlyDurationMs = (int)sldFlyDuration.Value;
 
-            // ★★★ 小鸟依人模式 ★★★
+            // ★★★ 引潮模式 ★★★
             _settingsData.ClingModeEnabled = chkClingMode.IsChecked ?? false;
 
             // ★ 面板点击穿透修饰键（双写：本地副本 + 设置服务）
@@ -956,12 +975,27 @@ namespace ShoreHue.UI.Settings
             _settings.WeatherCity = txtWeatherCity.Text;
             _settingsData.WeatherCity = txtWeatherCity.Text; // ★ 双写，避免 Apply 覆盖
 
+            // ★★★ 状态栏显示项（修复：此前只加载不写回，勾选后刷新/重启即还原） ★★★
+            _settingsData.StatusShowTime = chkStatusTime.IsChecked ?? true;
+            _settingsData.StatusShowCpu = chkStatusCpu.IsChecked ?? true;
+            _settingsData.StatusShowMemory = chkStatusMemory.IsChecked ?? true;
+            _settingsData.StatusShowFps = chkStatusFps.IsChecked ?? true;
+            _settingsData.StatusShowVolume = chkStatusVolume.IsChecked ?? true;
+            _settingsData.StatusShowNetwork = chkStatusNetwork.IsChecked ?? true;
+            _settingsData.StatusShowBattery = chkStatusBattery.IsChecked ?? true;
+            _settingsData.StatusShowWeather = chkStatusWeather.IsChecked ?? true;
+
             // ★★★ 性能模式 ★★★
             string perfMode = _settingsData.PerformanceMode ?? PerformancePresets.Normal;
             if (!PerformancePresets.Matches(_settingsData, perfMode))
             {
                 _settingsData.PerformanceMode = PerformancePresets.Custom;
             }
+
+            // ★★★ 键盘呼出区域面板（Ctrl+数字环） ★★★
+            _settingsData.RegionHotkeysEnabled = chkRegionHotkeys.IsChecked ?? false;
+            _settingsData.RegionHotkeyModifier =
+                (cmbRegionHotkeyMod.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Ctrl";
 
             // ★★★ 面板运行帧率（0=自动满帧） ★★★
             _settingsData.PanelFrameRate = (int)sldPanelFrameRate.Value;
@@ -1004,7 +1038,7 @@ namespace ShoreHue.UI.Settings
                 // ★ 关键修复：把设置副本整体同步进 SettingsManager 再落盘。
                 //   之前 ApplyControlsToData 只写本地 _settingsData，_settings.SaveSettings()
                 //   保存的是 SettingsManager 内部从未更新的旧数据 → 设置改动全部丢失，
-                //   刷新/重启后还原（曾导致"关掉小鸟依人刷新又开"、面板一直跟随鼠标）。
+                //   刷新/重启后还原（曾导致"关掉引潮刷新又开"、面板一直跟随鼠标）。
                 _settings.Apply(_settingsData);
                 SaveAiSettings();
                 ShoreHue.Infrastructure.WinApi.WeatherService.ClearCache();
@@ -1017,23 +1051,26 @@ namespace ShoreHue.UI.Settings
             }
         }
 
-        /// <summary>所有设置控件值变化 → 实时自动保存（滑块/勾选/下拉/文本，防抖）。</summary>
+        /// <summary>所有设置控件值变化 → 实时自动保存（滑块/勾选/下拉/文本，防抖）。
+        /// ★ 海床页（tabSeabed）是编程工具而非设置控件：代码编辑器（txtJsonEditor/xaml 双框）、
+        ///   编程模式/预设下拉在选中树节点时会被程序性改写，若也被挂钩会触发全量设置保存 →
+        ///   SettingsChanged → 小组件面板重建/重新测量（曾致"点海床列表项 → 面板异常 + 内容变空"）。</summary>
         private void HookAutoSave()
         {
             foreach (var s in FindVisualChildren<Slider>(this))
-                if (_autoSaveHooked.Add(s)) s.ValueChanged += (_, _) => ScheduleSave();
+                if (!IsInsideSeabedPage(s) && _autoSaveHooked.Add(s)) s.ValueChanged += (_, _) => ScheduleSave();
             foreach (var c in FindVisualChildren<CheckBox>(this))
             {
-                if (_autoSaveHooked.Add(c))
+                if (!IsInsideSeabedPage(c) && _autoSaveHooked.Add(c))
                 {
                     c.Checked += (_, _) => ScheduleSave();
                     c.Unchecked += (_, _) => ScheduleSave();
                 }
             }
             foreach (var c in FindVisualChildren<ComboBox>(this))
-                if (_autoSaveHooked.Add(c)) c.SelectionChanged += (_, _) => ScheduleSave();
+                if (!IsInsideSeabedPage(c) && _autoSaveHooked.Add(c)) c.SelectionChanged += (_, _) => ScheduleSave();
             foreach (var t in FindVisualChildren<TextBox>(this))
-                if (_autoSaveHooked.Add(t)) t.TextChanged += (_, _) => ScheduleSave();
+                if (!IsInsideSeabedPage(t) && _autoSaveHooked.Add(t)) t.TextChanged += (_, _) => ScheduleSave();
 
             // 语言：选中立即切换界面语言（不等防抖）
             if (!_languageHooked)
@@ -1046,6 +1083,18 @@ namespace ShoreHue.UI.Settings
                     ScheduleSave();
                 };
             }
+        }
+
+        /// <summary>控件是否位于海床页内（沿视觉树上溯）。海床控件不参与设置自动保存。</summary>
+        private static bool IsInsideSeabedPage(DependencyObject d)
+        {
+            DependencyObject? cur = d;
+            while (cur != null)
+            {
+                if (cur is ShoreHue.UI.Settings.Pages.SeabedPage) return true;
+                cur = VisualTreeHelper.GetParent(cur);
+            }
+            return false;
         }
 
         private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject

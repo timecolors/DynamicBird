@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using ShoreHue.Core.Services;
 using ShoreHue.Infrastructure.WinApi;
@@ -24,15 +24,30 @@ namespace ShoreHue.UI.Main
 
         private void UpdateIconTextInternal()
         {
-            // ★ 图标已移除（2026-08-30 用户要求）：状态机驱动左侧竖条的 hover 反馈条
+            // ★ 图标已移除（2026-08-30 用户要求）：状态机驱动左侧竖条的反馈。
+            //   拖放态显示大字字标：AddMode=＋（固定窗口/文件）、DeleteMode=🗑（移除快捷方式），
+            //   否则仅按悬停点亮淡色反馈条。
             switch (_currentIconState)
             {
                 case IconState.AddMode:
+                    IconHoverBar.Opacity = 1.0;
+                    if (IconModeGlyph != null)
+                    {
+                        IconModeGlyph.Text = "＋";
+                        IconModeGlyph.Opacity = 1.0;
+                    }
+                    return;
                 case IconState.DeleteMode:
                     IconHoverBar.Opacity = 1.0;
+                    if (IconModeGlyph != null)
+                    {
+                        IconModeGlyph.Text = "🗑";
+                        IconModeGlyph.Opacity = 1.0;
+                    }
                     return;
             }
 
+            if (IconModeGlyph != null) IconModeGlyph.Opacity = 0.0;
             IconHoverBar.Opacity = (_isHovering && !_modeService.IsDoNotDisturb) ? 1.0 : 0.0;
         }
 

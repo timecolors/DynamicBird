@@ -28,6 +28,8 @@ namespace ShoreHue.UI.Status
         private ISettingsService? _settings;
         private bool _weatherEnabled;
         private string _weatherCity = "";
+        private DateTime _weatherLastClick = DateTime.MinValue;   // 双击判定：与系统双击时间比较，不依赖 ClickCount
+        private DispatcherTimer? _weatherClickTimer;              // 单击延迟刷新（给双击留判定窗口）
 
         // ===== 自定义状态栏显示项（IStatusProvider 动态挂载） =====
         private sealed class CustomStatusItem
@@ -115,7 +117,10 @@ namespace ShoreHue.UI.Status
                 WeatherText.Text = LocalizationManager.Instance["Status_WeatherLoading"];
                 _ = RefreshWeatherAsync();
                 _weatherTimer ??= new DispatcherTimer { Interval = TimeSpan.FromMinutes(15) };
-                _weatherTimer.Tick += (_, _) => _ = RefreshWeatherAsync();
+                // ★ 修复：每次 ApplySettings 都 += 会累积多个 Tick 订阅（重复刷新天气）；
+                //   先 -= 再 += 保证只挂一个
+                _weatherTimer.Tick -= OnWeatherTimerTick;
+                _weatherTimer.Tick += OnWeatherTimerTick;
                 _weatherTimer.Start();
             }
             else
@@ -223,21 +228,45 @@ namespace ShoreHue.UI.Status
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
-        /// <summary>单击 → 立即刷新天气状态；双击 → 用默认浏览器打开该城市天气预报网页。</summary>
+        /// <summary>天气交互：单击 → 刷新；双击（系统双击时间内两次点击）→ 默认浏览器搜索"城市 + 天气"。
+        /// ★ 不用 WPF ClickCount（曾出现双击判不出/单击被双击第一击打断），用时间差自判：
+        ///   单击只延迟执行刷新（给双击留判定窗口），双击到达即取消刷新、直接开浏览器。</summary>
         private async void WeatherPanel_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             try
             {
-                if (e.ClickCount == 2)
+                var now = DateTime.Now;
+                bool isDouble = (now - _weatherLastClick).TotalMilliseconds
+                    <= System.Windows.Forms.SystemInformation.DoubleClickTime;
+                _weatherLastClick = now;
+
+                if (isDouble)
                 {
+                    // 双击：取消待执行的单击刷新 → 开浏览器搜索天气
+                    if (_weatherClickTimer != null) { _weatherClickTimer.Stop(); _weatherClickTimer = null; }
+                    _weatherLastClick = DateTime.MinValue;   // 防三连击再次触发
                     await WeatherService.OpenForecastPageAsync(_weatherCity);
+                    return;
                 }
-                else
+
+                // 单击：延迟 300ms 刷新（若紧随其后有第二击 → isDouble 分支接管并取消）
+                if (_weatherClickTimer == null)
                 {
-                    // ★ 单击：立即重新查询天气（不等 15 分钟定时器）
-                    WeatherText.Text = LocalizationManager.Instance["Status_WeatherLoading"];
-                    await RefreshWeatherAsync();
+                    _weatherClickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+                    _weatherClickTimer.Tick += async (_, _) =>
+                    {
+                        _weatherClickTimer?.Stop();
+                        _weatherClickTimer = null;
+                        try
+                        {
+                            WeatherText.Text = LocalizationManager.Instance["Status_WeatherLoading"];
+                            await RefreshWeatherAsync();
+                        }
+                        catch { }
+                    };
                 }
+                _weatherClickTimer.Stop();
+                _weatherClickTimer.Start();
             }
             catch { }
         }
@@ -270,6 +299,9 @@ namespace ShoreHue.UI.Status
                 });
             }
         }
+
+        /// <summary>天气定时器回调（15 分钟刷新一次；-= / += 防重复订阅）。</summary>
+        private void OnWeatherTimerTick(object? sender, EventArgs e) => _ = RefreshWeatherAsync();
 
         private void UpdateStatus()
         {

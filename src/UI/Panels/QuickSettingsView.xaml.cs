@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,7 +36,7 @@ namespace ShoreHue.UI.Panels
 
             _stateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             _stateTimer.Tick += async (_, _) => await RefreshStatesAsync();
-            RefreshBirdModeButton();
+            RefreshPerfModeButton();
 
             Loaded += async (_, _) =>
             {
@@ -198,18 +198,18 @@ namespace ShoreHue.UI.Panels
 
         // ================= ShoreHue 性能模式（顺滑 / 正常 / 省电 / 自定义） =================
 
-        private void BirdMode_Click(object sender, RoutedEventArgs e)
+        private void PerfMode_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button btn || btn.Tag is not string mode) return;
             // 自定义是状态不是档位：点击预设才生效；当前已是该模式无需重复应用
             if (mode == PerformancePresets.Custom) return;
             if (_settings.PerformanceMode == mode) return;
             _settings.SetPerformanceMode(mode);
-            RefreshBirdModeButton();
+            RefreshPerfModeButton();
         }
 
         /// <summary>刷新四个模式按钮的高亮与提示（面板显示时调用）。</summary>
-        public void RefreshBirdModeButton()
+        public void RefreshPerfModeButton()
         {
             if (BtnModeSmooth == null) return;
             string mode = _settings.PerformanceMode;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ShoreHue.Core.Services.Configuration
@@ -163,7 +163,7 @@ namespace ShoreHue.Core.Services.Configuration
         public int HideDelayMs { get; set; } = 200;            // ★ 从 300 改为 200
         public int FlyDurationMs { get; set; } = 500;
 
-        // ========== 小鸟依人模式 ==========
+        // ========== 引潮模式 ==========
         public bool ClingModeEnabled { get; set; } = false;
 
         // ========== 贴边吸附范围（px）：面板边缘距屏幕边小于该值 → 磁铁吸附贴边（0=关闭） ==========
@@ -184,7 +184,7 @@ namespace ShoreHue.Core.Services.Configuration
         public string? PerformanceMode { get; set; } = "Normal";
 
         // ========== 面板运行帧率（fps：0=自动满帧，30/60/120 可选手动） ==========
-        // 渲染帧跟随/小鸟依人的目标帧率；0 = 跟随显示器刷新率（CompositionTarget.Rendering 满帧）。
+        // 渲染帧跟随/引潮的目标帧率；0 = 跟随显示器刷新率（CompositionTarget.Rendering 满帧）。
         // 值越低越省 CPU（配合 PowerSaver 降帧），越高越顺滑（Smooth 建议 60/120）。
         public int PanelFrameRate { get; set; } = 0;
 
@@ -272,5 +272,9 @@ namespace ShoreHue.Core.Services.Configuration
         // ========== 划词翻译 ==========
         // 全局热键字符串（如 "Ctrl+Alt+Q"）；空 = 未设置（面板内提示去设置）
         public string? TextAiHotkey { get; set; } = "";
+
+        // ========== 键盘呼出区域面板（Ctrl+数字环；与浏览器切标签冲突 → 默认关，可改修饰键） ==========
+        public bool RegionHotkeysEnabled { get; set; } = false;
+        public string RegionHotkeyModifier { get; set; } = "Ctrl";   // Ctrl / Ctrl+Shift / Alt / Ctrl+Alt
     }
 }

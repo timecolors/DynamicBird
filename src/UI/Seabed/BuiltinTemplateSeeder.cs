@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,11 +54,121 @@ namespace ShoreHue.UI.Seabed
                 // 2) 小组件（从项目源文件复制 XAML + cs）
                 SeedWidgets(root);
 
-                // 3) 配置节点（面板设计/动画/外观/交互/状态栏的叶子节点 → <分组>/<节点名>/config.json）
-                //    ★ Plan B 完整性：海床树每个叶子节点都有文件夹投影，用户能在文件夹看到全部分组内容
+                // 3) 配置节点（按设置页签分组：常规/区域/面板/动画 → <分组>/[<二级名>/]<叶子名>/config.json）
+                //    ★ 文件夹=树的镜像：树里每个配置叶子都有文件夹投影
                 SeedConfigNodes(root);
+
+                // 4) 树驱动清理：删除不在当前树投影里的 system 配置目录
+                //    （旧分组 面板设计/外观/交互/状态栏、改名残留如 小鸟依人、已删叶子等，全部按新树抹平）
+                RemoveStaleConfigProjections(root);
             }
             catch { }
+        }
+
+        /// <summary>删除不在当前树投影中的 system 配置目录（按 分组/二级/三级 显示名路径匹配；最多 3 层）。</summary>
+        private static void RemoveStaleConfigProjections(string root)
+        {
+            try
+            {
+                // 期望路径集合：分组(一级 Category)/二级显示名[/三级显示名]（配置叶子用显示名做目录）
+                var expected = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+                var tree = ShoreHue.UI.Seabed.ConfigTreeBuilder.Build();
+                foreach (var g in tree.Children)
+                {
+                    string gf = Sanitize(g.Category);
+                    if (string.IsNullOrEmpty(gf)) continue;
+                    foreach (var c2 in g.Children)
+                    {
+                        if (c2.Children.Count == 0)
+                            expected.Add(gf + "/" + Sanitize(c2.Name));
+                        else
+                            foreach (var c3 in c2.Children)
+                                expected.Add(gf + "/" + Sanitize(c2.Name) + "/" + Sanitize(c3.Name));
+                    }
+                }
+                RemoveStaleProjectionsRecursive(root, "", expected);
+
+                // 清理历史遗留的空一级目录（旧分组 面板设计/外观/交互/状态栏 等在投影删除后变空 → 一并移除，
+                //   保持文件夹顶层与当前分类一致：小组件/面板功能 + 常规/区域/面板/动画）
+                string[] currentGroups = { "常规", "区域", "面板", "动画" };
+                foreach (var d in Directory.GetDirectories(root))
+                {
+                    string dn = Path.GetFileName(d);
+                    if (System.Array.IndexOf(currentGroups, dn) >= 0) continue;
+                    try { DeleteEmptyDirsRecursive(d); } catch { }
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>递归删除空目录（仅当整棵子树为空）。</summary>
+        private static void DeleteEmptyDirsRecursive(string dir)
+        {
+            foreach (var sd in Directory.GetDirectories(dir))
+            {
+                try { DeleteEmptyDirsRecursive(sd); } catch { }
+            }
+            if (!Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
+        }
+
+        private static void RemoveStaleProjectionsRecursive(string dir, string rel, System.Collections.Generic.HashSet<string> expected)
+        {
+            foreach (var d in Directory.GetDirectories(dir))
+            {
+                string name = Path.GetFileName(d);
+                string childRel = string.IsNullOrEmpty(rel) ? name : rel + "/" + name;
+                string mf = Path.Combine(d, "manifest.json");
+                if (File.Exists(mf))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(File.ReadAllText(mf));
+                        var ro = doc.RootElement;
+                        bool isSystem = ro.TryGetProperty("system", out var s) && s.ValueKind == JsonValueKind.True;
+                        string? kind = ro.TryGetProperty("kind", out var k) && k.ValueKind == JsonValueKind.String ? k.GetString() : null;
+                        // 仅清理 system=true 且 kind=Config 的树投影（用户代码/内置源码目录一律不碰）
+                        if (isSystem && kind == "Config" && !expected.Contains(childRel))
+                        {
+                            Directory.Delete(d, true);
+                            continue;
+                        }
+                    }
+                    catch { }
+                }
+                RemoveStaleProjectionsRecursive(d, childRel, expected);
+            }
+        }
+
+        /// <summary>删除历史遗留的 widget-* 系统占位目录（最多 3 层：分组/二级/叶子）。</summary>
+        private static void RemoveStaleWidgetStubs(string root)
+        {
+            try { RemoveStaleWidgetStubsRecursive(root, 0); } catch { }
+        }
+
+        private static void RemoveStaleWidgetStubsRecursive(string dir, int depth)
+        {
+            if (depth > 3) return;
+            foreach (var d in Directory.GetDirectories(dir))
+            {
+                string mf = Path.Combine(d, "manifest.json");
+                if (File.Exists(mf))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(File.ReadAllText(mf));
+                        var ro = doc.RootElement;
+                        bool isSystem = ro.TryGetProperty("system", out var s) && s.ValueKind == JsonValueKind.True;
+                        string? id = ro.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.String ? idEl.GetString() : null;
+                        if (isSystem && id != null && id.StartsWith("widget-", StringComparison.Ordinal))
+                        {
+                            Directory.Delete(d, true);
+                            continue;   // 已删除，不再递归其内部
+                        }
+                    }
+                    catch { }
+                }
+                RemoveStaleWidgetStubsRecursive(d, depth + 1);
+            }
         }
 
         /// <summary>
@@ -86,6 +196,9 @@ namespace ShoreHue.UI.Seabed
                             foreach (var leaf in child.Children)
                             {
                                 if (leaf.FieldNames == null || leaf.FieldNames.Count == 0) continue;
+                                // 小组件叶子(widget-*)不是配置节点：真源在 小组件/<英文id>/（SeedWidgets 已落 XAML），
+                                // 不再投影 config.json 占位——文件夹=真相：树里的条目在文件夹里必须对应真实资源文件
+                                if (leaf.Key.StartsWith("widget-", StringComparison.Ordinal)) continue;
                                 WriteConfigNode(root, groupFolder, Sanitize(child.Name), Sanitize(leaf.Name),
                                     leaf.Key, leaf.Name, groupFolder, leaf.FieldNames, props, data);
                             }
@@ -153,7 +266,7 @@ namespace ShoreHue.UI.Seabed
                 {
                     if (!ShoreHue.UI.Seabed.BuiltinFeatureSources.Sources.TryGetValue(kv.Key, out var source)) continue;
                     if (string.IsNullOrWhiteSpace(source)) continue;
-                    string dir = Path.Combine(root, "面板功能", Sanitize(kv.Key));
+                    string dir = Path.Combine(root, "面板", "面板功能", Sanitize(kv.Key));
                     Directory.CreateDirectory(dir);
                     WriteTemplateFile(dir, "main.cs", source);
                     WriteManifest(dir, kv.Key, kv.Value.Name, "Panel", "面板功能", "1.0.0", kv.Key);
@@ -169,7 +282,7 @@ namespace ShoreHue.UI.Seabed
                 try
                 {
                     string id = kv.Key;
-                    string dir = Path.Combine(root, "小组件", Sanitize(id));
+                    string dir = Path.Combine(root, "面板", "小组件", Sanitize(id));
                     Directory.CreateDirectory(dir);
                     // ★ 从项目 seabed/ 原样复制内置源码（与编译进 exe 的一致）
                     var (xaml, cs) = LoadWidgetFiles(id);

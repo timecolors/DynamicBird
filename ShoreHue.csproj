@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
@@ -96,6 +96,8 @@
   	<None Include="assets\icon.ico">
   		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   	</None>
+  	<!-- ★ 水面像素着色器（fxc 编译产物，嵌入程序集，pack URI 加载） -->
+
 
   	<!-- ★★★ AI 编程指南（海床界面按钮打开；发布时随 exe 携带） ★★★ -->
   	<None Include="docs\AI-PROGRAMMING.md">

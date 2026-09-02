@@ -6,8 +6,8 @@
         Title="{Binding Item[UI_SettingsWindow_134], Source={x:Static loc:LocalizationManager.Instance}}"
         Height="720" Width="960"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
-        Background="{DynamicResource SettingsWindowBg}"
+        ResizeMode="CanResize"
+        Background="{DynamicResource CoastFlat}"
         Foreground="{DynamicResource SettingsWindowFg}"
         MinHeight="560" MinWidth="780" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
 
@@ -22,6 +22,14 @@
         </Style>
 
         <!-- ★ 主题资源（浅色默认；运行时按系统主题切换深色变体） -->
+        <!-- 窗口背景：海岸线主题静态渐变（右上沙滩 → 左下海，浅/深由代码随系统主题切换） -->
+        <LinearGradientBrush x:Key="CoastFlat" StartPoint="1,0" EndPoint="0,1">
+            <GradientStop Color="#FBF3DF" Offset="0.00"/>
+            <GradientStop Color="#F2E7CA" Offset="0.35"/>
+            <GradientStop Color="#DCE9E6" Offset="0.62"/>
+            <GradientStop Color="#C2DCE6" Offset="0.82"/>
+            <GradientStop Color="#B4D3E0" Offset="1.00"/>
+        </LinearGradientBrush>
         <SolidColorBrush x:Key="SettingsWindowBg" Color="#F9F9F9"/>
         <SolidColorBrush x:Key="SettingsWindowFg" Color="#1E1E1E"/>
         <SolidColorBrush x:Key="SettingsCardBg" Color="#FFFFFF"/>
@@ -336,8 +344,9 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="{Binding Item[Set_PanelFrameRateLabel], Source={x:Static loc:LocalizationManager.Instance}}"
                                                VerticalAlignment="Center" FontSize="12" Width="60"/>
+                                    <!-- ★ 修复：Minimum=0 使"0=自动满帧"档可选；原 Minimum=30 会把 Value=0 钳到 30 -->
                                     <Slider Grid.Column="1" x:Name="sldPanelFrameRate"
-                                            Minimum="30" Maximum="120" Value="0"
+                                            Minimum="0" Maximum="120" Value="0"
                                             TickFrequency="30" IsSnapToTickEnabled="True"
                                             VerticalAlignment="Center" Margin="0,0,8,0"/>
                                     <TextBlock Grid.Column="2" x:Name="txtPanelFrameRate"
@@ -724,7 +733,7 @@
                                                ToolTip="{Binding Item[UI_SettingsWindow_213], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
 
-                                <!-- ★★★ 小鸟依人模式 ★★★ -->
+                                <!-- ★★★ 引潮模式 ★★★ -->
                                 <Grid Margin="0,8,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
@@ -757,6 +766,28 @@
                                                ToolTip="{Binding Item[Set_PassthroughTip], Source={x:Static loc:LocalizationManager.Instance}}"/>
                                 </Grid>
 
+                                <!-- ★★★ 键盘呼出区域面板（Ctrl+数字环；默认关避免与浏览器切标签冲突） ★★★ -->
+                                <Border Background="#FFF9EC" CornerRadius="6" Padding="8,6" Margin="0,10,0,0"
+                                        BorderBrush="#EAD9A8" BorderThickness="1">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkRegionHotkeys" Content="键盘呼出区域面板（Ctrl + 数字环）" FontSize="12" Margin="0,0,0,6"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="修饰键" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <ComboBox Grid.Column="1" x:Name="cmbRegionHotkeyMod" Width="130" FontSize="12" HorizontalAlignment="Left">
+                                                <ComboBoxItem Content="Ctrl" Tag="Ctrl"/>
+                                                <ComboBoxItem Content="Ctrl + Shift" Tag="Ctrl+Shift"/>
+                                                <ComboBoxItem Content="Alt" Tag="Alt"/>
+                                                <ComboBoxItem Content="Ctrl + Alt" Tag="Ctrl+Alt"/>
+                                            </ComboBox>
+                                        </Grid>
+                                        <TextBlock Text="数字键=九宫格：4=左中(AI) 6=右中 8=上中 2=下中；7/9/1/3=四角。连按精修：Ctrl+4 再按 7（或 7 再 4）= 左边缘上段(小组件)。呼出后面板不自动隐藏，再按当前区域键收起。右上角 Ctrl+9 默认安全区无面板。默认关闭：Ctrl+数字 会被浏览器切标签占用，开启后由海岸线接管（可改修饰键避开）。" FontSize="10.5" Foreground="#8A6D3B" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                </Border>
 
                                 <Expander Header="{Binding Item[UI_SettingsWindow_219], Source={x:Static loc:LocalizationManager.Instance}}"
                                           Margin="0,6,0,0"

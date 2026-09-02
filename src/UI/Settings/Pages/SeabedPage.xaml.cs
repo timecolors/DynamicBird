@@ -1,4 +1,4 @@
-﻿using ShoreHue.Core.Models;
+using ShoreHue.Core.Models;
 using ShoreHue.Core.Services;
 using ShoreHue.Core.Services.Configuration;
 using ShoreHue.UI.Seabed;
@@ -57,14 +57,33 @@ public class CustomPanel : UserControl, IWidget
             public int Level;
             public bool IsAdd { get; set; }      // 每级末尾的"⊕ 新建同级"占位行
             public bool HasDelete { get; set; }  // 用户新建项：可删除（行末 ×）
-            public string Display => IsAdd
-                ? ""   // 占位行只显示 ⊕ 按钮，不再显示文字
-                : Level switch
-                {
-                    0 => Node.Name,
-                    1 => "▸ " + Node.Name,
-                    _ => "• " + Node.Name
-                };
+
+            // ===== 文件资源管理器行（文件夹=真相：树显示 seabed 真实目录/文件） =====
+            /// <summary>资源管理器行：选中项的绝对路径（文件或目录）。null = 传统配置树行。</summary>
+            public string? FsPath;
+            /// <summary>资源管理器行：是否为目录（false = 文件）。</summary>
+            public bool FsIsDir;
+            /// <summary>资源管理器行：内置标记（该目录/其父目录 manifest system=true → 删除前警告）。</summary>
+            public bool FsIsSystem;
+            /// <summary>资源管理器行：显示名（目录/文件名原样，不中文化）。</summary>
+            public string? DisplayOverride;
+            /// <summary>资源管理器行：所在功能目录的 manifest kind（Widget/Panel/Config/StatusProvider/Animation）。</summary>
+            public string? FsKind;
+            /// <summary>资源管理器行：所在功能目录的 manifest id（英文标识）。</summary>
+            public string? FsManifestId;
+            /// <summary>资源管理器行：是否为配置目录（常规/区域/面板/动画 下的 config.json 投影）。</summary>
+            public bool FsIsConfigDir;
+
+            public string Display => DisplayOverride != null
+                ? DisplayOverride
+                : IsAdd
+                    ? ""   // 占位行只显示 ⊕ 按钮，不再显示文字
+                    : Level switch
+                    {
+                        0 => Node.Name,
+                        1 => "▸ " + Node.Name,
+                        _ => "• " + Node.Name
+                    };
             public double Indent => Level switch { 0 => 0, 1 => 14, _ => 30 };
             public System.Windows.Thickness IndentMargin => new System.Windows.Thickness(Indent, 0, 0, 0);
 
@@ -130,6 +149,25 @@ public class CustomPanel : UserControl, IWidget
             UpdateEditorVisibility();
             LoadTree();
             RefreshPresets();
+            // ★ 文件夹变化（watcher：用户在系统文件夹增删文件/目录）→ 海床树实时刷新（资源管理器语义，无需手动刷新）
+            ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.Changed += OnWidgetStoreChanged;
+            Unloaded += OnSeabedPageUnloaded;
+        }
+
+        /// <summary>节点是否支持完全编程（XAML 形态）：仅当功能有真实 XAML 内容（小组件等）才支持。</summary>
+        private bool NodeSupportsXaml(ConfigNode node) => NodeHasXaml(node);
+
+        /// <summary>节点是否已有 XAML 形态内容（CustomPanels 或 seabed 文件夹中存在 .xaml/.xaml.cs）。</summary>
+        private bool NodeHasXaml(ConfigNode node)
+        {
+            var cp = _settings.CustomPanels.FirstOrDefault(p => p.Id == node.CustomId);
+            if (cp != null && (!string.IsNullOrEmpty(cp.Xaml) || !string.IsNullOrEmpty(cp.XamlCs))) return true;
+            try
+            {
+                var (_, fx, fxc, _) = LoadNodeFromFolder(node, cp);
+                return !string.IsNullOrEmpty(fx) || !string.IsNullOrEmpty(fxc);
+            }
+            catch { return false; }
         }
 
         /// <summary>当前编程模式：Simple=简单编程 / Xaml=完全编程。</summary>
@@ -147,6 +185,12 @@ public class CustomPanel : UserControl, IWidget
         /// <summary>模式切换：显示对应编辑器 + 重新加载当前节点代码。</summary>
         private void CmbProgMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            if (_selected != null && CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml && !NodeSupportsXaml(_selected))
+            {
+                // ★ 节点不支持完全编程（面板/状态栏/配置无 XAML）：强制回退简单模式
+                cmbProgMode.SelectedIndex = 0;
+                return;
+            }
             UpdateEditorVisibility();
             if (_selected != null)
             {
@@ -156,13 +200,29 @@ public class CustomPanel : UserControl, IWidget
                     txtJsonEditor.Text = ExtractJson(_selected);
             }
         }
-
         /// <summary>按模式显示编辑器（简单=单框；完全=双框+预览）。</summary>
         private void UpdateEditorVisibility()
         {
             bool xaml = CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml;
             if (txtJsonEditor != null) txtJsonEditor.Visibility = xaml ? Visibility.Collapsed : Visibility.Visible;
             if (xamlEditorPanel != null) xamlEditorPanel.Visibility = xaml ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        /// <summary>按节点能力应用编程模式：功能没有 XAML 编程方法 → 默认回退简单编程，并禁用「完全编程」选项。</summary>
+        private void ApplyProgModeForNode(ConfigNode node)
+        {
+            bool hasXaml = NodeSupportsXaml(node);
+            if (cmbProgXamlItem != null) cmbProgXamlItem.IsEnabled = hasXaml;   // 无 XAML：完全编程暂时禁用
+            if (!hasXaml && cmbProgMode.SelectedIndex != 0) cmbProgMode.SelectedIndex = 0;
+            if (hasXaml && CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml)
+            {
+                RefreshXamlEditors(node);
+                txtJsonEditor.Text = "";
+            }
+            else
+            {
+                txtJsonEditor.Text = ExtractJson(node);
+            }
         }
 
         /// <summary>加载当前节点的完全编程代码（.xaml + .xaml.cs；从文件资源管理器 seabed 文件夹读取）。</summary>
@@ -233,8 +293,9 @@ public class CustomPanel : UserControl, IWidget
                 }
                 else if (node.Key.StartsWith("status-", StringComparison.Ordinal))
                 {
-                    folderName = node.Name;
-                    group = "状态栏";
+                    // 状态栏配置投影在 面板/状态栏/<显示名>（设置页签：面板页的「状态栏」分区）
+                    folderName = System.IO.Path.Combine("状态栏", node.Name);
+                    group = "面板";
                 }
                 else if (node.Key.StartsWith("anim-", StringComparison.Ordinal))
                 {
@@ -247,7 +308,9 @@ public class CustomPanel : UserControl, IWidget
                     group = node.Category;
                 }
                 if (string.IsNullOrEmpty(folderName)) return ("", "", "", "");
-                string dir = Path.Combine(ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.RootDir, group, folderName);
+                // ★ 分组名 → 目录（小组件/面板功能 → 面板/小组件、面板/面板功能；其余 = 设置页签目录）
+                string groupFolder = ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.MapCategoryToFolder(group);
+                string dir = Path.Combine(ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.RootDir, groupFolder, folderName);
                 if (!Directory.Exists(dir)) return ("", "", "", "");
                 if (isXaml)
                 {
@@ -333,7 +396,7 @@ public class CustomPanel : UserControl, IWidget
         /// <summary>下拉框中当前选中的整套预设名（无则 null）。</summary>
         internal string? CurrentSelectedPresetName => cmbPresets.SelectedItem as string;
 
-        private void LoadTree()
+        private void LoadLegacyConfigTree()
         {
             ResetArm();   // 树重建后按钮被替换，清除残留的确认态
             // ★ 每次用全新 List（复用同一 List 会触发 ItemsControl "项源不一致"异常）
@@ -463,6 +526,13 @@ public class CustomPanel : UserControl, IWidget
         {
             if (lstConfigTree.SelectedItem is not FlatNode fn) return;
 
+            // ★ 文件资源管理器行：目录=展开/收起；文件=读入真实文件（文件夹=真相）
+            if (fn.FsPath != null)
+            {
+                OnExplorerRow(fn);
+                return;
+            }
+
             // 占位行（⊕ 新建同级）：点击即创建（防重入；点 ⊕ 按钮也会先触发本事件）
             if (fn.IsAdd)
             {
@@ -485,15 +555,7 @@ public class CustomPanel : UserControl, IWidget
                     : fn.Node.IsLeaf
                         ? $"共 {fn.Node.FieldNames.Count} 项可编辑"
                         : "分组（含子项，编辑需选中子项）";
-            if (CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml)
-            {
-                RefreshXamlEditors(fn.Node);
-                txtJsonEditor.Text = "";
-            }
-            else
-            {
-                txtJsonEditor.Text = ExtractJson(fn.Node);
-            }
+            ApplyProgModeForNode(fn.Node);
             txtJsonStatus.Text = "";
         }
 
@@ -568,6 +630,7 @@ public class CustomPanel : UserControl, IWidget
         private void BtnDeleteNode_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button btn || btn.DataContext is not FlatNode fn) return;
+            if (fn.FsPath != null) { TryArmOrDelete(fn, btn); return; }   // ★ 文件资源管理器：两击确认后删选中文件/目录
             string customId = fn.Node.CustomId ?? "";
             if (string.IsNullOrEmpty(customId)) return;
 
@@ -794,6 +857,7 @@ public class CustomPanel : UserControl, IWidget
         /// <summary>编译：校验当前节点配置并写入。编译失败 → 该项红色高亮提示。</summary>
         private void BtnCompile_Click(object sender, RoutedEventArgs e)
         {
+            if (_fsPath != null && !_fsIsDir) { CompileFsFile(); return; }   // ★ 文件资源管理器：编译当前编辑内容
             if (_selected == null) return;
             try
             {
@@ -960,6 +1024,16 @@ public class CustomPanel : UserControl, IWidget
         {
             try
             {
+                // ★ 文件资源管理器：打开选中项所在目录
+                if (_fsPath != null)
+                {
+                    string target = _fsIsDir ? _fsPath : System.IO.Path.GetDirectoryName(_fsPath) ?? "";
+                    if (!string.IsNullOrEmpty(target) && System.IO.Directory.Exists(target))
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("explorer.exe", "\"" + target + "\"") { UseShellExecute = true });
+                        return;
+                    }
+                }
                 // ★ 未选中节点也兜底打开根目录（避免"点击有反馈但没动作"）
                 if (_selected == null)
                 {
@@ -977,7 +1051,21 @@ public class CustomPanel : UserControl, IWidget
                         return;
                     }
                 }
-                // 内置/配置节点：按 分类 + 节点Key/名称 定位到对应分组目录
+                // 内置功能节点：真源在对应分组文件夹（文件夹=真相，树里条目打开即是真实资源）
+                string key = sel.Key ?? "";
+                if (key.StartsWith("widget-", StringComparison.Ordinal))
+                {
+                    // 小组件 → 小组件/<英文id>/（内有真实 .xaml/.xaml.cs）
+                    ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.OpenNodeFolder("", key.Substring("widget-".Length), "小组件");
+                    return;
+                }
+                if (ShoreHue.UI.Seabed.BuiltinFeatureSources.PanelKeys.Contains(key))
+                {
+                    // 面板功能 → 面板功能/<key>/（内有 main.cs）
+                    ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.OpenNodeFolder("", key, "面板功能");
+                    return;
+                }
+                // 配置节点：按 分类 + 节点名 定位
                 ShoreHue.UI.Widgets.Dynamic.WidgetPluginStore.OpenNodeFolder("", sel.Name, sel.Category);
             }
             catch (Exception ex)
@@ -1018,6 +1106,7 @@ public class CustomPanel : UserControl, IWidget
 
         private void BtnCopyPrompt_Click(object sender, RoutedEventArgs e)
         {
+            if (_fsPath != null) { CopyFsAiPrompt(); return; }   // ★ 文件资源管理器：按目录 manifest kind 生成提示词
             if (_selected == null) return;
             // ★ 编程模式：简单编程（纯 C#）/ 完全编程（XAML + 代码后置）
             var mode = PromptGenerator.ProgrammingMode.Simple;
@@ -1069,6 +1158,13 @@ public class CustomPanel : UserControl, IWidget
         /// </summary>
         private void BtnSavePartial_Click(object sender, RoutedEventArgs e)
         {
+            // ★ 文件资源管理器：选中文件 → 保存写回；选中目录 → 另存为变体
+            if (_fsPath != null)
+            {
+                if (!_fsIsDir) { BtnSaveFile_Click(sender, e); }
+                else { CopyFsAsVariantPath(_fsPath); }
+                return;
+            }
             if (_selected == null) { txtJsonStatus.Text = "请先选中一个节点"; return; }
             string code = txtJsonEditor.Text ?? "";
             bool xamlMode = CurrentProgMode == PromptGenerator.ProgrammingMode.Xaml;
@@ -1174,6 +1270,16 @@ public class CustomPanel : UserControl, IWidget
 
         private void BtnApplyPreset_Click(object sender, RoutedEventArgs e)
         {
+            // ★ 文件资源管理器：选中配置目录 → 应用其 config.json（写回设置 + 冲突变灰）
+            if (_fsPath != null)
+            {
+                string? dir = _fsIsDir ? _fsPath : System.IO.Path.GetDirectoryName(_fsPath);
+                if (dir != null && string.Equals(ReadManifestField(dir, "kind"), "Config", StringComparison.OrdinalIgnoreCase))
+                {
+                    ApplyFsConfigDir(dir);
+                    return;
+                }
+            }
             // ★ 树里选中了单预设（用户新建项）→ 应用单预设（执行其代码并标记冲突）
             if (_selected?.CustomId != null)
             {

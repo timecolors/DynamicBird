@@ -67,7 +67,7 @@ namespace ScreenshotGen
             Render("05-AI.png", new ShoreHue.UI.AI.AiChatView(), 420, 400, new Point(730, 240), outDir);
 
             // 6) 海床（AI 编程）界面
-            var birdSettings = new FakeSettings();
+            var fakeSettings = new FakeSettings();
             Render("06-Seabed.png", new ShoreHue.UI.Settings.Pages.SeabedPage(birdSettings), 880, 600, new Point(520, 150), outDir);
         }
 

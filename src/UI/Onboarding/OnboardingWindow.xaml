@@ -6,8 +6,9 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
-        Background="#F3F6FA"
-        Foreground="#1E1E1E" xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
+        Foreground="#1E1E1E"
+        xmlns:loc="clr-namespace:ShoreHue.UI.Localization">
+    <!-- ★ 海边风格：Window 无背景色，由根 Grid 铺天空→海面→沙滩渐变 + 动态浪花 -->
 
     <!-- ★ 内联主题按钮样式：OnboardingWindow 自身可解析（不依赖 App 资源环境，便于单元测试） -->
     <Window.Resources>
@@ -73,9 +74,23 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ★ 静态背景：右上浅沙色 → 左下淡海蓝（柔和、可读性好，无动画） -->
+        <LinearGradientBrush x:Key="CoastFlat" StartPoint="1,0" EndPoint="0,1">
+            <GradientStop Color="#FBF3DF" Offset="0.00"/>
+            <GradientStop Color="#F2E7CA" Offset="0.35"/>
+            <GradientStop Color="#DCE9E6" Offset="0.62"/>
+            <GradientStop Color="#C2DCE6" Offset="0.82"/>
+            <GradientStop Color="#B4D3E0" Offset="1.00"/>
+        </LinearGradientBrush>
     </Window.Resources>
 
-    <Grid Margin="28">
+    <Grid x:Name="RootGrid">
+        <Grid.Background>
+            <StaticResource ResourceKey="CoastFlat"/>
+        </Grid.Background>
+
+        <Grid Margin="28">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -88,15 +103,27 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- 左侧步骤指示 -->
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,4,20,0">
-            <StackPanel x:Name="StepPanel">
-                <TextBlock Text="{Binding Item[Ob_Step_Brand], Source={x:Static loc:LocalizationManager.Instance}}"
-                           FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16"/>
-                <!-- 步骤 1-10 动态生成由代码填充，这里保留占位容器 -->
-                <ItemsControl x:Name="StepList"/>
-            </StackPanel>
-            </ScrollViewer>
+            <!-- 左侧：品牌 + 步骤指示（半透明白卡片保证在海洋蓝上也可读；品牌固定不随滚动） -->
+            <Border Grid.Column="0" Background="#E8FFFFFF" CornerRadius="14" Padding="14,12" Margin="0,4,20,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0"
+                               Text="{Binding Item[Ob_Step_Brand], Source={x:Static loc:LocalizationManager.Instance}}"
+                               FontSize="20" FontWeight="SemiBold"
+                               Foreground="#0F5C8A"
+                               Margin="0,0,0,14"
+                               TextTrimming="CharacterEllipsis"/>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel x:Name="StepPanel">
+                            <!-- 步骤 1-10 动态生成由代码填充，这里保留占位容器 -->
+                            <ItemsControl x:Name="StepList"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
 
             <!-- 右侧内容 -->
             <Grid Grid.Column="1">
@@ -188,16 +215,16 @@
 
                             <!-- 四角（橙=快捷设置/最近/通知；灰=右上安全区） -->
                             <Border Grid.Row="0" Grid.Column="0" Background="#D0FF9900" CornerRadius="6" Margin="2">
-                                <TextBlock Text="设" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Item[Ob_Map_CornerTLShort], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="4" Background="#CCAAAAAA" CornerRadius="6" Margin="2">
-                                <TextBlock Text="隐" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Item[Ob_Map_CornerTRShort], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="4" Grid.Column="0" Background="#D0FF9900" CornerRadius="6" Margin="2">
-                                <TextBlock Text="近" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Item[Ob_Map_CornerBLShort], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="4" Grid.Column="4" Background="#D0FF9900" CornerRadius="6" Margin="2">
-                                <TextBlock Text="通" FontSize="16" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Item[Ob_Map_CornerBRShort], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </Grid>
                     </Border>
@@ -220,6 +247,13 @@
                         <StackPanel>
                             <TextBlock Text="{Binding Item[Ob_Map_CustomTitle], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="13" Foreground="#1E3A8A"/>
                             <TextBlock Text="{Binding Item[Ob_Map_CustomText], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11.5" Foreground="#2B579A" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="18"/>
+                        </StackPanel>
+                    </Border>
+                    <!-- ★ 数字环：键盘呼出（可选开启） -->
+                    <Border Background="#FFF7E6" CornerRadius="10" Padding="14,10" Margin="0,8,0,0">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Item[Ob_Map_RingTitle], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="13" Foreground="#8A5A00"/>
+                            <TextBlock Text="{Binding Item[Ob_Map_RingText], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11.5" Foreground="#8A6D00" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="18"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -350,6 +384,10 @@
                     <Border Background="#FFFFFF" CornerRadius="10" Padding="16,12" Margin="0,0,0,10">
                         <StackPanel><TextBlock Text="{Binding Item[Ob_Customize_Card3Title], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="14"/><TextBlock Text="{Binding Item[Ob_Customize_Card3Text], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12.5" Foreground="#555555" TextWrapping="Wrap" Margin="0,6,0,0" LineHeight="21"/></StackPanel>
                     </Border>
+                    <!-- ★ 海床：设置即文件（编程模式） -->
+                    <Border Background="#EDE7F6" CornerRadius="10" Padding="16,12" Margin="0,0,0,10">
+                        <StackPanel><TextBlock Text="{Binding Item[Ob_Customize_Card4Title], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="14" Foreground="#4A1E8A"/><TextBlock Text="{Binding Item[Ob_Customize_Card4Text], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12.5" Foreground="#4B3A6B" TextWrapping="Wrap" Margin="0,6,0,0" LineHeight="21"/></StackPanel>
+                    </Border>
                     <Border Background="#FFF8E1" CornerRadius="10" Padding="14,10"><TextBlock Text="{Binding Item[Ob_Customize_Tip], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11.5" Foreground="#8A6D00" TextWrapping="Wrap" LineHeight="19"/></Border>
                 </StackPanel>
                 </ScrollViewer>
@@ -373,7 +411,7 @@
                                 <TextBlock Grid.Column="1" Text="{Binding Item[Ob_Done_Hotkey1], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12.5" Foreground="#555555" TextWrapping="Wrap" VerticalAlignment="Center"/>
                             </Grid>
                             <!-- 快捷键 2（动态） -->
-                            <Grid>
+                            <Grid Margin="0,8,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
@@ -382,6 +420,17 @@
                                     <TextBlock x:Name="DoneHotkey2Key" FontSize="12" FontWeight="SemiBold" Foreground="#0078D4"/>
                                 </Border>
                                 <TextBlock Grid.Column="1" x:Name="DoneHotkey2Desc" FontSize="12.5" Foreground="#555555" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            </Grid>
+                            <!-- 快捷键 3（数字环，动态） -->
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#E8F0FE" CornerRadius="6" Padding="10,4" Margin="0,0,10,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="DoneHotkey3Key" FontSize="12" FontWeight="SemiBold" Foreground="#0078D4"/>
+                                </Border>
+                                <TextBlock Grid.Column="1" x:Name="DoneHotkey3Desc" FontSize="12.5" Foreground="#555555" TextWrapping="Wrap" VerticalAlignment="Center"/>
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -407,5 +456,6 @@
             <Button x:Name="BtnPrev" Grid.Column="2" Content="{Binding Item[UI_OnboardingWindow_109], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource Win11Button}" Width="90" Height="32" Margin="0,0,8,0" Click="Prev_Click" Visibility="Collapsed"/>
             <Button x:Name="BtnNext" Grid.Column="3" Content="{Binding Item[UI_OnboardingWindow_110], Source={x:Static loc:LocalizationManager.Instance}}" Style="{StaticResource Win11AccentButton}" Width="110" Height="32" Click="Next_Click"/>
         </Grid>
+    </Grid>
     </Grid>
 </Window>

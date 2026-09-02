@@ -67,7 +67,7 @@ namespace ShoreHue.Core.Controllers
         private bool _directLoadInProgress = false;
         private string _pendingSwitchType = "";
         private string _pendingSwitchKey = "";
-        // ========== 小鸟依人 ==========
+        // ========== 引潮 ==========
         private bool _isClinging = false;
 
         // ========== IEdgeTriggerController 接口实现 ==========
@@ -153,7 +153,7 @@ namespace ShoreHue.Core.Controllers
                     //   "top = my - ch/2" 中心跳变（快速切换方向反转时面板乱跳）
                     double cw = _cachedWidth > 0 ? _cachedWidth : _window.Width;
                     double ch = _cachedHeight > 0 ? _cachedHeight : _window.Height;
-                    // ★ 贴边模式：纯贴边锚定（无吸附——吸附是小鸟依人的设计，贴边本就贴边）
+                    // ★ 贴边模式：纯贴边锚定（无吸附——吸附是引潮的设计，贴边本就贴边）
                     return CalculatePosition(region, mx, my, sw, sh, cw, ch);
                 }
                 catch
@@ -323,6 +323,111 @@ namespace ShoreHue.Core.Controllers
         }
 
         /// <summary>
+        /// 键盘呼出指定区域面板（Ctrl+数字环）：绕过触发延时/防抖，直接加载内容并锚定显示。
+        /// 角部默认规则与鼠标触发一致：右上角未配置「窗口控制」时不呼出（安全区，无副作用）。
+        /// 显示后由 MainWindow 置热键钉住（不自动隐藏；再按同键收起）。
+        /// </summary>
+        public void SummonRegion(EdgeRegion region)
+        {
+            try
+            {
+                if (region == EdgeRegion.Unknown) return;
+                // ★ 右上角安全区：默认不设面板 → 不呼出（Ctrl+9 无副作用）
+                if (region == EdgeRegion.TopRight &&
+                    _settings.GetRegionPanel("TopRight") != "WindowControl")
+                {
+                    return;
+                }
+                if (_isDragging) return;
+
+                var wa = GetPanelWorkArea();
+                double sw = wa.Width;
+                double sh = wa.Height;
+                bool corner = region == EdgeRegion.TopLeft || region == EdgeRegion.TopRight ||
+                              region == EdgeRegion.BottomLeft || region == EdgeRegion.BottomRight;
+
+                string type, key;
+                if (corner)
+                {
+                    key = region.ToString();
+                    string custom = _settings.GetRegionPanel(key);
+                    type = custom != "Default" && IsValidPanelType(custom) ? custom : "Placeholder";
+                    _currentEdge = region is EdgeRegion.BottomLeft or EdgeRegion.BottomRight ? "Bottom" : "Top";
+                }
+                else
+                {
+                    type = GetRegionTypeFromEnum(region);
+                    key = GetRegionKey(region);
+                    _currentEdge = GetEdgeName(region);
+                }
+
+                _lastRegionType = type;
+                _currentRegionKey = key;
+                _lastProcessedRegion = region;
+                RegionChanged?.Invoke(type, key);   // 加载内容（同 type 复用缓存实例）
+                SizeController.SetMode(type, key);
+
+                double w, h, left = 0, top = 0;
+                if (corner)
+                {
+                    // 与 ProcessCorner 一致：内容自适应（AutoFit）或用户尺寸
+                    if (_settings.AutoFitOnTrigger)
+                    {
+                        (w, h) = SizeController.MeasurePlaceholderTargetSize();
+                    }
+                    else
+                    {
+                        var (userW, userH) = _settings.GetUserSize(key);
+                        w = Math.Max(100, Math.Min(userW >= 100 ? userW : sw * 2.0 / 7.0, sw * 0.8));
+                        h = Math.Max(100, Math.Min(userH >= 100 ? userH : sw * 2.0 / 7.0, sh * 0.8));
+                    }
+                    _cachedWidth = w; _cachedHeight = h; _lastTargetW = w; _lastTargetH = h;
+                    switch (region)
+                    {
+                        case EdgeRegion.TopLeft: break;
+                        case EdgeRegion.TopRight: left = sw - w; break;
+                        case EdgeRegion.BottomLeft: top = _bottomBoundary - h; break;
+                        case EdgeRegion.BottomRight: left = sw - w; top = _bottomBoundary - h; break;
+                    }
+                }
+                else
+                {
+                    (w, h) = GetTargetSizeForRegion(type, key);
+                    _cachedWidth = w; _cachedHeight = h; _lastTargetW = w; _lastTargetH = h;
+                    _shapeAnimator.SetSizeKeepPositionDirect(w, h);
+                    // ★ 键盘呼出瞄准：中段取该边中点、端段贴向对应角，使面板落在目标边段。
+                    //   不沿用窗口当前位置作锚点——窗口隐藏（屏幕外）时旧锚点会被钳到边角，
+                    //   导致「上/下/左/右边中段」错误地落在边缘端部。
+                    double mx = sw / 2, my = sh / 2;
+                    switch (region)
+                    {
+                        case EdgeRegion.Top_Left: mx = 0; break;
+                        case EdgeRegion.Top_Right: mx = sw; break;
+                        case EdgeRegion.Bottom_Left: mx = 0; break;
+                        case EdgeRegion.Bottom_Right: mx = sw; break;
+                        case EdgeRegion.Left_Top: my = 0; break;
+                        case EdgeRegion.Left_Bottom: my = sh; break;
+                        case EdgeRegion.Right_Top: my = 0; break;
+                        case EdgeRegion.Right_Bottom: my = sh; break;
+                        // Top_Center/Bottom_Center/Left_Center/Right_Center 保持 0.5 → 居中
+                    }
+                    (left, top) = CalculatePosition(region, mx, my, sw, sh, w, h);
+                }
+
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Debug(
+                    $"键盘呼出 region={region} type={type} key={key} → 目标({left:0},{top:0}) 屏幕{sw:0}x{sh:0}");
+                _visibilityController.ShowAt(left, top, _currentEdge);
+                _visibilityController.CurrentRegionKey = key;
+                _timing.ResetTriggerDelay();
+                _timing.ResetDebounce();
+            }
+            catch (Exception ex)
+            {
+                ShoreHue.Core.Infrastructure.Logging.LogManager.Error("键盘呼出区域面板异常: " + region, ex);
+            }
+        }
+
+        /// <summary>
         /// 鼠标在面板内时：仅跟随边缘滑动更新位置，不切换区域/内容。
         /// 解决“面板内移动鼠标位置不实时跟手”的问题。
         /// </summary>
@@ -420,7 +525,7 @@ namespace ShoreHue.Core.Controllers
         }
 
         /// <summary>
-        /// 小鸟依人开关变化：关闭时若正在跟随，立即停止（面板停住，回普通模式）。
+        /// 引潮开关变化：关闭时若正在跟随，立即停止（面板停住，回普通模式）。
         /// MainWindow 在设置变更时调用。
         /// </summary>
         public void SetClingModeEnabled(bool enabled)
@@ -715,7 +820,7 @@ namespace ShoreHue.Core.Controllers
         }
 
         // ========================================
-        //  小鸟依人
+        //  引潮
         // ========================================
 
         public bool StartClinging(double mouseX, double mouseY)
@@ -799,7 +904,7 @@ namespace ShoreHue.Core.Controllers
         }
 
         /// <summary>
-        /// 计算小鸟依人目标位置：面板中心对准鼠标点，磁铁吸附 + 屏幕钳制。
+        /// 计算引潮目标位置：面板中心对准鼠标点，磁铁吸附 + 屏幕钳制。
         /// 由 tick 的 UpdateClinging 和渲染帧的 ClingTargetProvider（实时跟手）共用。
         /// </summary>
         public (double left, double top) ComputeClingTarget(double mouseX, double mouseY)
@@ -811,7 +916,7 @@ namespace ShoreHue.Core.Controllers
             var clingWa = GetMouseWorkArea(mouseX, mouseY);
             double csw = clingWa.Width;
             double csh = clingWa.Height;
-            // 磁铁吸附（小鸟依人的设计）：面板边缘距屏幕边 < 吸附范围 → 吸到该边贴边
+            // 磁铁吸附（引潮的设计）：面板边缘距屏幕边 < 吸附范围 → 吸到该边贴边
             int snap = _settings.SnapRangePx;
             if (snap > 0)
             {

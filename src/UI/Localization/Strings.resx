@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -360,7 +360,7 @@
     <value>开启后，面板会软绵绵地追着鼠标跑，追上后粘在鼠标上。关闭则移出边缘后面板停在原位。</value>
   </data>
   <data name="UI_SettingsWindow_214" xml:space="preserve">
-    <value>小鸟依人模式</value>
+    <value>引潮模式</value>
   </data>
   <data name="UI_SettingsWindow_219" xml:space="preserve">
     <value>区域形状（高级）</value>
@@ -1220,10 +1220,10 @@
     <value>自适应 / 固定位置</value>
   </data>
   <data name="UI_OnboardingWindow_95" xml:space="preserve">
-    <value>开启后，鼠标移出面板时，面板会跟着鼠标走（像小鸟跟着人）；鼠标停下，面板就停在鼠标附近，适合把面板随手带到需要的位置。</value>
+    <value>开启后，鼠标移出面板时，面板会跟着鼠标走（像潮水被月亮牵引）；鼠标停下，面板就停在鼠标附近，适合把面板随手带到需要的位置。</value>
   </data>
   <data name="UI_OnboardingWindow_94" xml:space="preserve">
-    <value>小鸟依人模式</value>
+    <value>引潮模式</value>
   </data>
   <data name="UI_OnboardingWindow_93" xml:space="preserve">
     <value>值得了解的设置特性</value>
@@ -2147,7 +2147,7 @@
     <value>三大分区</value>
   </data>
   <data name="Ob_Welcome_Card2Text" xml:space="preserve">
-    <value>边缘：快捷操作与任务栏；角落：独立功能（快捷开关 / 最近使用 / 通知坞）；中间区域：AI 助手与应用辅助（画中画）。</value>
+    <value>面板只出现在屏幕边缘，不占屏幕中央：上/下边缘 = 任务栏；左边缘 = 小组件（中段为 AI 助手）；右边缘 = 小组件（中段为应用辅助·画中画）；四个角落 = 快捷开关 / 最近使用 / 通知坞（右上默认安全区）。</value>
   </data>
   <data name="Ob_Welcome_Tip" xml:space="preserve">
     <value>隐私优先：所有数据只保存在本机 %LOCALAPPDATA%\ShoreHue，无账号、无广告、无云上传。</value>
@@ -2156,7 +2156,7 @@
     <value>屏幕地图：16 个触发区</value>
   </data>
   <data name="Ob_Map_Desc" xml:space="preserve">
-    <value>下面这张图是海岸线的默认布局。每个区域显示什么、是否启用、形状与触发延时，都能在 设置 → 通用 中单独定制。</value>
+    <value>下面这张图是海岸线的默认布局。每个区域显示什么、是否启用、形状与触发延时，都能在 设置 → 区域 中单独定制；面板外观与小组件在 设置 → 面板。</value>
   </data>
   <data name="Ob_Map_TopLeft" xml:space="preserve">
     <value>任务栏</value>
@@ -2213,13 +2213,13 @@
     <value>固定应用</value>
   </data>
   <data name="Ob_Taskbar_Card1Text" xml:space="preserve">
-    <value>把正在运行的窗口标签拖到面板左上角的海岸线图标上，松开即固定为快捷方式（拖放时图标会变成 ＋）。也可以直接把 .exe 拖到面板。</value>
+    <value>把正在运行的窗口标签拖到面板左侧的交互条上，松开即固定为快捷方式（拖入时交互条中央显示 ＋）。也可以直接把 .exe 文件拖到面板。</value>
   </data>
   <data name="Ob_Taskbar_Card2Title" xml:space="preserve">
     <value>关闭与移除</value>
   </data>
   <data name="Ob_Taskbar_Card2Text" xml:space="preserve">
-    <value>窗口标签右侧的 ✕ 关闭窗口；把快捷方式拖到左上角图标（图标变垃圾桶）即可移除。</value>
+    <value>窗口标签右侧的 ✕ 关闭窗口；把已有快捷方式拖回左侧交互条（显示 🗑）即可移除。</value>
   </data>
   <data name="Ob_Taskbar_Card3Title" xml:space="preserve">
     <value>排序与启动</value>
@@ -2264,10 +2264,10 @@
     <value>左右边缘除中间外默认是小组件面板，顶部标签切换。</value>
   </data>
   <data name="Ob_Widgets_Card1Title" xml:space="preserve">
-    <value>五个内置小组件</value>
+    <value>六个内置小组件</value>
   </data>
   <data name="Ob_Widgets_Card1Text" xml:space="preserve">
-    <value>剪贴板历史（跨重启保留、收藏不清理、搜索分类）、便签（多色）、计时器（正计时/倒计时/闹钟）、计算器（标准/科学/程序员）、划词翻译。</value>
+    <value>剪贴板历史（跨重启保留、收藏不清理、搜索分类）、便签（多色）、计时器（正计时/倒计时/闹钟）、计算器（标准/科学/程序员）、划词翻译、网页（内置浏览器，地址可在设置中更换）。</value>
   </data>
   <data name="Ob_Widgets_Card2Title" xml:space="preserve">
     <value>划词翻译</value>
@@ -2279,10 +2279,10 @@
     <value>自定义小组件</value>
   </data>
   <data name="Ob_Widgets_Card3Text" xml:space="preserve">
-    <value>设置 → 小工具 → 新建小组件：用 C# 编写（可让 AI 生成代码），内置编译器即时编译预览，保存即生效。也可以从文件导入/导出分享。</value>
+    <value>新建小组件：在 设置 → 面板 → 小组件/组件市场 中新建，或用 AI 生成 C# 代码后粘贴，内置编译器即时编译预览，保存即生效。开启编程模式后，小组件代码以文件存放在 海床 的「面板/小组件」文件夹，可直接编辑。</value>
   </data>
   <data name="Ob_Widgets_Tip" xml:space="preserve">
-    <value>小组件显示/隐藏、数量限制都可在 设置 → 小工具 中调整。</value>
+    <value>小组件显示/隐藏可在 设置 → 面板 → 小组件 中逐项勾选。</value>
   </data>
   <data name="Ob_Toggles_Title" xml:space="preserve">
     <value>快捷开关与状态栏</value>
@@ -2300,7 +2300,7 @@
     <value>状态栏</value>
   </data>
   <data name="Ob_Toggles_Card2Text" xml:space="preserve">
-    <value>面板顶部显示时间、CPU、内存、FPS、音量、网络、电池与天气，显示哪些项可在 设置 → 任务栏 中逐项勾选。</value>
+    <value>面板顶部显示时间、CPU、内存、FPS、音量、网络、电池与天气，显示哪些项可在 设置 → 面板 中逐项勾选。</value>
   </data>
   <data name="Ob_Toggles_Card3Title" xml:space="preserve">
     <value>快捷操作</value>
@@ -2321,7 +2321,7 @@
     <value>首次配置</value>
   </data>
   <data name="Ob_Ai_Card1Text" xml:space="preserve">
-    <value>设置 → AI 助手：选择服务商预设（DeepSeek / OpenAI / SiliconFlow / Ollama 本地 / OpenRouter 等），填入 API Key 与模型名，点「测试连接」验证。</value>
+    <value>设置 → AI：选择服务商预设（DeepSeek / OpenAI / SiliconFlow / Ollama 本地 / OpenRouter 等），填入 API Key 与模型名，点「测试连接」验证。</value>
   </data>
   <data name="Ob_Ai_Card2Title" xml:space="preserve">
     <value>对话与文件</value>
@@ -2369,22 +2369,43 @@
     <value>外观</value>
   </data>
   <data name="Ob_Customize_Card1Text" xml:space="preserve">
-    <value>背景色、文字色、透明度、圆角、自定义图标，在 设置 → 通用 调整；Win11 22H2+ 自动启用 Mica 毛玻璃。</value>
+    <value>背景色、文字色、透明度、圆角、自定义图标与全局字号，在 设置 → 面板 → 外观 调整；Win11 22H2+ 自动启用 Mica 毛玻璃。</value>
   </data>
   <data name="Ob_Customize_Card2Title" xml:space="preserve">
     <value>动画与性能</value>
   </data>
   <data name="Ob_Customize_Card2Text" xml:space="preserve">
-    <value>呼出/隐藏动画、缓动类型、时长可调；性能三档预设（顺滑/正常/省电）一键切换——省电模式关闭动画、最低 CPU 占用。</value>
+    <value>呼出/隐藏动画、缓动类型、时长与面板帧率在 设置 → 动画 可调；性能三档预设（顺滑/正常/省电）在快捷开关面板一键切换——省电模式关闭动画、最低 CPU 占用。</value>
   </data>
   <data name="Ob_Customize_Card3Title" xml:space="preserve">
     <value>边缘行为与多显示器</value>
   </data>
   <data name="Ob_Customize_Card3Text" xml:space="preserve">
-    <value>每个边缘可选择跟随鼠标或固定位置；「小鸟依人」模式让面板跟着鼠标走；多显示器下自动跟随鼠标所在的屏幕，副屏也能正常使用。</value>
+    <value>每个边缘可选择跟随鼠标或固定位置；「引潮」模式让面板跟着鼠标走；多显示器下自动跟随鼠标所在的屏幕，副屏也能正常使用。</value>
   </data>
   <data name="Ob_Customize_Tip" xml:space="preserve">
     <value>16 个区域的面板类型、形状、触发延时全部可单独配置——比如把右边缘改成 AI 助手，或把右上角改成窗口操作中心。</value>
+  </data>
+  <data name="Ob_Customize_Card4Title" xml:space="preserve">
+    <value>海床：设置与功能都是文件</value>
+  </data>
+  <data name="Ob_Customize_Card4Text" xml:space="preserve">
+    <value>在 设置 → 通用 勾选「编程模式（海床）」后，设置窗口会新增「海床」页签：全部设置按 常规/区域/面板/动画 四类组织为真实文件夹与 JSON 文件，小组件代码放在「面板/小组件」里可直接编辑、保存即时生效——设置本身就是一个可视化的文件资源管理器，树里看到什么，文件夹里就有什么。</value>
+  </data>
+  <data name="Ob_Map_RingTitle" xml:space="preserve">
+    <value>不用鼠标：数字环（修饰键 + 数字 1-9）</value>
+  </data>
+  <data name="Ob_Map_RingText" xml:space="preserve">
+    <value>在 设置 → 区域 → 高级 勾选「键盘呼出区域面板」后，按修饰键（默认 Ctrl，可改为 Ctrl+Shift/Alt/Ctrl+Alt 避开浏览器冲突）+ 数字键即可呼出对应区域：7/9/1/3 = 四角，2/4/6/8 = 四边中段；主键盘与小键盘数字都支持；再按一次收起；右上角 Ctrl+9 默认安全区不呼出。</value>
+  </data>
+  <data name="Ob_Done_Hotkey3DescSet" xml:space="preserve">
+    <value>数字环：按数字 1-9 呼出对应区域面板（主键盘/小键盘均可，再按收起）</value>
+  </data>
+  <data name="Ob_Done_Hotkey3DescUnset" xml:space="preserve">
+    <value>数字环未开启——在 设置 → 区域 → 高级 勾选「键盘呼出区域面板」后即可使用</value>
+  </data>
+  <data name="Ob_Done_Hotkey3KeyUnset" xml:space="preserve">
+    <value>（未开启）</value>
   </data>
   <data name="Ob_Done_Title" xml:space="preserve">
     <value>都准备好了</value>
@@ -2428,7 +2449,7 @@
     <value>一切皆可自定义</value>
   </data>
   <data name="Ob_Map_CustomText" xml:space="preserve">
-    <value>16 个区域的触发开关、面板类型（任务栏/小组件/AI/画中画/通知等）、形状（方形/横条/竖条）、尺寸与触发延时都能在 设置 → 通用 中单独配置——把每个边缘/角落改成你想要的任何功能。</value>
+    <value>16 个区域的触发开关、面板类型（任务栏/小组件/AI/画中画/通知等）、形状（方形/横条/竖条）、尺寸与触发延时都能在 设置 → 区域 中单独配置——把每个边缘/角落改成你想要的任何功能。</value>
   </data>
   <data name="Ob_Done_Tip" xml:space="preserve">
     <value>提示：鼠标移到屏幕边缘/角落即可触发，不需要点击任何按钮。</value>
@@ -2442,6 +2463,18 @@
   </data>
   <data name="Ob_Map_Widgets" xml:space="preserve">
     <value>小组件</value>
+  </data>
+  <data name="Ob_Map_CornerTLShort" xml:space="preserve">
+    <value>快捷</value>
+  </data>
+  <data name="Ob_Map_CornerBLShort" xml:space="preserve">
+    <value>最近</value>
+  </data>
+  <data name="Ob_Map_CornerBRShort" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="Ob_Map_CornerTRShort" xml:space="preserve">
+    <value>安全</value>
   </data>
   <data name="Ob_Map_CornerTL" xml:space="preserve">
     <value>左上：快捷开关
@@ -2547,7 +2580,7 @@
     <value>面板运行帧率</value>
   </data>
   <data name="Set_PanelFrameRateTip" xml:space="preserve">
-    <value>面板跟随/小鸟依人动画的渲染帧率。越高越顺滑，越低越省 CPU。</value>
+    <value>面板跟随/引潮动画的渲染帧率。越高越顺滑，越低越省 CPU。</value>
   </data>
   <data name="Set_PanelFrameRateLabel" xml:space="preserve">
     <value>帧率</value>
@@ -2556,7 +2589,7 @@
     <value>0 = 自动（跟随显示器刷新率）。手动档：30 / 60 / 90 / 120 fps。</value>
   </data>
   <data name="Set_PanelFrameRateHint" xml:space="preserve">
-    <value>帧率越高，边缘跟随与小鸟依人越顺滑（顺滑模式建议 60-120）；越低越省 CPU（省电模式自动降帧）。</value>
+    <value>帧率越高，边缘跟随与引潮越顺滑（顺滑模式建议 60-120）；越低越省 CPU（省电模式自动降帧）。</value>
   </data>
   <data name="Set_FrameRateAuto" xml:space="preserve">
     <value>自动</value>

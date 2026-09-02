@@ -4,8 +4,9 @@ using ShoreHue.Core.Models;
 namespace ShoreHue.UI.Seabed
 {
     /// <summary>
-    /// 构建海床配置树：一级分类（面板设计/动画/外观/交互/状态栏）→ 二级 → 三级。
-    /// 叶子节点绑定 SettingsData 字段名（编程框以 JSON 编辑这些字段）。
+    /// 构建海床配置树：一级分类 = 设置窗口页签（常规/区域/面板/动画），与文件夹目录同构——
+    /// 文件夹里放什么，树里就看到什么；树的配置节点归属严格按设置面板页签内容分类。
+    /// 叶子节点 Key 与 SettingsData 字段名保持稳定（不随分组移动变化，预设/模板/变灰映射依赖它）。
     /// </summary>
     public static class ConfigTreeBuilder
     {
@@ -13,11 +14,10 @@ namespace ShoreHue.UI.Seabed
         {
             var root = new ConfigNode { Key = "root", Name = "海床" };
 
-            root.Children.Add(BuildPanelDesign());
-            root.Children.Add(BuildAnimation());
-            root.Children.Add(BuildAppearance());
-            root.Children.Add(BuildInteraction());
-            root.Children.Add(BuildStatusBar());
+            root.Children.Add(BuildGeneral());   // 设置页签：常规
+            root.Children.Add(BuildRegion());    // 设置页签：区域
+            root.Children.Add(BuildPanel());     // 设置页签：面板
+            root.Children.Add(BuildAnimation()); // 设置页签：动画
 
             return root;
         }
@@ -29,7 +29,7 @@ namespace ShoreHue.UI.Seabed
             return FindRecursive(root, key);
         }
 
-        /// <summary>按 Key 返回节点路径的名称链（如 [面板设计, 面板尺寸]）；未找到返回空。用于树↔文件夹映射。</summary>
+        /// <summary>按 Key 返回节点路径的名称链（如 [区域, 触发与位置]）；未找到返回空。用于树↔文件夹映射。</summary>
         public static System.Collections.Generic.List<string> FindPathNames(string key)
         {
             var result = new System.Collections.Generic.List<string>();
@@ -109,21 +109,42 @@ namespace ShoreHue.UI.Seabed
             return n;
         }
 
-        // ========== 面板设计 ==========
-        private static ConfigNode BuildPanelDesign()
+        // ========== 设置页签：常规（语言/更新/关于无配置叶子；含勿扰与性能帧率） ==========
+        private static ConfigNode BuildGeneral()
         {
-            var c = new ConfigNode { Key = "panel", Name = "面板设计", Category = "面板设计" };
-            c.Children.Add(Leaf("panel-regions", "区域面板类型", "面板设计",
+            var c = new ConfigNode { Key = "general", Name = "常规", Category = "常规" };
+            c.Children.Add(Leaf("panel-dnd", "勿扰模式", "常规",
+                "DndModeEnabled", "RememberDndMode"));
+            c.Children.Add(Leaf("inter-perf", "性能模式与帧率", "常规",
+                "PerformanceMode", "PanelFrameRate"));
+            return c;
+        }
+
+        // ========== 设置页签：区域（触发与位置 / 区域面板 / 触发行为 / 高级） ==========
+        private static ConfigNode BuildRegion()
+        {
+            var c = new ConfigNode { Key = "region", Name = "区域", Category = "区域" };
+
+            // 页签分区「触发与位置」：边/角开关 + 边行为模式 + 固定形状/偏移 + 区域形状
+            c.Children.Add(Leaf("panel-edges", "触发与位置", "区域",
+                "Edge_Top", "Edge_Bottom", "Edge_Left", "Edge_Right",
+                "Corner_TopLeft", "Corner_TopRight", "Corner_BottomLeft", "Corner_BottomRight",
+                "EdgeMode_Top", "EdgeMode_Bottom", "EdgeMode_Left", "EdgeMode_Right",
+                "FixedShape_Top", "FixedShape_Bottom", "FixedShape_Left", "FixedShape_Right",
+                "FixedOffset_Top", "FixedOffset_Bottom", "FixedOffset_Left", "FixedOffset_Right",
                 "Region_Top_Left", "Region_Top_Center", "Region_Top_Right",
                 "Region_Bottom_Left", "Region_Bottom_Center", "Region_Bottom_Right",
                 "Region_Left_Top", "Region_Left_Center", "Region_Left_Bottom",
-                "Region_Right_Top", "Region_Right_Center", "Region_Right_Bottom",
+                "Region_Right_Top", "Region_Right_Center", "Region_Right_Bottom"));
+
+            // 页签分区「区域面板」：16 区域面板类型 + 16 区域尺寸
+            c.Children.Add(Leaf("panel-regions", "区域面板类型", "区域",
                 "RegionPanel_Top_Left", "RegionPanel_Top_Center", "RegionPanel_Top_Right",
                 "RegionPanel_Bottom_Left", "RegionPanel_Bottom_Center", "RegionPanel_Bottom_Right",
                 "RegionPanel_Left_Top", "RegionPanel_Left_Center", "RegionPanel_Left_Bottom",
                 "RegionPanel_Right_Top", "RegionPanel_Right_Center", "RegionPanel_Right_Bottom",
                 "RegionPanel_TopLeft", "RegionPanel_TopRight", "RegionPanel_BottomLeft", "RegionPanel_BottomRight"));
-            c.Children.Add(Leaf("panel-sizes", "面板尺寸（各区域）", "面板设计",
+            c.Children.Add(Leaf("panel-sizes", "区域尺寸（各区域）", "区域",
                 "UserWidth_Top_Left", "UserHeight_Top_Left", "UserWidth_Top_Center", "UserHeight_Top_Center",
                 "UserWidth_Top_Right", "UserHeight_Top_Right", "UserWidth_Bottom_Left", "UserHeight_Bottom_Left",
                 "UserWidth_Bottom_Center", "UserHeight_Bottom_Center", "UserWidth_Bottom_Right", "UserHeight_Bottom_Right",
@@ -132,45 +153,71 @@ namespace ShoreHue.UI.Seabed
                 "UserWidth_Right_Center", "UserHeight_Right_Center", "UserWidth_Right_Bottom", "UserHeight_Right_Bottom",
                 "UserWidth_Corner_TopLeft", "UserHeight_Corner_TopLeft", "UserWidth_Corner_TopRight", "UserHeight_Corner_TopRight",
                 "UserWidth_Corner_BottomLeft", "UserHeight_Corner_BottomLeft", "UserWidth_Corner_BottomRight", "UserHeight_Corner_BottomRight"));
-            c.Children.Add(Leaf("panel-auto", "自适应与固定位置", "面板设计",
-                "AutoFitOnTrigger", "UseAutoSize", "HorizontalLayoutThreshold", "TagWidth",
-                "EdgeMode_Top", "EdgeMode_Bottom", "EdgeMode_Left", "EdgeMode_Right",
-                "FixedShape_Top", "FixedShape_Bottom", "FixedShape_Left", "FixedShape_Right",
-                "FixedOffset_Top", "FixedOffset_Bottom", "FixedOffset_Left", "FixedOffset_Right"));
-            c.Children.Add(Leaf("panel-taskbar", "任务栏", "面板设计",
-                "TaskbarIconSize", "DividerOffset"));
-            c.Children.Add(Leaf("panel-dnd", "勿扰模式", "面板设计",
-                "DndModeEnabled", "RememberDndMode"));
-            c.Children.Add(Leaf("panel-edges", "边缘与角落开关", "面板设计",
-                "Edge_Top", "Edge_Bottom", "Edge_Left", "Edge_Right",
-                "Corner_TopLeft", "Corner_TopRight", "Corner_BottomLeft", "Corner_BottomRight"));
 
-            // 小组件（三级：具体小组件）
-            var widget = new ConfigNode { Key = "panel-widgets", Name = "小组件", Category = "面板设计" };
-            widget.Children.Add(Leaf("widget-clipboard", "剪贴板", "面板设计",
-                "WidgetEnabled_Clipboard", "ClipboardMaxCount", "ClipboardDisplayLength",
-                "ClipboardImageMaxWidth", "ClipboardImageCacheLimitMB"));
-            widget.Children.Add(Leaf("widget-note", "便签", "面板设计",
-                "WidgetEnabled_Note", "DefaultNoteColor", "NoteShowTitleByDefault"));
-            widget.Children.Add(Leaf("widget-timer", "计时器", "面板设计", "WidgetEnabled_Timer"));
-            widget.Children.Add(Leaf("widget-calculator", "计算器", "面板设计", "WidgetEnabled_Calculator"));
-            widget.Children.Add(Leaf("widget-textai", "划词翻译", "面板设计",
-                "WidgetEnabled_TextAi", "TextAiHotkey"));
-            c.Children.Add(widget);
+            // 页签分区「触发行为」：触发距离/延时/防抖（RegionTriggerDelay/HideDelay 是运行时字典，白名单）
+            c.Children.Add(Leaf("inter-trigger", "触发行为", "区域",
+                "TriggerDistancePx", "TriggerDelayMs", "RegionDebounceMs"));
 
-            // 面板功能（任务栏/通知坞/最近/快捷设置/AI/窗口控制 → 可源码化，Kind=Panel 进区域面板）
-            var features = new ConfigNode { Key = "panel-features", Name = "面板功能", Category = "面板设计" };
-            features.Children.Add(Leaf("panel-notification", "通知坞", "面板设计"));
-            features.Children.Add(Leaf("panel-recent", "最近使用", "面板设计"));
-            features.Children.Add(Leaf("panel-quicksettings", "快捷设置", "面板设计"));
-            features.Children.Add(Leaf("panel-taskbar-feature", "任务栏", "面板设计"));
-            features.Children.Add(Leaf("panel-ai", "AI 助手", "面板设计"));
-            features.Children.Add(Leaf("panel-windowcontrol", "窗口控制", "面板设计"));
-            c.Children.Add(features);
+            // 页签分区「高级」：自适应 / 引潮（吸附）/ 穿透
+            c.Children.Add(Leaf("region-advanced", "高级设置", "区域",
+                "AutoFitOnTrigger", "UseAutoSize",
+                "ClingModeEnabled", "SnapRangePx",
+                "PassthroughModifier"));
             return c;
         }
 
-        // ========== 动画 ==========
+        // ========== 设置页签：面板（外观 / 任务栏 / 小组件 / 面板功能 / 状态栏） ==========
+        private static ConfigNode BuildPanel()
+        {
+            var c = new ConfigNode { Key = "panel", Name = "面板", Category = "面板" };
+
+            // 页签分区「外观」：颜色主题 + 形状参数
+            c.Children.Add(Leaf("appr-theme", "外观", "面板",
+                "BackgroundColor", "TextColor", "Opacity", "CornerRadius", "UiFontScale"));
+            c.Children.Add(Leaf("appr-shape", "形状参数", "面板",
+                "StripLengthRatio", "StripWidthMultiplier", "SquareShortSideMultiplier",
+                "GoldenRatio", "TriggerRegionRatio"));
+
+            // 页签分区「任务栏」
+            c.Children.Add(Leaf("panel-taskbar", "任务栏", "面板",
+                "TaskbarIconSize", "DividerOffset", "TagWidth", "HorizontalLayoutThreshold"));
+
+            // 页签分区「小组件」：启停开关 + 各小组件参数（剪贴板/便签参数在小组件详情里编辑）
+            var widget = new ConfigNode { Key = "panel-widgets", Name = "小组件", Category = "面板" };
+            widget.Children.Add(Leaf("widget-clipboard", "剪贴板", "面板",
+                "WidgetEnabled_Clipboard", "ClipboardMaxCount", "ClipboardDisplayLength",
+                "ClipboardImageMaxWidth", "ClipboardImageCacheLimitMB", "LastWidgetTab"));
+            widget.Children.Add(Leaf("widget-note", "便签", "面板",
+                "WidgetEnabled_Note", "DefaultNoteColor", "NoteShowTitleByDefault"));
+            widget.Children.Add(Leaf("widget-timer", "计时器", "面板", "WidgetEnabled_Timer"));
+            widget.Children.Add(Leaf("widget-calculator", "计算器", "面板", "WidgetEnabled_Calculator"));
+            widget.Children.Add(Leaf("widget-textai", "划词翻译", "面板",
+                "WidgetEnabled_TextAi", "TextAiHotkey"));
+            widget.Children.Add(Leaf("widget-web", "网页工具", "面板", "WidgetEnabled_Web", "WebWidgetUrl"));
+            c.Children.Add(widget);
+
+            // 页签分区「面板功能」：可源码化面板（保存为 Panel 变体进区域面板下拉）
+            var features = new ConfigNode { Key = "panel-features", Name = "面板功能", Category = "面板" };
+            features.Children.Add(Leaf("panel-notification", "通知坞", "面板"));
+            features.Children.Add(Leaf("panel-recent", "最近使用", "面板"));
+            features.Children.Add(Leaf("panel-quicksettings", "快捷设置", "面板"));
+            features.Children.Add(Leaf("panel-taskbar-feature", "任务栏", "面板"));
+            features.Children.Add(Leaf("panel-ai", "AI 助手", "面板"));
+            features.Children.Add(Leaf("panel-windowcontrol", "窗口控制", "面板"));
+            c.Children.Add(features);
+
+            // 页签分区「状态栏」（状态栏显示项/天气在面板页签内编辑）
+            var status = new ConfigNode { Key = "status", Name = "状态栏", Category = "面板" };
+            status.Children.Add(Leaf("status-items", "显示项", "面板",
+                "ShowSystemStatus", "StatusShowTime", "StatusShowCpu", "StatusShowMemory",
+                "StatusShowFps", "StatusShowVolume", "StatusShowNetwork", "StatusShowBattery", "StatusShowWeather"));
+            status.Children.Add(Leaf("status-weather", "天气", "面板",
+                "WeatherEnabled", "WeatherCity"));
+            c.Children.Add(status);
+            return c;
+        }
+
+        // ========== 设置页签：动画（触发/隐藏/形变/飞行/稳定/延时隐藏/总开关） ==========
         private static ConfigNode BuildAnimation()
         {
             var c = new ConfigNode { Key = "anim", Name = "动画", Category = "动画" };
@@ -183,54 +230,10 @@ namespace ShoreHue.UI.Seabed
             c.Children.Add(Leaf("anim-transform", "尺寸形变", "动画",
                 "TransformEasingType", "TransformDurationMs"));
             c.Children.Add(Leaf("anim-fly", "跟随 / 飞行", "动画", "FlyDurationMs"));
+            c.Children.Add(Leaf("anim-stabilize", "内容稳定", "动画", "ContentStabilizeMs"));
+            c.Children.Add(Leaf("anim-hidedelay", "延时隐藏", "动画", "HideDelayMs"));
             c.Children.Add(Leaf("anim-master", "总开关与旧兼容", "动画",
                 "AnimationsEnabled", "ShowHideEasingType", "ShowHideDurationMs"));
-            return c;
-        }
-
-        // ========== 外观 ==========
-        private static ConfigNode BuildAppearance()
-        {
-            var c = new ConfigNode { Key = "appr", Name = "外观", Category = "外观" };
-            c.Children.Add(Leaf("appr-theme", "颜色主题", "外观",
-                "BackgroundColor", "TextColor", "Opacity", "CornerRadius", "UiFontScale"));
-            c.Children.Add(Leaf("appr-shape", "形状参数", "外观",
-                "StripLengthRatio", "StripWidthMultiplier", "SquareShortSideMultiplier",
-                "GoldenRatio", "TriggerRegionRatio"));
-
-            return c;
-        }
-
-        // ========== 交互 ==========
-        private static ConfigNode BuildInteraction()
-        {
-            var c = new ConfigNode { Key = "inter", Name = "交互", Category = "交互" };
-            c.Children.Add(Leaf("inter-trigger", "触发行为", "交互",
-                "TriggerDistancePx", "TriggerDelayMs", "RegionDebounceMs"));
-            c.Children.Add(Leaf("inter-hide", "隐藏行为", "交互", "HideDelayMs"));
-            c.Children.Add(Leaf("inter-cling", "小鸟依人", "交互",
-                "ClingModeEnabled", "SnapRangePx", "ContentStabilizeMs"));
-            c.Children.Add(Leaf("inter-passthrough", "穿透", "交互", "PassthroughModifier"));
-            c.Children.Add(Leaf("inter-perf", "性能模式", "交互", "PerformanceMode", "PanelFrameRate"));
-            return c;
-        }
-
-        // ========== 状态栏 ==========
-        private static ConfigNode BuildStatusBar()
-        {
-            var c = new ConfigNode { Key = "status", Name = "状态栏", Category = "状态栏" };
-            c.Children.Add(Leaf("status-items", "显示项", "状态栏",
-                "ShowSystemStatus", "StatusShowTime", "StatusShowCpu", "StatusShowMemory",
-                "StatusShowFps", "StatusShowVolume", "StatusShowNetwork", "StatusShowBattery", "StatusShowWeather"));
-            c.Children.Add(Leaf("status-weather", "天气", "状态栏",
-                "WeatherEnabled", "WeatherCity"));
-            c.Children.Add(Leaf("status-clipboard", "剪贴板", "状态栏",
-                "ClipboardMaxCount", "ClipboardDisplayLength", "ClipboardImageMaxWidth", "ClipboardImageCacheLimitMB"));
-            c.Children.Add(Leaf("status-note", "便签", "状态栏",
-                "DefaultNoteColor", "NoteShowTitleByDefault", "LastWidgetTab"));
-            c.Children.Add(Leaf("status-widgets", "小组件开关", "状态栏",
-                "WidgetEnabled_Clipboard", "WidgetEnabled_Note", "WidgetEnabled_Timer",
-                "WidgetEnabled_Calculator", "WidgetEnabled_TextAi", "TextAiHotkey"));
             return c;
         }
     }

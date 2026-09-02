@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ShoreHue.Core.Services.Configuration
 {
@@ -114,7 +114,7 @@ namespace ShoreHue.Core.Services.Configuration
         System.Collections.Generic.Dictionary<string, string> AppliedPresets { get; set; }
 
         /// <summary>
-        /// 小鸟依人模式开关
+        /// 引潮模式开关
         /// </summary>
         bool ClingModeEnabled { get; set; }
 
@@ -190,6 +190,10 @@ namespace ShoreHue.Core.Services.Configuration
 
         // ========== 划词翻译 热键 ==========
         string TextAiHotkey { get; set; }
+
+        // ========== 键盘呼出区域面板（Ctrl+数字环；默认关，可改修饰键避开浏览器冲突） ==========
+        bool RegionHotkeysEnabled { get; set; }
+        string RegionHotkeyModifier { get; set; }
 
         // ========== 重新加载 / 保存 ==========
         void Reload();

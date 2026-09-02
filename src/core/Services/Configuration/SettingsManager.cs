@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using ShoreHue.Core.Infrastructure.Logging;
 using ShoreHue.Core.Infrastructure.Service;
@@ -47,7 +47,7 @@ namespace ShoreHue.Core.Services.Configuration
         public void Reload()
         {
             // ★ 刷新前先强制落盘内存中的待保存改动（防抖 300ms 内点刷新会丢改动：
-            //   例如刚关掉小鸟依人未落盘，Reload 读到旧值又恢复开启）。
+            //   例如刚关掉引潮未落盘，Reload 读到旧值又恢复开启）。
             FlushSaveNow();
             lock (_lock)
             {
@@ -95,7 +95,7 @@ namespace ShoreHue.Core.Services.Configuration
         /// 用一份完整的 SettingsData 替换内部数据并落盘。
         /// 设置窗口的 ApplyControlsToData 把控件值写入本地副本后调用此方法，
         /// 把副本整体同步进 SettingsManager（否则设置改动只改副本、不落盘，
-        /// 刷新/重启后全部还原——曾导致"关掉小鸟依人刷新又开"）。
+        /// 刷新/重启后全部还原——曾导致"关掉引潮刷新又开"）。
         /// </summary>
         public void Apply(SettingsData data)
         {
@@ -290,6 +290,8 @@ namespace ShoreHue.Core.Services.Configuration
             get => _data.BackgroundColor ?? "#2D2D2D";
             set => SetField(v => _data.BackgroundColor = v, value);
         }
+
+
 
         public string TextColor
         {
@@ -704,6 +706,19 @@ namespace ShoreHue.Core.Services.Configuration
             set => SetField(v => _data.TextAiHotkey = v, value);
         }
 
+        // ========== 键盘呼出区域面板（Ctrl+数字环） ==========
+        public bool RegionHotkeysEnabled
+        {
+            get => _data.RegionHotkeysEnabled;
+            set => SetField(v => _data.RegionHotkeysEnabled = v, value);
+        }
+
+        public string RegionHotkeyModifier
+        {
+            get => _data.RegionHotkeyModifier ?? "Ctrl";
+            set => SetField(v => _data.RegionHotkeyModifier = v, value);
+        }
+
         // ========== 勿扰模式 ==========
         public bool RememberDndMode
         {
@@ -964,7 +979,7 @@ namespace ShoreHue.Core.Services.Configuration
             set { _data.AppliedPresets = value; Save(); }
         }
 
-        // ========== 小鸟依人模式 ==========
+        // ========== 引潮模式 ==========
         public bool ClingModeEnabled
         {
             get => _data.ClingModeEnabled;

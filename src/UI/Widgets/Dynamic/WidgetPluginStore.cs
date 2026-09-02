@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -179,8 +179,13 @@ namespace ShoreHue.UI.Widgets.Dynamic
             }
         }
 
-        /// <summary>海床项目文件夹根（= 海床树的物理投影）：小组件/面板设计/动画/... 各分组子文件夹。</summary>
+        /// <summary>海床项目文件夹根（= 海床树的物理投影）。</summary>
         public static string RootDir => Path.Combine(AppPaths.DataRoot, "seabed");
+
+        /// <summary>小组件代码目录 = 面板/小组件（面板页签「小组件」分区：widget 源码即真相）。</summary>
+        public static string WidgetsCodeDir => Path.Combine(RootDir, "面板", "小组件");
+        /// <summary>面板功能代码目录 = 面板/面板功能（面板内容代码，用于区域面板下拉）。</summary>
+        public static string PanelsCodeDir => Path.Combine(RootDir, "面板", "面板功能");
 
         /// <summary>旧版本 widgets/ 目录 → seabed/ 迁移（首次运行执行一次）。</summary>
         private static void MigrateLegacyWidgetsDir()
@@ -228,10 +233,19 @@ namespace ShoreHue.UI.Widgets.Dynamic
             try
             {
                 EnsureSkeleton();   // 不存在时创建分组骨架
-                // ★ 分组 = 根目录下的子文件夹（小组件/面板功能/面板设计/动画/外观/交互/状态栏）
-                foreach (var groupDir in Directory.GetDirectories(RootDir))
+                // ★ 分组发现：设置页签目录（常规/区域/面板/动画）+ 面板/小组件 + 面板/面板功能（代码目录），
+                //   兼容历史顶层代码目录（迁移后为空）；同一目录只扫一次。
+                var seenDirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var groupPairs = new List<(string Group, string Dir)>();
+                foreach (var g in Directory.GetDirectories(RootDir))
+                    groupPairs.Add((Path.GetFileName(g), g));
+                foreach (var sub in new[] { (Group: "小组件", Dir: WidgetsCodeDir), (Group: "面板功能", Dir: PanelsCodeDir) })
+                    if (Directory.Exists(sub.Dir)) groupPairs.Add(sub);
+                foreach (var pair in groupPairs)
                 {
-                    string group = Path.GetFileName(groupDir);
+                    string groupDir = pair.Dir;
+                    if (!seenDirs.Add(groupDir)) continue;
+                    string group = pair.Group;
                     // ① 分组目录下的 .cs 单文件 → 归一化为 <id>/main.cs（自动包裹）
                     foreach (var csFile in Directory.GetFiles(groupDir, "*.cs"))
                     {
@@ -338,9 +352,11 @@ namespace ShoreHue.UI.Widgets.Dynamic
             {
                 foreach (var plugin in Installed)
                 {
-                    if (plugin.Group != "状态栏") continue;
-                    // manifest kind 过滤：显式非 StatusProvider 的类型跳过（缺省按分组放行）
-                    if (!string.IsNullOrEmpty(plugin.Kind) && plugin.Kind != "StatusProvider") continue;
+                    // 类型判定以 manifest kind 为准（不依赖顶层目录名）；kind 缺省时按目录分组名兼容
+                    string kind = plugin.Kind ?? "";
+                    if (kind == "StatusProvider") { }
+                    else if (kind.Length > 0) continue;
+                    else if (plugin.Group != "状态栏") continue;
                     // ★ 沙箱只对市场来源（TrustedSource=false）执行（与小组件一致）
                     if (!plugin.TrustedSource)
                     {
@@ -391,8 +407,10 @@ namespace ShoreHue.UI.Widgets.Dynamic
             {
                 foreach (var plugin in Installed)
                 {
-                    if (plugin.Group != "动画") continue;
-                    if (!string.IsNullOrEmpty(plugin.Kind) && plugin.Kind != "Animation") continue;
+                    string kind = plugin.Kind ?? "";
+                    if (kind == "Animation") { }
+                    else if (kind.Length > 0) continue;
+                    else if (plugin.Group != "动画") continue;
                     if (!plugin.TrustedSource)
                     {
                         string sandboxErr = WidgetCompiler.SandboxErrors(plugin.Source);
@@ -425,6 +443,27 @@ namespace ShoreHue.UI.Widgets.Dynamic
             ShoreHue.Animation.AnimationRegistry.ReplaceAll(map);
         }
 
+        /// <summary>分组目录集合：设置页签顶层 + 代码目录（面板/小组件、面板/面板功能）。</summary>
+        private static IEnumerable<string> LeafGroupDirs()
+        {
+            foreach (var g in Directory.GetDirectories(RootDir)) yield return g;
+            if (Directory.Exists(WidgetsCodeDir)) yield return WidgetsCodeDir;
+            if (Directory.Exists(PanelsCodeDir)) yield return PanelsCodeDir;
+        }
+
+        /// <summary>叶子功能目录（分组下一层的功能文件夹，去重）。</summary>
+        private static IEnumerable<string> LeafFeatureDirs()
+        {
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var g in LeafGroupDirs())
+            {
+                foreach (var d in Directory.GetDirectories(g))
+                {
+                    if (seen.Add(d)) yield return d;
+                }
+            }
+        }
+
         /// <summary>保存（新建或覆盖）。返回错误信息，成功为空串。</summary>
         public static string Save(WidgetPlugin plugin)
         {
@@ -437,9 +476,11 @@ namespace ShoreHue.UI.Widgets.Dynamic
                 // ★ 应用自身写盘：暂停 watcher，避免写文件触发事件链（watcher 只响应**用户**的增删）
                 WithWatcherSuspended(() =>
                 {
-                    // ★ 写入分组子目录（默认「小组件」；与文件夹扫描一致）
+                    // ★ 写入代码目录（小组件 → 面板/小组件；面板功能 → 面板/面板功能；其余按分组名）
                     string group = string.IsNullOrEmpty(plugin.Group) ? "小组件" : plugin.Group;
-                    string groupPath = Path.Combine(RootDir, group);
+                    string groupPath = group == "小组件" ? WidgetsCodeDir
+                        : group == "面板功能" ? PanelsCodeDir
+                        : Path.Combine(RootDir, group);
                     Directory.CreateDirectory(groupPath);
                     string dir = Path.Combine(groupPath, plugin.Id);
                     Directory.CreateDirectory(dir);
@@ -471,12 +512,11 @@ namespace ShoreHue.UI.Widgets.Dynamic
                 bool deleted = false;
                 WithWatcherSuspended(() =>
                 {
-                    // ★ 支持分组路径：从所有分组子目录中查找
+                    // ★ 支持分组路径：从所有叶子功能目录中查找（含 面板/小组件、面板/面板功能）
                     if (!Directory.Exists(RootDir)) return;
-                    foreach (var groupDir in Directory.GetDirectories(RootDir))
+                    foreach (var dir in LeafFeatureDirs())
                     {
-                        string dir = Path.Combine(groupDir, id);
-                        if (Directory.Exists(dir))
+                        if (string.Equals(Path.GetFileName(dir), id, StringComparison.OrdinalIgnoreCase))
                         {
                             Directory.Delete(dir, true);
                             deleted = true;
@@ -497,16 +537,62 @@ namespace ShoreHue.UI.Widgets.Dynamic
             return false;
         }
 
-        /// <summary>创建分组骨架（不存在时）：根目录 + 各分组子文件夹，方便用户直接放文件。</summary>
+        /// <summary>创建分组骨架（不存在时）。根目录 = 设置页签（常规/区域/面板/动画）；
+        /// 面板内容代码归 面板/小组件 与 面板/面板功能（与设置面板「面板」页签同构）。</summary>
         private static void EnsureSkeleton()
         {
             MigrateLegacyWidgetsDir();
+            MigrateGroupLayout();   // 旧布局：顶层 小组件/面板功能 → 面板/ 下
             if (!Directory.Exists(RootDir)) Directory.CreateDirectory(RootDir);
-            string[] groups = { "小组件", "面板功能", "面板设计", "动画", "外观", "交互", "状态栏" };
-            foreach (var g in groups)
+            foreach (var g in new[] { "常规", "区域", "面板", "动画" })
             {
                 string d = Path.Combine(RootDir, g);
                 if (!Directory.Exists(d)) Directory.CreateDirectory(d);
+            }
+            if (!Directory.Exists(WidgetsCodeDir)) Directory.CreateDirectory(WidgetsCodeDir);
+            if (!Directory.Exists(PanelsCodeDir)) Directory.CreateDirectory(PanelsCodeDir);
+        }
+
+        /// <summary>布局迁移（一次）：把历史顶层代码目录 小组件/、面板功能/ 整体挪到 面板/ 下（目标存在则不重复移动）。</summary>
+        private static void MigrateGroupLayout()
+        {
+            try
+            {
+                MoveDirInto(RootDir, "小组件", WidgetsCodeDir);
+                MoveDirInto(RootDir, "面板功能", PanelsCodeDir);
+            }
+            catch { }
+        }
+
+        private static void MoveDirInto(string root, string name, string targetDir)
+        {
+            string src = Path.Combine(root, name);
+            if (!Directory.Exists(src)) return;
+            if (!Directory.Exists(targetDir))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(targetDir)!);
+                Directory.Move(src, targetDir);
+                return;
+            }
+            // 目标已存在（如 Seeder 先跑）：逐项并入
+            foreach (var item in Directory.EnumerateFileSystemEntries(src))
+            {
+                string dest = Path.Combine(targetDir, Path.GetFileName(item));
+                if (Directory.Exists(dest) || File.Exists(dest)) continue;
+                try
+                {
+                    if (Directory.Exists(item)) Directory.Move(item, dest);
+                    else File.Move(item, dest);
+                }
+                catch { }
+            }
+            // 源里所有条目都已在目标存在（旧布局残留副本）→ 整体删除；否则保留真正冲突的条目
+            bool allMoved = Directory.EnumerateFileSystemEntries(src)
+                .All(item => Directory.Exists(Path.Combine(targetDir, Path.GetFileName(item)))
+                          || File.Exists(Path.Combine(targetDir, Path.GetFileName(item))));
+            if (allMoved)
+            {
+                try { Directory.Delete(src, true); } catch { }
             }
         }
 
@@ -687,22 +773,19 @@ namespace ShoreHue.UI.Widgets.Dynamic
             try
             {
                 if (string.IsNullOrEmpty(customId) || !Directory.Exists(RootDir)) return null;
-                foreach (var groupDir in Directory.GetDirectories(RootDir))
+                foreach (var dir in LeafFeatureDirs())
                 {
-                    foreach (var dir in Directory.GetDirectories(groupDir))
+                    string mf = Path.Combine(dir, "manifest.json");
+                    if (!File.Exists(mf)) continue;
+                    try
                     {
-                        string mf = Path.Combine(dir, "manifest.json");
-                        if (!File.Exists(mf)) continue;
-                        try
-                        {
-                            using var doc = JsonDocument.Parse(File.ReadAllText(mf));
-                            if (doc.RootElement.TryGetProperty("id", out var idEl) &&
-                                idEl.ValueKind == JsonValueKind.String &&
-                                idEl.GetString() == customId)
-                                return dir;
-                        }
-                        catch { }
+                        using var doc = JsonDocument.Parse(File.ReadAllText(mf));
+                        if (doc.RootElement.TryGetProperty("id", out var idEl) &&
+                            idEl.ValueKind == JsonValueKind.String &&
+                            idEl.GetString() == customId)
+                            return dir;
                     }
+                    catch { }
                 }
             }
             catch { }
@@ -715,42 +798,44 @@ namespace ShoreHue.UI.Widgets.Dynamic
             try
             {
                 if (!Directory.Exists(RootDir)) return;
-                foreach (var groupDir in Directory.GetDirectories(RootDir))
+                foreach (var dir in LeafFeatureDirs())
                 {
-                    foreach (var dir in Directory.GetDirectories(groupDir))
+                    string mf = Path.Combine(dir, "manifest.json");
+                    if (!File.Exists(mf)) continue;
+                    try
                     {
-                        string mf = Path.Combine(dir, "manifest.json");
-                        if (!File.Exists(mf)) continue;
-                        try
+                        using var doc = JsonDocument.Parse(File.ReadAllText(mf));
+                        if (doc.RootElement.TryGetProperty("id", out var idEl) &&
+                            idEl.ValueKind == JsonValueKind.String &&
+                            idEl.GetString() == customId)
                         {
-                            using var doc = JsonDocument.Parse(File.ReadAllText(mf));
-                            if (doc.RootElement.TryGetProperty("id", out var idEl) &&
-                                idEl.ValueKind == JsonValueKind.String &&
-                                idEl.GetString() == customId)
-                            {
-                                Directory.Delete(dir, true);
-                                return;
-                            }
+                            Directory.Delete(dir, true);
+                            return;
                         }
-                        catch { }
                     }
+                    catch { }
                 }
             }
             catch { }
         }
 
-        /// <summary>一级分类 → 分组文件夹名（树分类名可能含特殊字符，映射为安全目录名）。</summary>
+        /// <summary>一级分类 → 分组文件夹名（设置页签分类；保留旧分类名映射以兼容存量数据）。</summary>
         public static string MapCategoryToFolder(string category)
         {
             switch (category)
             {
-                case "小组件": return "小组件";
-                case "面板功能": return "面板功能";
-                case "面板设计": return "面板设计";
+                case "小组件": return "面板/小组件";
+                case "面板功能": return "面板/面板功能";
+                // 设置页签分组
+                case "常规": return "常规";
+                case "区域": return "区域";
+                case "面板": return "面板";
                 case "动画": return "动画";
-                case "外观": return "外观";
-                case "交互": return "交互";
-                case "状态栏": return "状态栏";
+                // 旧分类名（v1.1.0 之前/过渡期存量 CustomPanel 仍带这些值）：映射到就近目录，避免落"其他"
+                case "面板设计": return "面板";
+                case "外观": return "面板";
+                case "交互": return "区域";
+                case "状态栏": return "面板";
                 default: return "其他";
             }
         }
@@ -763,29 +848,26 @@ namespace ShoreHue.UI.Widgets.Dynamic
             try
             {
                 if (!Directory.Exists(RootDir)) { log("[OpenFolder] RootDir 不存在"); return; }
-                // ① 按 manifest.id 精确定位
+                // ① 按 manifest.id 精确定位（候选叶子目录，含 面板/小组件、面板/面板功能）
                 if (!string.IsNullOrEmpty(customId))
                 {
-                    foreach (var groupDir in Directory.GetDirectories(RootDir))
+                    foreach (var dir in LeafFeatureDirs())
                     {
-                        foreach (var dir in Directory.GetDirectories(groupDir))
+                        string mf = Path.Combine(dir, "manifest.json");
+                        if (!File.Exists(mf)) continue;
+                        try
                         {
-                            string mf = Path.Combine(dir, "manifest.json");
-                            if (!File.Exists(mf)) continue;
-                            try
+                            using var doc = JsonDocument.Parse(File.ReadAllText(mf));
+                            if (doc.RootElement.TryGetProperty("id", out var idEl) &&
+                                idEl.ValueKind == JsonValueKind.String &&
+                                idEl.GetString() == customId)
                             {
-                                using var doc = JsonDocument.Parse(File.ReadAllText(mf));
-                                if (doc.RootElement.TryGetProperty("id", out var idEl) &&
-                                    idEl.ValueKind == JsonValueKind.String &&
-                                    idEl.GetString() == customId)
-                                {
-                                    log($"[OpenFolder] ① manifest.id 命中 dir={dir}");
-                                    OpenFolderInExplorer(dir);
-                                    return;
-                                }
+                                log($"[OpenFolder] ① manifest.id 命中 dir={dir}");
+                                OpenFolderInExplorer(dir);
+                                return;
                             }
-                            catch { }
                         }
+                        catch { }
                     }
                 }
                 // ② 回退：按 分组/节点名 定位
