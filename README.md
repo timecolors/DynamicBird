@@ -12,7 +12,8 @@
 <p align="center">
   <a href="https://github.com/timecolors/ShoreHue/releases">GitHub Releases</a> ·
   <a href="https://apps.microsoft.com/detail/9PBR9CCTQXXN">Microsoft Store</a> ·
-  <a href="docs/PRIVACY.md">隐私政策 Privacy Policy</a>
+  <a href="docs/PRIVACY.md">隐私政策 Privacy Policy</a> ·
+  <a href="docs/SECURITY.md">安全说明 Security</a>
 </p>
 
 ---
